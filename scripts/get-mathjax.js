@@ -6,6 +6,7 @@ var request = require('request');
 var zlib    = require('zlib');
 var tar     = require('tar');
 var path    = require('path');
+var fs      = require('fs');
 
 var url     = "https://github.com/mathjax/MathJax/archive/2.4.0.tar.gz";
 var headers = {
@@ -20,6 +21,8 @@ var options = {
   headers: headers
 }
 
-request( options )
-    .pipe(zlib.Unzip())
-    .pipe(tar.Extract( {path: path.resolve('./MathJax')} ))
+if( !fs.existsSync(path.resolve('./MathJax')) ) {
+  request( options )
+      .pipe(zlib.Unzip())
+      .pipe(tar.Extract( {path: path.resolve('./MathJax')} ))
+}
