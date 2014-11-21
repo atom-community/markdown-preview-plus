@@ -82,15 +82,15 @@ class MarkdownPreviewView extends ScrollView
     @subscribe this, 'core:copy', =>
       return false if @copyToClipboard()
 
-    @subscribeToCommand atom.workspaceView, 'markdown-preview:zoom-in', =>
+    @subscribeToCommand atom.workspaceView, 'markdown-preview-plus:zoom-in', =>
       zoomLevel = parseFloat(@css('zoom')) or 1
       @css('zoom', zoomLevel + .1)
 
-    @subscribeToCommand atom.workspaceView, 'markdown-preview:zoom-out', =>
+    @subscribeToCommand atom.workspaceView, 'markdown-preview-plus:zoom-out', =>
       zoomLevel = parseFloat(@css('zoom')) or 1
       @css('zoom', zoomLevel - .1)
 
-    @subscribeToCommand atom.workspaceView, 'markdown-preview:reset-zoom', =>
+    @subscribeToCommand atom.workspaceView, 'markdown-preview-plus:reset-zoom', =>
       @css('zoom', 1)
 
     changeHandler = =>
@@ -105,14 +105,14 @@ class MarkdownPreviewView extends ScrollView
       @subscribe(@file, 'contents-changed', changeHandler)
     else if @editor?
       @subscribe @editor.getBuffer(), 'contents-modified', =>
-        changeHandler() if atom.config.get 'markdown-preview.liveUpdate'
+        changeHandler() if atom.config.get 'markdown-preview-plus.liveUpdate'
       @subscribe @editor, 'path-changed', => @trigger 'title-changed'
       @subscribe @editor.getBuffer(), 'reloaded saved', =>
-        changeHandler() unless atom.config.get 'markdown-preview.liveUpdate'
+        changeHandler() unless atom.config.get 'markdown-preview-plus.liveUpdate'
 
-    @subscribe atom.config.observe 'markdown-preview.breakOnSingleNewline', callNow: false, changeHandler
+    @subscribe atom.config.observe 'markdown-preview-plus.breakOnSingleNewline', callNow: false, changeHandler
 
-    @subscribeToCommand atom.workspaceView, 'markdown-preview:toggle-render-latex', () =>
+    @subscribeToCommand atom.workspaceView, 'markdown-preview-plus:toggle-render-latex', () =>
       if (atom.workspaceView.getActiveView() is @) or (atom.workspace.getActiveTextEditor() is @editor)
         @renderLaTeX = !@renderLaTeX
         @renderMarkdown()
@@ -137,7 +137,7 @@ class MarkdownPreviewView extends ScrollView
         if !@updatePreview
           @updatePreview = new UpdatePreview(@find("div.update-preview")[0])
         @updatePreview.update(html, @renderLaTeX)
-        @trigger('markdown-preview:markdown-changed')
+        @trigger('markdown-preview-plus:markdown-changed')
 
   getTitle: ->
     if @file?
@@ -152,9 +152,9 @@ class MarkdownPreviewView extends ScrollView
 
   getUri: ->
     if @file?
-      "markdown-preview://#{@getPath()}"
+      "markdown-preview-plus://#{@getPath()}"
     else
-      "markdown-preview://editor/#{@editorId}"
+      "markdown-preview-plus://editor/#{@editorId}"
 
   getPath: ->
     if @file?

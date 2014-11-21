@@ -32,17 +32,17 @@ module.exports =
     ]
 
   activate: ->
-    atom.workspaceView.command 'markdown-preview:toggle', =>
+    atom.workspaceView.command 'markdown-preview-plus:toggle', =>
       @toggle()
 
-    atom.workspaceView.command 'markdown-preview:copy-html', =>
+    atom.workspaceView.command 'markdown-preview-plus:copy-html', =>
       @copyHtml()
 
-    atom.workspaceView.on 'markdown-preview:preview-file', (event) =>
+    atom.workspaceView.on 'markdown-preview-plus:preview-file', (event) =>
       @previewFile(event)
 
-    atom.workspaceView.command 'markdown-preview:toggle-break-on-single-newline', ->
-      atom.config.toggle('markdown-preview.breakOnSingleNewline')
+    atom.workspaceView.command 'markdown-preview-plus:toggle-break-on-single-newline', ->
+      atom.config.toggle('markdown-preview-plus.breakOnSingleNewline')
 
     # Call to load MathJax environment
     require('./mathjax-helper').loadMathJax();
@@ -53,7 +53,7 @@ module.exports =
       catch error
         return
 
-      return unless protocol is 'markdown-preview:'
+      return unless protocol is 'markdown-preview-plus:'
 
       try
         pathname = decodeURI(pathname) if pathname
@@ -73,13 +73,13 @@ module.exports =
     editor = atom.workspace.getActiveEditor()
     return unless editor?
 
-    grammars = atom.config.get('markdown-preview.grammars') ? []
+    grammars = atom.config.get('markdown-preview-plus.grammars') ? []
     return unless editor.getGrammar().scopeName in grammars
 
     @addPreviewForEditor(editor) unless @removePreviewForEditor(editor)
 
   uriForEditor: (editor) ->
-    "markdown-preview://editor/#{editor.id}"
+    "markdown-preview-plus://editor/#{editor.id}"
 
   removePreviewForEditor: (editor) ->
     uri = @uriForEditor(editor)
@@ -105,7 +105,7 @@ module.exports =
       @addPreviewForEditor(editor)
       return
 
-    atom.workspace.open "markdown-preview://#{encodeURI(filePath)}", searchAllPanes: true
+    atom.workspace.open "markdown-preview-plus://#{encodeURI(filePath)}", searchAllPanes: true
 
   copyHtml: ->
     editor = atom.workspace.getActiveEditor()

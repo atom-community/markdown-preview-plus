@@ -15,7 +15,7 @@ exports.toHtml = (text='', filePath, grammar, renderLaTeX, callback) ->
   roaster ?= require 'roaster'
   options =
     sanitize: false
-    breaks: atom.config.get('markdown-preview.breakOnSingleNewline')
+    breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
 
   # Remove the <!doctype> since otherwise marked will escape it
   # https://github.com/chjj/marked/issues/354
