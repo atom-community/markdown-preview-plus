@@ -18,7 +18,7 @@ module.exports =
     script.addEventListener "load", () ->
       configureMathJax()
     script.type   = "text/javascript";
-    script.src    = path.resolve('./MathJax/MathJax-2.4.0/MathJax.js')+"?delayStartupUntil=configured"
+    script.src    = path.resolve(__dirname, '../MathJax/MathJax-2.4.0/MathJax.js')+"?delayStartupUntil=configured"
     document.getElementsByTagName("head")[0].appendChild(script)
     return
 
