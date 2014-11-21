@@ -44,6 +44,9 @@ module.exports =
     atom.workspaceView.command 'markdown-preview:toggle-break-on-single-newline', ->
       atom.config.toggle('markdown-preview.breakOnSingleNewline')
 
+    # Call to load MathJax environment
+    require('./mathjax-helper').loadMathJax();
+
     atom.workspace.registerOpener (uriToOpen) ->
       try
         {protocol, host, pathname} = url.parse(uriToOpen)

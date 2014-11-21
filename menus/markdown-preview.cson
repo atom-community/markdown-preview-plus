@@ -3,8 +3,13 @@
   'submenu': [
     'label': 'Markdown Preview'
     'submenu': [
-      'label': 'Toggle Preview'
-      'command': 'markdown-preview:toggle'
+      {
+        'label': 'Toggle Preview'
+        'command': 'markdown-preview:toggle'
+      },{
+        'label': 'Toggle LaTeX Rendering'
+        'command': 'markdown-preview:toggle-render-latex'
+      }
     ]
   ]
 ]

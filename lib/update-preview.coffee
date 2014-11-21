@@ -23,6 +23,7 @@
 "use strict"
 
 WrappedDomTree = require './wrapped-dom-tree'
+MathJaxHelper  = require './mathjax-helper'
 
 module.exports = class UpdatePreview
   # @param dom A DOM element object
@@ -31,10 +32,7 @@ module.exports = class UpdatePreview
     @tree     = new WrappedDomTree dom, true
     @htmlStr  = ""
 
-  # @param htmlStr A string representation of the html output of the markdown
-  #   processor. This should be exactly the translated markdown without any
-  #   encapsulating elements added such as a container div.
-  update: (htmlStr) ->
+  update: (htmlStr, renderLaTeX) ->
     if htmlStr is @htmlStr
       return
 
@@ -52,5 +50,14 @@ module.exports = class UpdatePreview
     if firstTime
       r.possibleReplace = null
       r.last            = null
+
+    if renderLaTeX
+      r.inserted = r.inserted.map (elm) ->
+        while elm and !elm.innerHTML
+          elm = elm.parentElement
+        elm
+      r.inserted = r.inserted.filter (elm) ->
+        !!elm
+      MathJaxHelper.mathProcessor r.inserted
 
     return r

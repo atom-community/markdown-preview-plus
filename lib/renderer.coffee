@@ -5,12 +5,13 @@ Highlights = require 'highlights'
 {$} = require 'atom'
 roaster = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
+mathjaxHelper = require './mathjax-helper'
 
 highlighter = null
 {resourcePath} = atom.getLoadSettings()
 packagePath = path.dirname(__dirname)
 
-exports.toHtml = (text='', filePath, grammar, callback) ->
+exports.toHtml = (text='', filePath, grammar, renderLaTeX, callback) ->
   roaster ?= require 'roaster'
   options =
     sanitize: false
@@ -19,6 +20,10 @@ exports.toHtml = (text='', filePath, grammar, callback) ->
   # Remove the <!doctype> since otherwise marked will escape it
   # https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
+
+  # Parse test for latex equations
+  if renderLaTeX
+    text = mathjaxHelper.preprocessor(text)
 
   roaster text, options, (error, html) =>
     return callback(error) if error
@@ -30,10 +35,13 @@ exports.toHtml = (text='', filePath, grammar, callback) ->
     html = sanitize(html)
     html = resolveImagePaths(html, filePath)
     html = tokenizeCodeBlocks(html, defaultCodeLanguage)
-    callback(null, html.html().trim())
+    if renderLaTeX
+      mathjaxHelper.postprocessor(html, callback)
+    else
+      callback(null, html.html().trim())
 
 exports.toText = (text, filePath, grammar, callback) ->
-  exports.toHtml text, filePath, grammar, (error, html) ->
+  exports.toHtml text, filePath, grammar, false, (error, html) ->
     if error
       callback(error)
     else
@@ -42,7 +50,8 @@ exports.toText = (text, filePath, grammar, callback) ->
 
 sanitize = (html) ->
   o = cheerio.load("<div>#{html}</div>")
-  o('script').remove()
+  # Do not remove MathJax script delimited blocks
+  o("script:not([type^='math/tex'])").remove()
   attributesToRemove = [
     'onabort'
     'onblur'
