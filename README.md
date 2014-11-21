@@ -26,17 +26,11 @@ and `.ron` files.
 
 ## New Features
 
-<table style="border: none; width: 80%; margin: 2em auto">
-  <tr style="border: none">
-    <td style="border: none">
-      LaTeX equations in the source markdown are rendered in the preview pane.
-      Rendering of LaTeX equations in the preview pane cane be toggled with
-      `ctrl-shift-x`. Please see [LaTeX](LATEX.md) for more details.
-    </td>
-    <td style="border: none; width: 150px">
-      <img style="box-shadow: 0 1px 5px rgba(0,0,0,0.3),0 0 0 1px rgba(0,0,0,0.04); border-radius:75px" src="assets/LaTeX.svg">
-    </td>
-</table>
+### LaTeX Equations
+
+LaTeX equations in the source markdown are rendered in the preview pane.
+Rendering of LaTeX equations in the preview pane can be toggled with
+`ctrl-shift-x`. Please see [LaTeX](LATEX.md) for more details.
 
 ## Whats wrong with Markdown Preview?
 
@@ -48,4 +42,4 @@ potential stability issues, however you shouldn't meet gremlins too often.
 ## License
 
 Markdown Preview Plus is realised under the MIT licence. Please see
-[LICENCE](LICENCE.md) for full details.
+[LICENSE](LICENSE.md) for full details.
