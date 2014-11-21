@@ -9,8 +9,13 @@ delicious new features.
 Simply search for *Markdown Preview Plus* in the `Packages` tab of the
 settings menu in Atom and click `install`. In order to start using MPP you need
 to disable the built in Markdown Preview package. You can do this by searching
-for *Markdown Preview* in the `Filter packages` input dialouge and clicking
-`Disable`
+for *Markdown Preview* in the `Filter packages` input dialogue and clicking
+`Disable`.
+
+Note, that the dependencies are ~90MB in size. As Atom provides no feedback as
+to the progress of the installation, the installation could be perceived to have
+stalled, but this is unlikely. Please allow plenty of time (5-10mins) for
+installation.
 
 ## Usage
 
