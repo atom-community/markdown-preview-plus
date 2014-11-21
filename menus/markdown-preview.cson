@@ -1,14 +1,14 @@
 'menu': [
   'label': 'Packages'
   'submenu': [
-    'label': 'Markdown Preview'
+    'label': 'Markdown Preview Plus'
     'submenu': [
       {
         'label': 'Toggle Preview'
-        'command': 'markdown-preview:toggle'
+        'command': 'markdown-preview-plus:toggle'
       },{
         'label': 'Toggle LaTeX Rendering'
-        'command': 'markdown-preview:toggle-render-latex'
+        'command': 'markdown-preview-plus:toggle-render-latex'
       }
     ]
   ]
@@ -19,16 +19,16 @@
     'Copy As HTML': 'core:copy'
     'Save As HTML\u2026': 'core:save-as'
   '.tree-view .file .name[data-name$=\\.markdown]':
-    'Markdown Preview': 'markdown-preview:preview-file'
+    'Markdown Preview': 'markdown-preview-plus:preview-file'
   '.tree-view .file .name[data-name$=\\.md]':
-    'Markdown Preview': 'markdown-preview:preview-file'
+    'Markdown Preview': 'markdown-preview-plus:preview-file'
   '.tree-view .file .name[data-name$=\\.mdown]':
-    'Markdown Preview': 'markdown-preview:preview-file'
+    'Markdown Preview': 'markdown-preview-plus:preview-file'
   '.tree-view .file .name[data-name$=\\.mkd]':
-    'Markdown Preview': 'markdown-preview:preview-file'
+    'Markdown Preview': 'markdown-preview-plus:preview-file'
   '.tree-view .file .name[data-name$=\\.mkdown]':
-    'Markdown Preview': 'markdown-preview:preview-file'
+    'Markdown Preview': 'markdown-preview-plus:preview-file'
   '.tree-view .file .name[data-name$=\\.ron]':
-    'Markdown Preview': 'markdown-preview:preview-file'
+    'Markdown Preview': 'markdown-preview-plus:preview-file'
   '.tree-view .file .name[data-name$=\\.txt]':
-    'Markdown Preview': 'markdown-preview:preview-file'
+    'Markdown Preview': 'markdown-preview-plus:preview-file'
