@@ -1,6 +1,6 @@
 # Markdown Preview Plus (MPP)
 
-![MPP](imgs/mpp.png?raw=true)
+![MPP](https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/imgs/mpp.png)
 
 All the yummy goodness of
 [Markdown Preview](https://github.com/atom/markdown-preview) with sprinklings of
