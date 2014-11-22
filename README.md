@@ -1,8 +1,11 @@
 # Markdown Preview Plus (MPP)
 
+![MPP](imgs/mpp.png?raw=true)
+
 All the yummy goodness of
 [Markdown Preview](https://github.com/atom/markdown-preview) with sprinklings of
-delicious new features.
+delicious new features. Show the rendered HTML markdown to the right of the
+current editor using the keymap `ctrl-shift-m`.
 
 ## Installation
 
@@ -12,17 +15,17 @@ to disable the built in Markdown Preview package. You can do this by searching
 for *Markdown Preview* in the `Filter packages` input dialogue and clicking
 `Disable`.
 
-Note, that the dependencies are ~90MB in size. As Atom provides no feedback as
-to the progress of the installation, the installation could be perceived to have
-stalled, but this is unlikely. Please allow plenty of time (5-10mins) for
-installation.
+### Troubleshooting
 
-## Usage
+- **Installation is taking a long time**  
+  The dependencies are ~90MB in size. As Atom provides no feedback as to the
+  progress of the installation, the installation could be perceived to have
+  stalled, but this is unlikely. Please allow plenty of time (5-10mins) for
+  installation.
 
-Show the rendered HTML markdown to the right of the current editor using
-`ctrl-shift-m`. It can be activated from the editor using the `ctrl-shift-m`
-key-binding and is currently enabled for `.markdown`, `.md`, `.mkd`, `.mkdown`,
-and `.ron` files.
+- **I've installed MPP but I cannot open a preview tab/ render LaTeX**  
+  After installation a complete restart (close all open Atom windows and reopen)
+  of Atom may be required to enable the packages functionality.
 
 ## New Features
 
@@ -41,5 +44,5 @@ potential stability issues, however you shouldn't meet gremlins too often.
 
 ## License
 
-Markdown Preview Plus is realised under the MIT licence. Please see
+Markdown Preview Plus (MPP) is released under the MIT licence. Please see
 [LICENSE](LICENSE.md) for full details.
