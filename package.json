@@ -2,7 +2,7 @@
   "name": "markdown-preview-plus",
   "version": "0.1.0",
   "main": "./lib/main",
-  "description": "All the yummy goodness of Markdown Preview with sprinklings of delicious new features.",
+  "description": "Markdown + LaTeX preview in Atom",
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
   "license": "MIT",
   "engines": {
