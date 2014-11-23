@@ -8,9 +8,6 @@
   "engines": {
     "atom": "*"
   },
-  "scripts": {
-    "install": "node scripts/get-mathjax.js"
-  },
   "dependencies": {
     "cheerio": "0.15.0",
     "fs-plus": "2.x",
@@ -20,7 +17,6 @@
     "underscore-plus": "1.x",
     "wrench": "1.5.x",
     "highlights": "0.13.0",
-    "tar": "^1.0.0",
-    "request": "^2.40.0"
+    "MathJax": "https://github.com/Galadirith/MathJax/tarball/mathjax-complete-node"
   }
 }
