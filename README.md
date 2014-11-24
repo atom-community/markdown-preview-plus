@@ -1,6 +1,6 @@
 # Markdown Preview Plus (MPP)
 
-<img align="center" src="https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/imgs/mpp-full-res-invert.png">
+![MPP](https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/imgs/mpp-full-res-invert.png)
 
 All the yummy goodness of
 [Markdown Preview](https://github.com/atom/markdown-preview) with sprinklings of
@@ -9,25 +9,24 @@ current editor using the keymap `ctrl-shift-m`.
 
 ## New Features
 
-- **LaTeX**  
+- **LaTeX equation rendering**  
   LaTeX equations in the source markdown are rendered in the preview pane.
   Rendering of LaTeX equations in the preview pane can be toggled with
   `ctrl-shift-x`. Please see [LaTeX](LATEX.md) for more details.
 
 ## Installation Instructions
 
-1.  Simply search for *Markdown Preview Plus* in the *Packages* tab of the
-    settings menu in Atom and click *install*. Alternativly if you would prefer
+1.  Search for **Markdown Preview Plus** in the menu **File &rsaquo; Settings
+    &rsaquo; Packages** and click **Install**. Alternatively if you would prefer
     to use the command line utility `apm`:
 
     ````bash
     $ apm install markdown-preview-plus
     ````
 
-2.  In order to start using MPP you need to disable the built in Markdown
-    Preview package. You can do this by searching for *Markdown Preview* in
-    the *Filter packages* input dialogue of the settings menu and clicking
-    *Disable*.
+2.  Disable the built in Markdown Preview package. You can do this by searching
+    for **Markdown Preview** in the **Filter packages** input dialogue of the
+    **File &rsaquo; Settings** menu and clicking **Disable**.
 
 ## Troubleshooting
 
@@ -36,21 +35,17 @@ current editor using the keymap `ctrl-shift-m`.
   little while for Atom to install MPP. As Atom provides no feedback as to the
   progress of the installation, the installation could be perceived to have
   stalled, but this is unlikely. Please allow plenty of time (10-15mins) for
-  installation. Future updates to the package should not require the same
-  length of time.
+  installation.
+
+- **Updating is taking a long time**  
+  If you are updating MPP from any version prior to `0.2.0` updates may take
+  10-15mins. If you are updating MPP from version `0.2.0` or later updates to an
+  installation of MPP should not require the same length of time.
 
 - **I've installed MPP but I cannot open a preview tab / render LaTeX**  
   After installation a complete restart (close all open Atom windows and reopen)
   of Atom may be required to enable the packages functionality.
 
-## Whats wrong with Markdown Preview?
-
-Absolutely nothing, in fact its the best thing since sliced bread. Markdown
-Preview is an incredibly important core package of [Atom](https://atom.io/) and
-stability is absolutely crucial. MPP adds new features at the expense of some
-potential stability issues, however you shouldn't meet gremlins too often.
-
 ## License
 
-Markdown Preview Plus (MPP) is released under the MIT license. Please see
-[LICENSE](LICENSE.md) for full details.
+Markdown Preview Plus (MPP) is released under the [MIT license](LICENSE.md).
