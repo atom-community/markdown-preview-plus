@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "main": "./lib/main",
   "description": "Markdown + LaTeX preview in Atom",
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
