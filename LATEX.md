@@ -5,7 +5,11 @@ enables LaTex to be rendered in a preview window of a markdown document in
 [Atom](https://atom.io/). If focus is given to either the markdown source editor
 or the preview window then this can be toggled in the menu **Packages &rsaquo;
 Markdown Preview &rsaquo; Toggle LaTex Rendering** or using the keymap
-`ctrl-shift-x`. Note that the default is to preview without rendering LaTex.
+`ctrl-shift-x`.
+
+To enable LaTeX rendering by default search for **Markdown Preview** in the
+**Filter packages** input dialogue of the **File &rsaquo; Settings** menu and
+tick **Enable Latex Rendering By Default**.
 
 ## Syntax
 
