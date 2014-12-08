@@ -16,7 +16,8 @@ class MarkdownPreviewView extends ScrollView
       @div class: 'update-preview'
 
   constructor: ({@editorId, @filePath}) ->
-    @updatePreview = null
+    @updatePreview  = null
+    @renderLaTeX    = atom.config.get 'markdown-preview.enableLatexRenderingByDefault'
     super
 
   afterAttach: ->
@@ -117,8 +118,6 @@ class MarkdownPreviewView extends ScrollView
         @renderLaTeX = !@renderLaTeX
         @renderMarkdown()
       return
-
-  renderLaTeX: false
 
   renderMarkdown: ->
     if @file?
