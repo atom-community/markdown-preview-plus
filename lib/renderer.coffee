@@ -14,16 +14,13 @@ packagePath = path.dirname(__dirname)
 exports.toHtml = (text='', filePath, grammar, renderLaTeX, callback) ->
   roaster ?= require 'roaster'
   options =
+    mathjax: renderLaTeX
     sanitize: false
     breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
 
   # Remove the <!doctype> since otherwise marked will escape it
   # https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
-
-  # Parse test for latex equations
-  if renderLaTeX
-    text = mathjaxHelper.preprocessor(text)
 
   roaster text, options, (error, html) =>
     return callback(error) if error
@@ -35,10 +32,7 @@ exports.toHtml = (text='', filePath, grammar, renderLaTeX, callback) ->
     html = sanitize(html)
     html = resolveImagePaths(html, filePath)
     html = tokenizeCodeBlocks(html, defaultCodeLanguage)
-    if renderLaTeX
-      mathjaxHelper.postprocessor(html, callback)
-    else
-      callback(null, html.html().trim())
+    callback(null, html.html().trim())
 
 exports.toText = (text, filePath, grammar, callback) ->
   exports.toHtml text, filePath, grammar, false, (error, html) ->
