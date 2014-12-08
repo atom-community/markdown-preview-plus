@@ -25,8 +25,8 @@ current editor using the keymap `ctrl-shift-m`.
     ````
 
 2.  Disable the built in Markdown Preview package. You can do this by searching
-    for **Markdown Preview** in the **Filter packages** input dialogue of the
-    **File &rsaquo; Settings** menu and clicking **Disable**.
+    for **Markdown Preview Plus** in the **Filter packages** input dialogue of
+    the **File &rsaquo; Settings** menu and clicking **Disable**.
 
 ## Troubleshooting
 
@@ -45,6 +45,30 @@ current editor using the keymap `ctrl-shift-m`.
 - **I've installed MPP but I cannot open a preview tab / render LaTeX**  
   After installation a complete restart (close all open Atom windows and reopen)
   of Atom may be required to enable the packages functionality.
+
+- **After updating installation MPP no longer renders LaTeX**  
+  You have two options that should resolve this issue.
+
+  The first is to perform a full reinstallation of MPP. You can do this by
+  searching for **Markdown Preview Plus** in the **Filter packages** input
+  dialogue of the **File &rsaquo; Settings** menu and clicking **Uninstall**.
+  Then follow the **Installation Instructions** to reinstall MPP.
+
+  Alternatively follow these instructions:
+
+  1.  Open up `~/.atom/packages/markdown-preview-plus/node_modules` in a file
+      explorer and Delete the folder named **roaster**.
+
+  2.  Open up a terminal (on windows you should use **powershell**) and run the
+      following commands:
+
+      ````bash
+      $ cd ~/.atom/packages/markdown-preview-plus
+      $ apm update
+      ````
+  3.  You should see a progress message `Installing Modules`, and will be
+      complete when it displays `Installing Modules done` which may take
+      1-5mins.
 
 ## License
 
