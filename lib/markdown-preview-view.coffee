@@ -20,7 +20,6 @@ class MarkdownPreviewView extends ScrollView
   constructor: ({@editorId, @filePath}) ->
     @updatePreview  = null
     @renderLaTeX    = atom.config.get 'markdown-preview-plus.enableLatexRenderingByDefault'
-    @destroyed      = false
     super
     @emitter = new Emitter
     @disposables = new CompositeDisposable
@@ -44,7 +43,6 @@ class MarkdownPreviewView extends ScrollView
     editorId: @editorId
 
   destroy: ->
-    @destroyed = true
     @disposables.dispose()
 
   onDidChangeTitle: (callback) ->
@@ -113,21 +111,6 @@ class MarkdownPreviewView extends ScrollView
         @css('zoom', zoomLevel - .1)
       'markdown-preview-plus:reset-zoom': =>
         @css('zoom', 1)
-      'markdown-preview-plus:toggle-render-latex': =>
-        @renderLaTeX = !@renderLaTeX
-        @renderMarkdown()
-        return
-
-    # Toggle LaTeX rendering if focus is on the editor. I don't know how (or
-    # even if it is possible) to target the DOM element of the editor associated
-    # with this view. As such we target the DOM of the workspace with
-    # 'atom-workspace' and condition on the active text editor.
-    atom.commands.add 'atom-workspace',
-      'markdown-preview-plus:toggle-render-latex': =>
-        if atom.workspace.getActiveTextEditor() is @editor and not @destroyed
-          @renderLaTeX = !@renderLaTeX
-          changeHandler()
-        return
 
     changeHandler = =>
       @renderMarkdown()
@@ -149,6 +132,14 @@ class MarkdownPreviewView extends ScrollView
         changeHandler() unless atom.config.get 'markdown-preview-plus.liveUpdate'
 
     @disposables.add atom.config.onDidChange 'markdown-preview-plus.breakOnSingleNewline', changeHandler
+
+    # Toggle LaTeX rendering if focus is on preview pane or associated editor.
+    @disposables.add atom.commands.add 'atom-workspace',
+      'markdown-preview-plus:toggle-render-latex': =>
+        if (atom.workspaceView.getActiveView() is @) or (atom.workspace.getActiveTextEditor() is @editor)
+          @renderLaTeX = !@renderLaTeX
+          changeHandler()
+        return
 
   renderMarkdown: ->
     if @file?
