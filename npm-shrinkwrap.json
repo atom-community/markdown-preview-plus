@@ -2,11 +2,6 @@
   "name": "markdown-preview-plus",
   "version": "*",
   "dependencies": {
-    "MathJax": {
-      "version": "0.1.0",
-      "from": "https://github.com/Galadirith/MathJax/tarball/mathjax-complete-node",
-      "resolved": "https://github.com/Galadirith/MathJax/tarball/mathjax-complete-node"
-    },
     "atom-space-pen-views": {
       "version": "2.0.3",
       "from": "atom-space-pen-views@^2.0.0",

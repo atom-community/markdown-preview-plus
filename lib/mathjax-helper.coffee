@@ -17,8 +17,17 @@ module.exports =
     script.addEventListener "load", () ->
       configureMathJax()
     script.type   = "text/javascript";
-    script.src    = require.resolve('MathJax/MathJax')+"?delayStartupUntil=configured"
-    document.getElementsByTagName("head")[0].appendChild(script)
+    try
+      # atom.packages.resolvePackagePath('mathjax-wrapper') doesnt work but
+      # does for other packages? Nor does 'atom://mathjax-wrapper' work (I get
+      # CSP errors). getLoaded over getActive is important.
+      mathjaxPath = atom.packages.getLoadedPackage('mathjax-wrapper')
+      script.src  = path.join(
+        mathjaxPath.path,
+        "node_modules/MathJax/MathJax.js?delayStartupUntil=configured" )
+      document.getElementsByTagName("head")[0].appendChild(script)
+    finally
+      return
     return
 
   #
@@ -29,7 +38,7 @@ module.exports =
   #   details on DOM elements.
   #
   mathProcessor: (domElements) ->
-    if MathJax
+    if MathJax?
       MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
     return
 
