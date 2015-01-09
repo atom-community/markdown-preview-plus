@@ -17,8 +17,9 @@ current editor using the keymap `ctrl-shift-m`.
 ## Installation Instructions
 
 1.  Search for **Markdown Preview Plus** in the menu **File &rsaquo; Settings
-    &rsaquo; Packages** and click **Install**. Alternatively if you would prefer
-    to use the command line utility `apm`:
+    &rsaquo; Packages** and click **Install**. Please allow 3-5 mins for
+    installation. Alternatively if you would prefer to use the command line
+    utility `apm`:
 
     ````bash
     $ apm install markdown-preview-plus
@@ -28,23 +29,32 @@ current editor using the keymap `ctrl-shift-m`.
     for **Markdown Preview Plus** in the **Filter packages** input dialogue of
     the **File &rsaquo; Settings** menu and clicking **Disable**.
 
+3.  Markdown Preview Plus requires the
+    [mathjax-wrapper](https://github.com/Galadirith/mathjax-wrapper) package to
+    be installed to preview LaTeX. To install mathjax-wrapper search for
+    **mathjax-wrapper** in the menu **File &rsaquo; Settings &rsaquo; Packages**
+    and click **Install**. Please allow 10-15 mins for installation of
+    mathjax-wrapper. Alternatively if you would prefer to use the command line
+    utility `apm`:
+
+    ````bash
+    $ apm install mathjax-wrapper
+    ````
+
 ## Troubleshooting
 
-- **Installation is taking a long time**  
-  The dependencies are ~90MB in size and contain ~35000 files, so it takes a
-  little while for Atom to install MPP. As Atom provides no feedback as to the
-  progress of the installation, the installation could be perceived to have
-  stalled, but this is unlikely. Please allow plenty of time (10-15mins) for
-  installation.
-
-- **Updating is taking a long time**  
-  If you are updating MPP from any version prior to `0.2.0` updates may take
-  10-15mins. If you are updating MPP from version `0.2.0` or later updates to an
-  installation of MPP should not require the same length of time.
-
-- **I've installed MPP but I cannot open a preview tab / render LaTeX**  
+- **I've installed MPP but I cannot open a preview tab**  
   After installation a complete restart (close all open Atom windows and reopen)
   of Atom may be required to enable the packages functionality.
+
+- **I've installed MPP but I cannot toggle LaTeX in the preview**  
+  Since version `1.0.0`
+  [mathjax-wrapper](https://github.com/Galadirith/mathjax-wrapper) is required
+  by MPP to preview LaTeX, and has to be installed separately.  The majority
+  of the time spent installing MPP in versions prior to `1.0.0` was installing
+  the MathJax dependency. mathjax-wrapper now handles installing MathJax which
+  means installing MPP should be significantly faster, and allow for more
+  frequent updates.
 
 - **After updating installation MPP no longer renders LaTeX**  
   You have two options that should resolve this issue.
