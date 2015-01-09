@@ -20,6 +20,7 @@ class MarkdownPreviewView extends ScrollView
   constructor: ({@editorId, @filePath}) ->
     @updatePreview  = null
     @renderLaTeX    = atom.config.get 'markdown-preview-plus.enableLatexRenderingByDefault'
+    @destroyed      = false
     super
     @emitter = new Emitter
     @disposables = new CompositeDisposable
@@ -43,6 +44,7 @@ class MarkdownPreviewView extends ScrollView
     editorId: @editorId
 
   destroy: ->
+    @destroyed = true
     @disposables.dispose()
 
   onDidChangeTitle: (callback) ->
@@ -119,17 +121,12 @@ class MarkdownPreviewView extends ScrollView
     # Toggle LaTeX rendering if focus is on the editor. I don't know how (or
     # even if it is possible) to target the DOM element of the editor associated
     # with this view. As such we target the DOM of the workspace with
-    # 'atom-workspace'. I suspect this will mean that each time a new preview
-    # window is opened and hence a new MarkdownPreviewView object, this command
-    # for the workspace will be overwritten each such time. I don't know yet if
-    # that will cause errors if that is true, but be aware of this possible
-    # scenario :D
-    # https://github.com/atom/atom/blob/8fa6fdb90cefcad7482808ded81dbb3e9616d211/src/command-registry.coffee#L106
+    # 'atom-workspace' and condition on the active text editor.
     atom.commands.add 'atom-workspace',
       'markdown-preview-plus:toggle-render-latex': =>
-        if atom.workspace.getActiveTextEditor() is @editor
+        if atom.workspace.getActiveTextEditor() is @editor and not @destroyed
           @renderLaTeX = !@renderLaTeX
-          @renderMarkdown()
+          changeHandler()
         return
 
     changeHandler = =>
