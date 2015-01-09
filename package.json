@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "main": "./lib/main",
   "description": "Markdown + LaTeX preview in Atom",
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
@@ -18,7 +18,6 @@
     "roaster": "^1.1.2",
     "temp": "^0.6.0",
     "underscore-plus": "^1.0.0",
-    "wrench": "^1.5.0",
-    "highlights": "0.13.0"
+    "wrench": "^1.5.0"
   }
 }
