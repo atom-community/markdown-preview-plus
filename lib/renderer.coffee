@@ -1,8 +1,9 @@
 path = require 'path'
 _ = require 'underscore-plus'
 cheerio = require 'cheerio'
+fs = require 'fs-plus'
 Highlights = require 'highlights'
-{$} = require 'atom'
+{$} = require 'atom-space-pen-views'
 roaster = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 mathjaxHelper = require './mathjax-helper'
@@ -25,7 +26,7 @@ exports.toHtml = (text='', filePath, grammar, renderLaTeX, callback) ->
   roaster text, options, (error, html) =>
     return callback(error) if error
 
-    grammar ?= atom.syntax.selectGrammar(filePath, text)
+    grammar ?= atom.grammars.selectGrammar(filePath, text)
     # Default code blocks to be coffee in Literate CoffeeScript files
     defaultCodeLanguage = 'coffee' if grammar.scopeName is 'source.litcoffee'
 
@@ -84,7 +85,8 @@ resolveImagePaths = (html, filePath) ->
       continue if src.startsWith(packagePath)
 
       if src[0] is '/'
-        img.attr('src', atom.project.resolve(src.substring(1)))
+        unless fs.isFileSync(src)
+          img.attr('src', atom.project.resolve(src.substring(1)))
       else
         img.attr('src', path.resolve(path.dirname(filePath), src))
 
@@ -100,7 +102,7 @@ tokenizeCodeBlocks = (html, defaultLanguage='text') ->
     codeBlock = $(preElement.firstChild)
     fenceName = codeBlock.attr('class')?.replace(/^lang-/, '') ? defaultLanguage
 
-    highlighter ?= new Highlights(registry: atom.syntax)
+    highlighter ?= new Highlights(registry: atom.grammars)
     highlightedHtml = highlighter.highlightSync
       fileContents: codeBlock.text()
       scopeName: scopeForFenceName(fenceName)
