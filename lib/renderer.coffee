@@ -13,7 +13,7 @@ highlighter = null
 packagePath = path.dirname(__dirname)
 
 exports.toHtml = (text='', filePath, grammar, renderLaTeX, callback) ->
-  roaster ?= require 'roaster'
+  roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
   options =
     mathjax: renderLaTeX
     sanitize: false
