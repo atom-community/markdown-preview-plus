@@ -43,6 +43,11 @@ current editor using the keymap `ctrl-shift-m`.
 
 ## Troubleshooting
 
+These a common problems that you may experience when installing or updating MPP
+with suggested solutions. If the suggested solution doesn't fix your problem or
+you have experienced a problem not listed here please open up an
+[issue](https://github.com/Galadirith/markdown-preview-plus/issues/new).
+
 - **I've installed MPP but I cannot open a preview tab**  
   After installation a complete restart (close all open Atom windows and reopen)
   of Atom may be required to enable the packages functionality.
@@ -64,7 +69,7 @@ current editor using the keymap `ctrl-shift-m`.
   dialogue of the **File &rsaquo; Settings** menu and clicking **Uninstall**.
   Then follow the **Installation Instructions** to reinstall MPP.
 
-  Alternatively follow these instructions:
+  If a full reinstallation doesn't work please follow these instructions:
 
   1.  Open up `~/.atom/packages/markdown-preview-plus/node_modules` in a file
       explorer and Delete the folder named **roaster**.
