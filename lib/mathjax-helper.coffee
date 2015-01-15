@@ -47,9 +47,15 @@ module.exports =
 # a few unnessesary features stripped away
 #
 configureMathJax = ->
+  # Add Local Path to Ajax's Config Path call it Local
+  packagePath =  atom.packages.getPackageDirPaths()[0] + '/markdown-preview-plus/local'
+  MathJax.Ajax.config.path["Local"] = packagePath
+
+  #Now Configure MathJax
   MathJax.Hub.Config
     jax: ["input/TeX","output/HTML-CSS"]
     extensions: []
+    config: ["[Local]/macros.js"]
     TeX:
       extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
     messageStyle: "none"
