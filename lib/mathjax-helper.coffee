@@ -4,9 +4,10 @@
 # This module will handle loading the MathJax environment and provide a wrapper
 # for calls to MathJax to process LaTeX equations.
 #
-
 cheerio = require 'cheerio'
 path    = require 'path'
+CSON    = require 'season'
+fs      = require 'fs-plus'
 
 module.exports =
   #
@@ -18,7 +19,7 @@ module.exports =
       configureMathJax()
     script.type   = "text/javascript";
     try
-      # atom.packages.resolvePackagePath('mathjax-wrapper') doesnt work but
+      # atom.packages.resolvePackagePath('mathjax-wrapper') doesn't work but
       # does for other packages? Nor does 'atom://mathjax-wrapper' work (I get
       # CSP errors). getLoaded over getActive is important.
       mathjaxPath = atom.packages.getLoadedPackage('mathjax-wrapper')
@@ -43,21 +44,43 @@ module.exports =
     return
 
 #
+# Define some functions to help get a hold of the user's Latex
+# Macros.
+#
+
+getUserMacrosPath = ->
+  userMacrosPath =  CSON.resolve(path.join(atom.getConfigDirPath(),'latex-macros'))
+  userMacrosPath ? path.join(atom.getConfigDirPath(),'latex-macros.cson')
+
+loadMacrosFile = (filePath) ->
+  return {} unless CSON.isObjectPath(filePath)
+  CSON.readFileSync filePath, (error, object={}) =>
+    if error?
+      console.warn "Error reading Latex Macros file '#{filePath}': #{error.stack ? error}"
+      atom.notifications?.addError("Failed to load Latex Macros from '#{filePath}'", {detail: error.message, dismissable: true})
+    object
+
+loadUserMacros = ->
+  userMacrosPath = getUserMacrosPath()
+  if fs.isFileSync(userMacrosPath)
+    result = loadMacrosFile(userMacrosPath)
+  else
+    {}
+
+#
 # Configure MathJax environment. Similar to the TeX-AMS_HTML configuration with
-# a few unnessesary features stripped away
+# a few unnecessary features stripped away
 #
 configureMathJax = ->
-  # Add Local Path to Ajax's Config Path call it Local
-  packagePath =  atom.packages.getPackageDirPaths()[0] + '/markdown-preview-plus/local'
-  MathJax.Ajax.config.path["Local"] = packagePath
+  userMacros = loadUserMacros()
 
   #Now Configure MathJax
   MathJax.Hub.Config
     jax: ["input/TeX","output/HTML-CSS"]
     extensions: []
-    config: ["[Local]/macros.js"]
     TeX:
       extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+      Macros: userMacros
     messageStyle: "none"
     showMathMenu: false
   MathJax.Hub.Configured()
