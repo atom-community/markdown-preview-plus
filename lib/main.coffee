@@ -96,9 +96,9 @@ module.exports =
 
   removePreviewForEditor: (editor) ->
     uri = @uriForEditor(editor)
-    previewPane = atom.workspace.paneForUri(uri)
+    previewPane = atom.workspace.paneForURI(uri)
     if previewPane?
-      previewPane.destroyItem(previewPane.itemForUri(uri))
+      previewPane.destroyItem(previewPane.itemForURI(uri))
       true
     else
       false
@@ -126,7 +126,7 @@ module.exports =
 
     renderer ?= require './renderer'
     text = editor.getSelectedText() or editor.getText()
-    renderer.toText text, editor.getPath(), editor.getGrammar(), (error, html) =>
+    renderer.toHTML text, editor.getPath(), editor.getGrammar(), (error, html) =>
       if error
         console.warn('Copying Markdown as HTML failed', error)
       else

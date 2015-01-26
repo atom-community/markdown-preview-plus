@@ -34,7 +34,7 @@ class MarkdownPreviewView extends ScrollView
       if atom.workspace?
         @subscribeToFilePath(@filePath)
       else
-        @disposables.add atom.packages.onDidActivateAll =>
+        @disposables.add atom.packages.onDidActivateInitialPackages =>
           @subscribeToFilePath(@filePath)
 
   serialize: ->
@@ -82,7 +82,7 @@ class MarkdownPreviewView extends ScrollView
     if atom.workspace?
       resolve()
     else
-      @disposables.add atom.packages.onDidActivateAll(resolve)
+      @disposables.add atom.packages.onDidActivateInitialPackages(resolve)
 
   editorForId: (editorId) ->
     for editor in atom.workspace.getTextEditors()
@@ -90,7 +90,7 @@ class MarkdownPreviewView extends ScrollView
     null
 
   handleEvents: ->
-    @disposables.add atom.grammars.onDidAddGrammar _.debounce((=> @renderMarkdown()), 250)
+    @disposables.add atom.grammars.onDidAddGrammar => _.debounce((=> @renderMarkdown()), 250)
     @disposables.add atom.grammars.onDidUpdateGrammar _.debounce((=> @renderMarkdown()), 250)
 
     atom.commands.add @element,
@@ -115,8 +115,8 @@ class MarkdownPreviewView extends ScrollView
     changeHandler = =>
       @renderMarkdown()
 
-      # TODO: Remove paneForUri call when ::paneForItem is released
-      pane = atom.workspace.paneForItem?(this) ? atom.workspace.paneForUri(@getUri())
+      # TODO: Remove paneForURI call when ::paneForItem is released
+      pane = atom.workspace.paneForItem?(this) ? atom.workspace.paneForURI(@getURI())
       if pane? and pane isnt atom.workspace.getActivePane()
         pane.activateItem(this)
 
@@ -136,7 +136,7 @@ class MarkdownPreviewView extends ScrollView
     # Toggle LaTeX rendering if focus is on preview pane or associated editor.
     @disposables.add atom.commands.add 'atom-workspace',
       'markdown-preview-plus:toggle-render-latex': =>
-        if (atom.workspaceView.getActiveView() is @) or (atom.workspace.getActiveTextEditor() is @editor)
+        if (atom.workspace.getActivePaneItem() is @) or (atom.workspace.getActiveTextEditor() is @editor)
           @renderLaTeX = !@renderLaTeX
           changeHandler()
         return
@@ -148,7 +148,7 @@ class MarkdownPreviewView extends ScrollView
       @renderMarkdownText(@editor.getText())
 
   renderMarkdownText: (text) ->
-    renderer.toHtml text, @getPath(), @getGrammar(), @renderLaTeX, (error, html) =>
+    renderer.toHTML text, @getPath(), @getGrammar(), @renderLaTeX, (error, html) =>
       if error
         @showError(error)
       else
@@ -196,7 +196,7 @@ class MarkdownPreviewView extends ScrollView
   getIconName: ->
     "markdown"
 
-  getUri: ->
+  getURI: ->
     if @file?
       "markdown-preview-plus://#{@getPath()}"
     else

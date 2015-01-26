@@ -7,12 +7,15 @@ describe "MarkdownPreviewView", ->
   [file, preview, workspaceElement] = []
 
   beforeEach ->
-    filePath = atom.project.resolve('subdir/file.markdown')
+    filePath = atom.project.getDirectories()[0].resolve('subdir/file.markdown')
     preview = new MarkdownPreviewView({filePath})
     jasmine.attachToDOM(preview.element)
 
     waitsForPromise ->
       atom.packages.activatePackage('language-ruby')
+
+    waitsForPromise ->
+      atom.packages.activatePackage('language-javascript')
 
     waitsForPromise ->
       atom.packages.activatePackage('markdown-preview')
@@ -62,29 +65,39 @@ describe "MarkdownPreviewView", ->
         jasmine.attachToDOM(newPreview.element)
         expect(newPreview.getPath()).toBe preview.getPath()
 
-  describe "code block tokenization", ->
+  describe "code block conversion to atom-text-editor tags", ->
     beforeEach ->
       waitsForPromise ->
         preview.renderMarkdown()
 
     describe "when the code block's fence name has a matching grammar", ->
-      it "tokenizes the code block with the grammar", ->
-        expect(preview.find("pre span.entity.name.function.ruby")).toExist()
+      it "assigns the grammar on the atom-text-editor", ->
+        rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
+        expect(rubyEditor).toExist()
+        expect(rubyEditor[0].getModel().getText()).toBe """
+          def func
+            x = 1
+          end
+        """
+
+        # nested in a list item
+        jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
+        expect(jsEditor).toExist()
+        expect(jsEditor[0].getModel().getText()).toBe """
+          if a === 3 {
+          b = 5
+          }
+        """
 
     describe "when the code block's fence name doesn't have a matching grammar", ->
-      it "does not tokenize the code block", ->
-        expect(preview.find("pre.lang-kombucha .line .null-grammar").children().length).toBe 2
-
-    describe "when the code block contains empty lines", ->
-      it "doesn't remove the empty lines", ->
-        expect(preview.find("pre.lang-python").children().length).toBe 6
-        expect(preview.find("pre.lang-python div:nth-child(2)").text().trim()).toBe ''
-        expect(preview.find("pre.lang-python div:nth-child(4)").text().trim()).toBe ''
-        expect(preview.find("pre.lang-python div:nth-child(5)").text().trim()).toBe ''
-
-    describe "when the code block is nested", ->
-      it "detects and styles the block", ->
-        expect(preview.find("pre.lang-javascript")).toHaveClass 'editor-colors'
+      it "does not assign a specific grammar", ->
+        plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+        expect(plainEditor).toExist()
+        expect(plainEditor[0].getModel().getText()).toBe """
+          function f(x) {
+            return x++;
+          }
+        """
 
   describe "image resolving", ->
     beforeEach ->
@@ -94,12 +107,12 @@ describe "MarkdownPreviewView", ->
     describe "when the image uses a relative path", ->
       it "resolves to a path relative to the file", ->
         image = preview.find("img[alt=Image1]")
-        expect(image.attr('src')).toBe atom.project.resolve('subdir/image1.png')
+        expect(image.attr('src')).toBe atom.project.getDirectories()[0].resolve('subdir/image1.png')
 
     describe "when the image uses an absolute path that does not exist", ->
       it "resolves to a path relative to the project root", ->
         image = preview.find("img[alt=Image2]")
-        expect(image.attr('src')).toBe atom.project.resolve('tmp/image2.png')
+        expect(image.attr('src')).toBe atom.project.getDirectories()[0].resolve('tmp/image2.png')
 
     describe "when the image uses an absolute path that exists", ->
       it "doesn't change the URL", ->
@@ -145,7 +158,7 @@ describe "MarkdownPreviewView", ->
   describe "when core:save-as is triggered", ->
     beforeEach ->
       preview.destroy()
-      filePath = atom.project.resolve('subdir/simple.md')
+      filePath = atom.project.getDirectories()[0].resolve('subdir/simple.md')
       preview = new MarkdownPreviewView({filePath})
       jasmine.attachToDOM(preview.element)
 
@@ -175,7 +188,7 @@ describe "MarkdownPreviewView", ->
   describe "when core:copy is triggered", ->
     beforeEach ->
       preview.destroy()
-      filePath = atom.project.resolve('subdir/simple.md')
+      filePath = atom.project.getDirectories()[0].resolve('subdir/simple.md')
       preview = new MarkdownPreviewView({filePath})
       jasmine.attachToDOM(preview.element)
 
