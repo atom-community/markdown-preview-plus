@@ -31,7 +31,8 @@
 .markdown-preview {
   pre,
   code,
-  tt {
+  tt,
+  atom-text-editor {
     font-size: 12px;
     font-family: Consolas, "Liberation Mono", Courier, monospace;
   }
@@ -46,6 +47,16 @@
 
   ul > li {
     list-style-type: disc;
+  }
+
+  li > atom-text-editor {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%;
+  }
+
+  li:last-child > atom-text-editor {
+    margin-bottom: 0;
   }
 
   & > *:first-child {
@@ -136,7 +147,8 @@
   blockquote,
   ul, ol, dl,
   table,
-  pre {
+  pre,
+  atom-text-editor {
     margin: 15px 0;
   }
 
@@ -390,6 +402,18 @@
 
   code { white-space: nowrap; }
 
+  pre, atom-text-editor {
+    background: #f8f8f8;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    line-height: 19px;
+    overflow: auto;
+    padding: 6px 10px;
+    border-radius:3px;
+    background: @syntax-background-color;
+    border: 1px solid darken(@syntax-background-color, 10%);
+  }
+
   // Code tags within code blocks (<pre>s)
   pre > code {
     margin: 0;
@@ -398,21 +422,6 @@
     border: none;
     background: transparent;
     word-wrap: normal;
-  }
-
-  pre {
-    background: #f8f8f8;
-    border: 1px solid #ccc;
-    font-size: 13px;
-    line-height: 19px;
-    overflow: auto;
-    padding: 6px 10px;
-    border-radius:3px;
-  }
-
-  pre.editor-colors {
-    background: @syntax-background-color;
-    border: 1px solid darken(@syntax-background-color, 10%);
   }
 
   pre code, pre tt {

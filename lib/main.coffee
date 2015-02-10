@@ -26,6 +26,9 @@ module.exports =
     liveUpdate:
       type: 'boolean'
       default: true
+    openPreviewInSplitPane:
+      type: 'boolean'
+      default: true
     grammars:
       type: 'array'
       default: [
@@ -50,12 +53,13 @@ module.exports =
         atom.config.set(keyPath, !atom.config.get(keyPath))
 
     previewFile = @previewFile.bind(this)
+    atom.commands.add '.tree-view .file .name[data-name$=\\.markdown]', 'markdown-preview-plus:preview-file', previewFile
     atom.commands.add '.tree-view .file .name[data-name$=\\.md]', 'markdown-preview-plus:preview-file', previewFile
     atom.commands.add '.tree-view .file .name[data-name$=\\.mdown]', 'markdown-preview-plus:preview-file', previewFile
     atom.commands.add '.tree-view .file .name[data-name$=\\.mkd]', 'markdown-preview-plus:preview-file', previewFile
     atom.commands.add '.tree-view .file .name[data-name$=\\.mkdown]', 'markdown-preview-plus:preview-file', previewFile
     atom.commands.add '.tree-view .file .name[data-name$=\\.ron]', 'markdown-preview-plus:preview-file', previewFile
-    atom.commands.add '.tree-view .file .name[data-name$=\\.text]', 'markdown-preview-plus:preview-file', previewFile
+    atom.commands.add '.tree-view .file .name[data-name$=\\.txt]', 'markdown-preview-plus:preview-file', previewFile
 
     # Call to load MathJax environment
     require('./mathjax-helper').loadMathJax();
@@ -96,9 +100,9 @@ module.exports =
 
   removePreviewForEditor: (editor) ->
     uri = @uriForEditor(editor)
-    previewPane = atom.workspace.paneForUri(uri)
+    previewPane = atom.workspace.paneForURI(uri)
     if previewPane?
-      previewPane.destroyItem(previewPane.itemForUri(uri))
+      previewPane.destroyItem(previewPane.itemForURI(uri))
       true
     else
       false
@@ -106,7 +110,11 @@ module.exports =
   addPreviewForEditor: (editor) ->
     uri = @uriForEditor(editor)
     previousActivePane = atom.workspace.getActivePane()
-    atom.workspace.open(uri, split: 'right', searchAllPanes: true).done (markdownPreviewView) ->
+    options =
+      searchAllPanes: true
+    if atom.config.get('markdown-preview-plus.openPreviewInSplitPane')
+      options.split = 'right'
+    atom.workspace.open(uri, options).done (markdownPreviewView) ->
       if isMarkdownPreviewView(markdownPreviewView)
         previousActivePane.activate()
 
@@ -126,7 +134,7 @@ module.exports =
 
     renderer ?= require './renderer'
     text = editor.getSelectedText() or editor.getText()
-    renderer.toText text, editor.getPath(), editor.getGrammar(), (error, html) =>
+    renderer.toHTML text, editor.getPath(), editor.getGrammar(), (error, html) =>
       if error
         console.warn('Copying Markdown as HTML failed', error)
       else

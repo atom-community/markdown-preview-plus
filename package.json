@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "1.0.1",
+  "version": "1.2.0",
   "main": "./lib/main",
   "description": "Markdown + LaTeX preview in Atom",
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
@@ -13,8 +13,8 @@
     "cheerio": "0.15.0",
     "fs-plus": "^2.0.0",
     "grim": "^1.0.0",
-    "highlights": "0.13.0",
-    "pathwatcher": "^2.0",
+    "highlights": "^1.0.0",
+    "pathwatcher": "^3.0",
     "roaster": "https://github.com/Galadirith/roaster/tarball/marked-mathjax",
     "temp": "^0.6.0",
     "underscore-plus": "^1.0.0",
