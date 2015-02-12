@@ -47,10 +47,20 @@ module.exports =
 # Define some functions to help get a hold of the user's Latex
 # Macros.
 #
+namePattern = ///             # The name of a macro can be either
+              ^[^a-zA-Z\d\s]$ # a single non-alphanumeric character
+              |               # or
+              ^[a-zA-Z]*$     # any number of lower and upper case
+              ///             # letters, but no numerals.
+
+valuePattern = ///^    # The stringified version of the definition
+               {.*}    # must be between brackets
+               (,\d)?  # and may be followed by a comma and a digit
+               $///
 
 getUserMacrosPath = ->
-  userMacrosPath =  CSON.resolve(path.join(atom.getConfigDirPath(),'latex-macros'))
-  userMacrosPath ? path.join(atom.getConfigDirPath(),'latex-macros.cson')
+  userMacrosPath =  CSON.resolve(path.join(atom.getConfigDirPath(),'markdown-preview-plus'))
+  userMacrosPath ? path.join(atom.getConfigDirPath(),'markdown-preview-plus.cson')
 
 loadMacrosFile = (filePath) ->
   return {} unless CSON.isObjectPath(filePath)
@@ -65,14 +75,33 @@ loadUserMacros = ->
   if fs.isFileSync(userMacrosPath)
     result = loadMacrosFile(userMacrosPath)
   else
-    {}
+    console.log "Creating markdown-preview-plus.cson, this is a one-time operation."
+    createMacrosTemplate(userMacrosPath)
+    result = loadMacrosFile(userMacrosPath)
 
-#
+createMacrosTemplate = (filePath) ->
+  templatePath = path.join(__dirname,"../assets/macros-template.cson")
+  templateFile = fs.readFileSync templatePath, 'utf8'
+  fs.writeFileSync filePath, templateFile
+
+checkMacros = (macrosObject) ->
+  for name, value of macrosObject
+    unless name.match(namePattern) and "#{value}".match(valuePattern)
+      delete macrosObject[name]
+      atom.notifications?.addError("Failed to load LaTeX macro named '#{name}'. Please see the [LaTeX guide](https://github.com/Galadirith/markdown-preview-plus/blob/master/LATEX.md#macro-names)", {dismissable: true})
+  macrosObject
+
 # Configure MathJax environment. Similar to the TeX-AMS_HTML configuration with
 # a few unnecessary features stripped away
 #
 configureMathJax = ->
   userMacros = loadUserMacros()
+  if userMacros
+    userMacros = checkMacros(userMacros)
+  else
+    userMacros = {}
+
+  console.log userMacros
 
   #Now Configure MathJax
   MathJax.Hub.Config

@@ -14,6 +14,11 @@ current editor using the keymap `ctrl-shift-m`.
   Rendering of LaTeX equations in the preview pane can be toggled with
   `ctrl-shift-x`. Please see [LaTeX](LATEX.md) for more details.
 
+- **LaTeX Macros**
+  You can add your own macros to a config file named `markdown-preview-plus.cson`
+  which is in the `~/.atom` directory. To learn more about LaTeX macros see
+  [LaTeX](LATEX.md) for more details.
+
 ## Installation Instructions
 
 1.  Search for **Markdown Preview Plus** in the menu **File &rsaquo; Settings

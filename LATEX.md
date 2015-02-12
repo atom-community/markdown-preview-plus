@@ -50,3 +50,84 @@ literally display a dollar sign you can use `\$`.
     it's exactly three seconds before i honk your $\int -xe^{x^2} dx$ nose and
     pull your underwear over your head ...
     ````
+
+## Macros
+
+Depending on what you're using MPP for, you might find yourself typing the same
+things over and over again. For example, I'm taking a course in quantum mechanics
+this year and often need to write bras and kets and bra-kets in my notes:
+
+```latex
+\left| \psi \right
+\left< \psi^* \middle| \psi \right>
+etc
+```
+
+I also find myself needing a lot of 1 over the square-root of somethings like
+
+```latex
+\frac{1}{\sqrt{2}}
+```
+
+LaTeX let's me make *my own* shortcuts for commonly used things called macros.
+For example if I define the macro `\negroot{}` like so
+
+```cson
+negroot: ["{\\frac{1}{\\sqrt{#1}}}",1]
+```
+
+Then I can just type `\negroot{2}` and the LaTeX engine (MathJax in our case) will
+receive `\frac{1}{\sqrt{2}}`. That saves me a lot of typing!
+
+To get started using macros in your installation of Markdown Preview Plus (MPP), go to
+`~/.atom` and open up the `markdown-preview-plus.cson` file.
+
+(If you don't have this file that means you haven't run atom with the latest version
+of MPP yet.)
+
+This file includes some example macros and explains briefly how to write them.
+If you want to learn even more about them, go to the source: the [MathJax docs](http://docs.mathjax.org/en/latest/tex.html#defining-tex-macros).
+
+## Macro Definition Syntax
+
+#### Zero argument macros
+
+To define a macro that takes no arguments (like `\sin`) just wrap it in quotes like so
+```cson
+# This is just an alias for \theta.
+th: "{\\theta}"
+```
+
+#### 1-9 argument macros
+
+To define a macro that takes arguments (like `\frac`), use an array that specifies
+the number of arguments allowed. Then refer to the arguments with the `#` sign like so:
+```cson
+# This one gives you "1 over something" as a fraction.
+inv: ["{\\frac{1}{#1}}",1]
+
+# This one gives you a fraction with nicely typeset parentheses on either side.
+pfrac: ["{\\left(\\frac{#1}{#2}\\right)}",2]
+```
+
+#### Macro Names
+
+Macros need to be named with either
+  * a single non-alphanumeric character like `\,` or
+  * any number of uppercase and lowercase letters (no numbers).
+
+Please see [this](http://tex.stackexchange.com/questions/66666/command-macro-name-cannot-include-numbers-and-symbols)
+StackExchange discussion.
+
+Note that since we define the objects in CSON, if you want to use a single non-alphanumeric
+character for the name of your macro like
+
+```cson
+!: "{OK}"
+```
+
+MPP will fail because CSON will throw an `unexpected !` syntax error. So be sure to write such definitions as a string. The following will work fine:
+
+```cson
+'!': "{OK}"
+```
