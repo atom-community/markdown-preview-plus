@@ -54,29 +54,20 @@ literally display a dollar sign you can use `\$`.
 ## Macros
 
 Depending on what you're using MPP for, you might find yourself typing the same
-things over and over again. For example, I'm taking a course in quantum mechanics
-this year and often need to write bras and kets and bra-kets in my notes:
-
-```latex
-\left| \psi \right
-\left< \psi^* \middle| \psi \right>
-etc
-```
-
-I also find myself needing a lot of 1 over the square-root of somethings like
+things over and over again. I find myself needing a lot of 1 over the square-root of somethings like
 
 ```latex
 \frac{1}{\sqrt{2}}
 ```
 
-LaTeX let's me make *my own* shortcuts for commonly used things called macros.
-For example if I define the macro `\negroot{}` like so
+In LaTeX I can make *my own* shortcuts for commonly used things called *macros*.
+I could define the macro `\negroot{}` like so
 
 ```cson
-negroot: ["{\\frac{1}{\\sqrt{#1}}}",1]
+negroot: ["\\frac{1}{\\sqrt{#1}}",1]
 ```
 
-Then I can just type `\negroot{2}` and the LaTeX engine (MathJax in our case) will
+With this in place, I can just type `\negroot{2}` and the LaTeX engine (MathJax in our case) will
 receive `\frac{1}{\sqrt{2}}`. That saves me a lot of typing!
 
 To get started using macros in your installation of Markdown Preview Plus (MPP), go to
@@ -95,19 +86,19 @@ If you want to learn even more about them, go to the source: the [MathJax docs](
 To define a macro that takes no arguments (like `\sin`) just wrap it in quotes like so
 ```cson
 # This is just an alias for \theta.
-th: "{\\theta}"
+th: "\\theta"
 ```
 
 #### 1-9 argument macros
 
 To define a macro that takes arguments (like `\frac`), use an array that specifies
-the number of arguments allowed. Then refer to the arguments with the `#` sign like so:
+the number of arguments allowed. Then refer to the arguments as `#1` `#2` like so:
 ```cson
 # This one gives you "1 over something" as a fraction.
-inv: ["{\\frac{1}{#1}}",1]
+inv: ["\\frac{1}{#1}",1]
 
 # This one gives you a fraction with nicely typeset parentheses on either side.
-pfrac: ["{\\left(\\frac{#1}{#2}\\right)}",2]
+pfrac: ["\\left(\\frac{#1}{#2}\\right)",2]
 ```
 
 #### Macro Names
