@@ -5,6 +5,7 @@ fs = require 'fs-plus'
 Highlights = require 'highlights'
 {$} = require 'atom-space-pen-views'
 roaster = null # Defer until used
+pandocHelper = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 mathjaxHelper = require './mathjax-helper'
 
@@ -34,22 +35,26 @@ exports.toHTML = (text='', filePath, grammar, renderLaTeX, callback) ->
     callback(null, html)
 
 render = (text, filePath, renderLaTeX, callback) ->
-  roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
-  options =
-    mathjax: renderLaTeX
-    sanitize: false
-    breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
-
   # Remove the <!doctype> since otherwise marked will escape it
   # https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
-  roaster text, options, (error, html) =>
+  callbackFunction = (error, html) ->
     return callback(error) if error?
-
     html = sanitize(html)
     html = resolveImagePaths(html, filePath)
     callback(null, html.trim())
+
+  if atom.config.get('markdown-preview-plus.enablePandoc')
+    pandocHelper ?= require './pandoc-helper'
+    pandocHelper.renderPandoc text, filePath, renderLaTeX, callbackFunction
+  else
+    roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
+    options =
+      mathjax: renderLaTeX
+      sanitize: false
+      breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
+    roaster text, options, callbackFunction
 
 sanitize = (html) ->
   o = cheerio.load("<div>#{html}</div>")
