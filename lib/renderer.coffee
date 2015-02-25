@@ -13,7 +13,7 @@ highlighter = null
 packagePath = path.dirname(__dirname)
 
 exports.toDOMFragment = (text='', filePath, grammar, callback) ->
-  render text, filePath, grammar, (error, html) ->
+  render text, filePath, (error, html) ->
     return callback(error) if error?
 
     template = document.createElement('template')
@@ -26,14 +26,14 @@ exports.toDOMFragment = (text='', filePath, grammar, callback) ->
     callback(null, domFragment)
 
 exports.toHTML = (text='', filePath, grammar, renderLaTeX, callback) ->
-  render text, filePath, grammar, renderLaTeX, (error, html) ->
+  render text, filePath, renderLaTeX, (error, html) ->
     return callback(error) if error?
     # Default code blocks to be coffee in Literate CoffeeScript files
     defaultCodeLanguage = 'coffee' if grammar?.scopeName is 'source.litcoffee'
     html = tokenizeCodeBlocks(html, defaultCodeLanguage)
     callback(null, html)
 
-render = (text, filePath, grammar, renderLaTeX, callback) ->
+render = (text, filePath, renderLaTeX, callback) ->
   roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
   options =
     mathjax: renderLaTeX
@@ -45,7 +45,7 @@ render = (text, filePath, grammar, renderLaTeX, callback) ->
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
   roaster text, options, (error, html) =>
-    return callback(error) if error
+    return callback(error) if error?
 
     html = sanitize(html)
     html = resolveImagePaths(html, filePath)

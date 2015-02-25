@@ -186,20 +186,25 @@ describe "MarkdownPreviewView", ->
         """
 
   describe "when core:copy is triggered", ->
-    beforeEach ->
+    it "writes the rendered HTML to the clipboard", ->
       preview.destroy()
-      filePath = atom.project.getDirectories()[0].resolve('subdir/simple.md')
+      preview.element.remove()
+
+      filePath = atom.project.getDirectories()[0].resolve('subdir/code-block.md')
       preview = new MarkdownPreviewView({filePath})
       jasmine.attachToDOM(preview.element)
 
-    it "writes the rendered HTML to the clipboard", ->
       waitsForPromise ->
         preview.renderMarkdown()
 
       runs ->
         atom.commands.dispatch preview.element, 'core:copy'
+
+      waitsFor ->
+        atom.clipboard.read() isnt "initial clipboard content"
+
+      runs ->
         expect(atom.clipboard.read()).toBe """
-          <p><em>italic</em></p>
-          <p><strong>bold</strong></p>
-          <p>encoding \u2192 issue</p>
+         <h1 id="code-block">Code Block</h1>
+         <pre class="editor-colors lang-javascript"><div class="line"><span class="source js"><span class="keyword control js"><span>if</span></span><span>&nbsp;a&nbsp;</span><span class="keyword operator js"><span>===</span></span><span>&nbsp;</span><span class="constant numeric js"><span>3</span></span><span>&nbsp;</span><span class="meta brace curly js"><span>{</span></span></span></div><div class="line"><span class="source js"><span>&nbsp;&nbsp;b&nbsp;</span><span class="keyword operator js"><span>=</span></span><span>&nbsp;</span><span class="constant numeric js"><span>5</span></span></span></div><div class="line"><span class="source js"><span class="meta brace curly js"><span>}</span></span></span></div></pre>
         """
