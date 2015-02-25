@@ -39,6 +39,12 @@ module.exports =
     enableLatexRenderingByDefault:
       type: 'boolean'
       default: false
+    enableRenderingWithPandoc:
+      type: 'boolean'
+      default: true
+    pandocPath:
+      type: 'string'
+      default: '/usr/local/bin/pandoc'
 
   activate: ->
     atom.commands.add 'atom-workspace',
