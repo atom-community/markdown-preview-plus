@@ -41,10 +41,10 @@ module.exports =
       default: false
     enableRenderingWithPandoc:
       type: 'boolean'
-      default: true
+      default: false
     pandocPath:
       type: 'string'
-      default: '/usr/local/bin/pandoc'
+      default: 'pandoc'
 
   activate: ->
     atom.commands.add 'atom-workspace',
