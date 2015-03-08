@@ -39,16 +39,20 @@ render = (text, filePath, renderLaTeX, callback) ->
   # https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
+  usePandoc = atom.config.get('markdown-preview-plus.pandocEnablePandoc')
+
   callbackFunction = (error, html) ->
     return callback(error) if error?
-    html = sanitize(html)
+    html = sanitize(html, usePandoc && renderLaTeX)
     html = resolveImagePaths(html, filePath)
     callback(null, html.trim())
 
-  if atom.config.get('markdown-preview-plus.enableRenderingWithPandoc')
+  if usePandoc
     pandoc ?= require path.join(packagePath, 'node_modules/pdc/pdc')
-    pandoc.path = atom.config.get('markdown-preview-plus.pandocPath')
-    pandoc text, 'markdown-raw_tex', 'html', ['--mathjax'], callbackFunction
+    pandoc.path = atom.config.get('markdown-preview-plus.pandocOptsPath')
+    args = atom.config.get('markdown-preview-plus.pandocOptsArguments')
+    args.push '--mathjax' if renderLaTeX
+    pandoc text, atom.config.get('markdown-preview-plus.pandocOptsMarkdownFlavor'), 'html', args, callbackFunction
   else
     roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
     options =
@@ -57,8 +61,15 @@ render = (text, filePath, renderLaTeX, callback) ->
       breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
     roaster text, options, callbackFunction
 
-sanitize = (html) ->
+sanitize = (html, renderPandocMath) ->
   o = cheerio.load("<div>#{html}</div>")
+  if renderPandocMath
+    o('.math').each (i,elem) ->
+      math = cheerio(this).text()
+      mode = if math.indexOf('\\[') > -1  then '; mode=display' else ''
+      math = math.replace(/\\[[()\]]/g, '')
+      newContent = "<span class='math'><script type='math/tex" + mode + "'>" + math + "</script></span>"
+      cheerio(this).replaceWith(newContent)
   # Do not remove MathJax script delimited blocks
   o("script:not([type^='math/tex'])").remove()
   attributesToRemove = [

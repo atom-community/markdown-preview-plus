@@ -39,12 +39,18 @@ module.exports =
     enableLatexRenderingByDefault:
       type: 'boolean'
       default: false
-    enableRenderingWithPandoc:
+    pandocEnablePandoc:
       type: 'boolean'
       default: false
-    pandocPath:
+    pandocOptsPath:
       type: 'string'
       default: 'pandoc'
+    pandocOptsMarkdownFlavor:
+      type: 'string'
+      default: 'markdown-raw_tex+tex_math_single_backslash'
+    pandocOptsArguments:
+      type: 'array'
+      default: []
 
   activate: ->
     atom.commands.add 'atom-workspace',
