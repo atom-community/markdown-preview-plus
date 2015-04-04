@@ -59,7 +59,7 @@ handleError = (error, html) ->
   search = /pandoc-citeproc: reference ([\S]+) not found\n?/ig
   matches = error.message.match search
   message = error.message.replace search, ''
-  if message.length > 0
+  if message.length is 0
     error = null
     matches = _.uniq matches
     html = "<b>#{ matches.join('<br>') }</b>"
