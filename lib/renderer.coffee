@@ -5,7 +5,7 @@ fs = require 'fs-plus'
 Highlights = require 'highlights'
 {$} = require 'atom-space-pen-views'
 roaster = null # Defer until used
-pandoc = null # Defer until used
+pandocHelper = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 mathjaxHelper = require './mathjax-helper'
 
@@ -39,20 +39,15 @@ render = (text, filePath, renderLaTeX, callback) ->
   # https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
-  usePandoc = atom.config.get('markdown-preview-plus.pandocEnablePandoc')
-
   callbackFunction = (error, html) ->
     return callback(error) if error?
-    html = sanitize(html, usePandoc && renderLaTeX)
+    html = sanitize(html)
     html = resolveImagePaths(html, filePath)
     callback(null, html.trim())
 
-  if usePandoc
-    pandoc ?= require path.join(packagePath, 'node_modules/pdc/pdc')
-    pandoc.path = atom.config.get('markdown-preview-plus.pandocOptsPath')
-    args = atom.config.get('markdown-preview-plus.pandocOptsArguments')
-    args.push '--mathjax' if renderLaTeX
-    pandoc text, atom.config.get('markdown-preview-plus.pandocOptsMarkdownFlavor'), 'html', args, callbackFunction
+  if atom.config.get('markdown-preview-plus.pandocEnablePandoc')
+    pandocHelper ?= require './pandoc-helper'
+    pandocHelper.renderPandoc text, renderLaTeX, callbackFunction
   else
     roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
     options =
@@ -61,15 +56,8 @@ render = (text, filePath, renderLaTeX, callback) ->
       breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
     roaster text, options, callbackFunction
 
-sanitize = (html, renderPandocMath) ->
+sanitize = (html) ->
   o = cheerio.load("<div>#{html}</div>")
-  if renderPandocMath
-    o('.math').each (i,elem) ->
-      math = cheerio(this).text()
-      mode = if math.indexOf('\\[') > -1  then '; mode=display' else ''
-      math = math.replace(/\\[[()\]]/g, '')
-      newContent = "<span class='math'><script type='math/tex" + mode + "'>" + math + "</script></span>"
-      cheerio(this).replaceWith(newContent)
   # Do not remove MathJax script delimited blocks
   o("script:not([type^='math/tex'])").remove()
   attributesToRemove = [
