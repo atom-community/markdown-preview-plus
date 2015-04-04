@@ -68,7 +68,7 @@ handleError = (error, html) ->
       r = new RegExp "@#{match}", 'gi'
       currentText = currentText.replace(r, "&#64;#{match}")
     currentText = html + '<br>' + currentText
-    pdc currentText, flavor, 'html', args, handleHTML
+    pdc currentText, flavor, 'html', args, handleResponse
   else
     message = error.message.replace /\n/g, '<br>'
     html = "<h1>Pandoc Error</h1><p><b>#{message}</b></p>"
