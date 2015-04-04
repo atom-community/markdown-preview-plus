@@ -40,6 +40,7 @@ current editor using the keymap `ctrl-shift-m`.
     ````bash
     $ apm install mathjax-wrapper
     ````
+  4. Optionally you may use pandoc to render the Markdown preview. Please have a look at the pandoc section below troubleshooting.
 
 ## Troubleshooting
 
@@ -84,6 +85,40 @@ you have experienced a problem not listed here please open up an
   3.  You should see a progress message `Installing Modules`, and will be
       complete when it displays `Installing Modules done` which may take
       1-5mins.
+
+- **I want to use pandoc but it doesn't work**  
+  For instructions have a look at the pandoc section below.
+
+## Pandoc
+
+Below you will find an installation guide for pandoc and an explanation of all settings
+
+1. [Install pandoc](http://pandoc.org/installing.html)
+2. Run `which pandoc` and note the full path to the pandoc executable
+3. On the Markdown-Preview-Plus Settings Page
+    - enable **Enable Pandoc Parser**
+    - paste the result of 2. into **Pandoc Options: Path**
+4. voilà - pandoc should work
+
+The Pandoc options give you furthermore the possibility to
+
+* define custom [pandoc arguments](http://pandoc.org/README.html#options)
+* adjust the [markdown flavor](http://pandoc.org/README.html#pandocs-markdown)
+* enable [citation replacement](http://pandoc.org/README.html#citations) for references like &#x5B;&#x40;smith04&#x5D;
+    - Therefore enable **Pandoc Options: Citations**
+    - MPP will now search for any file named *bibliography.bib* and *custom.csl* from the markdown's directory up. The first files that are matching will be used for pandocs citations. You can change the filenames it is searching for with the option **Bibliography (bibfile)** and **Bibliography Style (cslfile)**. Here is a small example how it works:
+    ````
+    /
+    |-- bibliography.bib     <-- will be used by README.md
+    |-- custom.csl           <-- will be used by README.md & RANDOM.md
+    |-- src
+    |   |-- bibliography.bib <-- will be used by RANDOM.md
+    |   |-- otherbib.bib     <-- will not be used as filename does not match
+    |   `-- md
+    |       `-- RANDOM.md
+    `-- README.md
+    ````
+    Effictively the arguments `--csl=/custom.csl --bibliography=/bibliography.bib` are used for `/README.md` and `--csl=/custom.csl --bibliography=/src/bibliography.bib` for `/src/md/RANDOM.md` 
 
 ## License
 

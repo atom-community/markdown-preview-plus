@@ -45,9 +45,9 @@ render = (text, filePath, renderLaTeX, callback) ->
     html = resolveImagePaths(html, filePath)
     callback(null, html.trim())
 
-  if atom.config.get('markdown-preview-plus.pandocEnablePandoc')
+  if atom.config.get('markdown-preview-plus.enablePandoc')
     pandocHelper ?= require './pandoc-helper'
-    pandocHelper.renderPandoc text, renderLaTeX, callbackFunction
+    pandocHelper.renderPandoc text, filePath, renderLaTeX, callbackFunction
   else
     roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
     options =
