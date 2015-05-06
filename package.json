@@ -2,7 +2,12 @@
   "name": "markdown-preview-plus",
   "version": "1.3.0",
   "main": "./lib/main",
-  "description": "Markdown + LaTeX preview in Atom",
+  "description": "Markdown + Maths preview in Atom",
+  "keywords": [
+    "markdown",
+    "maths",
+    "latex"
+  ]
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
   "license": "MIT",
   "engines": {
