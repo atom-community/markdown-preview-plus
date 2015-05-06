@@ -7,7 +7,7 @@
     "markdown",
     "maths",
     "latex"
-  ]
+  ],
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
   "license": "MIT",
   "engines": {
