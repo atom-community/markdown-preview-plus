@@ -23,6 +23,7 @@ class MarkdownPreviewView extends ScrollView
     super
     @emitter = new Emitter
     @disposables = new CompositeDisposable
+    @loaded = true # Do not show the loading spinnor on initial load
 
   attached: ->
     return if @isAttached
@@ -54,11 +55,6 @@ class MarkdownPreviewView extends ScrollView
 
   onDidChangeMarkdown: (callback) ->
     @emitter.on 'did-change-markdown', callback
-
-  on: (eventName) ->
-    if eventName is 'markdown-preview-plus:markdown-changed'
-      Grim.deprecate("Use MarkdownPreviewView::onDidChangeMarkdown instead of the 'markdown-preview-plus:markdown-changed' jQuery event")
-    super
 
   subscribeToFilePath: (filePath) ->
     @file = new File(filePath)
@@ -142,6 +138,7 @@ class MarkdownPreviewView extends ScrollView
         return
 
   renderMarkdown: ->
+    @showLoading() unless @loaded
     @getMarkdownSource().then (source) => @renderMarkdownText(source) if source?
 
   getMarkdownSource: ->
@@ -152,12 +149,19 @@ class MarkdownPreviewView extends ScrollView
     else
       Promise.resolve(null)
 
+  getHTML: (callback) ->
+    @getMarkdownSource().then (source) =>
+      return unless source?
+
+      renderer.toHTML source, @getPath(), @getGrammar(), callback
+
   renderMarkdownText: (text) ->
     renderer.toHTML text, @getPath(), @getGrammar(), @renderLaTeX, (error, html) =>
       if error
         @showError(error)
       else
         @loading = false
+        @loaded = true
         # div.update-preview created after constructor st UpdatePreview cannot
         # be instanced in the constructor
         if !@updatePreview
@@ -216,6 +220,44 @@ class MarkdownPreviewView extends ScrollView
   getGrammar: ->
     @editor?.getGrammar()
 
+  getDocumentStyleSheets: -> # This function exists so we can stub it
+    document.styleSheets
+
+  getTextEditorStyles: ->
+
+    textEditorStyles = document.createElement("atom-styles")
+    textEditorStyles.setAttribute "context", "atom-text-editor"
+    document.body.appendChild textEditorStyles
+
+    # Force styles injection
+    textEditorStyles.initialize()
+
+    # Extract style elements content
+    Array.prototype.slice.apply(textEditorStyles.childNodes).map (styleElement) ->
+      styleElement.innerText
+
+  getMarkdownPreviewCSS: ->
+    markdowPreviewRules = []
+    ruleRegExp = /\.markdown-preview/
+    cssUrlRefExp = /url\(atom:\/\/markdown-preview\/assets\/(.*)\)/
+
+    for stylesheet in @getDocumentStyleSheets()
+      if stylesheet.rules?
+        for rule in stylesheet.rules
+          # We only need `.markdown-review` css
+          markdowPreviewRules.push(rule.cssText) if rule.selectorText?.match(ruleRegExp)?
+
+    markdowPreviewRules
+      .concat(@getTextEditorStyles())
+      .join('\n')
+      .replace(/atom-text-editor/g, 'pre.editor-colors')
+      .replace(/:host/g, '.host') # Remove shadow-dom :host selector causing problem on FF
+      .replace cssUrlRefExp, (match, assetsName, offset, string) -> # base64 encode assets
+        assetPath = path.join __dirname, '../assets', assetsName
+        originalData = fs.readFileSync assetPath, 'binary'
+        base64Data = new Buffer(originalData, 'binary').toString('base64')
+        "url('data:image/jpeg;base64,#{base64Data}')"
+
   showError: (result) ->
     failureMessage = result?.message
 
@@ -238,14 +280,11 @@ class MarkdownPreviewView extends ScrollView
     # Use default copy event handler if there is selected text inside this view
     return false if selectedText and selectedNode? and (@[0] is selectedNode or $.contains(@[0], selectedNode))
 
-    @getMarkdownSource().then (source) =>
-      return unless source?
-
-      renderer.toHTML source, @getPath(), @getGrammar(), (error, html) =>
-        if error?
-          console.warn('Copying Markdown as HTML failed', error)
-        else
-          atom.clipboard.write(html)
+    @getHTML (error, html) ->
+      if error?
+        console.warn('Copying Markdown as HTML failed', error)
+      else
+        atom.clipboard.write(html)
 
     true
 
@@ -253,20 +292,41 @@ class MarkdownPreviewView extends ScrollView
     return if @loading
 
     filePath = @getPath()
+    title = 'Markdown to HTML'
     if filePath
+      title = path.parse(filePath).name
       filePath += '.html'
     else
       filePath = 'untitled.md.html'
-      if projectPath = atom.project.getPath()
+      if projectPath = atom.project.getPaths()[0]
         filePath = path.join(projectPath, filePath)
 
     if htmlFilePath = atom.showSaveDialogSync(filePath)
-      # Hack to prevent encoding issues
-      # https://github.com/atom/markdown-preview/issues/96
-      html = @[0].innerHTML.split('').join('')
 
-      fs.writeFileSync(htmlFilePath, html)
-      atom.workspace.open(htmlFilePath)
+      @getHTML (error, htmlBody) =>
+        if error?
+          console.warn('Saving Markdown as HTML failed', error)
+        else
+
+          html = """
+            <!DOCTYPE html>
+            <html>
+              <head>
+                  <meta charset="utf-8" />
+                  <title>#{title}</title>
+                  <style>#{@getMarkdownPreviewCSS()}</style>
+              </head>
+              <body class='markdown-preview'>#{htmlBody}</body>
+            </html>""" + "\n" # Ensure trailing newline
+
+          fs.writeFileSync(htmlFilePath, html)
+          atom.workspace.open(htmlFilePath)
 
   isEqual: (other) ->
     @[0] is other?[0] # Compare DOM elements
+
+if Grim.includeDeprecatedAPIs
+  MarkdownPreviewView::on = (eventName) ->
+    if eventName is 'markdown-preview:markdown-changed'
+      Grim.deprecate("Use MarkdownPreviewView::onDidChangeMarkdown instead of the 'markdown-preview:markdown-changed' jQuery event")
+    super
