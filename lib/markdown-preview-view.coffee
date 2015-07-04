@@ -119,12 +119,12 @@ class MarkdownPreviewView extends ScrollView
     if @file?
       @disposables.add @file.onDidChange(changeHandler)
     else if @editor?
-      @disposables.add @editor.getBuffer().onDidStopChanging =>
+      @disposables.add @editor.getBuffer().onDidStopChanging ->
         changeHandler() if atom.config.get 'markdown-preview-plus.liveUpdate'
       @disposables.add @editor.onDidChangePath => @emitter.emit 'did-change-title'
-      @disposables.add @editor.getBuffer().onDidSave =>
+      @disposables.add @editor.getBuffer().onDidSave ->
         changeHandler() unless atom.config.get 'markdown-preview-plus.liveUpdate'
-      @disposables.add @editor.getBuffer().onDidReload =>
+      @disposables.add @editor.getBuffer().onDidReload ->
         changeHandler() unless atom.config.get 'markdown-preview-plus.liveUpdate'
 
     @disposables.add atom.config.onDidChange 'markdown-preview-plus.breakOnSingleNewline', changeHandler
@@ -136,6 +136,12 @@ class MarkdownPreviewView extends ScrollView
           @renderLaTeX = !@renderLaTeX
           changeHandler()
         return
+
+    @disposables.add atom.config.observe 'markdown-preview.useGitHubStyle', (useGitHubStyle) =>
+      if useGitHubStyle
+        @element.setAttribute('data-use-github-style', '')
+      else
+        @element.removeAttribute('data-use-github-style')
 
   renderMarkdown: ->
     @showLoading() unless @loaded
