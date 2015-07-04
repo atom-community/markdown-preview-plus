@@ -40,7 +40,8 @@ current editor using the keymap `ctrl-shift-m`.
     ````bash
     $ apm install mathjax-wrapper
     ````
-  4. Optionally you may use pandoc to render the Markdown preview. Please have a look at the pandoc section below troubleshooting.
+
+    * Optionally you may use pandoc to render the Markdown preview. Please have a look at the pandoc section below for instructions.
 
 4.  Disable the built in Markdown Preview package. You can do this by searching
     for **Markdown Preview** in the menu **File &rsaquo; Settings &rsaquo;
@@ -49,8 +50,6 @@ current editor using the keymap `ctrl-shift-m`.
 Should you have any problems while installing or using MPP please open up a
 [new issue](https://github.com/Galadirith/markdown-preview-plus/issues/new).
 
-- **I want to use pandoc but it doesn't work**  
-  For instructions have a look at the pandoc section below.
 
 ## Pandoc
 
@@ -81,7 +80,7 @@ The Pandoc options give you furthermore the possibility to
     |       `-- RANDOM.md
     `-- README.md
     ````
-    Effictively the arguments `--csl=/custom.csl --bibliography=/bibliography.bib` are used for `/README.md` and `--csl=/custom.csl --bibliography=/src/bibliography.bib` for `/src/md/RANDOM.md` 
+    Effictively the arguments `--csl=/custom.csl --bibliography=/bibliography.bib` are used for `/README.md` and `--csl=/custom.csl --bibliography=/src/bibliography.bib` for `/src/md/RANDOM.md`
 
 ## License
 
