@@ -18,21 +18,25 @@ describe "MarkdownPreviewView", ->
       atom.packages.activatePackage('language-javascript')
 
     waitsForPromise ->
-      atom.packages.activatePackage('markdown-preview')
+      atom.packages.activatePackage('markdown-preview-plus')
 
   afterEach ->
     preview.destroy()
 
   describe "::constructor", ->
-    it "shows a loading spinner and renders the markdown", ->
-      preview.showLoading()
-      expect(preview.find('.markdown-spinner')).toExist()
-
-      waitsForPromise ->
-        preview.renderMarkdown()
-
-      runs ->
-        expect(preview.find(".emoji")).toExist()
+    # Loading spinner disabled when DOM update by diff was introduced. If
+    # spinner code in `lib/markdown-preview-view` is removed completly this
+    # spec should also be removed
+    #
+    # it "shows a loading spinner and renders the markdown", ->
+    #   preview.showLoading()
+    #   expect(preview.find('.markdown-spinner')).toExist()
+    #
+    #   waitsForPromise ->
+    #     preview.renderMarkdown()
+    #
+    #   runs ->
+    #     expect(preview.find(".emoji")).toExist()
 
     it "shows an error message when there is an error", ->
       preview.showError("Not a real file")
@@ -65,44 +69,49 @@ describe "MarkdownPreviewView", ->
         jasmine.attachToDOM(newPreview.element)
         expect(newPreview.getPath()).toBe preview.getPath()
 
-  describe "code block conversion to atom-text-editor tags", ->
-    beforeEach ->
-      waitsForPromise ->
-        preview.renderMarkdown()
-
-    it "removes line decorations on rendered code blocks", ->
-      editor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
-      decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
-      expect(decorations.length).toBe 0
-
-    describe "when the code block's fence name has a matching grammar", ->
-      it "assigns the grammar on the atom-text-editor", ->
-        rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
-        expect(rubyEditor).toExist()
-        expect(rubyEditor[0].getModel().getText()).toBe """
-          def func
-            x = 1
-          end
-        """
-
-        # nested in a list item
-        jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
-        expect(jsEditor).toExist()
-        expect(jsEditor[0].getModel().getText()).toBe """
-          if a === 3 {
-          b = 5
-          }
-        """
-
-    describe "when the code block's fence name doesn't have a matching grammar", ->
-      it "does not assign a specific grammar", ->
-        plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
-        expect(plainEditor).toExist()
-        expect(plainEditor[0].getModel().getText()).toBe """
-          function f(x) {
-            return x++;
-          }
-        """
+  # Conversion of `<pre>` to `<atom-text-editor>` was introduced in 090fb1f
+  # upstream however before signing off on this in MPP it must be verified that
+  # this does not muck up the DOM update by diff. Restore this spec if/when that
+  # verification is completed.
+  #
+  # describe "code block conversion to atom-text-editor tags", ->
+  #   beforeEach ->
+  #     waitsForPromise ->
+  #       preview.renderMarkdown()
+  #
+  #   it "removes line decorations on rendered code blocks", ->
+  #     editor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+  #     decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
+  #     expect(decorations.length).toBe 0
+  #
+  #   describe "when the code block's fence name has a matching grammar", ->
+  #     it "assigns the grammar on the atom-text-editor", ->
+  #       rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
+  #       expect(rubyEditor).toExist()
+  #       expect(rubyEditor[0].getModel().getText()).toBe """
+  #         def func
+  #           x = 1
+  #         end
+  #       """
+  #
+  #       # nested in a list item
+  #       jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
+  #       expect(jsEditor).toExist()
+  #       expect(jsEditor[0].getModel().getText()).toBe """
+  #         if a === 3 {
+  #         b = 5
+  #         }
+  #       """
+  #
+  #   describe "when the code block's fence name doesn't have a matching grammar", ->
+  #     it "does not assign a specific grammar", ->
+  #       plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+  #       expect(plainEditor).toExist()
+  #       expect(plainEditor[0].getModel().getText()).toBe """
+  #         function f(x) {
+  #           return x++;
+  #         }
+  #       """
 
   describe "image resolving", ->
     beforeEach ->
@@ -142,7 +151,7 @@ describe "MarkdownPreviewView", ->
   describe "gfm newlines", ->
     describe "when gfm newlines are not enabled", ->
       it "creates a single paragraph with <br>", ->
-        atom.config.set('markdown-preview.breakOnSingleNewline', false)
+        atom.config.set('markdown-preview-plus.breakOnSingleNewline', false)
 
         waitsForPromise ->
           preview.renderMarkdown()
@@ -152,7 +161,7 @@ describe "MarkdownPreviewView", ->
 
     describe "when gfm newlines are enabled", ->
       it "creates a single paragraph with no <br>", ->
-        atom.config.set('markdown-preview.breakOnSingleNewline', true)
+        atom.config.set('markdown-preview-plus.breakOnSingleNewline', true)
 
         waitsForPromise ->
           preview.renderMarkdown()
@@ -194,7 +203,7 @@ describe "MarkdownPreviewView", ->
       atomTextEditorStyles = [
         "atom-text-editor .line { color: brown; }\natom-text-editor .number { color: cyan; }"
         "atom-text-editor :host .something { color: black; }"
-        "atom-text-editor .hr { background: url(atom://markdown-preview/assets/hr.png); }"
+        "atom-text-editor .hr { background: url(atom://markdown-preview-plus/assets/hr.png); }"
       ]
 
       expect(fs.isFileSync(outputPath)).toBe false
@@ -213,7 +222,10 @@ describe "MarkdownPreviewView", ->
 
       runs ->
         expect(fs.isFileSync(outputPath)).toBe true
-        expect(atom.workspace.getActiveTextEditor().getText()).toBe expectedOutput
+        savedHTML = atom.workspace.getActiveTextEditor().getText()
+          .replace(/<body class='markdown-preview'><div>/, '<body class=\'markdown-preview\'>')
+          .replace(/\n<\/div><\/body>/, '</body>')
+        expect(savedHTML).toBe expectedOutput.replace(/\r\n/g, '\n')
 
     describe "text editor style extraction", ->
 
@@ -257,7 +269,8 @@ describe "MarkdownPreviewView", ->
 
       runs ->
         expect(atom.clipboard.read()).toBe """
-         <h1 id="code-block">Code Block</h1>
+         <div><h1 id="code-block">Code Block</h1>
          <pre class="editor-colors lang-javascript"><div class="line"><span class="source js"><span class="keyword control js"><span>if</span></span><span>&nbsp;a&nbsp;</span><span class="keyword operator js"><span>===</span></span><span>&nbsp;</span><span class="constant numeric js"><span>3</span></span><span>&nbsp;</span><span class="meta brace curly js"><span>{</span></span></span></div><div class="line"><span class="source js"><span>&nbsp;&nbsp;b&nbsp;</span><span class="keyword operator js"><span>=</span></span><span>&nbsp;</span><span class="constant numeric js"><span>5</span></span></span></div><div class="line"><span class="source js"><span class="meta brace curly js"><span>}</span></span></span></div></pre>
          <p>encoding \u2192 issue</p>
+         </div>
         """
