@@ -137,7 +137,7 @@ class MarkdownPreviewView extends ScrollView
           changeHandler()
         return
 
-    @disposables.add atom.config.observe 'markdown-preview.useGitHubStyle', (useGitHubStyle) =>
+    @disposables.add atom.config.observe 'markdown-preview-plus.useGitHubStyle', (useGitHubStyle) =>
       if useGitHubStyle
         @element.setAttribute('data-use-github-style', '')
       else
@@ -159,7 +159,7 @@ class MarkdownPreviewView extends ScrollView
     @getMarkdownSource().then (source) =>
       return unless source?
 
-      renderer.toHTML source, @getPath(), @getGrammar(), callback
+      renderer.toHTML source, @getPath(), @getGrammar(), @renderLaTeX, callback
 
   renderMarkdownText: (text) ->
     renderer.toHTML text, @getPath(), @getGrammar(), @renderLaTeX, (error, html) =>
@@ -245,7 +245,7 @@ class MarkdownPreviewView extends ScrollView
   getMarkdownPreviewCSS: ->
     markdowPreviewRules = []
     ruleRegExp = /\.markdown-preview/
-    cssUrlRefExp = /url\(atom:\/\/markdown-preview\/assets\/(.*)\)/
+    cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
     for stylesheet in @getDocumentStyleSheets()
       if stylesheet.rules?
