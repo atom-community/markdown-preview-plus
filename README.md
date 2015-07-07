@@ -7,14 +7,24 @@ All the yummy goodness of
 delicious new features. Show the rendered HTML markdown to the right of the
 current editor using the keymap `ctrl-shift-m`.
 
-## New Features
+Should you have any problems while installing or using MPP please open up a
+[new issue](https://github.com/Galadirith/markdown-preview-plus/issues/new).
+
+## Features
 
 - **LaTeX equation rendering**  
   LaTeX equations in the source markdown are rendered in the preview pane.
   Rendering of LaTeX equations in the preview pane can be toggled with
   `ctrl-shift-x`. Please see [LaTeX](LATEX.md) for more details.
 
-## Installation Instructions
+- **Pandoc support**  
+  You can use [Pandoc](https://github.com/jgm/pandoc) to render the
+  markdown preview which provides a richer functionality including support to
+  define custom [pandoc arguments](http://pandoc.org/README.html#options),
+  adjust the [markdown flavor](http://pandoc.org/README.html#pandocs-markdown)
+  and enable [citation replacement](http://pandoc.org/README.html#citations).
+
+## Installation
 
 1.  The installation process uses
     [node-gyp](https://github.com/TooTallNate/node-gyp) which is installed when
@@ -41,46 +51,50 @@ current editor using the keymap `ctrl-shift-m`.
     $ apm install mathjax-wrapper
     ````
 
-    * Optionally you may use pandoc to render the Markdown preview. Please have a look at the pandoc section below for instructions.
-
 4.  Disable the built in Markdown Preview package. You can do this by searching
     for **Markdown Preview** in the menu **File &rsaquo; Settings &rsaquo;
     Packages** and clicking **Disable**.
 
-Should you have any problems while installing or using MPP please open up a
-[new issue](https://github.com/Galadirith/markdown-preview-plus/issues/new).
+### Enable Pandoc
 
+Optionally you may use Pandoc to render the Markdown preview. To enable Pandoc
+within Markdown Preview Plus:
 
-## Pandoc
+1.  [Install pandoc](http://pandoc.org/installing.html)
+2.  Run `which pandoc` and note the full path to the Pandoc executable.
+3.  On the Markdown Preview Plus settings page
+    - Enable **Enable Pandoc Parser**
+    - Enter the path from step 2 into **Pandoc Options: Path**
 
-Below you will find an installation guide for pandoc and an explanation of all settings
+## Usage
 
-1. [Install pandoc](http://pandoc.org/installing.html)
-2. Run `which pandoc` and note the full path to the pandoc executable
-3. On the Markdown-Preview-Plus Settings Page
-    - enable **Enable Pandoc Parser**
-    - paste the result of 2. into **Pandoc Options: Path**
-4. voilà - pandoc should work
+### Pandoc citation replacement
 
-The Pandoc options give you furthermore the possibility to
+If you have enabled Pandoc to render the markdown preview then you can enable
+citation replacement by enabling **Pandoc Options: Citations** on the Markdown
+Preview Plus settings page
 
-* define custom [pandoc arguments](http://pandoc.org/README.html#options)
-* adjust the [markdown flavor](http://pandoc.org/README.html#pandocs-markdown)
-* enable [citation replacement](http://pandoc.org/README.html#citations) for references like &#x5B;&#x40;smith04&#x5D;
-    - Therefore enable **Pandoc Options: Citations**
-    - MPP will now search for any file named *bibliography.bib* and *custom.csl* from the markdown's directory up. The first files that are matching will be used for pandocs citations. You can change the filenames it is searching for with the option **Bibliography (bibfile)** and **Bibliography Style (cslfile)**. Here is a small example how it works:
-    ````
-    /
-    |-- bibliography.bib     <-- will be used by README.md
-    |-- custom.csl           <-- will be used by README.md & RANDOM.md
-    |-- src
-    |   |-- bibliography.bib <-- will be used by RANDOM.md
-    |   |-- otherbib.bib     <-- will not be used as filename does not match
-    |   `-- md
-    |       `-- RANDOM.md
-    `-- README.md
-    ````
-    Effictively the arguments `--csl=/custom.csl --bibliography=/bibliography.bib` are used for `/README.md` and `--csl=/custom.csl --bibliography=/src/bibliography.bib` for `/src/md/RANDOM.md`
+MPP will now search for any file named *bibliography.bib* and *custom.csl*
+from the markdown's directory up. The first files that are matching will be
+used for Pandocs citations. You can change the filenames it is searching for
+by changing the options **Bibliography (bibfile)** and **Bibliography Style
+(cslfile)** on the settings page.
+
+Here is a small example how it works:
+````
+/
+├── bibliography.bib     <-- will be used by README.md
+├── custom.csl           <-- will be used by README.md & RANDOM.md
+├── src
+│   ├── bibliography.bib <-- will be used by RANDOM.md
+│   ├── otherbib.bib     <-- will not be used as filename does not match
+│   └── md
+│       └── RANDOM.md
+└── README.md
+````
+Effictively the arguments `--csl=/custom.csl --bibliography=/bibliography.bib`
+are used for `/README.md` and `--csl=/custom.csl
+--bibliography=/src/bibliography.bib` for `/src/md/RANDOM.md`
 
 ## License
 
