@@ -42,7 +42,7 @@ class MarkdownPreviewView extends ScrollView
 
   serialize: ->
     deserializer: 'MarkdownPreviewView'
-    filePath: @getPath()
+    filePath: @getPath() ? @filePath
     editorId: @editorId
 
   destroy: ->
