@@ -313,13 +313,30 @@ class MarkdownPreviewView extends ScrollView
         if error?
           console.warn('Saving Markdown as HTML failed', error)
         else
+          if @renderLaTeX
+            mathjaxScript = """
 
+              <script type="text/x-mathjax-config">
+                MathJax.Hub.Config({
+                  jax: ["input/TeX","output/HTML-CSS"],
+                  extensions: [],
+                  TeX: {
+                    extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+                  },
+                  showMathMenu: false
+                });
+              </script>
+              <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js">
+              </script>
+              """
+          else
+            mathjaxScript = ""
           html = """
             <!DOCTYPE html>
             <html>
               <head>
                   <meta charset="utf-8" />
-                  <title>#{title}</title>
+                  <title>#{title}</title>#{mathjaxScript}
                   <style>#{@getMarkdownPreviewCSS()}</style>
               </head>
               <body class='markdown-preview'>#{htmlBody}</body>
