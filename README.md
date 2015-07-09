@@ -2,12 +2,11 @@
 
 ![MPP](https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/imgs/mpp-full-res-invert.png)
 
-All the yummy goodness of
-[Markdown Preview](https://github.com/atom/markdown-preview) with sprinklings of
-delicious new features. Show the rendered HTML markdown to the right of the
-current editor using the keymap `ctrl-shift-m`.
-
-Should you have any problems while installing or using MPP please open up a
+Markdown Preview Plus (MPP) is a fork of
+[Markdown Preview](https://github.com/atom/markdown-preview) that provides a
+real-time preview of markdown documents. Should you have any problems while
+installing or using MPP, or if you would like to see a new feature added please
+open up a
 [new issue](https://github.com/Galadirith/markdown-preview-plus/issues/new).
 
 ## Features
@@ -26,14 +25,16 @@ Should you have any problems while installing or using MPP please open up a
 
 ## Installation
 
-1.  The installation process uses
+1.  **Check installation dependencies**  
+    The installation process uses
     [node-gyp](https://github.com/TooTallNate/node-gyp) which is installed when
     you installed atom. Please check the
     [installation](https://github.com/TooTallNate/node-gyp#installation) section
     of node-gyp to ensure you have all the programs installed that it requires
     to run.
 
-2.  Search for **Markdown Preview Plus** in the menu **File &rsaquo; Settings
+2.  **Install MPP**  
+    Search for **Markdown Preview Plus** in the menu **File &rsaquo; Settings
     &rsaquo; Install** and click **Install**. Please allow 3-5 mins for
     installation. Alternatively if you would prefer to use the command line
     utility `apm`:
@@ -42,7 +43,8 @@ Should you have any problems while installing or using MPP please open up a
     $ apm install markdown-preview-plus
     ````
 
-3.  Search for **mathjax-wrapper** in the menu **File &rsaquo; Settings &rsaquo;
+3.  **Install mathjax-wrapper**  
+    Search for **mathjax-wrapper** in the menu **File &rsaquo; Settings &rsaquo;
     Install** and click **Install**. Please allow 10-15 mins for installation
     of mathjax-wrapper. Alternatively if you would prefer to use the command
     line utility `apm`:
@@ -51,28 +53,45 @@ Should you have any problems while installing or using MPP please open up a
     $ apm install mathjax-wrapper
     ````
 
-4.  Disable the built in Markdown Preview package. You can do this by searching
+4.  **Disable Markdown Preview**  
+    Disable the built in Markdown Preview package. You can do this by searching
     for **Markdown Preview** in the menu **File &rsaquo; Settings &rsaquo;
     Packages** and clicking **Disable**.
 
-### Enable Pandoc
+5.  **(Optional) Enable Pandoc**  
+    Optionally you may use Pandoc to render the Markdown preview. To enable
+    Pandoc within MPP:
 
-Optionally you may use Pandoc to render the Markdown preview. To enable Pandoc
-within Markdown Preview Plus:
-
-1.  [Install pandoc](http://pandoc.org/installing.html)
-2.  Run `which pandoc` and note the full path to the Pandoc executable.
-3.  On the Markdown Preview Plus settings page
-    - Enable **Enable Pandoc Parser**
-    - Enter the path from step 2 into **Pandoc Options: Path**
+    1.  [Install pandoc](http://pandoc.org/installing.html)
+    2.  Run `which pandoc` and note the full path to the Pandoc executable.
+    3.  On the MPP settings page enable **Enable Pandoc Parser**
+    4.  Enter the path from step 2 into **Pandoc Options: Path**
 
 ## Usage
+
+### Opening a preview
+
+If you are editing a markdown document in atom you can open a preview with
+`ctrl-shift-m` that will update in real-time as you edit the document. You can
+also right click on a markdown document in the tree-view and select **Markdown
+Preview** to open a standalone preview.
+
+### LaTeX equation rendering
+
+MPP extends the syntax of
+[GitHub flavored markdown](https://help.github.com/articles/github-flavored-markdown/)
+with equation blocks. An equation block is indicated by enclosing it in double
+dollar signs `$$...$$`. You can use any LaTeX macros that are valid in a maths
+environment of a LaTeX document inside an equation block. Rendering of LaTeX
+equations in the document preview can be toggled with `ctrl-shift-x`.
+
+For more details on using equations in MPP please see [LaTeX](LATEX.md).
 
 ### Pandoc citation replacement
 
 If you have enabled Pandoc to render the markdown preview then you can enable
-citation replacement by enabling **Pandoc Options: Citations** on the Markdown
-Preview Plus settings page
+citation replacement by enabling **Pandoc Options: Citations** on the MPP
+settings page.
 
 MPP will now search for any file named *bibliography.bib* and *custom.csl*
 from the markdown's directory up. The first files that are matching will be
@@ -82,7 +101,7 @@ by changing the options **Bibliography (bibfile)** and **Bibliography Style
 
 Here is a small example how it works:
 ````
-/
+./
 ├── bibliography.bib     <-- will be used by README.md
 ├── custom.csl           <-- will be used by README.md & RANDOM.md
 ├── src
