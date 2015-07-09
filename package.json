@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "main": "./lib/main",
   "description": "Markdown + Maths preview in Atom",
   "keywords": [
