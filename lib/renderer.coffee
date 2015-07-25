@@ -6,6 +6,7 @@ Highlights = require 'highlights'
 {$} = require 'atom-space-pen-views'
 roaster = null # Defer until used
 pandocHelper = null # Defer until used
+markdownIt = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 mathjaxHelper = require './mathjax-helper'
 pathWatcher = require 'pathwatcher'
@@ -59,12 +60,10 @@ render = (text, filePath, renderLaTeX, callback) ->
     pandocHelper ?= require './pandoc-helper'
     pandocHelper.renderPandoc text, filePath, renderLaTeX, callbackFunction
   else
-    roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
-    options =
-      mathjax: renderLaTeX
-      sanitize: false
-      breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
-    roaster text, options, callbackFunction
+
+    markdownIt ?= require './markdown-it-helper'
+
+    callbackFunction null, markdownIt text
 
 sanitize = (html) ->
   o = cheerio.load(html)
