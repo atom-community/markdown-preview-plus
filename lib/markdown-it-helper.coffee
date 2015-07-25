@@ -7,8 +7,8 @@ markdownItOptions =
   linkify: true
   typographer: true
 
-mathInline = (string) -> "<script type='math/tex'>#{string}</script>"
-mathBlock = (string) -> "<script type='math/tex; mode=display'>#{string}</script>"
+mathInline = (string) -> "<span class='math'><script type='math/tex'>#{string}</script></span>"
+mathBlock = (string) -> "<span class='math'><script type='math/tex; mode=display'>#{string}</script></span>"
 
 mathDollars =
   inlineOpen: '$'
