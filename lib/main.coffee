@@ -1,6 +1,4 @@
 url = require 'url'
-fs = require 'fs-plus'
-{$} = require 'atom-space-pen-views'
 
 MarkdownPreviewView = null # Defer until used
 renderer = null # Defer until used
@@ -23,12 +21,15 @@ module.exports =
     breakOnSingleNewline:
       type: 'boolean'
       default: false
+      order: 0
     liveUpdate:
       type: 'boolean'
       default: true
+      order: 10
     openPreviewInSplitPane:
       type: 'boolean'
       default: true
+      order: 20
     grammars:
       type: 'array'
       default: [
@@ -38,9 +39,71 @@ module.exports =
         'text.plain'
         'text.plain.null-grammar'
       ]
+      order: 30
     enableLatexRenderingByDefault:
       type: 'boolean'
       default: false
+      order: 40
+    useGitHubStyle:
+      title: 'Use GitHub.com style'
+      type: 'boolean'
+      default: false
+      order: 50
+    enablePandoc:
+      type: 'boolean'
+      default: false
+      title: 'Enable Pandoc Parser'
+      order: 100
+    pandocPath:
+      type: 'string'
+      default: 'pandoc'
+      title: 'Pandoc Options: Path'
+      description: 'Please specify the correct path to your pandoc executable'
+      dependencies: ['enablePandoc']
+      order: 110
+    pandocArguments:
+      type: 'array'
+      default: []
+      title: 'Pandoc Options: Commandline Arguments'
+      description: 'Enter comma seperated pandoc commandline options e.g. `--smart, --normalize` '
+      dependencies: ['enablePandoc']
+      order: 120
+    pandocMarkdownFlavor:
+      type: 'string'
+      default: 'markdown-raw_tex+tex_math_single_backslash'
+      title: 'Pandoc Options: Markdown Flavor'
+      description: 'Enter the pandoc markdown flavor you want'
+      dependencies: ['enablePandoc']
+      order: 130
+    pandocBibliography:
+      type: 'boolean'
+      default: false
+      title: 'Pandoc Options: Citations'
+      description: 'Enable this for bibliography parsing'
+      dependencies: ['enablePandoc']
+      order: 140
+    pandocRemoveReferences:
+      type: 'boolean'
+      default: true
+      title: 'Pandoc Options: Remove References'
+      description: 'Removes references at the end of the HTML preview'
+      dependencies: ['pandocBibliography']
+      order: 150
+    pandocBIBFile:
+      type: 'string'
+      default: 'bibliography.bib'
+      title: 'Pandoc Options: Bibliography (bibfile)'
+      description: 'Name of bibfile to search for recursivly'
+      dependencies: ['pandocBibliography']
+      order: 160
+    pandocCSLFile:
+      type: 'string'
+      default: 'custom.csl'
+      title: 'Pandoc Options: Bibliography Style (cslfile)'
+      description: 'Name of cslfile to search for recursivly'
+      dependencies: ['pandocBibliography']
+      order: 170
+
 
   activate: ->
     atom.commands.add 'atom-workspace',
@@ -50,7 +113,7 @@ module.exports =
         @copyHtml()
       'markdown-preview-plus:toggle-break-on-single-newline': ->
         keyPath = 'markdown-preview-plus.breakOnSingleNewline'
-        atom.config.set(keyPath, !atom.config.get(keyPath))
+        atom.config.set(keyPath, not atom.config.get(keyPath))
 
     previewFile = @previewFile.bind(this)
     atom.commands.add '.tree-view .file .name[data-name$=\\.markdown]', 'markdown-preview-plus:preview-file', previewFile
@@ -134,7 +197,7 @@ module.exports =
 
     renderer ?= require './renderer'
     text = editor.getSelectedText() or editor.getText()
-    renderer.toHTML text, editor.getPath(), editor.getGrammar(), (error, html) =>
+    renderer.toHTML text, editor.getPath(), editor.getGrammar(), false, (error, html) ->
       if error
         console.warn('Copying Markdown as HTML failed', error)
       else

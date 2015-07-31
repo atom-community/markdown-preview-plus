@@ -18,21 +18,25 @@ describe "MarkdownPreviewView", ->
       atom.packages.activatePackage('language-javascript')
 
     waitsForPromise ->
-      atom.packages.activatePackage('markdown-preview')
+      atom.packages.activatePackage('markdown-preview-plus')
 
   afterEach ->
     preview.destroy()
 
   describe "::constructor", ->
-    it "shows a loading spinner and renders the markdown", ->
-      preview.showLoading()
-      expect(preview.find('.markdown-spinner')).toExist()
-
-      waitsForPromise ->
-        preview.renderMarkdown()
-
-      runs ->
-        expect(preview.find(".emoji")).toExist()
+    # Loading spinner disabled when DOM update by diff was introduced. If
+    # spinner code in `lib/markdown-preview-view` is removed completly this
+    # spec should also be removed
+    #
+    # it "shows a loading spinner and renders the markdown", ->
+    #   preview.showLoading()
+    #   expect(preview.find('.markdown-spinner')).toExist()
+    #
+    #   waitsForPromise ->
+    #     preview.renderMarkdown()
+    #
+    #   runs ->
+    #     expect(preview.find(".emoji")).toExist()
 
     it "shows an error message when there is an error", ->
       preview.showError("Not a real file")
@@ -65,39 +69,49 @@ describe "MarkdownPreviewView", ->
         jasmine.attachToDOM(newPreview.element)
         expect(newPreview.getPath()).toBe preview.getPath()
 
-  describe "code block conversion to atom-text-editor tags", ->
-    beforeEach ->
-      waitsForPromise ->
-        preview.renderMarkdown()
-
-    describe "when the code block's fence name has a matching grammar", ->
-      it "assigns the grammar on the atom-text-editor", ->
-        rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
-        expect(rubyEditor).toExist()
-        expect(rubyEditor[0].getModel().getText()).toBe """
-          def func
-            x = 1
-          end
-        """
-
-        # nested in a list item
-        jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
-        expect(jsEditor).toExist()
-        expect(jsEditor[0].getModel().getText()).toBe """
-          if a === 3 {
-          b = 5
-          }
-        """
-
-    describe "when the code block's fence name doesn't have a matching grammar", ->
-      it "does not assign a specific grammar", ->
-        plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
-        expect(plainEditor).toExist()
-        expect(plainEditor[0].getModel().getText()).toBe """
-          function f(x) {
-            return x++;
-          }
-        """
+  # Conversion of `<pre>` to `<atom-text-editor>` was introduced in 090fb1f
+  # upstream however before signing off on this in MPP it must be verified that
+  # this does not muck up the DOM update by diff. Restore this spec if/when that
+  # verification is completed.
+  #
+  # describe "code block conversion to atom-text-editor tags", ->
+  #   beforeEach ->
+  #     waitsForPromise ->
+  #       preview.renderMarkdown()
+  #
+  #   it "removes line decorations on rendered code blocks", ->
+  #     editor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+  #     decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
+  #     expect(decorations.length).toBe 0
+  #
+  #   describe "when the code block's fence name has a matching grammar", ->
+  #     it "assigns the grammar on the atom-text-editor", ->
+  #       rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
+  #       expect(rubyEditor).toExist()
+  #       expect(rubyEditor[0].getModel().getText()).toBe """
+  #         def func
+  #           x = 1
+  #         end
+  #       """
+  #
+  #       # nested in a list item
+  #       jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
+  #       expect(jsEditor).toExist()
+  #       expect(jsEditor[0].getModel().getText()).toBe """
+  #         if a === 3 {
+  #         b = 5
+  #         }
+  #       """
+  #
+  #   describe "when the code block's fence name doesn't have a matching grammar", ->
+  #     it "does not assign a specific grammar", ->
+  #       plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+  #       expect(plainEditor).toExist()
+  #       expect(plainEditor[0].getModel().getText()).toBe """
+  #         function f(x) {
+  #           return x++;
+  #         }
+  #       """
 
   describe "image resolving", ->
     beforeEach ->
@@ -137,7 +151,7 @@ describe "MarkdownPreviewView", ->
   describe "gfm newlines", ->
     describe "when gfm newlines are not enabled", ->
       it "creates a single paragraph with <br>", ->
-        atom.config.set('markdown-preview.breakOnSingleNewline', false)
+        atom.config.set('markdown-preview-plus.breakOnSingleNewline', false)
 
         waitsForPromise ->
           preview.renderMarkdown()
@@ -147,7 +161,7 @@ describe "MarkdownPreviewView", ->
 
     describe "when gfm newlines are enabled", ->
       it "creates a single paragraph with no <br>", ->
-        atom.config.set('markdown-preview.breakOnSingleNewline', true)
+        atom.config.set('markdown-preview-plus.breakOnSingleNewline', true)
 
         waitsForPromise ->
           preview.renderMarkdown()
@@ -158,12 +172,40 @@ describe "MarkdownPreviewView", ->
   describe "when core:save-as is triggered", ->
     beforeEach ->
       preview.destroy()
-      filePath = atom.project.getDirectories()[0].resolve('subdir/simple.md')
+      filePath = atom.project.getDirectories()[0].resolve('subdir/code-block.md')
       preview = new MarkdownPreviewView({filePath})
       jasmine.attachToDOM(preview.element)
 
     it "saves the rendered HTML and opens it", ->
       outputPath = temp.path(suffix: '.html')
+      expectedFilePath = atom.project.getDirectories()[0].resolve('saved-html.html')
+      expectedOutput = fs.readFileSync(expectedFilePath).toString()
+
+      createRule = (selector, css) ->
+        return {
+          selectorText: selector
+          cssText: "#{selector} #{css}"
+        }
+
+      markdownPreviewStyles = [
+        {
+          rules: [
+            createRule ".markdown-preview", "{ color: orange; }"
+          ]
+        }, {
+          rules: [
+            createRule ".not-included", "{ color: green; }"
+            createRule ".markdown-preview :host", "{ color: purple; }"
+          ]
+        }
+      ]
+
+      atomTextEditorStyles = [
+        "atom-text-editor .line { color: brown; }\natom-text-editor .number { color: cyan; }"
+        "atom-text-editor :host .something { color: black; }"
+        "atom-text-editor .hr { background: url(atom://markdown-preview-plus/assets/hr.png); }"
+      ]
+
       expect(fs.isFileSync(outputPath)).toBe false
 
       waitsForPromise ->
@@ -171,35 +213,64 @@ describe "MarkdownPreviewView", ->
 
       runs ->
         spyOn(atom, 'showSaveDialogSync').andReturn(outputPath)
+        spyOn(preview, 'getDocumentStyleSheets').andReturn(markdownPreviewStyles)
+        spyOn(preview, 'getTextEditorStyles').andReturn(atomTextEditorStyles)
         atom.commands.dispatch preview.element, 'core:save-as'
-        outputPath = fs.realpathSync(outputPath)
-        expect(fs.isFileSync(outputPath)).toBe true
 
       waitsFor ->
-        atom.workspace.getActiveTextEditor()?.getPath() is outputPath
+        fs.existsSync(outputPath) and atom.workspace.getActiveTextEditor()?.getPath() is fs.realpathSync(outputPath)
 
       runs ->
-        expect(atom.workspace.getActiveTextEditor().getText()).toBe """
-          <p><em>italic</em></p>
-          <p><strong>bold</strong></p>
-          <p>encoding \u2192 issue</p>
-        """
+        expect(fs.isFileSync(outputPath)).toBe true
+        savedHTML = atom.workspace.getActiveTextEditor().getText()
+          .replace(/<body class='markdown-preview'><div>/, '<body class=\'markdown-preview\'>')
+          .replace(/\n<\/div><\/body>/, '</body>')
+        expect(savedHTML).toBe expectedOutput.replace(/\r\n/g, '\n')
+
+    describe "text editor style extraction", ->
+
+      [extractedStyles] = []
+
+      textEditorStyle = ".editor-style .extraction-test { color: blue; }"
+      unrelatedStyle  = ".something else { color: red; }"
+
+      beforeEach ->
+        atom.styles.addStyleSheet textEditorStyle,
+          context: 'atom-text-editor'
+
+        atom.styles.addStyleSheet unrelatedStyle,
+          context: 'unrelated-context'
+
+        extractedStyles = preview.getTextEditorStyles()
+
+      it "returns an array containing atom-text-editor css style strings", ->
+        expect(extractedStyles.indexOf(textEditorStyle)).toBeGreaterThan(-1)
+
+      it "does not return other styles", ->
+        expect(extractedStyles.indexOf(unrelatedStyle)).toBe(-1)
 
   describe "when core:copy is triggered", ->
-    beforeEach ->
+    it "writes the rendered HTML to the clipboard", ->
       preview.destroy()
-      filePath = atom.project.getDirectories()[0].resolve('subdir/simple.md')
+      preview.element.remove()
+
+      filePath = atom.project.getDirectories()[0].resolve('subdir/code-block.md')
       preview = new MarkdownPreviewView({filePath})
       jasmine.attachToDOM(preview.element)
 
-    it "writes the rendered HTML to the clipboard", ->
       waitsForPromise ->
         preview.renderMarkdown()
 
       runs ->
         atom.commands.dispatch preview.element, 'core:copy'
+
+      waitsFor ->
+        atom.clipboard.read() isnt "initial clipboard content"
+
+      runs ->
         expect(atom.clipboard.read()).toBe """
-          <p><em>italic</em></p>
-          <p><strong>bold</strong></p>
-          <p>encoding \u2192 issue</p>
+         <div><h1 id="code-block">Code Block</h1>
+         <pre class="editor-colors lang-javascript"><div class="line"><span class="source js"><span class="keyword control js"><span>if</span></span><span>&nbsp;a&nbsp;</span><span class="keyword operator js"><span>===</span></span><span>&nbsp;</span><span class="constant numeric js"><span>3</span></span><span>&nbsp;</span><span class="meta brace curly js"><span>{</span></span></span></div><div class="line"><span class="source js"><span>&nbsp;&nbsp;b&nbsp;</span><span class="keyword operator js"><span>=</span></span><span>&nbsp;</span><span class="constant numeric js"><span>5</span></span></span></div><div class="line"><span class="source js"><span class="meta brace curly js"><span>}</span></span></span></div></pre>
+         <p>encoding \u2192 issue</p>
+         </div>
         """

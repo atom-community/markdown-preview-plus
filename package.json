@@ -1,23 +1,32 @@
 {
   "name": "markdown-preview-plus",
-  "version": "1.2.0",
+  "version": "1.6.0",
   "main": "./lib/main",
-  "description": "Markdown + LaTeX preview in Atom",
+  "description": "Markdown + Maths preview in Atom",
+  "keywords": [
+    "markdown",
+    "maths",
+    "latex"
+  ],
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
   "license": "MIT",
   "engines": {
-    "atom": ">=0.169.0"
+    "atom": "*"
   },
   "dependencies": {
     "atom-space-pen-views": "^2.0.0",
     "cheerio": "0.15.0",
     "fs-plus": "^2.0.0",
-    "grim": "^1.0.0",
+    "grim": "^1.2.1",
     "highlights": "^1.0.0",
-    "pathwatcher": "^3.0",
+    "pathwatcher": "^4.3",
+    "pdc": "~0.2.2",
     "roaster": "https://github.com/Galadirith/roaster/tarball/marked-mathjax",
-    "temp": "^0.6.0",
+    "temp": "^0.8.1",
     "underscore-plus": "^1.0.0",
     "wrench": "^1.5.0"
+  },
+  "devDependencies": {
+    "coffeelint": "^1.9.7"
   }
 }

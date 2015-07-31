@@ -5,6 +5,7 @@ fs = require 'fs-plus'
 Highlights = require 'highlights'
 {$} = require 'atom-space-pen-views'
 roaster = null # Defer until used
+pandocHelper = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 mathjaxHelper = require './mathjax-helper'
 
@@ -13,7 +14,7 @@ highlighter = null
 packagePath = path.dirname(__dirname)
 
 exports.toDOMFragment = (text='', filePath, grammar, callback) ->
-  render text, filePath, grammar, (error, html) ->
+  render text, filePath, (error, html) ->
     return callback(error) if error?
 
     template = document.createElement('template')
@@ -26,30 +27,34 @@ exports.toDOMFragment = (text='', filePath, grammar, callback) ->
     callback(null, domFragment)
 
 exports.toHTML = (text='', filePath, grammar, renderLaTeX, callback) ->
-  render text, filePath, grammar, renderLaTeX, (error, html) ->
+  render text, filePath, renderLaTeX, (error, html) ->
     return callback(error) if error?
     # Default code blocks to be coffee in Literate CoffeeScript files
     defaultCodeLanguage = 'coffee' if grammar?.scopeName is 'source.litcoffee'
     html = tokenizeCodeBlocks(html, defaultCodeLanguage)
     callback(null, html)
 
-render = (text, filePath, grammar, renderLaTeX, callback) ->
-  roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
-  options =
-    mathjax: renderLaTeX
-    sanitize: false
-    breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
-
+render = (text, filePath, renderLaTeX, callback) ->
   # Remove the <!doctype> since otherwise marked will escape it
   # https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
-  roaster text, options, (error, html) =>
-    return callback(error) if error
-
+  callbackFunction = (error, html) ->
+    return callback(error) if error?
     html = sanitize(html)
     html = resolveImagePaths(html, filePath)
     callback(null, html.trim())
+
+  if atom.config.get('markdown-preview-plus.enablePandoc')
+    pandocHelper ?= require './pandoc-helper'
+    pandocHelper.renderPandoc text, filePath, renderLaTeX, callbackFunction
+  else
+    roaster ?= require path.join(packagePath, 'node_modules/roaster/lib/roaster')
+    options =
+      mathjax: renderLaTeX
+      sanitize: false
+      breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline')
+    roaster text, options, callbackFunction
 
 sanitize = (html) ->
   o = cheerio.load("<div>#{html}</div>")
@@ -83,6 +88,7 @@ sanitize = (html) ->
   o.html()
 
 resolveImagePaths = (html, filePath) ->
+  [rootDirectory] = atom.project.relativizePath(filePath)
   o = cheerio.load(html)
   for imgElement in o('img')
     img = o(imgElement)
@@ -94,7 +100,7 @@ resolveImagePaths = (html, filePath) ->
 
       if src[0] is '/'
         unless fs.isFileSync(src)
-          img.attr('src', atom.project.getDirectories()[0]?.resolve(src.substring(1)))
+          img.attr('src', path.join(rootDirectory, src.substring(1)))
       else
         img.attr('src', path.resolve(path.dirname(filePath), src))
 
@@ -118,6 +124,8 @@ convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') ->
     preElement.remove()
 
     editor = editorElement.getModel()
+    # remove the default selection of a line in each editor
+    editor.getDecorations(class: 'cursor-line', type: 'line')[0].destroy()
     editor.setText(codeBlock.textContent.trim())
     if grammar = atom.grammars.grammarForScopeName(scopeForFenceName(fenceName))
       editor.setGrammar(grammar)
