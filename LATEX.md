@@ -53,33 +53,11 @@ literally display a dollar sign you can use `\$`.
 
 ## Macros
 
-Depending on what you're using MPP for, you might find yourself typing the same
-things over and over again. I find myself needing a lot of 1 over the square-root of somethings like
+MPP supports persistent [macro definitions](http://docs.mathjax.org/en/latest/tex.html#defining-tex-macros).
 
-```latex
-\frac{1}{\sqrt{2}}
-```
+Macros belong in `~/.atom/markdown-preview-plus.cson` and are defined as follows.
 
-In LaTeX I can make *my own* shortcuts for commonly used things called *macros*.
-I could define the macro `\negroot{}` like so
-
-```cson
-negroot: ["\\frac{1}{\\sqrt{#1}}",1]
-```
-
-With this in place, I can just type `\negroot{2}` and the LaTeX engine (MathJax in our case) will
-receive `\frac{1}{\sqrt{2}}`. That saves me a lot of typing!
-
-To get started using macros in your installation of Markdown Preview Plus (MPP), go to
-`~/.atom` and open up the `markdown-preview-plus.cson` file.
-
-(If you don't have this file that means you haven't run atom with the latest version
-of MPP yet.)
-
-This file includes some example macros and explains briefly how to write them.
-If you want to learn even more about them, go to the source: the [MathJax docs](http://docs.mathjax.org/en/latest/tex.html#defining-tex-macros).
-
-## Macro Definition Syntax
+### Macro Definition Syntax
 
 #### Zero argument macros
 

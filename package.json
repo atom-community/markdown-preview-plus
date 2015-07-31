@@ -22,6 +22,7 @@
     "pathwatcher": "^4.3",
     "pdc": "~0.2.2",
     "roaster": "https://github.com/Galadirith/roaster/tarball/marked-mathjax",
+    "season": "^5.3",
     "temp": "^0.8.1",
     "underscore-plus": "^1.0.0",
     "wrench": "^1.5.0"
