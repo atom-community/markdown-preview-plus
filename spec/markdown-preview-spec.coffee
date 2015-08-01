@@ -264,17 +264,15 @@ describe "Markdown preview plus package", ->
       runs ->
         atom.commands.dispatch workspaceElement, 'markdown-preview-plus:copy-html'
         expect(atom.clipboard.read()).toBe """
-          <div><p><em>italic</em></p>
+          <p><em>italic</em></p>
           <p><strong>bold</strong></p>
           <p>encoding \u2192 issue</p>
-          </div>
         """
 
         atom.workspace.getActiveTextEditor().setSelectedBufferRange [[0, 0], [1, 0]]
         atom.commands.dispatch workspaceElement, 'markdown-preview-plus:copy-html'
         expect(atom.clipboard.read()).toBe """
-          <div><p><em>italic</em></p>
-          </div>
+          <p><em>italic</em></p>
         """
 
     describe "code block tokenization", ->
@@ -322,12 +320,11 @@ describe "Markdown preview plus package", ->
 
       runs ->
         expect($(preview[0]).find("div.update-preview").html()).toBe """
-          <div><p>hello</p>
+          <p>hello</p>
           <p></p>
           <p>
           <img>
           world</p>
-          </div>
         """
 
     it "remove the first <!doctype> tag at the beginning of the file", ->
@@ -337,9 +334,8 @@ describe "Markdown preview plus package", ->
 
       runs ->
         expect($(preview[0]).find("div.update-preview").html()).toBe """
-          <div><p>content
+          <p>content
           &lt;!doctype html&gt;</p>
-          </div>
         """
 
   describe "when the markdown contains an <html> tag", ->
@@ -348,10 +344,7 @@ describe "Markdown preview plus package", ->
       runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
       expectPreviewInSplitPane()
 
-      runs -> expect($(preview[0]).find("div.update-preview").html()).toBe """
-        <div>content
-        </div>
-      """
+      runs -> expect($(preview[0]).find("div.update-preview").html()).toBe "content"
 
   # Conversion of `<pre>` to `<atom-text-editor>` was introduced in 090fb1f
   # upstream however before signing off on this in MPP it must be verified that

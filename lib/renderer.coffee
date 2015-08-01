@@ -57,7 +57,7 @@ render = (text, filePath, renderLaTeX, callback) ->
     roaster text, options, callbackFunction
 
 sanitize = (html) ->
-  o = cheerio.load("<div>#{html}</div>")
+  o = cheerio.load(html)
   # Do not remove MathJax script delimited blocks
   o("script:not([type^='math/tex'])").remove()
   attributesToRemove = [
