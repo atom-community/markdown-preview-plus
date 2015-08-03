@@ -127,9 +127,8 @@ module.exports =
     atom.deserializers.add
       name: 'MarkdownPreviewView'
       deserialize: (state) ->
-        if state.constructor is Object
-          if state.editorId or fs.isFileSync(state.filePath)
-            createMarkdownPreviewView(state)
+        if state.editorId or fs.isFileSync(state.filePath)
+          createMarkdownPreviewView(state)
 
     atom.commands.add 'atom-workspace',
       'markdown-preview-plus:toggle': =>
