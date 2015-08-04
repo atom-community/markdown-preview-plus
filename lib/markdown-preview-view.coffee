@@ -162,7 +162,7 @@ class MarkdownPreviewView extends ScrollView
       renderer.toHTML source, @getPath(), @getGrammar(), @renderLaTeX, callback
 
   renderMarkdownText: (text) ->
-    renderer.toHTML text, @getPath(), @getGrammar(), @renderLaTeX, (error, html) =>
+    renderer.toDOMFragment text, @getPath(), @getGrammar(), @renderLaTeX, (error, domFragment) =>
       if error
         @showError(error)
       else
@@ -196,7 +196,7 @@ class MarkdownPreviewView extends ScrollView
             <strong>Install</strong>.'
             ,false)
         else
-          @updatePreview.update(html, @renderLaTeX)
+          @updatePreview.update(domFragment, @renderLaTeX)
         @emitter.emit 'did-change-markdown'
         @originalTrigger('markdown-preview-plus:markdown-changed')
 

@@ -72,12 +72,7 @@ module.exports = class WrappedDomTree
     inserted    = []
 
     # Force variables to leak to diffTo scope
-    last            = undefined
-    possibleReplace = undefined
-    r               = undefined
-    lastOp          = undefined
-    lastElmDeleted  = undefined
-    lastElmInserted = undefined
+    [last, possibleReplace, r, lastOp, lastElmDeleted, lastElmInserted] = []
 
     if operations
       if operations instanceof Array
@@ -283,6 +278,7 @@ module.exports = class WrappedDomTree
     @tagName isnt otherTree.tagName or
     @className isnt otherTree.className or
     @className is "math" or
+    @className is "atom-text-editor" or
     @tagName is "A" or
     (@tagName is "IMG" and !@dom.isEqualNode(otherTree.dom))
 

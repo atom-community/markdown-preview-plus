@@ -69,49 +69,44 @@ describe "MarkdownPreviewView", ->
         jasmine.attachToDOM(newPreview.element)
         expect(newPreview.getPath()).toBe preview.getPath()
 
-  # Conversion of `<pre>` to `<atom-text-editor>` was introduced in 090fb1f
-  # upstream however before signing off on this in MPP it must be verified that
-  # this does not muck up the DOM update by diff. Restore this spec if/when that
-  # verification is completed.
-  #
-  # describe "code block conversion to atom-text-editor tags", ->
-  #   beforeEach ->
-  #     waitsForPromise ->
-  #       preview.renderMarkdown()
-  #
-  #   it "removes line decorations on rendered code blocks", ->
-  #     editor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
-  #     decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
-  #     expect(decorations.length).toBe 0
-  #
-  #   describe "when the code block's fence name has a matching grammar", ->
-  #     it "assigns the grammar on the atom-text-editor", ->
-  #       rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
-  #       expect(rubyEditor).toExist()
-  #       expect(rubyEditor[0].getModel().getText()).toBe """
-  #         def func
-  #           x = 1
-  #         end
-  #       """
-  #
-  #       # nested in a list item
-  #       jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
-  #       expect(jsEditor).toExist()
-  #       expect(jsEditor[0].getModel().getText()).toBe """
-  #         if a === 3 {
-  #         b = 5
-  #         }
-  #       """
-  #
-  #   describe "when the code block's fence name doesn't have a matching grammar", ->
-  #     it "does not assign a specific grammar", ->
-  #       plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
-  #       expect(plainEditor).toExist()
-  #       expect(plainEditor[0].getModel().getText()).toBe """
-  #         function f(x) {
-  #           return x++;
-  #         }
-  #       """
+  describe "code block conversion to atom-text-editor tags", ->
+    beforeEach ->
+      waitsForPromise ->
+        preview.renderMarkdown()
+
+    it "removes line decorations on rendered code blocks", ->
+      editor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+      decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
+      expect(decorations.length).toBe 0
+
+    describe "when the code block's fence name has a matching grammar", ->
+      it "assigns the grammar on the atom-text-editor", ->
+        rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
+        expect(rubyEditor).toExist()
+        expect(rubyEditor[0].getModel().getText()).toBe """
+          def func
+            x = 1
+          end
+        """
+
+        # nested in a list item
+        jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
+        expect(jsEditor).toExist()
+        expect(jsEditor[0].getModel().getText()).toBe """
+          if a === 3 {
+          b = 5
+          }
+        """
+
+    describe "when the code block's fence name doesn't have a matching grammar", ->
+      it "does not assign a specific grammar", ->
+        plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+        expect(plainEditor).toExist()
+        expect(plainEditor[0].getModel().getText()).toBe """
+          function f(x) {
+            return x++;
+          }
+        """
 
   describe "image resolving", ->
     beforeEach ->

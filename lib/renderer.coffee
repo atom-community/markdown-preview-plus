@@ -13,17 +13,14 @@ highlighter = null
 {resourcePath} = atom.getLoadSettings()
 packagePath = path.dirname(__dirname)
 
-exports.toDOMFragment = (text='', filePath, grammar, callback) ->
-  render text, filePath, (error, html) ->
+exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
+  render text, filePath, renderLaTeX, (error, html) ->
     return callback(error) if error?
 
     template = document.createElement('template')
     template.innerHTML = html
     domFragment = template.content.cloneNode(true)
 
-    # Default code blocks to be coffee in Literate CoffeeScript files
-    defaultCodeLanguage = 'coffee' if grammar?.scopeName is 'source.litcoffee'
-    convertCodeBlocksToAtomEditors(domFragment, defaultCodeLanguage)
     callback(null, domFragment)
 
 exports.toHTML = (text='', filePath, grammar, renderLaTeX, callback) ->
@@ -106,9 +103,8 @@ resolveImagePaths = (html, filePath) ->
 
   o.html()
 
-convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') ->
+exports.convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') ->
   if fontFamily = atom.config.get('editor.fontFamily')
-
     for codeElement in domFragment.querySelectorAll('code')
       codeElement.style.fontFamily = fontFamily
 
