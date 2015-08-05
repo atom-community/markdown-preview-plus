@@ -41,6 +41,7 @@ module.exports =
       ]
       order: 30
     enableLatexRenderingByDefault:
+      title: 'Enable Math Rendering By Default'
       type: 'boolean'
       default: false
       order: 40
@@ -65,7 +66,7 @@ module.exports =
       type: 'array'
       default: []
       title: 'Pandoc Options: Commandline Arguments'
-      description: 'Enter comma seperated pandoc commandline options e.g. `--smart, --normalize` '
+      description: 'Enter comma separated pandoc commandline options e.g. `--smart, --normalize`'
       dependencies: ['enablePandoc']
       order: 120
     pandocMarkdownFlavor:

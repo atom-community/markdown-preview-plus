@@ -2,11 +2,13 @@
   "name": "markdown-preview-plus",
   "version": "1.6.0",
   "main": "./lib/main",
-  "description": "Markdown + Maths preview in Atom",
+  "description": "Better markdown preview in atom (optional pandoc support)",
   "keywords": [
     "markdown",
     "maths",
-    "latex"
+    "latex",
+    "commonmark",
+    "pandoc"
   ],
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
   "license": "MIT",

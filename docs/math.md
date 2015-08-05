@@ -1,4 +1,4 @@
-# LaTex
+# LaTeX style math
 
 This fork of [markdown-preview](https://github.com/atom/markdown-preview)
 enables LaTex to be rendered in a preview window of a markdown document in
