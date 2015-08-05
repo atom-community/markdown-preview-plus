@@ -8,10 +8,17 @@ roaster = null # Defer until used
 pandocHelper = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 mathjaxHelper = require './mathjax-helper'
+pathWatcher = require 'pathwatcher'
+
+MarkdownPreviewView = null # Defer until used
+isMarkdownPreviewView = (object) ->
+  MarkdownPreviewView ?= require './markdown-preview-view'
+  object instanceof MarkdownPreviewView
 
 highlighter = null
 {resourcePath} = atom.getLoadSettings()
 packagePath = path.dirname(__dirname)
+imgVersion = []
 
 exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
   render text, filePath, renderLaTeX, (error, html) ->
@@ -97,9 +104,26 @@ resolveImagePaths = (html, filePath) ->
 
       if src[0] is '/'
         unless fs.isFileSync(src)
-          img.attr('src', path.join(rootDirectory, src.substring(1)))
+          src = path.join(rootDirectory, src.substring(1))
       else
-        img.attr('src', path.resolve(path.dirname(filePath), src))
+        src = path.resolve(path.dirname(filePath), src)
+
+      # Use most recent version of image
+      if imgVersion[src]?
+        if imgVersion[src] > 0
+          src = "#{src}##{imgVersion[src]}"
+      else
+        imgVersion[src] = 0
+        srcClosure = (src) ->
+          return _.debounce(((event, path) ->
+            imgVersion[src] += 1
+            for item in atom.workspace.getPaneItems()
+              if isMarkdownPreviewView(item)
+                item.renderMarkdown()
+            return), 250)
+        pathWatcher.watch src, srcClosure(src)
+
+      img.attr('src', src)
 
   o.html()
 
