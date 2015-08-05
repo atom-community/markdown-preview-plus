@@ -10,7 +10,7 @@ You may configure them in the [settings of MPP][options]
     can also right click on a markdown document in the tree-view and select
     **Markdown Preview** to open a standalone preview.
 
--   **Pandoc support**
+-   **LaTeX equation rendering**
 
     MPP extends the syntax of [GitHub flavored markdown][gfm]
     with equation blocks. An equation block is indicated by enclosing it in
