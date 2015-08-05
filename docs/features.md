@@ -15,9 +15,11 @@ You may configure them in the [settings of MPP][options]
     MPP extends the syntax of [GitHub flavored markdown][gfm]
     with equation blocks. An equation block is indicated by enclosing it in
     double dollar signs `$$...$$`. You can use any LaTeX macros that are valid
-    in a maths environment of a LaTeX document inside an equation block.
-    Rendering of LaTeX equations in the preview pane can be toggled with
-    `ctrl-shift-x`. Please see [math.md](./math.md) for more details.
+    in a maths environment of a LaTeX document inside an equation block. For a
+    full list of supported macros please see
+    [Supported LaTeX commands][macro-support]. Rendering of LaTeX equations in
+    the preview pane can be toggled with `ctrl-shift-x`. Please see
+    [math](./math.md) for more details.
 
 -   **Pandoc support**
 
@@ -32,3 +34,4 @@ You may configure them in the [settings of MPP][options]
 [pandoc-args]: http://pandoc.org/README.html#options
 [pandoc-flavor]: http://pandoc.org/README.html#pandocs-markdown
 [pandoc-cit]: http://pandoc.org/README.html#citations
+[macro-support]: http://docs.mathjax.org/en/latest/tex.html#supported-latex-commands

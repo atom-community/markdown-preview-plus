@@ -38,6 +38,9 @@ Long instructions can be found [here][installation]. In short steps:
 
 ## Usage
 
+Please see [options][options] for further details on configuring MPP and
+[math][math] for more details on math rendering. For basic usage:
+
 -   Toggle Preview: `ctrl-shift-m`
 -   Toggle Math Rendering: `ctrl-shift-x`
 
@@ -52,3 +55,4 @@ Markdown Preview Plus (MPP) is released under the [MIT license][license].
 [features]: docs/features.md
 [node-gyp]: https://github.com/TooTallNate/node-gyp#installation
 [mathjax-wrapper]: https://atom.io/packages/mathjax-wrapper
+[options]: docs/options.md
