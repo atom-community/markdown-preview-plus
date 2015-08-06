@@ -109,19 +109,22 @@ resolveImagePaths = (html, filePath) ->
         src = path.resolve(path.dirname(filePath), src)
 
       # Use most recent version of image
-      if imgVersion[src]?
-        if imgVersion[src] > 0
-          src = "#{src}##{imgVersion[src]}"
-      else
-        imgVersion[src] = 0
-        srcClosure = (src) ->
-          return _.debounce(((event, path) ->
-            imgVersion[src] += 1
-            for item in atom.workspace.getPaneItems()
-              if isMarkdownPreviewView(item)
-                item.renderMarkdown()
-            return), 250)
-        pathWatcher.watch src, srcClosure(src)
+
+      srcClosure = (src) ->
+        return _.debounce(((event, path) ->
+          imgVersion[src] += 1
+          for item in atom.workspace.getPaneItems()
+            if isMarkdownPreviewView(item)
+              item.renderMarkdown()
+          return), 250)
+
+      if fs.isFileSync(src)
+        if not imgVersion[src]?
+          imgVersion[src] = 0
+          pathWatcher.watch src, srcClosure(src)
+        src = "#{src}?v=#{imgVersion[src]}"
+      else if imgVersion[src]?
+        src = "#{src}?v=deleted"
 
       img.attr('src', src)
 
