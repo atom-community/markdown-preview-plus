@@ -137,7 +137,7 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         runs ->
-          expect(preview.find("img[alt=absolute]").attr('src')).toBe "#{filePath}?v=0"
+          expect(preview.find("img[alt=absolute]").attr('src')).toBe "#{filePath}?v=1"
 
     describe "when the image uses a web URL", ->
       it "doesn't change the URL", ->
@@ -184,7 +184,7 @@ describe "MarkdownPreviewView", ->
 
         runs ->
           image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=0"
+          expect(image.attr('src')).toBe "#{img1Path}?v=1"
 
     describe "when a local image is modified during a preview", ->
       it "is rerendered with an incremented query value", ->
@@ -194,15 +194,15 @@ describe "MarkdownPreviewView", ->
 
         runs ->
           image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=0"
+          expect(image.attr('src')).toBe "#{img1Path}?v=1"
           fs.writeFileSync img1Path, "still clearly not a png ;D"
 
         waitsFor "image src attribute to update", ->
-          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=0"
+          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
 
         runs ->
           image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=1"
+          expect(image.attr('src')).toBe "#{img1Path}?v=2"
 
     describe "when three images are previewed and all are modified", ->
       it "increments the query value of each as they are modified", ->
@@ -238,28 +238,28 @@ describe "MarkdownPreviewView", ->
           expect(img3.attr('src')).toBe "#{img3Path}?v=#{img3Val}"
 
         runs ->
-          expectQueryValues(0,0,0)
+          expectQueryValues(1, 1, 1)
           fs.writeFileSync img1Path, "still clearly not a png ;D"
 
         waitsFor "img1 src attribute to update", ->
-          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=0"
+          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
 
         runs ->
-          expectQueryValues(1,0,0)
+          expectQueryValues(2, 1, 1)
           fs.writeFileSync img2Path, "still clearly not a png either ;D"
 
         waitsFor "img2 src attribute to update", ->
-          preview.find("img[alt=img2]").attr('src') isnt "#{img2Path}?v=0"
+          preview.find("img[alt=img2]").attr('src') isnt "#{img2Path}?v=1"
 
         runs ->
-          expectQueryValues(1,1,0)
+          expectQueryValues(2, 2, 1)
           fs.writeFileSync img3Path, "you better believe i'm not a png ;D"
 
         waitsFor "img3 src attribute to update", ->
-          preview.find("img[alt=img3]").attr('src') isnt "#{img3Path}?v=0"
+          preview.find("img[alt=img3]").attr('src') isnt "#{img3Path}?v=1"
 
         runs ->
-          expectQueryValues(1,1,1)
+          expectQueryValues(2, 2, 2)
 
     describe "when and image is previewed and then deleted", ->
       it "sets the query value to deleted", ->
@@ -269,15 +269,35 @@ describe "MarkdownPreviewView", ->
 
         runs ->
           image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=0"
+          expect(image.attr('src')).toBe "#{img1Path}?v=1"
           fs.unlinkSync img1Path
 
         waitsFor "image src attribute to update", ->
-          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=0"
+          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
 
         runs ->
           image = preview.find("img[alt=img1]")
           expect(image.attr('src')).toBe "#{img1Path}?v=deleted"
+
+    describe "when and image is previewed and then renamed", ->
+      it "sets the query value to deleted", ->
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        runs ->
+          image = preview.find("img[alt=img1]")
+          expect(image.attr('src')).toBe "#{img1Path}?v=1"
+          fs.renameSync img1Path, img1Path + "trol"
+          #fs.writeFileSync filePath, "![img1](#{img1Path}) xo"
+          #fs.writeFileSync img1Path, "still clearly not a png ;D"
+
+        waitsFor "image src attribute to update", ->
+          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
+
+        runs ->
+          image = preview.find("img[alt=img1]")
+          expect(image.attr('src')).toBe "#{img1Path}?v=renamed"
 
   describe "gfm newlines", ->
     describe "when gfm newlines are not enabled", ->

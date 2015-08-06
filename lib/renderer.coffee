@@ -91,12 +91,26 @@ sanitize = (html) ->
   o('*').removeAttr(attribute) for attribute in attributesToRemove
   o.html()
 
+srcClosure = (src) ->
+
+  return _.debounce(((event, path) ->
+    iv = imgVersion[src]
+    if event is 'change'
+      imgVersion[src] = if iv > 0 then iv + 1 else 1
+    else
+      imgVersion[src] = event + "d"
+    for item in atom.workspace.getPaneItems()
+      if isMarkdownPreviewView(item)
+        item.renderMarkdown()
+    return), 250)
+
 resolveImagePaths = (html, filePath) ->
   [rootDirectory] = atom.project.relativizePath(filePath)
   o = cheerio.load(html)
   for imgElement in o('img')
     img = o(imgElement)
     if src = img.attr('src')
+
       continue if src.match(/^(https?|atom):\/\//)
       continue if src.startsWith(process.resourcesPath)
       continue if src.startsWith(resourcePath)
@@ -104,27 +118,19 @@ resolveImagePaths = (html, filePath) ->
 
       if src[0] is '/'
         unless fs.isFileSync(src)
-          src = path.join(rootDirectory, src.substring(1))
+          try
+            src = path.join(rootDirectory, src.substring(1))
+          catch e
       else
         src = path.resolve(path.dirname(filePath), src)
 
       # Use most recent version of image
 
-      srcClosure = (src) ->
-        return _.debounce(((event, path) ->
-          imgVersion[src] += 1
-          for item in atom.workspace.getPaneItems()
-            if isMarkdownPreviewView(item)
-              item.renderMarkdown()
-          return), 250)
+      if not imgVersion[src] > 0 and fs.isFileSync(src)
+        imgVersion[src] = 1
+        pathWatcher.watch src, srcClosure(src)
 
-      if fs.isFileSync(src)
-        if not imgVersion[src]?
-          imgVersion[src] = 0
-          pathWatcher.watch src, srcClosure(src)
-        src = "#{src}?v=#{imgVersion[src]}"
-      else if imgVersion[src]?
-        src = "#{src}?v=deleted"
+      src = "#{src}?v=#{imgVersion[src]}" if imgVersion[src]
 
       img.attr('src', src)
 
