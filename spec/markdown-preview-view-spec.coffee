@@ -2,6 +2,7 @@ path = require 'path'
 fs = require 'fs-plus'
 temp = require 'temp'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
+pathWatcher = require 'pathwatcher'
 
 describe "MarkdownPreviewView", ->
   [file, preview, workspaceElement] = []
@@ -124,7 +125,7 @@ describe "MarkdownPreviewView", ->
         expect(image.attr('src')).toBe atom.project.getDirectories()[0].resolve('tmp/image2.png')
 
     describe "when the image uses an absolute path that exists", ->
-      it "doesn't change the URL", ->
+      it "adds a query to the URL", ->
         preview.destroy()
 
         filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
@@ -136,12 +137,147 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         runs ->
-          expect(preview.find("img[alt=absolute]").attr('src')).toBe filePath
+          expect(preview.find("img[alt=absolute]").attr('src')).toBe "#{filePath}?v=0"
 
     describe "when the image uses a web URL", ->
       it "doesn't change the URL", ->
         image = preview.find("img[alt=Image3]")
         expect(image.attr('src')).toBe 'http://github.com/image3.png'
+
+  describe "image modification", ->
+    [dirPath, filePath, img1Path] = []
+
+    beforeEach ->
+      preview.destroy()
+
+      jasmine.useRealClock()
+
+      dirPath   = temp.mkdirSync('atom')
+      filePath  = path.join dirPath, 'image-modification.md'
+      img1Path  = path.join dirPath, 'img1.png'
+
+      fs.writeFileSync filePath, "![img1](#{img1Path})"
+      fs.writeFileSync img1Path, "clearly not a png but good enough for tests"
+
+      workspaceElement = atom.views.getView(atom.workspace)
+      jasmine.attachToDOM(workspaceElement)
+
+      waitsForPromise ->
+        atom.packages.activatePackage("markdown-preview-plus")
+
+    expectPreviewInSplitPane = ->
+      runs ->
+        expect(atom.workspace.getPanes()).toHaveLength 2
+
+      waitsFor "markdown preview to be created", ->
+        preview = atom.workspace.getPanes()[1].getActiveItem()
+
+      runs ->
+        expect(preview).toBeInstanceOf(MarkdownPreviewView)
+        expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
+
+    describe "when a local image is previewed", ->
+      it "adds a query to the URL", ->
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        runs ->
+          image = preview.find("img[alt=img1]")
+          expect(image.attr('src')).toBe "#{img1Path}?v=0"
+
+    describe "when a local image is modified during a preview", ->
+      it "is rerendered with an incremented query value", ->
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        runs ->
+          image = preview.find("img[alt=img1]")
+          expect(image.attr('src')).toBe "#{img1Path}?v=0"
+          fs.writeFileSync img1Path, "still clearly not a png ;D"
+
+        waitsFor "image src attribute to update", ->
+          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=0"
+
+        runs ->
+          image = preview.find("img[alt=img1]")
+          expect(image.attr('src')).toBe "#{img1Path}?v=1"
+
+    describe "when three images are previewed and all are modified", ->
+      it "increments the query value of each as they are modified", ->
+        [img2Path, img3Path] = []
+
+        runs ->
+          img2Path  = path.join dirPath, 'img2.png'
+          img3Path  = path.join dirPath, 'img3.png'
+
+          fs.writeFileSync img2Path, "i'm not really a png ;D"
+          fs.writeFileSync img3Path, "neither am i ;D"
+          fs.writeFileSync filePath, """
+            ![img1](#{img1Path})
+            ![img2](#{img2Path})
+            ![img3](#{img3Path})
+          """
+
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        imgElements = ->
+          return [
+            preview.find("img[alt=img1]"),
+            preview.find("img[alt=img2]"),
+            preview.find("img[alt=img3]")
+          ]
+
+        expectQueryValues = (img1Val, img2Val, img3Val) ->
+          [img1, img2, img3] = imgElements()
+          expect(img1.attr('src')).toBe "#{img1Path}?v=#{img1Val}"
+          expect(img2.attr('src')).toBe "#{img2Path}?v=#{img2Val}"
+          expect(img3.attr('src')).toBe "#{img3Path}?v=#{img3Val}"
+
+        runs ->
+          expectQueryValues(0,0,0)
+          fs.writeFileSync img1Path, "still clearly not a png ;D"
+
+        waitsFor "img1 src attribute to update", ->
+          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=0"
+
+        runs ->
+          expectQueryValues(1,0,0)
+          fs.writeFileSync img2Path, "still clearly not a png either ;D"
+
+        waitsFor "img2 src attribute to update", ->
+          preview.find("img[alt=img2]").attr('src') isnt "#{img2Path}?v=0"
+
+        runs ->
+          expectQueryValues(1,1,0)
+          fs.writeFileSync img3Path, "you better believe i'm not a png ;D"
+
+        waitsFor "img3 src attribute to update", ->
+          preview.find("img[alt=img3]").attr('src') isnt "#{img3Path}?v=0"
+
+        runs ->
+          expectQueryValues(1,1,1)
+
+    describe "when and image is previewed and then deleted", ->
+      it "sets the query value to deleted", ->
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        runs ->
+          image = preview.find("img[alt=img1]")
+          expect(image.attr('src')).toBe "#{img1Path}?v=0"
+          fs.unlinkSync img1Path
+
+        waitsFor "image src attribute to update", ->
+          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=0"
+
+        runs ->
+          image = preview.find("img[alt=img1]")
+          expect(image.attr('src')).toBe "#{img1Path}?v=deleted"
 
   describe "gfm newlines", ->
     describe "when gfm newlines are not enabled", ->
