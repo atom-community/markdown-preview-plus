@@ -126,7 +126,7 @@ module.exports =
     atom.commands.add '.tree-view .file .name[data-name$=\\.txt]', 'markdown-preview-plus:preview-file', previewFile
 
     # Call to load MathJax environment
-    require('./mathjax-helper').loadMathJax();
+    require('./mathjax-helper').loadMathJax()
 
     atom.workspace.addOpener (uriToOpen) ->
       try

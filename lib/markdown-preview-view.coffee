@@ -132,8 +132,8 @@ class MarkdownPreviewView extends ScrollView
     # Toggle LaTeX rendering if focus is on preview pane or associated editor.
     @disposables.add atom.commands.add 'atom-workspace',
       'markdown-preview-plus:toggle-render-latex': =>
-        if (atom.workspace.getActivePaneItem() is @) or (atom.workspace.getActiveTextEditor() is @editor)
-          @renderLaTeX = !@renderLaTeX
+        if (atom.workspace.getActivePaneItem() is this) or (atom.workspace.getActiveTextEditor() is @editor)
+          @renderLaTeX = not @renderLaTeX
           changeHandler()
         return
 
@@ -170,7 +170,7 @@ class MarkdownPreviewView extends ScrollView
         @loaded = true
         # div.update-preview created after constructor st UpdatePreview cannot
         # be instanced in the constructor
-        if !@updatePreview
+        unless @updatePreview
           @updatePreview = new UpdatePreview(@find("div.update-preview")[0])
         if @renderLaTeX and not MathJax?
           @updatePreview.update(
@@ -194,7 +194,7 @@ class MarkdownPreviewView extends ScrollView
             simply search for <strong>mathjax-wrapper</strong> in the menu
             <strong>File &rsaquo; Settings &rsaquo; Packages</strong> and click
             <strong>Install</strong>.'
-            ,false)
+            , false)
         else
           @updatePreview.update(domFragment, @renderLaTeX)
         @emitter.emit 'did-change-markdown'

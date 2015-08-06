@@ -9,12 +9,12 @@ currentText = null
 
 atomConfig = null
 
-config = { }
+config = {}
 
 ###*
  * Sets local mathjaxPath if available
  ###
-getMathJaxPath = () ->
+getMathJaxPath = ->
   try
     path ?= require 'path'
     config.mathjax = atom.packages.getLoadedPackage('mathjax-wrapper')

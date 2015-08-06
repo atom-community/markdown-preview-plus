@@ -14,9 +14,9 @@ module.exports =
   #
   loadMathJax: ->
     script = document.createElement("script")
-    script.addEventListener "load", () ->
+    script.addEventListener "load", ->
       configureMathJax()
-    script.type   = "text/javascript";
+    script.type   = "text/javascript"
     try
       # atom.packages.resolvePackagePath('mathjax-wrapper') doesnt work but
       # does for other packages? Nor does 'atom://mathjax-wrapper' work (I get
@@ -48,10 +48,18 @@ module.exports =
 #
 configureMathJax = ->
   MathJax.Hub.Config
-    jax: ["input/TeX","output/HTML-CSS"]
+    jax: [
+      "input/TeX",
+      "output/HTML-CSS"
+    ]
     extensions: []
     TeX:
-      extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+      extensions: [
+        "AMSmath.js",
+        "AMSsymbols.js",
+        "noErrors.js",
+        "noUndefined.js"
+      ]
     messageStyle: "none"
     showMathMenu: false
   MathJax.Hub.Configured()

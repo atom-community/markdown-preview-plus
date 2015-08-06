@@ -56,7 +56,7 @@ module.exports = class UpdatePreview
 
     if renderLaTeX
       r.inserted = r.inserted.map (elm) ->
-        while elm and !elm.innerHTML
+        while elm and not elm.innerHTML
           elm = elm.parentElement
         elm
       r.inserted = r.inserted.filter (elm) ->
