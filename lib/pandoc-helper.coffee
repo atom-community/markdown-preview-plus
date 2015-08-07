@@ -31,7 +31,7 @@ findFileRecursive = (filePath, fileName) ->
     bibFile
   else
     newPath = path.join bibFile, '..'
-    if newPath isnt filePath
+    if newPath isnt filePath and not _.contains(atom.project.getPaths(), newPath)
       findFileRecursive newPath, fileName
     else
       false
@@ -46,14 +46,16 @@ setPandocOptions = (filePath) ->
   atomConfig = atom.config.get('markdown-preview-plus')
   pdc.path = atomConfig.pandocPath
   config.flavor = atomConfig.pandocMarkdownFlavor
-  config.args = atom.config.get('markdown-preview-plus.pandocArguments')
+  config.args = atomConfig.pandocArguments
   getMathJaxPath() unless config.mathjax?
   config.args.push "--mathjax#{config.mathjax}" if config.renderMath
   if atomConfig.pandocBibliography
     bibFile = findFileRecursive filePath, atomConfig.pandocBIBFile
+    bibFile = atomConfig.pandocBIBFileFallback unless bibFile
     config.args.push "--bibliography=#{bibFile}" if bibFile
     cslFile = findFileRecursive filePath, atomConfig.pandocCSLFile
-    config.args.push "--csl=#{cslFile}" if bibFile and cslFile
+    cslFile = atomConfig.pandocCSLFileFallback unless cslFile
+    config.args.push "--csl=#{cslFile}" if cslFile
 
 ###*
  * Handle error response from pdc
