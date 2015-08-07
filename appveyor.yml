@@ -4,15 +4,14 @@ os: Windows Server 2012 R2
 test: off
 deploy: off
 
-init:
-  - cmd: rd /s /q %CHOCOLATEYINSTALL%
-  - ps: iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))
-
 install:
-  - cinst atom -y
-  - cd %APPVEYOR_BUILD_FOLDER%
-  - "%LOCALAPPDATA%/atom/bin/apm install"
+  - cmd: cd %LOCALAPPDATA%
+  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/')/atom-windows.zip", "$(pwd)\atom-windows.zip")
+  - cmd: 7z -y x atom-windows.zip
 
 build_script:
-  - cd %APPVEYOR_BUILD_FOLDER%
-  - "%LOCALAPPDATA%/atom/bin/apm test --path %LOCALAPPDATA%/atom/bin/atom.cmd"
+  - cmd: SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
+  - cmd: cd %APPVEYOR_BUILD_FOLDER%
+  - cmd: apm clean
+  - cmd: apm install
+  - cmd: apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
