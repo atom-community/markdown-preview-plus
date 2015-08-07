@@ -1,0 +1,19 @@
+box: leipert/atom-apm
+# Build definition
+build:
+  # The steps that will be executed on build
+  steps:
+    # A nice caching version of npm install
+    - npm-install
+    - script:
+        name: APM rebuild to make sure npm install worked
+        code: apm rebuild
+    - script:
+        name: Test package
+        code: >
+          start-stop-daemon --start --pidfile /tmp/xvfb_99.pid --make-pidfile
+          --background --exec /usr/bin/Xvfb -- :99 -screen 0 1024x768x24 -ac
+          +extension GLX +extension RANDR +render -noreset &&
+          sleep 3 &&
+          export DISPLAY=:99 &&
+          apm test
