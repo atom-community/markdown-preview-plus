@@ -41,6 +41,9 @@ used for Pandocs citations. You can change the filenames it is searching for
 by changing the options **Bibliography (bibfile)** and **Bibliography Style
 (cslfile)** on the settings page.
 
+You can set a fallback bibfile and cslfile if the current repository
+has none of it's own.
+
 Here is a small example how it works:
 
 ```` text
@@ -55,9 +58,9 @@ Here is a small example how it works:
 └── README.md
 ````
 
-Effectively the arguments `--csl=/custom.csl --bibliography=/bibliography.bib`
-are used for `/README.md` and `--csl=/custom.csl
---bibliography=/src/bibliography.bib` for `/src/md/RANDOM.md`
+Effectively the arguments `--csl=./custom.csl --bibliography=./bibliography.bib`
+are used for `./README.md` and `--csl=./custom.csl
+--bibliography=./src/bibliography.bib` for `./src/md/RANDOM.md`
 
 [issue-46]: https://github.com/Galadirith/markdown-preview-plus/issues/46#issuecomment-124324926
 [pandoc-cit]: http://pandoc.org/README.html#citations
