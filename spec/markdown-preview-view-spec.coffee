@@ -289,15 +289,13 @@ describe "MarkdownPreviewView", ->
           image = preview.find("img[alt=img1]")
           expect(image.attr('src')).toBe "#{img1Path}?v=1"
           fs.renameSync img1Path, img1Path + "trol"
-          #fs.writeFileSync filePath, "![img1](#{img1Path}) xo"
-          #fs.writeFileSync img1Path, "still clearly not a png ;D"
 
         waitsFor "image src attribute to update", ->
           preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
 
         runs ->
           image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=renamed"
+          expect(image.attr('src')).toBe "#{img1Path}?v=deleted"
 
   describe "gfm newlines", ->
     describe "when gfm newlines are not enabled", ->
