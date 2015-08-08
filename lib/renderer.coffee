@@ -98,7 +98,7 @@ srcClosure = (src) ->
     if event is 'change'
       imgVersion[src] = if iv > 0 then iv + 1 else 1
     else
-      imgVersion[src] = event + "d"
+      imgVersion[src] = 'deleted'
     for item in atom.workspace.getPaneItems()
       if isMarkdownPreviewView(item)
         item.renderMarkdown()

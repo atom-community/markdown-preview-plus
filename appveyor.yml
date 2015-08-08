@@ -1,0 +1,17 @@
+version: "{build}"
+os: Windows Server 2012 R2
+
+test: off
+deploy: off
+
+install:
+  - cmd: cd %LOCALAPPDATA%
+  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/' ).trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
+  - cmd: 7z -y x atom-windows.zip
+
+build_script:
+  - cmd: SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
+  - cmd: cd %APPVEYOR_BUILD_FOLDER%
+  - cmd: apm clean
+  - cmd: apm install
+  - cmd: apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
