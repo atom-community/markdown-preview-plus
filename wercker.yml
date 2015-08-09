@@ -1,4 +1,4 @@
-box: leipert/atom-apm
+box: leipert/atom-apm:v1.0.x
 # Build definition
 build:
   # The steps that will be executed on build
