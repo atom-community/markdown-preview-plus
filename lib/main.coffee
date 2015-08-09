@@ -66,7 +66,7 @@ module.exports =
       type: 'array'
       default: []
       title: 'Pandoc Options: Commandline Arguments'
-      description: 'Enter comma separated pandoc commandline options e.g. `--smart, --normalize`'
+      description: 'Comma separated pandoc arguments e.g. `--smart, --filter=/bin/exe`. Please use long argument names.'
       dependencies: ['enablePandoc']
       order: 120
     pandocMarkdownFlavor:
@@ -97,6 +97,13 @@ module.exports =
       description: 'Name of bibfile to search for recursivly'
       dependencies: ['pandocBibliography']
       order: 160
+    pandocBIBFileFallback:
+      type: 'string'
+      default: ''
+      title: 'Pandoc Options: Fallback Bibliography (bibfile)'
+      description: 'Full path to fallback bibfile'
+      dependencies: ['pandocBibliography']
+      order: 165
     pandocCSLFile:
       type: 'string'
       default: 'custom.csl'
@@ -104,6 +111,13 @@ module.exports =
       description: 'Name of cslfile to search for recursivly'
       dependencies: ['pandocBibliography']
       order: 170
+    pandocCSLFileFallback:
+      type: 'string'
+      default: ''
+      title: 'Pandoc Options: Fallback Bibliography Style (cslfile)'
+      description: 'Full path to fallback cslfile'
+      dependencies: ['pandocBibliography']
+      order: 175
 
 
   activate: ->
