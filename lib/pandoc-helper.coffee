@@ -19,7 +19,7 @@ getMathJaxPath = ->
     path ?= require 'path'
     config.mathjax = atom.packages.getLoadedPackage('mathjax-wrapper')
     config.mathjax = path.join config.mathjax.path, 'node_modules/MathJax/MathJax.js'
-    config.mathjax = "=#{config.mathjax}"
+    config.mathjax = config.mathjax
   catch e
     config.mathjax = ''
 
@@ -38,24 +38,24 @@ findFileRecursive = (filePath, fileName) ->
 
 ###*
  * Sets local variables needed for everything
- * @param {string} document in markdown
- * @param {boolean} whether to render the math with mathjax
- * @param {function} callbackFunction
+ * @param {string} path to markdown file
+ *
  ###
 setPandocOptions = (filePath) ->
   atomConfig = atom.config.get('markdown-preview-plus')
   pdc.path = atomConfig.pandocPath
   config.flavor = atomConfig.pandocMarkdownFlavor
-  config.args = atomConfig.pandocArguments
+  config.args = {}
   getMathJaxPath() unless config.mathjax?
-  config.args.push "--mathjax#{config.mathjax}" if config.renderMath
+  config.args.mathjax = if config.renderMath then config.mathjax else undefined
   if atomConfig.pandocBibliography
     bibFile = findFileRecursive filePath, atomConfig.pandocBIBFile
     bibFile = atomConfig.pandocBIBFileFallback unless bibFile
-    config.args.push "--bibliography=#{bibFile}" if bibFile
+    config.args.bibliography = if bibFile then bibFile else undefined
     cslFile = findFileRecursive filePath, atomConfig.pandocCSLFile
     cslFile = atomConfig.pandocCSLFileFallback unless cslFile
-    config.args.push "--csl=#{cslFile}" if cslFile
+    config.args.csl = if cslFile then cslFile else undefined
+  config
 
 ###*
  * Handle error response from pdc
@@ -143,7 +143,24 @@ renderPandoc = (text, filePath, renderMath, cb) ->
   config.renderMath = renderMath
   config.callback = cb
   setPandocOptions filePath
-  pdc text, config.flavor, 'html', config.args, handleResponse
+  pdc text, config.flavor, 'html', getArguments(config.args), handleResponse
+
+getArguments = (args) ->
+  args = _.reduce args,
+    (res, val, key) ->
+      res.push "--#{key}=#{val}" unless _.isEmpty val
+      return res
+    , []
+  args = _.union args, atom.config.get('markdown-preview-plus.pandocArguments')
+  args = _.map args,
+    (val) ->
+      val = val.replace(/^(--[\w\-]+)\s(.+)$/i, "$1=$2")
+      if val.substr(0, 1) isnt '-' then undefined else val
+  _.reject args, _.isEmpty
 
 module.exports =
-  renderPandoc: renderPandoc
+  renderPandoc: renderPandoc,
+  __testing__:
+    findFileRecursive: findFileRecursive
+    setPandocOptions: setPandocOptions
+    getArguments: getArguments

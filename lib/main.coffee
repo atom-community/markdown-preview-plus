@@ -66,7 +66,7 @@ module.exports =
       type: 'array'
       default: []
       title: 'Pandoc Options: Commandline Arguments'
-      description: 'Enter comma separated pandoc commandline options e.g. `--smart, --normalize`'
+      description: 'Comma separated pandoc arguments e.g. `--smart, --filter=/bin/exe`. Please use long argument names.'
       dependencies: ['enablePandoc']
       order: 120
     pandocMarkdownFlavor:
