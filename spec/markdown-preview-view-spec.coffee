@@ -2,6 +2,7 @@ path = require 'path'
 fs = require 'fs-plus'
 temp = require 'temp'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
+pathWatcher = require 'pathwatcher'
 url = require 'url'
 queryString = require 'querystring'
 
@@ -210,13 +211,12 @@ describe "MarkdownPreviewView", ->
           imageURL = preview.find("img[alt=img1]").attr('src')
           imageVer = getImageVersion(img1Path, imageURL)
           expect(imageVer).not.toEqual('deleted')
+
           fs.writeFileSync img1Path, "still clearly not a png ;D"
 
-        waitsFor "image src attribute to update",
-          ->
-            imageURL = preview.find("img[alt=img1]").attr('src')
-            not imageURL.endsWith imageVer
-          , 10000
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
 
         runs ->
           newImageVer = getImageVersion(img1Path, imageURL)
@@ -275,11 +275,9 @@ describe "MarkdownPreviewView", ->
 
           fs.writeFileSync img1Path, "still clearly not a png ;D"
 
-        waitsFor "img1 src attribute to update",
-          ->
-            img1URL = preview.find("img[alt=img1]").attr('src')
-            not img1URL.endsWith img1Ver
-          , 10000
+        waitsFor "img1 src attribute to update", ->
+          img1URL = preview.find("img[alt=img1]").attr('src')
+          not img1URL.endsWith img1Ver
 
         runs ->
           expectQueryValues
@@ -290,13 +288,12 @@ describe "MarkdownPreviewView", ->
           expect(newImg1Ver).not.toEqual('deleted')
           expect(parseInt(newImg1Ver)).toBeGreaterThan(parseInt(img1Ver))
           img1Ver = newImg1Ver
+
           fs.writeFileSync img2Path, "still clearly not a png either ;D"
 
-        waitsFor "img2 src attribute to update",
-          ->
-            img2URL = preview.find("img[alt=img2]").attr('src')
-            not img2URL.endsWith img2Ver
-          , 10000
+        waitsFor "img2 src attribute to update", ->
+          img2URL = preview.find("img[alt=img2]").attr('src')
+          not img2URL.endsWith img2Ver
 
         runs ->
           expectQueryValues
@@ -310,11 +307,9 @@ describe "MarkdownPreviewView", ->
 
           fs.writeFileSync img3Path, "you better believe i'm not a png ;D"
 
-        waitsFor "img3 src attribute to update",
-          ->
-            img3URL = preview.find("img[alt=img3]").attr('src')
-            not img3URL.endsWith img3Ver
-          , 10000
+        waitsFor "img3 src attribute to update", ->
+          img3URL = preview.find("img[alt=img3]").attr('src')
+          not img3URL.endsWith img3Ver
 
         runs ->
           expectQueryValues
@@ -340,21 +335,18 @@ describe "MarkdownPreviewView", ->
 
           fs.unlinkSync img1Path
 
-        waitsFor "image src attribute to update after deletion",
-          ->
-            imageURL = preview.find("img[alt=img1]").attr('src')
-            not imageURL.endsWith imageVer
-          , 10000
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
 
         runs ->
           expect(getImageVersion(img1Path, imageURL)).toBe 'deleted'
+
           fs.writeFileSync img1Path, "clearly not a png but good enough for tests"
 
-        waitsFor "image src attribute to update after creation",
-          ->
-            imageURL = preview.find("img[alt=img1]").attr('src')
-            not imageURL.endsWith 'deleted'
-          , 10000
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith 'deleted'
 
         runs ->
           newImageVer = getImageVersion(img1Path, imageURL)
@@ -375,22 +367,18 @@ describe "MarkdownPreviewView", ->
 
           fs.renameSync img1Path, img1Path + "trol"
 
-        waitsFor "image src attribute to update",
-          ->
-            imageURL = preview.find("img[alt=img1]").attr('src')
-            not imageURL.endsWith imageVer
-          , 10000
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
 
         runs ->
           expect(getImageVersion(img1Path, imageURL)).toBe 'deleted'
 
           fs.renameSync img1Path + "trol", img1Path
 
-        waitsFor "image src attribute to update",
-          ->
-            imageURL = preview.find("img[alt=img1]").attr('src')
-            not imageURL.endsWith 'deleted'
-          , 10000
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith 'deleted'
 
         runs ->
           newImageVer = getImageVersion(img1Path, imageURL)

@@ -8,7 +8,7 @@ roaster = null # Defer until used
 pandocHelper = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 mathjaxHelper = require './mathjax-helper'
-watchr = require 'watchr'
+pathWatcher = require 'pathwatcher'
 
 MarkdownPreviewView = null # Defer until used
 isMarkdownPreviewView = (object) ->
@@ -25,7 +25,6 @@ highlighter = null
 {resourcePath} = atom.getLoadSettings()
 packagePath = path.dirname(__dirname)
 imgVersion = []
-watchers = []
 
 exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
   render text, filePath, renderLaTeX, (error, html) ->
@@ -98,14 +97,14 @@ sanitize = (html) ->
   o('*').removeAttr(attribute) for attribute in attributesToRemove
   o.html()
 
-imgListener = (event, src) ->
-  if imgVersion[src]?
-    if fs.isFileSync(src)
+srcClosure = (src) ->
+  return (event, path) ->
+    if event is 'change' and fs.isFileSync(src)
       imgVersion[src] = Date.now()
     else
       imgVersion[src] = 'deleted'
     renderPreviews()
-  return
+    return
 
 resolveImagePaths = (html, filePath) ->
   [rootDirectory] = atom.project.relativizePath(filePath)
@@ -131,12 +130,7 @@ resolveImagePaths = (html, filePath) ->
 
       if not imgVersion[src] > 0 and fs.isFileSync(src)
         imgVersion[src] = Date.now()
-        dir = path.join(src, '..')
-        if not watchers[dir]
-          watchers[dir] = watchr.watch
-            path: dir
-            listener: imgListener
-
+        pathWatcher.watch src, srcClosure(src)
 
       src = "#{src}?v=#{imgVersion[src]}" if imgVersion[src]
 
