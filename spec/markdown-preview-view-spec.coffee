@@ -3,6 +3,8 @@ fs = require 'fs-plus'
 temp = require 'temp'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
 pathWatcher = require 'pathwatcher'
+url = require 'url'
+queryString = require 'querystring'
 
 describe "MarkdownPreviewView", ->
   [file, preview, workspaceElement] = []
@@ -20,6 +22,10 @@ describe "MarkdownPreviewView", ->
 
     waitsForPromise ->
       atom.packages.activatePackage('markdown-preview-plus')
+
+    this.addMatchers
+      toStartWith: (expected) ->
+        this.actual.slice(0, expected.length) is expected;
 
   afterEach ->
     preview.destroy()
@@ -137,7 +143,7 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         runs ->
-          expect(preview.find("img[alt=absolute]").attr('src')).toBe "#{filePath}?v=1"
+          expect(preview.find("img[alt=absolute]").attr('src')).toStartWith "#{filePath}?v="
 
     describe "when the image uses a web URL", ->
       it "doesn't change the URL", ->
@@ -176,39 +182,56 @@ describe "MarkdownPreviewView", ->
         expect(preview).toBeInstanceOf(MarkdownPreviewView)
         expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
 
+    getImageVersion = (imagePath, imageURL) ->
+      expect(imageURL).toStartWith "#{imagePath}?v="
+      urlQueryStr = url.parse(imageURL).query
+      urlQuery    = queryString.parse(urlQueryStr)
+      urlQuery.v
+
     describe "when a local image is previewed", ->
-      it "adds a query to the URL", ->
+      it "adds a timestamp query to the URL", ->
         waitsForPromise -> atom.workspace.open(filePath)
         runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
         expectPreviewInSplitPane()
 
         runs ->
-          image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=1"
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageVer = getImageVersion(img1Path, imageURL)
+          expect(imageVer).not.toEqual('deleted')
 
     describe "when a local image is modified during a preview", ->
-      it "is rerendered with an incremented query value", ->
+      it "rerenders the image with a more recent timestamp query", ->
+        [imageURL, imageVer] = []
+
         waitsForPromise -> atom.workspace.open(filePath)
         runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
         expectPreviewInSplitPane()
 
         runs ->
-          image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=1"
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageVer = getImageVersion(img1Path, imageURL)
+          expect(imageVer).not.toEqual('deleted')
+
           fs.writeFileSync img1Path, "still clearly not a png ;D"
 
         waitsFor "image src attribute to update", ->
-          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
 
         runs ->
-          image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=2"
+          newImageVer = getImageVersion(img1Path, imageURL)
+          expect(newImageVer).not.toEqual('deleted')
+          expect(parseInt(newImageVer)).toBeGreaterThan(parseInt(imageVer))
 
     describe "when three images are previewed and all are modified", ->
-      it "increments the query value of each as they are modified", ->
+      it "rerenders the images with a more recent timestamp as they are modified", ->
         [img2Path, img3Path] = []
+        [img1Ver, img2Ver, img3Ver] = []
+        [img1URL, img2URL, img3URL] = []
 
         runs ->
+          preview.destroy()
+
           img2Path  = path.join dirPath, 'img2.png'
           img3Path  = path.join dirPath, 'img3.png'
 
@@ -224,78 +247,142 @@ describe "MarkdownPreviewView", ->
         runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
         expectPreviewInSplitPane()
 
-        imgElements = ->
+        getImageElementsURL = ->
           return [
-            preview.find("img[alt=img1]"),
-            preview.find("img[alt=img2]"),
-            preview.find("img[alt=img3]")
+            preview.find("img[alt=img1]").attr('src'),
+            preview.find("img[alt=img2]").attr('src'),
+            preview.find("img[alt=img3]").attr('src')
           ]
 
-        expectQueryValues = (img1Val, img2Val, img3Val) ->
-          [img1, img2, img3] = imgElements()
-          expect(img1.attr('src')).toBe "#{img1Path}?v=#{img1Val}"
-          expect(img2.attr('src')).toBe "#{img2Path}?v=#{img2Val}"
-          expect(img3.attr('src')).toBe "#{img3Path}?v=#{img3Val}"
+        expectQueryValues = (queryValues) ->
+          [img1URL, img2URL, img3URL] = getImageElementsURL()
+          if queryValues.img1?
+            expect(img1URL).toStartWith "#{img1Path}?v="
+            expect(img1URL).toBe "#{img1Path}?v=#{queryValues.img1}"
+          if queryValues.img2?
+            expect(img2URL).toStartWith "#{img2Path}?v="
+            expect(img2URL).toBe "#{img2Path}?v=#{queryValues.img2}"
+          if queryValues.img3?
+            expect(img3URL).toStartWith "#{img3Path}?v="
+            expect(img3URL).toBe "#{img3Path}?v=#{queryValues.img3}"
 
         runs ->
-          expectQueryValues(1, 1, 1)
+          [img1URL, img2URL, img3URL] = getImageElementsURL()
+
+          img1Ver = getImageVersion(img1Path, img1URL)
+          img2Ver = getImageVersion(img2Path, img2URL)
+          img3Ver = getImageVersion(img3Path, img3URL)
+
           fs.writeFileSync img1Path, "still clearly not a png ;D"
 
         waitsFor "img1 src attribute to update", ->
-          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
+          img1URL = preview.find("img[alt=img1]").attr('src')
+          not img1URL.endsWith img1Ver
 
         runs ->
-          expectQueryValues(2, 1, 1)
+          expectQueryValues
+            img2: img2Ver
+            img3: img3Ver
+
+          newImg1Ver = getImageVersion(img1Path, img1URL)
+          expect(newImg1Ver).not.toEqual('deleted')
+          expect(parseInt(newImg1Ver)).toBeGreaterThan(parseInt(img1Ver))
+          img1Ver = newImg1Ver
+
           fs.writeFileSync img2Path, "still clearly not a png either ;D"
 
         waitsFor "img2 src attribute to update", ->
-          preview.find("img[alt=img2]").attr('src') isnt "#{img2Path}?v=1"
+          img2URL = preview.find("img[alt=img2]").attr('src')
+          not img2URL.endsWith img2Ver
 
         runs ->
-          expectQueryValues(2, 2, 1)
+          expectQueryValues
+            img1: img1Ver
+            img3: img3Ver
+
+          newImg2Ver = getImageVersion(img2Path, img2URL)
+          expect(newImg2Ver).not.toEqual('deleted')
+          expect(parseInt(newImg2Ver)).toBeGreaterThan(parseInt(img2Ver))
+          img2Ver = newImg2Ver
+
           fs.writeFileSync img3Path, "you better believe i'm not a png ;D"
 
         waitsFor "img3 src attribute to update", ->
-          preview.find("img[alt=img3]").attr('src') isnt "#{img3Path}?v=1"
+          img3URL = preview.find("img[alt=img3]").attr('src')
+          not img3URL.endsWith img3Ver
 
         runs ->
-          expectQueryValues(2, 2, 2)
+          expectQueryValues
+            img1: img1Ver
+            img2: img2Ver
 
-    describe "when and image is previewed and then deleted", ->
-      it "sets the query value to deleted", ->
+          newImg3Ver  = getImageVersion(img3Path, img3URL)
+          expect(newImg3Ver).not.toEqual('deleted')
+          expect(parseInt(newImg3Ver)).toBeGreaterThan(parseInt(img3Ver))
+
+    describe "when an image is previewed, deleted then restored", ->
+      it "sets the query value to a timestamp, deleted and finally a more recent timestamp", ->
+        [imageURL, imageVer] = []
+
         waitsForPromise -> atom.workspace.open(filePath)
         runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
         expectPreviewInSplitPane()
 
         runs ->
-          image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=1"
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageVer = getImageVersion(img1Path, imageURL)
+          expect(imageVer).not.toEqual('deleted')
+
           fs.unlinkSync img1Path
 
         waitsFor "image src attribute to update", ->
-          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
 
         runs ->
-          image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=deleted"
+          expect(getImageVersion(img1Path, imageURL)).toBe 'deleted'
 
-    describe "when and image is previewed and then renamed", ->
-      it "sets the query value to deleted", ->
+          fs.writeFileSync img1Path, "clearly not a png but good enough for tests"
+
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith 'deleted'
+
+        runs ->
+          newImageVer = getImageVersion(img1Path, imageURL)
+          expect(parseInt(newImageVer)).toBeGreaterThan(parseInt(imageVer))
+
+    describe "when an image is previewed, renamed and then restored with original name", ->
+      it "sets the query value to a timestamp, deleted and finally a more recent timestamp", ->
+        [imageURL, imageVer] = []
+
         waitsForPromise -> atom.workspace.open(filePath)
         runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
         expectPreviewInSplitPane()
 
         runs ->
-          image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=1"
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageVer = getImageVersion(img1Path, imageURL)
+          expect(imageVer).not.toEqual('deleted')
+
           fs.renameSync img1Path, img1Path + "trol"
 
         waitsFor "image src attribute to update", ->
-          preview.find("img[alt=img1]").attr('src') isnt "#{img1Path}?v=1"
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
 
         runs ->
-          image = preview.find("img[alt=img1]")
-          expect(image.attr('src')).toBe "#{img1Path}?v=deleted"
+          expect(getImageVersion(img1Path, imageURL)).toBe 'deleted'
+
+          fs.renameSync img1Path + "trol", img1Path
+
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith 'deleted'
+
+        runs ->
+          newImageVer = getImageVersion(img1Path, imageURL)
+          expect(parseInt(newImageVer)).toBeGreaterThan(parseInt(imageVer))
 
   describe "gfm newlines", ->
     describe "when gfm newlines are not enabled", ->

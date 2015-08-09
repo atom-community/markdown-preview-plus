@@ -15,6 +15,12 @@ isMarkdownPreviewView = (object) ->
   MarkdownPreviewView ?= require './markdown-preview-view'
   object instanceof MarkdownPreviewView
 
+renderPreviews = _.debounce((->
+  for item in atom.workspace.getPaneItems()
+    if isMarkdownPreviewView(item)
+      item.renderMarkdown()
+  return), 250)
+
 highlighter = null
 {resourcePath} = atom.getLoadSettings()
 packagePath = path.dirname(__dirname)
@@ -92,17 +98,13 @@ sanitize = (html) ->
   o.html()
 
 srcClosure = (src) ->
-
-  return _.debounce(((event, path) ->
-    iv = imgVersion[src]
-    if event is 'change'
-      imgVersion[src] = if iv > 0 then iv + 1 else 1
+  return (event, path) ->
+    if event is 'change' and fs.isFileSync(src)
+      imgVersion[src] = Date.now()
     else
       imgVersion[src] = 'deleted'
-    for item in atom.workspace.getPaneItems()
-      if isMarkdownPreviewView(item)
-        item.renderMarkdown()
-    return), 250)
+    renderPreviews()
+    return
 
 resolveImagePaths = (html, filePath) ->
   [rootDirectory] = atom.project.relativizePath(filePath)
@@ -127,7 +129,7 @@ resolveImagePaths = (html, filePath) ->
       # Use most recent version of image
 
       if not imgVersion[src] > 0 and fs.isFileSync(src)
-        imgVersion[src] = 1
+        imgVersion[src] = Date.now()
         pathWatcher.watch src, srcClosure(src)
 
       src = "#{src}?v=#{imgVersion[src]}" if imgVersion[src]
