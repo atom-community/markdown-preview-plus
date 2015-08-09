@@ -102,7 +102,7 @@ srcClosure = (src) ->
     if event is 'change' and fs.isFileSync(src)
       imgVersion[src] = Date.now()
     else
-      imgVersion[src] = 'deleted'
+      imgVersion[src] = null
     renderPreviews()
     return
 
@@ -128,7 +128,7 @@ resolveImagePaths = (html, filePath) ->
 
       # Use most recent version of image
 
-      if not imgVersion[src] > 0 and fs.isFileSync(src)
+      if not imgVersion[src] and fs.isFileSync(src)
         imgVersion[src] = Date.now()
         pathWatcher.watch src, srcClosure(src)
 

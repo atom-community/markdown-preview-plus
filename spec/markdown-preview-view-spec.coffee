@@ -320,8 +320,8 @@ describe "MarkdownPreviewView", ->
           expect(newImg3Ver).not.toEqual('deleted')
           expect(parseInt(newImg3Ver)).toBeGreaterThan(parseInt(img3Ver))
 
-    describe "when an image is previewed, deleted then restored", ->
-      it "sets the query value to a timestamp, deleted and finally a more recent timestamp", ->
+    describe "when a previewed image is deleted then restored", ->
+      it "removes the query timestamp and restores the timestamp after a rerender", ->
         [imageURL, imageVer] = []
 
         waitsForPromise -> atom.workspace.open(filePath)
@@ -340,20 +340,20 @@ describe "MarkdownPreviewView", ->
           not imageURL.endsWith imageVer
 
         runs ->
-          expect(getImageVersion(img1Path, imageURL)).toBe 'deleted'
-
+          expect(imageURL).toBe img1Path
           fs.writeFileSync img1Path, "clearly not a png but good enough for tests"
+          preview.renderMarkdown()
 
         waitsFor "image src attribute to update", ->
           imageURL = preview.find("img[alt=img1]").attr('src')
-          not imageURL.endsWith 'deleted'
+          imageURL isnt img1Path
 
         runs ->
           newImageVer = getImageVersion(img1Path, imageURL)
           expect(parseInt(newImageVer)).toBeGreaterThan(parseInt(imageVer))
 
-    describe "when an image is previewed, renamed and then restored with original name", ->
-      it "sets the query value to a timestamp, deleted and finally a more recent timestamp", ->
+    describe "when a previewed image is renamed and then restored with its original name", ->
+      it "removes the query timestamp and restores the timestamp after a rerender", ->
         [imageURL, imageVer] = []
 
         waitsForPromise -> atom.workspace.open(filePath)
@@ -372,13 +372,13 @@ describe "MarkdownPreviewView", ->
           not imageURL.endsWith imageVer
 
         runs ->
-          expect(getImageVersion(img1Path, imageURL)).toBe 'deleted'
-
+          expect(imageURL).toBe img1Path
           fs.renameSync img1Path + "trol", img1Path
+          preview.renderMarkdown()
 
         waitsFor "image src attribute to update", ->
           imageURL = preview.find("img[alt=img1]").attr('src')
-          not imageURL.endsWith 'deleted'
+          imageURL isnt img1Path
 
         runs ->
           newImageVer = getImageVersion(img1Path, imageURL)
