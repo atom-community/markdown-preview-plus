@@ -3,11 +3,9 @@ box: leipert/atom-apm
 build:
   # The steps that will be executed on build
   steps:
-    # A nice caching version of npm install
-    - npm-install
     - script:
-        name: APM rebuild to make sure npm install worked
-        code: apm rebuild
+        name: Install dependencies
+        code: apm install
     - script:
         name: Test package
         code: >
