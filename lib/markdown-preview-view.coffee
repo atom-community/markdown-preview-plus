@@ -5,7 +5,7 @@ path = require 'path'
 Grim = require 'grim'
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
-{File} = require 'pathwatcher'
+{File} = require 'pathwatcher-without-runas'
 
 renderer = require './renderer'
 UpdatePreview = require './update-preview'
