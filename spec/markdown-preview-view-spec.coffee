@@ -103,7 +103,7 @@ describe "MarkdownPreviewView", ->
         expect(jsEditor).toExist()
         expect(jsEditor[0].getModel().getText()).toBe """
           if a === 3 {
-          b = 5
+            b = 5
           }
         """
 
@@ -507,7 +507,7 @@ describe "MarkdownPreviewView", ->
 
       runs ->
         expect(atom.clipboard.read()).toBe """
-         <h1 id="code-block">Code Block</h1>
+         <h1>Code Block</h1>
          <pre class="editor-colors lang-javascript"><div class="line"><span class="source js"><span class="keyword control js"><span>if</span></span><span>&nbsp;a&nbsp;</span><span class="keyword operator js"><span>===</span></span><span>&nbsp;</span><span class="constant numeric js"><span>3</span></span><span>&nbsp;</span><span class="meta brace curly js"><span>{</span></span></span></div><div class="line"><span class="source js"><span>&nbsp;&nbsp;b&nbsp;</span><span class="keyword operator js"><span>=</span></span><span>&nbsp;</span><span class="constant numeric js"><span>5</span></span></span></div><div class="line"><span class="source js"><span class="meta brace curly js"><span>}</span></span></span></div></pre>
          <p>encoding \u2192 issue</p>
         """

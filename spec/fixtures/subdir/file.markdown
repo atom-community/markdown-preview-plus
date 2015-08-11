@@ -8,11 +8,13 @@ def func
 end
 ```
 
-* ```javascript
-if a === 3 {
-  b = 5
-}
-```
+*   This is a test
+
+    ```javascript
+    if a === 3 {
+      b = 5
+    }
+    ```
 
 ```
 function f(x) {

@@ -63,7 +63,7 @@ render = (text, filePath, renderLaTeX, callback) ->
 
     markdownIt ?= require './markdown-it-helper'
 
-    callbackFunction null, markdownIt text
+    callbackFunction null, markdownIt text, renderLaTeX
 
 sanitize = (html) ->
   o = cheerio.load(html)
