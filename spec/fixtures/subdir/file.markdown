@@ -40,7 +40,7 @@ def foo()
 
 ![Image2](/tmp/image2.png)
 
-![Image3](http://github.com/image3.png)
+![Image3](https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png)
 
 lorem
 ipsum

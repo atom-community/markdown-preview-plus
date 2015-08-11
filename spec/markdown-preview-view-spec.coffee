@@ -125,12 +125,12 @@ describe "MarkdownPreviewView", ->
     describe "when the image uses a relative path", ->
       it "resolves to a path relative to the file", ->
         image = preview.find("img[alt=Image1]")
-        expect(image.attr('src')).toBe atom.project.getDirectories()[0].resolve('subdir/image1.png')
+        expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('subdir/image1.png')
 
     describe "when the image uses an absolute path that does not exist", ->
       it "resolves to a path relative to the project root", ->
         image = preview.find("img[alt=Image2]")
-        expect(image.attr('src')).toBe atom.project.getDirectories()[0].resolve('tmp/image2.png')
+        expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('tmp/image2.png')
 
     describe "when the image uses an absolute path that exists", ->
       it "adds a query to the URL", ->
@@ -150,7 +150,7 @@ describe "MarkdownPreviewView", ->
     describe "when the image uses a web URL", ->
       it "doesn't change the URL", ->
         image = preview.find("img[alt=Image3]")
-        expect(image.attr('src')).toBe 'http://github.com/image3.png'
+        expect(image.attr('src')).toBe 'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png'
 
   describe "image modification", ->
     [dirPath, filePath, img1Path] = []
