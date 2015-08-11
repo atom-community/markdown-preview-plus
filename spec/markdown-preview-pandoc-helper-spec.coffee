@@ -11,6 +11,8 @@ cslFile = 'foo.csl'
 tempPath = null
 file = null
 
+require './spec-helper'
+
 describe "Markdown preview plus pandoc helper", ->
   [workspaceElement, preview] = []
 

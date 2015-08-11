@@ -5,6 +5,8 @@ wrench = require 'wrench'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
 {$} = require 'atom-space-pen-views'
 
+require './spec-helper'
+
 describe "Markdown preview plus package", ->
   [workspaceElement, preview] = []
 

@@ -6,6 +6,8 @@ pathWatcher = require 'pathwatcher'
 url = require 'url'
 queryString = require 'querystring'
 
+require './spec-helper'
+
 describe "MarkdownPreviewView", ->
   [file, preview, workspaceElement] = []
 
@@ -199,7 +201,7 @@ describe "MarkdownPreviewView", ->
           imageVer = getImageVersion(img1Path, imageURL)
           expect(imageVer).not.toEqual('deleted')
 
-    describe "when a local image is modified during a preview", ->
+    describe "when a local image is modified during a preview #notwercker", ->
       it "rerenders the image with a more recent timestamp query", ->
         [imageURL, imageVer] = []
 
@@ -223,7 +225,7 @@ describe "MarkdownPreviewView", ->
           expect(newImageVer).not.toEqual('deleted')
           expect(parseInt(newImageVer)).toBeGreaterThan(parseInt(imageVer))
 
-    describe "when three images are previewed and all are modified", ->
+    describe "when three images are previewed and all are modified #notwercker", ->
       it "rerenders the images with a more recent timestamp as they are modified", ->
         [img2Path, img3Path] = []
         [img1Ver, img2Ver, img3Ver] = []
