@@ -2,7 +2,6 @@ path = require 'path'
 fs = require 'fs-plus'
 temp = require 'temp'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
-pathWatcher = require 'pathwatcher'
 url = require 'url'
 queryString = require 'querystring'
 
