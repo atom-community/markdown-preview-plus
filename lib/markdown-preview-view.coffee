@@ -12,6 +12,11 @@ UpdatePreview = require './update-preview'
 
 module.exports =
 class MarkdownPreviewView extends ScrollView
+  initialize: ->
+    @on 'click', 'a', ->
+      eventName = $(this).attr('href')
+      atom.workspace.open(eventName, {split: 'left'})
+
   @content: ->
     @div class: 'markdown-preview native-key-bindings', tabindex: -1, =>
       # If you dont explicitly declare a class then the elements wont be created
@@ -113,6 +118,7 @@ class MarkdownPreviewView extends ScrollView
 
       # TODO: Remove paneForURI call when ::paneForItem is released
       pane = atom.workspace.paneForItem?(this) ? atom.workspace.paneForURI(@getURI())
+      console.warn @getURI()
       if pane? and pane isnt atom.workspace.getActivePane()
         pane.activateItem(this)
 
