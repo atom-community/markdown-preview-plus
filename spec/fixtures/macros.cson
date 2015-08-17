@@ -1,0 +1,17 @@
+# Valid name and valid value
+macroOne: "should be defined"
+
+# Invalid name and valid value
+macro1: "should not be defined"
+
+# Valid name and invalid value
+macroTwo: 2
+
+# Valid name and valid value array
+macroParamOne: ["should be defined with #1", 1]
+
+# Invalid name and valid value array
+macroParam1: ["should not be defined with #1", 1]
+
+# Valid name and invalid value array
+macroParamTwo: [2, "two"]
