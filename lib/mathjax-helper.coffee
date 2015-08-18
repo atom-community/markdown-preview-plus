@@ -4,6 +4,7 @@
 # This module will handle loading the MathJax environment and provide a wrapper
 # for calls to MathJax to process LaTeX equations.
 #
+
 cheerio = require 'cheerio'
 path    = require 'path'
 CSON    = require 'season'
@@ -15,9 +16,9 @@ module.exports =
   #
   loadMathJax: ->
     script = document.createElement("script")
-    script.addEventListener "load", () ->
+    script.addEventListener "load", ->
       configureMathJax()
-    script.type   = "text/javascript";
+    script.type   = "text/javascript"
     try
       # atom.packages.resolvePackagePath('mathjax-wrapper') doesn't work but
       # does for other packages? Nor does 'atom://mathjax-wrapper' work (I get
@@ -114,10 +115,18 @@ configureMathJax = ->
 
   #Now Configure MathJax
   MathJax.Hub.Config
-    jax: ["input/TeX","output/HTML-CSS"]
+    jax: [
+      "input/TeX",
+      "output/HTML-CSS"
+    ]
     extensions: []
     TeX:
-      extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+      extensions: [
+        "AMSmath.js",
+        "AMSsymbols.js",
+        "noErrors.js",
+        "noUndefined.js"
+      ]
       Macros: userMacros
     messageStyle: "none"
     showMathMenu: false

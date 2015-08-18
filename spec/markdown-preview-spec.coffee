@@ -5,6 +5,8 @@ wrench = require 'wrench'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
 {$} = require 'atom-space-pen-views'
 
+require './spec-helper'
+
 describe "Markdown preview plus package", ->
   [workspaceElement, preview] = []
 
@@ -172,34 +174,29 @@ describe "Markdown preview plus package", ->
           waitsFor ->
             preview.text().indexOf("ch ch changes") >= 0
 
-    # Conversion of `<pre>` to `<atom-text-editor>` was introduced in 090fb1f
-    # upstream however before signing off on this in MPP it must be verified that
-    # this does not muck up the DOM update by diff. Restore this spec if/when that
-    # verification is completed.
-    #
-    # describe "when a new grammar is loaded", ->
-    #   it "re-renders the preview", ->
-    #     atom.workspace.getActiveTextEditor().setText """
-    #       ```javascript
-    #       var x = y;
-    #       ```
-    #     """
-    #
-    #     waitsFor "markdown to be rendered after its text changed", ->
-    #       preview.find("atom-text-editor").data("grammar") is "text plain null-grammar"
-    #
-    #     grammarAdded = false
-    #     runs ->
-    #       atom.grammars.onDidAddGrammar -> grammarAdded = true
-    #
-    #     waitsForPromise ->
-    #       expect(atom.packages.isPackageActive('language-javascript')).toBe false
-    #       atom.packages.activatePackage('language-javascript')
-    #
-    #     waitsFor "grammar to be added", -> grammarAdded
-    #
-    #     waitsFor "markdown to be rendered after grammar was added", ->
-    #       preview.find("atom-text-editor").data("grammar") isnt "source js"
+    describe "when a new grammar is loaded", ->
+      it "re-renders the preview", ->
+        atom.workspace.getActiveTextEditor().setText """
+          ```javascript
+          var x = y;
+          ```
+        """
+
+        waitsFor "markdown to be rendered after its text changed", ->
+          preview.find("atom-text-editor").data("grammar") is "text plain null-grammar"
+
+        grammarAdded = false
+        runs ->
+          atom.grammars.onDidAddGrammar -> grammarAdded = true
+
+        waitsForPromise ->
+          expect(atom.packages.isPackageActive('language-javascript')).toBe false
+          atom.packages.activatePackage('language-javascript')
+
+        waitsFor "grammar to be added", -> grammarAdded
+
+        waitsFor "markdown to be rendered after grammar was added", ->
+          preview.find("atom-text-editor").data("grammar") isnt "source js"
 
   describe "when the markdown preview view is requested by file URI", ->
     it "opens a preview editor and watches the file for changes", ->
@@ -264,17 +261,15 @@ describe "Markdown preview plus package", ->
       runs ->
         atom.commands.dispatch workspaceElement, 'markdown-preview-plus:copy-html'
         expect(atom.clipboard.read()).toBe """
-          <div><p><em>italic</em></p>
+          <p><em>italic</em></p>
           <p><strong>bold</strong></p>
           <p>encoding \u2192 issue</p>
-          </div>
         """
 
         atom.workspace.getActiveTextEditor().setSelectedBufferRange [[0, 0], [1, 0]]
         atom.commands.dispatch workspaceElement, 'markdown-preview-plus:copy-html'
         expect(atom.clipboard.read()).toBe """
-          <div><p><em>italic</em></p>
-          </div>
+          <p><em>italic</em></p>
         """
 
     describe "code block tokenization", ->
@@ -322,12 +317,11 @@ describe "Markdown preview plus package", ->
 
       runs ->
         expect($(preview[0]).find("div.update-preview").html()).toBe """
-          <div><p>hello</p>
+          <p>hello</p>
           <p></p>
           <p>
           <img>
           world</p>
-          </div>
         """
 
     it "remove the first <!doctype> tag at the beginning of the file", ->
@@ -337,9 +331,8 @@ describe "Markdown preview plus package", ->
 
       runs ->
         expect($(preview[0]).find("div.update-preview").html()).toBe """
-          <div><p>content
+          <p>content
           &lt;!doctype html&gt;</p>
-          </div>
         """
 
   describe "when the markdown contains an <html> tag", ->
@@ -348,23 +341,15 @@ describe "Markdown preview plus package", ->
       runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
       expectPreviewInSplitPane()
 
-      runs -> expect($(preview[0]).find("div.update-preview").html()).toBe """
-        <div>content
-        </div>
-      """
+      runs -> expect($(preview[0]).find("div.update-preview").html()).toBe "content"
 
-  # Conversion of `<pre>` to `<atom-text-editor>` was introduced in 090fb1f
-  # upstream however before signing off on this in MPP it must be verified that
-  # this does not muck up the DOM update by diff. Restore this spec if/when that
-  # verification is completed.
-  #
-  # describe "when the markdown contains a <pre> tag", ->
-  #   it "does not throw an exception", ->
-  #     waitsForPromise -> atom.workspace.open("subdir/pre-tag.md")
-  #     runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
-  #     expectPreviewInSplitPane()
-  #
-  #     runs -> expect(preview.find('atom-text-editor')).toExist()
+  describe "when the markdown contains a <pre> tag", ->
+    it "does not throw an exception", ->
+      waitsForPromise -> atom.workspace.open("subdir/pre-tag.md")
+      runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+      expectPreviewInSplitPane()
+
+      runs -> expect(preview.find('atom-text-editor')).toExist()
 
   # WARNING If focus is given to this spec alone your `config.cson` may be
   # overwritten. Please ensure that you have yours backed up :D

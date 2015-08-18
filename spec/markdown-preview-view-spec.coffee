@@ -2,6 +2,10 @@ path = require 'path'
 fs = require 'fs-plus'
 temp = require 'temp'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
+url = require 'url'
+queryString = require 'querystring'
+
+require './spec-helper'
 
 describe "MarkdownPreviewView", ->
   [file, preview, workspaceElement] = []
@@ -19,6 +23,10 @@ describe "MarkdownPreviewView", ->
 
     waitsForPromise ->
       atom.packages.activatePackage('markdown-preview-plus')
+
+    this.addMatchers
+      toStartWith: (expected) ->
+        this.actual.slice(0, expected.length) is expected;
 
   afterEach ->
     preview.destroy()
@@ -69,49 +77,44 @@ describe "MarkdownPreviewView", ->
         jasmine.attachToDOM(newPreview.element)
         expect(newPreview.getPath()).toBe preview.getPath()
 
-  # Conversion of `<pre>` to `<atom-text-editor>` was introduced in 090fb1f
-  # upstream however before signing off on this in MPP it must be verified that
-  # this does not muck up the DOM update by diff. Restore this spec if/when that
-  # verification is completed.
-  #
-  # describe "code block conversion to atom-text-editor tags", ->
-  #   beforeEach ->
-  #     waitsForPromise ->
-  #       preview.renderMarkdown()
-  #
-  #   it "removes line decorations on rendered code blocks", ->
-  #     editor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
-  #     decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
-  #     expect(decorations.length).toBe 0
-  #
-  #   describe "when the code block's fence name has a matching grammar", ->
-  #     it "assigns the grammar on the atom-text-editor", ->
-  #       rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
-  #       expect(rubyEditor).toExist()
-  #       expect(rubyEditor[0].getModel().getText()).toBe """
-  #         def func
-  #           x = 1
-  #         end
-  #       """
-  #
-  #       # nested in a list item
-  #       jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
-  #       expect(jsEditor).toExist()
-  #       expect(jsEditor[0].getModel().getText()).toBe """
-  #         if a === 3 {
-  #         b = 5
-  #         }
-  #       """
-  #
-  #   describe "when the code block's fence name doesn't have a matching grammar", ->
-  #     it "does not assign a specific grammar", ->
-  #       plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
-  #       expect(plainEditor).toExist()
-  #       expect(plainEditor[0].getModel().getText()).toBe """
-  #         function f(x) {
-  #           return x++;
-  #         }
-  #       """
+  describe "code block conversion to atom-text-editor tags", ->
+    beforeEach ->
+      waitsForPromise ->
+        preview.renderMarkdown()
+
+    it "removes line decorations on rendered code blocks", ->
+      editor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+      decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
+      expect(decorations.length).toBe 0
+
+    describe "when the code block's fence name has a matching grammar", ->
+      it "assigns the grammar on the atom-text-editor", ->
+        rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
+        expect(rubyEditor).toExist()
+        expect(rubyEditor[0].getModel().getText()).toBe """
+          def func
+            x = 1
+          end
+        """
+
+        # nested in a list item
+        jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
+        expect(jsEditor).toExist()
+        expect(jsEditor[0].getModel().getText()).toBe """
+          if a === 3 {
+          b = 5
+          }
+        """
+
+    describe "when the code block's fence name doesn't have a matching grammar", ->
+      it "does not assign a specific grammar", ->
+        plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
+        expect(plainEditor).toExist()
+        expect(plainEditor[0].getModel().getText()).toBe """
+          function f(x) {
+            return x++;
+          }
+        """
 
   describe "image resolving", ->
     beforeEach ->
@@ -129,7 +132,7 @@ describe "MarkdownPreviewView", ->
         expect(image.attr('src')).toBe atom.project.getDirectories()[0].resolve('tmp/image2.png')
 
     describe "when the image uses an absolute path that exists", ->
-      it "doesn't change the URL", ->
+      it "adds a query to the URL", ->
         preview.destroy()
 
         filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
@@ -141,12 +144,246 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         runs ->
-          expect(preview.find("img[alt=absolute]").attr('src')).toBe filePath
+          expect(preview.find("img[alt=absolute]").attr('src')).toStartWith "#{filePath}?v="
 
     describe "when the image uses a web URL", ->
       it "doesn't change the URL", ->
         image = preview.find("img[alt=Image3]")
         expect(image.attr('src')).toBe 'http://github.com/image3.png'
+
+  describe "image modification", ->
+    [dirPath, filePath, img1Path] = []
+
+    beforeEach ->
+      preview.destroy()
+
+      jasmine.useRealClock()
+
+      dirPath   = temp.mkdirSync('atom')
+      filePath  = path.join dirPath, 'image-modification.md'
+      img1Path  = path.join dirPath, 'img1.png'
+
+      fs.writeFileSync filePath, "![img1](#{img1Path})"
+      fs.writeFileSync img1Path, "clearly not a png but good enough for tests"
+
+      workspaceElement = atom.views.getView(atom.workspace)
+      jasmine.attachToDOM(workspaceElement)
+
+      waitsForPromise ->
+        atom.packages.activatePackage("markdown-preview-plus")
+
+    expectPreviewInSplitPane = ->
+      runs ->
+        expect(atom.workspace.getPanes()).toHaveLength 2
+
+      waitsFor "markdown preview to be created", ->
+        preview = atom.workspace.getPanes()[1].getActiveItem()
+
+      runs ->
+        expect(preview).toBeInstanceOf(MarkdownPreviewView)
+        expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
+
+    getImageVersion = (imagePath, imageURL) ->
+      expect(imageURL).toStartWith "#{imagePath}?v="
+      urlQueryStr = url.parse(imageURL).query
+      urlQuery    = queryString.parse(urlQueryStr)
+      urlQuery.v
+
+    describe "when a local image is previewed", ->
+      it "adds a timestamp query to the URL", ->
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        runs ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageVer = getImageVersion(img1Path, imageURL)
+          expect(imageVer).not.toEqual('deleted')
+
+    describe "when a local image is modified during a preview #notwercker", ->
+      it "rerenders the image with a more recent timestamp query", ->
+        [imageURL, imageVer] = []
+
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        runs ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageVer = getImageVersion(img1Path, imageURL)
+          expect(imageVer).not.toEqual('deleted')
+
+          fs.writeFileSync img1Path, "still clearly not a png ;D"
+
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
+
+        runs ->
+          newImageVer = getImageVersion(img1Path, imageURL)
+          expect(newImageVer).not.toEqual('deleted')
+          expect(parseInt(newImageVer)).toBeGreaterThan(parseInt(imageVer))
+
+    describe "when three images are previewed and all are modified #notwercker", ->
+      it "rerenders the images with a more recent timestamp as they are modified", ->
+        [img2Path, img3Path] = []
+        [img1Ver, img2Ver, img3Ver] = []
+        [img1URL, img2URL, img3URL] = []
+
+        runs ->
+          preview.destroy()
+
+          img2Path  = path.join dirPath, 'img2.png'
+          img3Path  = path.join dirPath, 'img3.png'
+
+          fs.writeFileSync img2Path, "i'm not really a png ;D"
+          fs.writeFileSync img3Path, "neither am i ;D"
+          fs.writeFileSync filePath, """
+            ![img1](#{img1Path})
+            ![img2](#{img2Path})
+            ![img3](#{img3Path})
+          """
+
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        getImageElementsURL = ->
+          return [
+            preview.find("img[alt=img1]").attr('src'),
+            preview.find("img[alt=img2]").attr('src'),
+            preview.find("img[alt=img3]").attr('src')
+          ]
+
+        expectQueryValues = (queryValues) ->
+          [img1URL, img2URL, img3URL] = getImageElementsURL()
+          if queryValues.img1?
+            expect(img1URL).toStartWith "#{img1Path}?v="
+            expect(img1URL).toBe "#{img1Path}?v=#{queryValues.img1}"
+          if queryValues.img2?
+            expect(img2URL).toStartWith "#{img2Path}?v="
+            expect(img2URL).toBe "#{img2Path}?v=#{queryValues.img2}"
+          if queryValues.img3?
+            expect(img3URL).toStartWith "#{img3Path}?v="
+            expect(img3URL).toBe "#{img3Path}?v=#{queryValues.img3}"
+
+        runs ->
+          [img1URL, img2URL, img3URL] = getImageElementsURL()
+
+          img1Ver = getImageVersion(img1Path, img1URL)
+          img2Ver = getImageVersion(img2Path, img2URL)
+          img3Ver = getImageVersion(img3Path, img3URL)
+
+          fs.writeFileSync img1Path, "still clearly not a png ;D"
+
+        waitsFor "img1 src attribute to update", ->
+          img1URL = preview.find("img[alt=img1]").attr('src')
+          not img1URL.endsWith img1Ver
+
+        runs ->
+          expectQueryValues
+            img2: img2Ver
+            img3: img3Ver
+
+          newImg1Ver = getImageVersion(img1Path, img1URL)
+          expect(newImg1Ver).not.toEqual('deleted')
+          expect(parseInt(newImg1Ver)).toBeGreaterThan(parseInt(img1Ver))
+          img1Ver = newImg1Ver
+
+          fs.writeFileSync img2Path, "still clearly not a png either ;D"
+
+        waitsFor "img2 src attribute to update", ->
+          img2URL = preview.find("img[alt=img2]").attr('src')
+          not img2URL.endsWith img2Ver
+
+        runs ->
+          expectQueryValues
+            img1: img1Ver
+            img3: img3Ver
+
+          newImg2Ver = getImageVersion(img2Path, img2URL)
+          expect(newImg2Ver).not.toEqual('deleted')
+          expect(parseInt(newImg2Ver)).toBeGreaterThan(parseInt(img2Ver))
+          img2Ver = newImg2Ver
+
+          fs.writeFileSync img3Path, "you better believe i'm not a png ;D"
+
+        waitsFor "img3 src attribute to update", ->
+          img3URL = preview.find("img[alt=img3]").attr('src')
+          not img3URL.endsWith img3Ver
+
+        runs ->
+          expectQueryValues
+            img1: img1Ver
+            img2: img2Ver
+
+          newImg3Ver  = getImageVersion(img3Path, img3URL)
+          expect(newImg3Ver).not.toEqual('deleted')
+          expect(parseInt(newImg3Ver)).toBeGreaterThan(parseInt(img3Ver))
+
+    describe "when a previewed image is deleted then restored", ->
+      it "removes the query timestamp and restores the timestamp after a rerender", ->
+        [imageURL, imageVer] = []
+
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        runs ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageVer = getImageVersion(img1Path, imageURL)
+          expect(imageVer).not.toEqual('deleted')
+
+          fs.unlinkSync img1Path
+
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
+
+        runs ->
+          expect(imageURL).toBe img1Path
+          fs.writeFileSync img1Path, "clearly not a png but good enough for tests"
+          preview.renderMarkdown()
+
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL isnt img1Path
+
+        runs ->
+          newImageVer = getImageVersion(img1Path, imageURL)
+          expect(parseInt(newImageVer)).toBeGreaterThan(parseInt(imageVer))
+
+    describe "when a previewed image is renamed and then restored with its original name", ->
+      it "removes the query timestamp and restores the timestamp after a rerender", ->
+        [imageURL, imageVer] = []
+
+        waitsForPromise -> atom.workspace.open(filePath)
+        runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+        expectPreviewInSplitPane()
+
+        runs ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageVer = getImageVersion(img1Path, imageURL)
+          expect(imageVer).not.toEqual('deleted')
+
+          fs.renameSync img1Path, img1Path + "trol"
+
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          not imageURL.endsWith imageVer
+
+        runs ->
+          expect(imageURL).toBe img1Path
+          fs.renameSync img1Path + "trol", img1Path
+          preview.renderMarkdown()
+
+        waitsFor "image src attribute to update", ->
+          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL isnt img1Path
+
+        runs ->
+          newImageVer = getImageVersion(img1Path, imageURL)
+          expect(parseInt(newImageVer)).toBeGreaterThan(parseInt(imageVer))
 
   describe "gfm newlines", ->
     describe "when gfm newlines are not enabled", ->
@@ -269,8 +506,7 @@ describe "MarkdownPreviewView", ->
 
       runs ->
         expect(atom.clipboard.read()).toBe """
-         <div><h1 id="code-block">Code Block</h1>
+         <h1 id="code-block">Code Block</h1>
          <pre class="editor-colors lang-javascript"><div class="line"><span class="source js"><span class="keyword control js"><span>if</span></span><span>&nbsp;a&nbsp;</span><span class="keyword operator js"><span>===</span></span><span>&nbsp;</span><span class="constant numeric js"><span>3</span></span><span>&nbsp;</span><span class="meta brace curly js"><span>{</span></span></span></div><div class="line"><span class="source js"><span>&nbsp;&nbsp;b&nbsp;</span><span class="keyword operator js"><span>=</span></span><span>&nbsp;</span><span class="constant numeric js"><span>5</span></span></span></div><div class="line"><span class="source js"><span class="meta brace curly js"><span>}</span></span></span></div></pre>
          <p>encoding \u2192 issue</p>
-         </div>
         """

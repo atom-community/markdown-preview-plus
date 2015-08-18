@@ -36,7 +36,7 @@ module.exports = class TwoDimArray
     c: ind % @col
 
   get: (row, col) ->
-    @_arr[@getInd(row,col)]
+    @_arr[@getInd(row, col)]
 
   set: (row, col, val) ->
     @_arr[row*@col + col] = val

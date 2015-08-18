@@ -1,11 +1,15 @@
-# LaTex
+# LaTeX style math
 
-This fork of [markdown-preview](https://github.com/atom/markdown-preview)
-enables LaTex to be rendered in a preview window of a markdown document in
-[Atom](https://atom.io/). If focus is given to either the markdown source editor
-or the preview window then this can be toggled in the menu **Packages &rsaquo;
-Markdown Preview Plus &rsaquo; Toggle LaTex Rendering** or using the keymap
-`ctrl-shift-x`.
+MPP extends the syntax of [GitHub flavored markdown][gfm] with equation blocks.
+Inside an equation block you can use any LaTeX macros that are valid in a maths
+environment of a LaTeX document. MPP will then render the equation in the
+preview window. For a full list of supported macros please see 
+[Supported LaTeX commands][macro-support].
+
+If focus is given to either the markdown source
+editor or the preview window then math rendering can be toggled in the menu
+**Packages &rsaquo; Markdown Preview Plus &rsaquo; Toggle LaTex Rendering** or
+using the keymap `ctrl-shift-x`.
 
 To enable LaTeX rendering by default search for **Markdown Preview Plus** in the
 **Filter packages** input dialogue of the **File &rsaquo; Settings** menu and
@@ -99,4 +103,7 @@ MPP will fail because CSON will throw an `unexpected !` syntax error. So be sure
 
 ```cson
 '!': "{OK}"
-```
+```    
+    
+[gfm]: https://help.github.com/articles/github-flavored-markdown/
+[macro-support]: http://docs.mathjax.org/en/latest/tex.html#supported-latex-commands

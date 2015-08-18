@@ -42,7 +42,7 @@ module.exports = class WrappedDomTree
 
     @clone        = clone
     @hash         = curHash++
-    hashTo[@hash] = @
+    hashTo[@hash] = this
     @isText       = dom.nodeType is 3
     @tagName      = dom.tagName
     @className    = dom.className
@@ -57,7 +57,7 @@ module.exports = class WrappedDomTree
         new WrappedDomTree(dom, false, if rep then rep.children[ind] else null)
       @size = if @children.length then @children.reduce ( (prev, cur) ->
         prev + cur.size ), 0 else 0
-      if !@size
+      unless @size
         @size = 1
 
   # @param otherTree WrappedDomTree of a DOM element to diff against
@@ -72,12 +72,7 @@ module.exports = class WrappedDomTree
     inserted    = []
 
     # Force variables to leak to diffTo scope
-    last            = undefined
-    possibleReplace = undefined
-    r               = undefined
-    lastOp          = undefined
-    lastElmDeleted  = undefined
-    lastElmInserted = undefined
+    [last, possibleReplace, r, lastOp, lastElmDeleted, lastElmInserted] = []
 
     if operations
       if operations instanceof Array
@@ -87,7 +82,7 @@ module.exports = class WrappedDomTree
               possibleLastDeleted = @children[op.tree + indexShift].dom
               r = @remove op.tree + indexShift
               @rep.remove op.tree + indexShift
-              if !last or last.nextSibling == r or last == r
+              if not last or last.nextSibling is r or last is r
                 last = r
                 # Undefined errors can be throw so we add a condition on lastOp
                 # being defined
@@ -103,7 +98,7 @@ module.exports = class WrappedDomTree
               @rep.insert op.pos + indexShift, otherTree.children[op.otherTree]
               r = @insert op.pos + indexShift, otherTree.children[op.otherTree], @rep.children[op.pos + indexShift]
               inserted.push(r)
-              if !last or last.nextSibling == r
+              if not last or last.nextSibling is r
                 last = r
                 lastOp = op
                 lastElmInserted = r
@@ -111,7 +106,7 @@ module.exports = class WrappedDomTree
               return
             else
               re = @children[op.tree + indexShift].diffTo otherTree.children[op.otherTree]
-              if !last or (last.nextSibling == @children[op.tree + indexShift].dom and re.last)
+              if not last or (last.nextSibling is @children[op.tree + indexShift].dom and re.last)
                 last = re.last
                 if re.possibleReplace
                   lastElmInserted = re.possibleReplace.cur
@@ -121,9 +116,9 @@ module.exports = class WrappedDomTree
               return
       else
         console.log operations
-        throw "invalid operations"
+        throw new Error "invalid operations"
 
-    if lastOp and lastOp.type != 'i' and lastElmInserted and lastElmDeleted
+    if lastOp and lastOp.type isnt 'i' and lastElmInserted and lastElmDeleted
       possibleReplace =
         cur: lastElmInserted
         prev: lastElmDeleted
@@ -160,7 +155,7 @@ module.exports = class WrappedDomTree
     if key in @diffHash
       return @diffHash[key]
 
-    if tmax == undefined
+    if tmax is undefined
       tmax = 100000
     if tmax <= 0
       return 0
@@ -197,12 +192,12 @@ module.exports = class WrappedDomTree
         p.set i, 0, (i-1)*p.col
         sum += @children[i + offset].size
     if @children.length - offset
-      dp.set @children.length - offset, 0 ,sum
+      dp.set @children.length - offset, 0, sum
       p.set @children.length - offset, 0, (@children.length - 1 - offset)*p.col
 
     getScore = (i, j, max) =>
-      if dp.get(i,j) isnt undefined
-        return dp.get(i,j)
+      if dp.get(i, j) isnt undefined
+        return dp.get(i, j)
       if max is undefined
         max = 1/0
       if max <= 0
@@ -217,13 +212,13 @@ module.exports = class WrappedDomTree
       val = getScore(i-1, j-1, bound - subdiff) + subdiff
       prev = p.getInd i-1, j-1
 
-      if !force
-        other = getScore(i-1, j, Math.min(val,max) - @children[i-1+offset].size) + @children[i-1+offset].size
+      unless force
+        other = getScore(i-1, j, Math.min(val, max) - @children[i-1+offset].size) + @children[i-1+offset].size
         if other < val
           prev  = p.getInd i-1, j
           val   = other
 
-        other = getScore(i, j-1, Math.min(val,max) - otherTree.children[j-1+offset].size) + otherTree.children[j-1+offset].size
+        other = getScore(i, j-1, Math.min(val, max) - otherTree.children[j-1+offset].size) + otherTree.children[j-1+offset].size
         if other < val
           prev  = p.getInd i, j-1
           val   = other
@@ -283,16 +278,17 @@ module.exports = class WrappedDomTree
     @tagName isnt otherTree.tagName or
     @className isnt otherTree.className or
     @className is "math" or
+    @className is "atom-text-editor" or
     @tagName is "A" or
-    (@tagName is "IMG" and !@dom.isEqualNode(otherTree.dom))
+    (@tagName is "IMG" and not @dom.isEqualNode(otherTree.dom))
 
-  getContent: () ->
+  getContent: ->
     if @dom.outerHTML
       return @dom.outerHTML
     else
       return @textData
 
-  removeSelf: () ->
+  removeSelf: ->
     hashTo[@hash] = null
     @children and @children.forEach (c) ->
       c.removeSelf()

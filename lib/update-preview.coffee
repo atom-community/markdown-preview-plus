@@ -22,26 +22,29 @@
 # THE SOFTWARE.
 "use strict"
 
-WrappedDomTree = require './wrapped-dom-tree'
-MathJaxHelper  = require './mathjax-helper'
+WrappedDomTree  = require './wrapped-dom-tree'
+MathJaxHelper   = require './mathjax-helper'
+renderer        = require './renderer'
 
 module.exports = class UpdatePreview
   # @param dom A DOM element object
   #    https://developer.mozilla.org/en-US/docs/Web/API/element
   constructor: (dom) ->
-    @tree     = new WrappedDomTree dom, true
-    @htmlStr  = ""
+    @tree         = new WrappedDomTree dom, true
+    @domFragment  = document.createDocumentFragment()
 
-  update: (htmlStr, renderLaTeX) ->
-    if htmlStr is @htmlStr
+  update: (domFragment, renderLaTeX) ->
+    prepareCodeBlocksForAtomEditors(domFragment)
+
+    if domFragment.isEqualNode(@domFragment)
       return
 
-    firstTime = @htmlStr is ""
-    @htmlStr  = htmlStr
+    firstTime     = @domFragment.childElementCount is 0
+    @domFragment  = domFragment.cloneNode(true)
 
     newDom            = document.createElement "div"
     newDom.className  = "update-preview"
-    newDom.innerHTML  = htmlStr
+    newDom.appendChild domFragment
     newTree           = new WrappedDomTree newDom
 
     r = @tree.diffTo newTree
@@ -53,11 +56,23 @@ module.exports = class UpdatePreview
 
     if renderLaTeX
       r.inserted = r.inserted.map (elm) ->
-        while elm and !elm.innerHTML
+        while elm and not elm.innerHTML
           elm = elm.parentElement
         elm
       r.inserted = r.inserted.filter (elm) ->
         !!elm
       MathJaxHelper.mathProcessor r.inserted
 
+    for elm in r.inserted
+      if elm instanceof Element
+        renderer.convertCodeBlocksToAtomEditors elm
+
     return r
+
+prepareCodeBlocksForAtomEditors = (domFragment) ->
+  for preElement in domFragment.querySelectorAll('pre')
+    preWrapper = document.createElement('span')
+    preWrapper.className = 'atom-text-editor'
+    preElement.parentNode.insertBefore(preWrapper, preElement)
+    preWrapper.appendChild(preElement)
+  domFragment

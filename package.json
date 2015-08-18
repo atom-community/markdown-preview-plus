@@ -1,12 +1,14 @@
 {
   "name": "markdown-preview-plus",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "main": "./lib/main",
-  "description": "Markdown + Maths preview in Atom",
+  "description": "Better markdown preview in atom (optional pandoc support)",
   "keywords": [
     "markdown",
     "maths",
-    "latex"
+    "latex",
+    "commonmark",
+    "pandoc"
   ],
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
   "license": "MIT",
@@ -19,7 +21,7 @@
     "fs-plus": "^2.0.0",
     "grim": "^1.2.1",
     "highlights": "^1.0.0",
-    "pathwatcher": "^4.3",
+    "pathwatcher-without-runas": "~4.5.0",
     "pdc": "~0.2.2",
     "roaster": "https://github.com/Galadirith/roaster/tarball/marked-mathjax",
     "season": "^5.3",
@@ -28,6 +30,7 @@
     "wrench": "^1.5.0"
   },
   "devDependencies": {
-    "coffeelint": "^1.9.7"
+    "coffeelint": "^1.9.7",
+    "jasmine-tagged": "^1.1.4"
   }
 }

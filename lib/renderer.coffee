@@ -8,22 +8,32 @@ roaster = null # Defer until used
 pandocHelper = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 mathjaxHelper = require './mathjax-helper'
+pathWatcher = require 'pathwatcher-without-runas'
+
+MarkdownPreviewView = null # Defer until used
+isMarkdownPreviewView = (object) ->
+  MarkdownPreviewView ?= require './markdown-preview-view'
+  object instanceof MarkdownPreviewView
+
+renderPreviews = _.debounce((->
+  for item in atom.workspace.getPaneItems()
+    if isMarkdownPreviewView(item)
+      item.renderMarkdown()
+  return), 250)
 
 highlighter = null
 {resourcePath} = atom.getLoadSettings()
 packagePath = path.dirname(__dirname)
+imgVersion = []
 
-exports.toDOMFragment = (text='', filePath, grammar, callback) ->
-  render text, filePath, (error, html) ->
+exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
+  render text, filePath, renderLaTeX, (error, html) ->
     return callback(error) if error?
 
     template = document.createElement('template')
     template.innerHTML = html
     domFragment = template.content.cloneNode(true)
 
-    # Default code blocks to be coffee in Literate CoffeeScript files
-    defaultCodeLanguage = 'coffee' if grammar?.scopeName is 'source.litcoffee'
-    convertCodeBlocksToAtomEditors(domFragment, defaultCodeLanguage)
     callback(null, domFragment)
 
 exports.toHTML = (text='', filePath, grammar, renderLaTeX, callback) ->
@@ -57,7 +67,7 @@ render = (text, filePath, renderLaTeX, callback) ->
     roaster text, options, callbackFunction
 
 sanitize = (html) ->
-  o = cheerio.load("<div>#{html}</div>")
+  o = cheerio.load(html)
   # Do not remove MathJax script delimited blocks
   o("script:not([type^='math/tex'])").remove()
   attributesToRemove = [
@@ -87,12 +97,22 @@ sanitize = (html) ->
   o('*').removeAttr(attribute) for attribute in attributesToRemove
   o.html()
 
+srcClosure = (src) ->
+  return (event, path) ->
+    if event is 'change' and fs.isFileSync(src)
+      imgVersion[src] = Date.now()
+    else
+      imgVersion[src] = null
+    renderPreviews()
+    return
+
 resolveImagePaths = (html, filePath) ->
   [rootDirectory] = atom.project.relativizePath(filePath)
   o = cheerio.load(html)
   for imgElement in o('img')
     img = o(imgElement)
     if src = img.attr('src')
+
       continue if src.match(/^(https?|atom):\/\//)
       continue if src.startsWith(process.resourcesPath)
       continue if src.startsWith(resourcePath)
@@ -100,15 +120,26 @@ resolveImagePaths = (html, filePath) ->
 
       if src[0] is '/'
         unless fs.isFileSync(src)
-          img.attr('src', path.join(rootDirectory, src.substring(1)))
+          try
+            src = path.join(rootDirectory, src.substring(1))
+          catch e
       else
-        img.attr('src', path.resolve(path.dirname(filePath), src))
+        src = path.resolve(path.dirname(filePath), src)
+
+      # Use most recent version of image
+
+      if not imgVersion[src] and fs.isFileSync(src)
+        imgVersion[src] = Date.now()
+        pathWatcher.watch src, srcClosure(src)
+
+      src = "#{src}?v=#{imgVersion[src]}" if imgVersion[src]
+
+      img.attr('src', src)
 
   o.html()
 
-convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') ->
+exports.convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') ->
   if fontFamily = atom.config.get('editor.fontFamily')
-
     for codeElement in domFragment.querySelectorAll('code')
       codeElement.style.fontFamily = fontFamily
 
