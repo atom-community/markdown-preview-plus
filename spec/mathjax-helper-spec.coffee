@@ -35,8 +35,8 @@ describe "MathJax helper module", ->
 
       runs ->
         span                  = document.createElement("span")
-        equation              = document.createElement("script");
-        equation.type         = "math/tex; mode=display";
+        equation              = document.createElement("script")
+        equation.type         = "math/tex; mode=display"
         equation.textContent  = "\\int_1^2"
         span.appendChild equation
         mathjaxHelper.mathProcessor span
