@@ -14,4 +14,5 @@ build_script:
   - cmd: cd %APPVEYOR_BUILD_FOLDER%
   - cmd: apm clean
   - cmd: apm install
+  - cmd: apm install mathjax-wrapper
   - cmd: apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
