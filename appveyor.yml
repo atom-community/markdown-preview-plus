@@ -22,7 +22,10 @@ install:
       If ((Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json) -And (Test-Path $env:USERPROFILE\mathjax.version)){
         apm show mathjax-wrapper > $env:USERPROFILE\mathjax-new.version
         If ((Get-FileHash $env:USERPROFILE\mathjax.version).hash -ne (Get-FileHash $env:USERPROFILE\mathjax-new.version).hash){
+          Write-Host "Newer mathjax version available, we are going to install the old one"
           Remove-Item $env:USERPROFILE\.atom\packages\mathjax-wrapper -recurse -Force
+        }Else{
+          Write-Host "Mathjax Versions match"
         }
       }
       apm show mathjax-wrapper > $env:USERPROFILE\mathjax.version
