@@ -22,8 +22,8 @@ install:
   - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
   - apm --version
   - ps: |
-      Write-Host %USERPROFILE%\.atom\packages\mathjax-wrapper\package.json
-      If (Test-Path %USERPROFILE%\.atom\packages\mathjax-wrapper\package.json){
+      Write-Host $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json
+      If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
         Write-Host "Atom mathjax-wrapper already installed"
       }Else{
         apm install mathjax-wrapper
