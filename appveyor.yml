@@ -1,18 +1,26 @@
 version: "{build}"
 os: Windows Server 2012 R2
-
-test: off
+matrix:
+  #- GYP_MSVS_VERSION: 2008
+  #   os: Windows Server 2012 R2
+  #- GYP_MSVS_VERSION: 2010
+  #   os: Windows Server 2012 R2
+  - GYP_MSVS_VERSION: 2012
+  #   os: Windows Server 2012 R2
+  - GYP_MSVS_VERSION: 2013
+build: off
 deploy: off
 
 install:
-  - cmd: cd %LOCALAPPDATA%
+  - cd %LOCALAPPDATA%
   - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/' ).trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
-  - cmd: 7z -y x atom-windows.zip > nul
+  - 7z -y x atom-windows.zip > nul
+  - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
+  - apm --version
+  - apm install mathjax-wrapper
 
-build_script:
-  - cmd: SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
-  - cmd: cd %APPVEYOR_BUILD_FOLDER%
-  - cmd: apm clean
-  - cmd: apm install
-  - cmd: apm install mathjax-wrapper
-  - cmd: apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
+test_script:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - apm clean
+  - apm install
+  - apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
