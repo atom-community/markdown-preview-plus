@@ -5,6 +5,9 @@ notifications:
     on_success: never
     on_failure: change
 
+env:
+  - APM_TEST_PACKAGES="mathjax-wrapper"
+
 script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
 
 git:

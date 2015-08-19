@@ -55,5 +55,55 @@ literally display a dollar sign you can use `\$`.
     pull your underwear over your head ...
     ````
 
+## Macros
+
+MPP supports persistent [macro definitions](http://docs.mathjax.org/en/latest/tex.html#defining-tex-macros).
+
+Macros belong in `~/.atom/markdown-preview-plus.cson` and are defined as follows.
+
+### Macro Definition Syntax
+
+#### Zero argument macros
+
+To define a macro that takes no arguments (like `\sin`) just wrap it in quotes like so
+```cson
+# This is just an alias for \theta.
+th: "\\theta"
+```
+
+#### 1-9 argument macros
+
+To define a macro that takes arguments (like `\frac`), use an array that specifies
+the number of arguments allowed. Then refer to the arguments as `#1` `#2` like so:
+```cson
+# This one gives you "1 over something" as a fraction.
+inv: ["\\frac{1}{#1}",1]
+
+# This one gives you a fraction with nicely typeset parentheses on either side.
+pfrac: ["\\left(\\frac{#1}{#2}\\right)",2]
+```
+
+#### Macro Names
+
+Macros need to be named with either
+  * a single non-alphanumeric character like `\,` or
+  * any number of uppercase and lowercase letters (no numbers).
+
+Please see [this](http://tex.stackexchange.com/questions/66666/command-macro-name-cannot-include-numbers-and-symbols)
+StackExchange discussion.
+
+Note that since we define the objects in CSON, if you want to use a single non-alphanumeric
+character for the name of your macro like
+
+```cson
+!: "{OK}"
+```
+
+MPP will fail because CSON will throw an `unexpected !` syntax error. So be sure to write such definitions as a string. The following will work fine:
+
+```cson
+'!': "{OK}"
+```    
+    
 [gfm]: https://help.github.com/articles/github-flavored-markdown/
 [macro-support]: http://docs.mathjax.org/en/latest/tex.html#supported-latex-commands

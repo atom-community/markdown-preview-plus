@@ -13,7 +13,7 @@ open up a [new issue][issue].
 We also have a more detailed description of [features][features].
 
 -   Fastly open a preview of any markdown with `ctrl-shift-m`
--   Math Rendering (LaTeX style equations), toggled with `ctrl-shift-x`
+-   Math rendering with persistent macro support, toggled with `ctrl-shift-x`
 -   Optionally use pandoc with citation support
 -   Live reload while editing
 -   And many more...
