@@ -19,7 +19,7 @@ install:
   - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
   - apm --version
   - ps: |
-      If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json -And Test-Path $env:USERPROFILE\mathjax.version){
+      If ((Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json) -And (Test-Path $env:USERPROFILE\mathjax.version)){
         apm show mathjax-wrapper > $env:USERPROFILE\mathjax-new.version
         If ((Get-FileHash $env:USERPROFILE\mathjax.version).hash -ne (Get-FileHash $env:USERPROFILE\mathjax-new.version).hash){
           Remove-Item $env:USERPROFILE\.atom\packages\mathjax-wrapper -recurse -Force
