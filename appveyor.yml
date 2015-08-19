@@ -12,13 +12,22 @@ environment:
 build: off
 deploy: off
 
+cache:
+  - %USERPROFILE%\.atom\packages\mathjax-wrapper -> package.json
+
 install:
   - cd %LOCALAPPDATA%
-  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/' ).trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
+  - (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/').trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
   - 7z -y x atom-windows.zip > nul
   - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
   - apm --version
-  - apm install mathjax-wrapper
+  - ps: |
+  If (Test-Path %USERPROFILE%\.atom\packages\mathjax-wrapper){
+    Write-Host "Atom mathjax-wrapper already installed"
+  }Else{
+    apm install mathjax-wrapper
+  }
+
 
 test_script:
   - cd %APPVEYOR_BUILD_FOLDER%
