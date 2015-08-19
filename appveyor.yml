@@ -1,18 +1,40 @@
 version: "{build}"
-os: Windows Server 2012 R2
+os: Visual Studio 2015
+environment:
+  matrix:
+    - GYP_MSVS_VERSION: 2012
+    - GYP_MSVS_VERSION: 2013
 
-test: off
+build: off
 deploy: off
 
-install:
-  - cmd: cd %LOCALAPPDATA%
-  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/' ).trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
-  - cmd: 7z -y x atom-windows.zip > nul
+cache:
+  - C:\Users\appveyor\.atom\packages\mathjax-wrapper
+  - C:\Users\appveyor\mathjax.version
 
-build_script:
-  - cmd: SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
-  - cmd: cd %APPVEYOR_BUILD_FOLDER%
-  - cmd: apm clean
-  - cmd: apm install
-  - cmd: apm install mathjax-wrapper
-  - cmd: apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
+install:
+  - cd %LOCALAPPDATA%
+  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/').trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
+  - 7z -y x atom-windows.zip > nul
+  - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
+  - apm --version
+  - ps: |
+      If ((Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json) -And (Test-Path $env:USERPROFILE\mathjax.version)){
+        apm show mathjax-wrapper > $env:USERPROFILE\mathjax-new.version
+        If ((Get-FileHash $env:USERPROFILE\mathjax.version).hash -ne (Get-FileHash $env:USERPROFILE\mathjax-new.version).hash){
+          Remove-Item $env:USERPROFILE\.atom\packages\mathjax-wrapper -recurse -Force
+        }
+      }
+      apm show mathjax-wrapper > $env:USERPROFILE\mathjax.version
+  - ps: |
+      If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
+        Write-Host "Atom mathjax-wrapper already installed"
+      }Else{
+        apm install mathjax-wrapper
+      }
+
+test_script:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - apm clean
+  - apm install
+  - apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
