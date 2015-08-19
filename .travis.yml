@@ -8,7 +8,11 @@ notifications:
 env:
   - APM_TEST_PACKAGES="mathjax-wrapper"
 
-script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
+script:
+  - '(curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh) || true'
+  - './node_modules/.bin/coffeelint lib'
+  - './node_modules/.bin/coffeelint spec'
+  - 'ATOM_PATH=./atom atom/Atom.app/Contents/Resources/app/apm/node_modules/.bin/apm test --path atom/Atom.app/Contents/Resources/app/atom.sh'
 
 git:
   depth: 10
