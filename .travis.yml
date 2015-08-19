@@ -12,7 +12,16 @@ script:
   - '(curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh) || true'
   - './node_modules/.bin/coffeelint lib'
   - './node_modules/.bin/coffeelint spec'
-  - 'ATOM_PATH=./atom atom/Atom.app/Contents/Resources/app/apm/node_modules/.bin/apm test --path atom/Atom.app/Contents/Resources/app/atom.sh'
+  - >
+    for i in {1..3}; do
+        exec 5>&1
+        x=$(ATOM_PATH=./atom atom/Atom.app/Contents/Resources/app/apm/node_modules/.bin/apm test --path atom/Atom.app/Contents/Resources/app/atom.sh >&5 2>&1 2>&5)
+        rc=$?;
+        if [[ $rc == 0 ]]; then exit $rc; fi
+        if [[ $rc != 0 && $x != *"foo"* ]]; then
+          exit $rc;
+        fi
+    done;
 
 git:
   depth: 10
