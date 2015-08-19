@@ -2,16 +2,8 @@ version: "{build}"
 os: Visual Studio 2015
 environment:
   matrix:
-    - GYP_MSVS_VERSION: 2008
-    - GYP_MSVS_VERSION: 2010
     - GYP_MSVS_VERSION: 2012
     - GYP_MSVS_VERSION: 2013
-    - GYP_MSVS_VERSION: 2015
-
-matrix:
-  allow_failures:
-    - GYP_MSVS_VERSION: 2008
-    - GYP_MSVS_VERSION: 2010
 
 build: off
 deploy: off
