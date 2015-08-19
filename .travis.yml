@@ -18,7 +18,7 @@ script:
         x=$(ATOM_PATH=./atom atom/Atom.app/Contents/Resources/app/apm/node_modules/.bin/apm test --path atom/Atom.app/Contents/Resources/app/atom.sh >&5 2>&1 2>&5)
         rc=$?;
         if [[ $rc == 0 ]]; then exit $rc; fi
-        if [[ $rc != 0 && $x != *"foo"* ]]; then
+        if [[ $rc != 0 && $x != *"FATAL:resource_dispatcher"* ]]; then
           exit $rc;
         fi
     done;
