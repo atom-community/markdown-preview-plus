@@ -1,14 +1,18 @@
 version: "{build}"
-os: Windows Server 2012 R2
+os: Visual Studio 2015
 environment:
   matrix:
-    #- GYP_MSVS_VERSION: 2008
-    #   os: Windows Server 2012 R2
-    #- GYP_MSVS_VERSION: 2010
-    #   os: Windows Server 2012 R2
+    - GYP_MSVS_VERSION: 2008
+    - GYP_MSVS_VERSION: 2010
     - GYP_MSVS_VERSION: 2012
-    #   os: Windows Server 2012 R2
     - GYP_MSVS_VERSION: 2013
+    - GYP_MSVS_VERSION: 2015
+
+matrix:
+  allow_failures:
+    - GYP_MSVS_VERSION: 2008
+    - GYP_MSVS_VERSION: 2010
+
 build: off
 deploy: off
 
@@ -22,7 +26,6 @@ install:
   - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
   - apm --version
   - ps: |
-      Write-Host $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json
       If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
         Write-Host "Atom mathjax-wrapper already installed"
       }Else{
