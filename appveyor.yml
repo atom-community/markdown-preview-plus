@@ -1,13 +1,14 @@
 version: "{build}"
 os: Windows Server 2012 R2
-matrix:
-  #- GYP_MSVS_VERSION: 2008
-  #   os: Windows Server 2012 R2
-  #- GYP_MSVS_VERSION: 2010
-  #   os: Windows Server 2012 R2
-  - GYP_MSVS_VERSION: 2012
-  #   os: Windows Server 2012 R2
-  - GYP_MSVS_VERSION: 2013
+environment:
+  matrix:
+    #- GYP_MSVS_VERSION: 2008
+    #   os: Windows Server 2012 R2
+    #- GYP_MSVS_VERSION: 2010
+    #   os: Windows Server 2012 R2
+    - GYP_MSVS_VERSION: 2012
+    #   os: Windows Server 2012 R2
+    - GYP_MSVS_VERSION: 2013
 build: off
 deploy: off
 
