@@ -13,7 +13,7 @@ build: off
 deploy: off
 
 cache:
-  - %USERPROFILE%\.atom\packages\mathjax-wrapper -> package.json
+  - C:\Users\appveyor\.atom\packages\mathjax-wrapper -> package.json
 
 install:
   - cd %LOCALAPPDATA%
@@ -22,12 +22,11 @@ install:
   - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
   - apm --version
   - ps: |
-  If (Test-Path %USERPROFILE%\.atom\packages\mathjax-wrapper){
-    Write-Host "Atom mathjax-wrapper already installed"
-  }Else{
-    apm install mathjax-wrapper
-  }
-
+      If (Test-Path %USERPROFILE%\.atom\packages\mathjax-wrapper){
+        Write-Host "Atom mathjax-wrapper already installed"
+      }Else{
+        apm install mathjax-wrapper
+      }
 
 test_script:
   - cd %APPVEYOR_BUILD_FOLDER%
