@@ -35,7 +35,7 @@ init = (rL) ->
 
   renderLaTeX = rL
 
-  markdownItOptions = getOptions(false)
+  markdownItOptions = getOptions()
 
   markdownIt = require('markdown-it')(markdownItOptions)
 
@@ -48,7 +48,7 @@ needsInit = (rL) ->
   markdownItOptions isnt getOptions() or markdownIt? or rL isnt renderLaTeX
 
 exports.render = (text, rL) ->
-  init(rL) if needsInit()
+  init(rL) if needsInit(rL)
   markdownIt.render text
 
 exports.decode = (url) ->
