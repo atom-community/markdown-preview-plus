@@ -318,8 +318,9 @@ describe "Markdown preview plus package", ->
       runs ->
         expect($(preview[0]).find("div.update-preview").html()).toBe """
           <p>hello</p>
-          <p></p>
-          <p>
+
+
+          <p>sad
           <img>
           world</p>
         """
