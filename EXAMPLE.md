@@ -16,9 +16,7 @@ Use `\[` on separate lines:
 
 Use `\[` on the same line:
 
-\[
-\frac{-b \pm \sqrt{b^2-4ac}}{2a}
-\]
+\[ \frac{-b \pm \sqrt{b^2-4ac}}{2a} \]
 
 Use `$$` on separate lines:
 
@@ -28,9 +26,7 @@ $$
 
 Use `$$` on the same line:
 
-$$
-E=mc^2
-$$
+$$E=mc^2$$
 
 ----
 
@@ -85,7 +81,6 @@ $x
 **Testing \newcommand**
 
 For all $x$ and $y$ in $\mathbb{R}^k$ it is true that
-
 $$
 \newcommand{sca}[1]{\langle #1 \rangle}
 |\sca{x,y}|^2 \le \sca{x,x} \cdot \sca{y,y},
