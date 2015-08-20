@@ -13,8 +13,6 @@ compareHTML = (one, two) ->
 
   two = two.replace(/\n\s*/g, '')
 
-  console.warn "#{one}\n#{two}"
-
   expect(one).toEqual(two)
 
 describe "MarkdownItHelper (Math)", ->
