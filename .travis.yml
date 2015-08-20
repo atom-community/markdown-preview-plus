@@ -13,12 +13,21 @@ script:
   - './node_modules/.bin/coffeelint lib'
   - './node_modules/.bin/coffeelint spec'
   - >
-    for i in {1..3}; do
-        x=$(ATOM_PATH=./atom atom/Atom.app/Contents/Resources/app/apm/node_modules/.bin/apm test --path atom/Atom.app/Contents/Resources/app/atom.sh 2>&1 | tee);
+    for i in {1..5}; do
+        echo "Test Run: $i";
+        x=$(ATOM_PATH=./atom atom/Atom.app/Contents/Resources/app/apm/node_modules/.bin/apm test --path atom/Atom.app/Contents/Resources/app/atom.sh 2>&1);
         rc=$?;
         echo "$x";
-        if [[ $rc == 0 ]]; then exit $rc; fi
-        if [[ $rc != 0 && $x != *"FATAL:resource_dispatcher"* ]]; then exit $rc; fi
+        echo "Test Exit Code: $rc";
+        if [[ $rc == 0 ]]; then
+          echo "Test Success :)";
+          exit 0;
+        fi
+        if [[ $rc != 0 && $x != *"FATAL:resource_dispatcher"* ]]; then
+          echo "Test Failed";
+          exit 1;
+        fi
+        echo "Test wrongly failed";
     done;
 
 git:
