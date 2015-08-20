@@ -63,7 +63,7 @@ render = (text, filePath, renderLaTeX, callback) ->
 
     markdownIt ?= require './markdown-it-helper'
 
-    callbackFunction null, markdownIt text, renderLaTeX
+    callbackFunction null, markdownIt.render(text, renderLaTeX)
 
 sanitize = (html) ->
   o = cheerio.load(html)
@@ -111,7 +111,8 @@ resolveImagePaths = (html, filePath) ->
   for imgElement in o('img')
     img = o(imgElement)
     if src = img.attr('src')
-
+      src = markdownIt.decode(src)
+      
       continue if src.match(/^(https?|atom):\/\//)
       continue if src.startsWith(process.resourcesPath)
       continue if src.startsWith(resourcePath)

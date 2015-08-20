@@ -47,8 +47,9 @@ init = (rL) ->
 needsInit = (rL) ->
   markdownItOptions isnt getOptions() or markdownIt? or rL isnt renderLaTeX
 
-module.exports = (text, rL) ->
-
+exports.render = (text, rL) ->
   init(rL) if needsInit()
-
   markdownIt.render text
+
+exports.decode = (url) ->
+  markdownIt.normalizeLinkText url
