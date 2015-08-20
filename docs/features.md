@@ -17,9 +17,12 @@ You may configure them in the [settings of MPP][options]
     double dollar signs `$$...$$`. You can use any LaTeX macros that are valid
     in a maths environment of a LaTeX document inside an equation block. For a
     full list of supported macros please see
-    [Supported LaTeX commands][macro-support]. Rendering of LaTeX equations in
-    the preview pane can be toggled with `ctrl-shift-x`. Please see
-    [math](./math.md) for more details.
+    [Supported LaTeX commands][macro-support]. MPP also supports user defined
+    persistent macro definitions.
+
+    Rendering of LaTeX equations in the preview pane can be toggled with
+    `ctrl-shift-x`. Please see [math](./math.md) for more details on the
+    equation syntax and user defined macros.
 
 -   **Pandoc support**
 

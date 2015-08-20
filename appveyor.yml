@@ -1,17 +1,45 @@
 version: "{build}"
-os: Windows Server 2012 R2
+os: Visual Studio 2015
+environment:
+  matrix:
+    - GYP_MSVS_VERSION: 2012
+    - GYP_MSVS_VERSION: 2013
 
-test: off
+build: off
 deploy: off
 
-install:
-  - cmd: cd %LOCALAPPDATA%
-  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/' ).trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
-  - cmd: 7z -y x atom-windows.zip > nul
+cache:
+  - C:\Users\appveyor\.atom\packages\mathjax-wrapper
+  - C:\Users\appveyor\mathjax.version
 
-build_script:
-  - cmd: SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
-  - cmd: cd %APPVEYOR_BUILD_FOLDER%
-  - cmd: apm clean
-  - cmd: apm install
-  - cmd: apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
+install:
+  - cd %LOCALAPPDATA%
+  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/').trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
+  - 7z -y x atom-windows.zip > nul
+  - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
+  - apm --version
+  - ps: |
+      If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
+        (New-Object Net.WebClient).DownloadFile("https://github.com/stedolan/jq/releases/download/jq-1.4/jq-win32.exe", "$(pwd)\jq-win32.exe")
+        $a = (apm view mathjax-wrapper --json | .\jq-win32.exe '.version') | Out-String
+        $b = (.\jq-win32.exe '.version' $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json) | Out-String
+        Write-Host $a$b
+        If ($a.CompareTo($b)){
+          Write-Host "Newer mathjax version available, we delete the old one"
+          Remove-Item $env:USERPROFILE\.atom\packages\mathjax-wrapper -recurse -Force
+        }Else{
+          Write-Host "Mathjax Versions match"
+        }
+      }
+  - ps: |
+      If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
+        Write-Host "Atom mathjax-wrapper already installed"
+      }Else{
+        apm install mathjax-wrapper
+      }
+
+test_script:
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - apm clean
+  - apm install
+  - apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
