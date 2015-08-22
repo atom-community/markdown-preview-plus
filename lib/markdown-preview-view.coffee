@@ -9,6 +9,7 @@ fs = require 'fs-plus'
 
 renderer = require './renderer'
 UpdatePreview = require './update-preview'
+markdownIt = null # Defer until used
 
 module.exports =
 class MarkdownPreviewView extends ScrollView
@@ -107,6 +108,10 @@ class MarkdownPreviewView extends ScrollView
         @css('zoom', zoomLevel - .1)
       'markdown-preview-plus:reset-zoom': =>
         @css('zoom', 1)
+      'markdown-preview-plus:sync-source': (event) =>
+        @getMarkdownSource().then (source) =>
+          return unless source?
+          @syncSource source, event.target
 
     changeHandler = =>
       @renderMarkdown()
@@ -126,6 +131,11 @@ class MarkdownPreviewView extends ScrollView
         changeHandler() unless atom.config.get 'markdown-preview-plus.liveUpdate'
       @disposables.add @editor.getBuffer().onDidReload ->
         changeHandler() unless atom.config.get 'markdown-preview-plus.liveUpdate'
+      @disposables.add atom.commands.add( atom.views.getView(@editor),
+        'markdown-preview-plus:sync-preview': (event) =>
+          @getMarkdownSource().then (source) =>
+            return unless source?
+            @syncPreview source, @editor.getCursorBufferPosition().row )
 
     @disposables.add atom.config.onDidChange 'markdown-preview-plus.breakOnSingleNewline', changeHandler
 
@@ -347,6 +357,137 @@ class MarkdownPreviewView extends ScrollView
 
   isEqual: (other) ->
     @[0] is other?[0] # Compare DOM elements
+
+  bubbleToContainer: (element) ->
+    testElement = element
+    while testElement isnt document.body
+      parent = testElement.parentNode
+      return parent.parentNode if parent.classList.contains('MathJax_Display')
+      return parent if parent.classList.contains('atom-text-editor')
+      testElement = parent
+    return element
+
+  encodeTag: (element) ->
+    return 'math' if element.classList.contains('math')
+    return 'code' if element.classList.contains('atom-text-editor') # only token.type is `fence` code blocks should ever be found in the first level of the tokens array
+    return element.tagName.toLowerCase()
+
+  decodeTag: (token) ->
+    return 'span' if token.tag is 'math'
+    return 'span' if token.tag is 'code'
+    return null if token.tag is ""
+    return token.tag
+
+  getPathToElementAsArray: (element) =>
+    if element.classList.contains('markdown-preview')
+      return [
+        tag: 'div'
+        index: 0
+      ]
+
+    element       = @bubbleToContainer element
+    tag           = @encodeTag element
+    siblings      = element.parentNode.childNodes
+    siblingsCount = 0
+
+    for i in [0..(siblings.length-1)] by 1
+      sibling     = siblings[i]
+      siblingTag  = if sibling.nodeType is 1 then @encodeTag(sibling) else null
+      if sibling is element
+        pathToElement = @getPathToElementAsArray(element.parentNode)
+        pathToElement.push
+          tag: tag
+          index: siblingsCount
+        return pathToElement
+      else if siblingTag is tag
+        siblingsCount++
+
+    return
+
+  syncSource: (text, element) =>
+    pathToElement = @getPathToElementAsArray element
+    pathToElement.shift() # remove div.markdown-preview
+    pathToElement.shift() # remove div.update-preview
+    return unless pathToElement.length
+
+    markdownIt  ?= require './markdown-it-helper'
+    tokens      = markdownIt.getTokens text, @renderLaTeX
+    finalToken  = null
+    level       = 0
+
+    for token in tokens
+      break if token.level < level
+      continue if token.hidden
+      if token.tag is pathToElement[0].tag and token.level is level
+        if token.nesting is 1
+          if pathToElement[0].index is 0
+            finalToken = token if token.map?
+            pathToElement.shift()
+            level++
+          else
+            pathToElement[0].index--
+        else if token.nesting is 0 and token.tag in ['math', 'code']
+          if pathToElement[0].index is 0
+            finalToken = token
+            break
+          else
+            pathToElement[0].index--
+      break if pathToElement.length is 0
+
+    @editor.setCursorBufferPosition [finalToken.map[0], 0] if finalToken?
+
+  getPathToTokenAsArray: (tokens, line) =>
+    pathToToken   = []
+    tokenTagCount = []
+    level         = 0
+
+    for token in tokens
+      break if token.level < level
+      continue if token.hidden
+      continue if token.nesting is -1
+
+      token.tag = @decodeTag token
+      continue unless token.tag?
+
+      if token.map? and line >= token.map[0] and line <= token.map[1]
+        if token.nesting is 1
+          pathToToken.push
+            tag: token.tag
+            index: tokenTagCount[token.tag] ? 0
+          tokenTagCount = []
+          level++
+        else if token.nesting is 0
+          pathToToken.push
+            tag: token.tag
+            index: tokenTagCount[token.tag] ? 0
+          break
+      else if token.level is level
+        if tokenTagCount[token.tag]?
+        then tokenTagCount[token.tag]++
+        else tokenTagCount[token.tag] = 1
+
+    return pathToToken
+
+  syncPreview: (text, line) =>
+    markdownIt  ?= require './markdown-it-helper'
+    tokens      = markdownIt.getTokens text, @renderLaTeX
+    pathToToken = @getPathToTokenAsArray tokens, line
+
+    element = @find('.update-preview').eq(0)
+    for token in pathToToken
+      candidateElement = element.children(token.tag).eq(token.index)
+      if candidateElement.length isnt 0
+      then element = candidateElement
+      else break
+
+    element[0].scrollIntoView() unless element[0].classList.contains('update-preview')
+    maxScrollTop = @element.scrollHeight - @innerHeight()
+    @element.scrollTop -= @innerHeight()/4 unless @scrollTop() >= maxScrollTop
+
+    element.addClass('flash')
+    setTimeout ( -> element.removeClass('flash') ), 1000
+
+    return
 
 if Grim.includeDeprecatedAPIs
   MarkdownPreviewView::on = (eventName) ->
