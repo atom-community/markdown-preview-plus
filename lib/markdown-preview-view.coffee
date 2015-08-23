@@ -113,20 +113,6 @@ class MarkdownPreviewView extends ScrollView
           return unless source?
           @syncSource source, event.target
 
-    @on 'click', (event) =>
-      return unless event.altKey is true
-      @getMarkdownSource().then (source) =>
-        return unless source?
-        @syncSource source, event.target
-
-    @on 'keydown', (event) =>
-      return unless event.which is 18
-      return false
-
-    @on 'keyup', (event) =>
-      return unless event.which is 18
-      return false
-
     changeHandler = =>
       @renderMarkdown()
 
