@@ -358,7 +358,7 @@ class MarkdownPreviewView extends ScrollView
   isEqual: (other) ->
     @[0] is other?[0] # Compare DOM elements
 
-  bubbleToContainer: (element) ->
+  bubbleToContainerElement: (element) ->
     testElement = element
     while testElement isnt document.body
       parent = testElement.parentNode
@@ -366,6 +366,11 @@ class MarkdownPreviewView extends ScrollView
       return parent if parent.classList.contains('atom-text-editor')
       testElement = parent
     return element
+
+  bubbleToContainerToken: (pathToToken) ->
+    for i in [0..(pathToToken.length-1)] by 1
+      return pathToToken.slice(0, i+1) if pathToToken[i].tag is 'table'
+    return pathToToken
 
   encodeTag: (element) ->
     return 'math' if element.classList.contains('math')
@@ -378,23 +383,22 @@ class MarkdownPreviewView extends ScrollView
     return null if token.tag is ""
     return token.tag
 
-  getPathToElementAsArray: (element) =>
+  getPathToElement: (element) =>
     if element.classList.contains('markdown-preview')
       return [
         tag: 'div'
         index: 0
       ]
 
-    element       = @bubbleToContainer element
+    element       = @bubbleToContainerElement element
     tag           = @encodeTag element
     siblings      = element.parentNode.childNodes
     siblingsCount = 0
 
-    for i in [0..(siblings.length-1)] by 1
-      sibling     = siblings[i]
+    for sibling in siblings
       siblingTag  = if sibling.nodeType is 1 then @encodeTag(sibling) else null
       if sibling is element
-        pathToElement = @getPathToElementAsArray(element.parentNode)
+        pathToElement = @getPathToElement(element.parentNode)
         pathToElement.push
           tag: tag
           index: siblingsCount
@@ -405,7 +409,7 @@ class MarkdownPreviewView extends ScrollView
     return
 
   syncSource: (text, element) =>
-    pathToElement = @getPathToElementAsArray element
+    pathToElement = @getPathToElement element
     pathToElement.shift() # remove div.markdown-preview
     pathToElement.shift() # remove div.update-preview
     return unless pathToElement.length
@@ -434,9 +438,13 @@ class MarkdownPreviewView extends ScrollView
             pathToElement[0].index--
       break if pathToElement.length is 0
 
-    @editor.setCursorBufferPosition [finalToken.map[0], 0] if finalToken?
+    if finalToken?
+      @editor.setCursorBufferPosition [finalToken.map[0], 0]
+      return finalToken.map[0]
+    else
+      return null
 
-  getPathToTokenAsArray: (tokens, line) =>
+  getPathToToken: (tokens, line) =>
     pathToToken   = []
     tokenTagCount = []
     level         = 0
@@ -449,7 +457,7 @@ class MarkdownPreviewView extends ScrollView
       token.tag = @decodeTag token
       continue unless token.tag?
 
-      if token.map? and line >= token.map[0] and line <= token.map[1]
+      if token.map? and line >= token.map[0] and line <= (token.map[1]-1)
         if token.nesting is 1
           pathToToken.push
             tag: token.tag
@@ -466,12 +474,13 @@ class MarkdownPreviewView extends ScrollView
         then tokenTagCount[token.tag]++
         else tokenTagCount[token.tag] = 1
 
+    pathToToken = @bubbleToContainerToken pathToToken
     return pathToToken
 
   syncPreview: (text, line) =>
     markdownIt  ?= require './markdown-it-helper'
     tokens      = markdownIt.getTokens text, @renderLaTeX
-    pathToToken = @getPathToTokenAsArray tokens, line
+    pathToToken = @getPathToToken tokens, line
 
     element = @find('.update-preview').eq(0)
     for token in pathToToken
@@ -480,6 +489,8 @@ class MarkdownPreviewView extends ScrollView
       then element = candidateElement
       else break
 
+    return null if element[0].classList.contains('update-preview') # Do not jump to the top of the preview for bad syncs
+
     element[0].scrollIntoView() unless element[0].classList.contains('update-preview')
     maxScrollTop = @element.scrollHeight - @innerHeight()
     @element.scrollTop -= @innerHeight()/4 unless @scrollTop() >= maxScrollTop
@@ -487,7 +498,7 @@ class MarkdownPreviewView extends ScrollView
     element.addClass('flash')
     setTimeout ( -> element.removeClass('flash') ), 1000
 
-    return
+    return element[0]
 
 if Grim.includeDeprecatedAPIs
   MarkdownPreviewView::on = (eventName) ->
