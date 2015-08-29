@@ -358,6 +358,15 @@ class MarkdownPreviewView extends ScrollView
   isEqual: (other) ->
     @[0] is other?[0] # Compare DOM elements
 
+  #
+  # Find the closest ancestor of an element that is not a decendant of either
+  # `span.math` or `span.atom-text-editor`.
+  #
+  # @param {HTMLElement} element The element from which the search for a
+  #   closest ancestor begins.
+  # @return {HTMLElement} The closest ancestor to `element` that does not
+  #   contain either `span.math` or `span.atom-text-editor`.
+  #
   bubbleToContainerElement: (element) ->
     testElement = element
     while testElement isnt document.body
@@ -367,22 +376,58 @@ class MarkdownPreviewView extends ScrollView
       testElement = parent
     return element
 
+  #
+  # Determine a subsequence of a sequence of tokens representing a path through
+  # HTMLElements that does not continue deeper than a table element.
+  #
+  # @param {(tag: <tag>, index: <index>)[]} pathToToken Array of tokens
+  #   representing a path to a HTMLElement with the root element at
+  #   pathToToken[0] and the target element at the highest index. Each element
+  #   consists of a `tag` and `index` representing its index amongst its
+  #   sibling elements of the same `tag`.
+  # @return {(tag: <tag>, index: <index>)[]} The subsequence of pathToToken that
+  #   maintains the same root but terminates at a table element or the target
+  #   element, whichever comes first.
+  #
   bubbleToContainerToken: (pathToToken) ->
     for i in [0..(pathToToken.length-1)] by 1
       return pathToToken.slice(0, i+1) if pathToToken[i].tag is 'table'
     return pathToToken
 
+  #
+  # Encode tags for markdown-it.
+  #
+  # @param {HTMLElement} element Encode the tag of element.
+  # @return {string} Encoded tag.
+  #
   encodeTag: (element) ->
     return 'math' if element.classList.contains('math')
     return 'code' if element.classList.contains('atom-text-editor') # only token.type is `fence` code blocks should ever be found in the first level of the tokens array
     return element.tagName.toLowerCase()
 
+  #
+  # Decode tags used by markdown-it
+  #
+  # @param {markdown-it.Token} token Decode the tag of token.
+  # @return {string|null} Decoded tag or `null` if the token has no tag.
+  #
   decodeTag: (token) ->
     return 'span' if token.tag is 'math'
     return 'span' if token.tag is 'code'
     return null if token.tag is ""
     return token.tag
 
+  #
+  # Determine path to a target element from a container `.markdown-preview`.
+  #
+  # @param {HTMLElement} element Target HTMLElement.
+  # @return {(tag: <tag>, index: <index>)[]} Array of tokens representing a path
+  #   to `element` from `.markdown-preview`. The root `.markdown-preview`
+  #   element is the first elements in the array and the target element
+  #   `element` at the highest index. Each element consists of a `tag` and
+  #   `index` representing its index amongst its sibling elements of the same
+  #   `tag`.
+  #
   getPathToElement: (element) =>
     if element.classList.contains('markdown-preview')
       return [
@@ -408,6 +453,17 @@ class MarkdownPreviewView extends ScrollView
 
     return
 
+  #
+  # Set the associated editors cursor buffer position to the line representing
+  # the source markdown of a target element.
+  #
+  # @param {string} text Source markdown of the associated editor.
+  # @param {HTMLElement} element Target element contained within the assoicated
+  #   `.markdown-preview` container. The method will attempt to identify the
+  #   line of `text` that represents `element` and set the cursor to that line.
+  # @return {number|null} The line of `text` that represents `element`. If no
+  #   line is identified `null` is returned.
+  #
   syncSource: (text, element) =>
     pathToElement = @getPathToElement element
     pathToElement.shift() # remove div.markdown-preview
@@ -444,6 +500,19 @@ class MarkdownPreviewView extends ScrollView
     else
       return null
 
+  #
+  # Determine path to a target token.
+  #
+  # @param {(markdown-it.Token)[]} tokens Array of tokens as returned by
+  #   `markdown-it.parse()`.
+  # @param {number} line Line representing the target token.
+  # @return {(tag: <tag>, index: <index>)[]} Array representing a path to the
+  #   target token. The root token is represented by the first element in the
+  #   array and the target token by the last elment. Each element consists of a
+  #   `tag` and `index` representing its index amongst its sibling tokens in
+  #   `tokens` of the same `tag`. `line` will lie between the properties
+  #   `map[0]` and `map[1]` of the target token.
+  #
   getPathToToken: (tokens, line) =>
     pathToToken   = []
     tokenTagCount = []
@@ -477,6 +546,17 @@ class MarkdownPreviewView extends ScrollView
     pathToToken = @bubbleToContainerToken pathToToken
     return pathToToken
 
+  #
+  # Scroll the associated preview to the element representing the target line of
+  # of the source markdown.
+  #
+  # @param {string} text Source markdown of the associated editor.
+  # @param {number} line Target line of `text`. The method will attempt to
+  #   identify the elment of the associated `.markdown-preview` that represents
+  #   `line` and scroll the `.markdown-preview` to that element.
+  # @return {number|null} The element that represents `line`. If no element is
+  #   identified `null` is returned.
+  #
   syncPreview: (text, line) =>
     markdownIt  ?= require './markdown-it-helper'
     tokens      = markdownIt.getTokens text, @renderLaTeX
