@@ -165,8 +165,11 @@
   .flash {
     -webkit-animation: flash 1s ease-out;
     -webkit-animation-iteration-count: 1;
-    display: block;
     outline: 1px solid rgba(255,0,0,0);
+  }
+
+  .flash:not(li) {
+    display: block;
   }
 
   @-webkit-keyframes flash {
