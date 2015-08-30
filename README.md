@@ -2,13 +2,17 @@
 
 [![appveyor][ab]][a] [![travis][tb]][t] [![wercker][wb]][w] ![apm version][av] ![apm downloads][ad]
 
-![MPP][preview]
-
 Markdown Preview Plus (MPP) is a fork of
 [Markdown Preview](https://github.com/atom/markdown-preview) that provides a
-real-time preview of markdown documents. Should you have any problems while
+real-time preview of markdown documents.
+
+Should you have any problems while
 installing or using MPP, or if you would like to see a new feature added please
 open up a [new issue][issue].
+
+We also maintain a [changelog][changelog] for you to see what improved in MPP.
+
+![MPP][preview]
 
 ## Features
 
@@ -37,7 +41,7 @@ Long instructions can be found [here][installation]. In short steps:
 
     If you have issues installing on Windows, please [check here for help][win-install]
 
-3.  Disable built-in package  *Markdown Preview*
+3.  Disable built-in package *Markdown Preview*
 
 4.  (optional) enable pandoc
 
@@ -54,6 +58,7 @@ Please see [options][options] for further details on configuring MPP and
 Markdown Preview Plus (MPP) is released under the [MIT license][license].
 
 [preview]: https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/imgs/mpp-full-res-invert.png
+[changelog]: https://github.com/Galadirith/markdown-preview-plus/blob/master/CHANGELOG.md
 [issue]: https://github.com/Galadirith/markdown-preview-plus/issues
 [installation]: docs/installation.md
 [win-install]: docs/win-install.md
