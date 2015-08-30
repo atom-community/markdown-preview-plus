@@ -1,0 +1,3612 @@
+[
+  {
+    line: 0
+    path: [
+      {
+        tag: "h1"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 1
+    path: []
+  }
+  {
+    line: 2
+    path: [
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 3
+    path: []
+  }
+  {
+    line: 4
+    path: [
+      {
+        tag: "p"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 5
+    path: [
+      {
+        tag: "p"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 6
+    path: [
+      {
+        tag: "p"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 7
+    path: []
+  }
+  {
+    line: 8
+    path: [
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 9
+    path: [
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 10
+    path: [
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 11
+    path: [
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 12
+    path: [
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 13
+    path: [
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 14
+    path: [
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 15
+    path: [
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 16
+    path: []
+  }
+  {
+    line: 17
+    path: [
+      {
+        tag: "blockquote"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 18
+    path: []
+  }
+  {
+    line: 19
+    path: [
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 20
+    path: [
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 21
+    path: [
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 22
+    path: []
+  }
+  {
+    line: 23
+    path: [
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 24
+    path: [
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 25
+    path: [
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 26
+    path: [
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 27
+    path: [
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 28
+    path: []
+  }
+  {
+    line: 29
+    path: [
+      {
+        tag: "hr"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 30
+    path: []
+  }
+  {
+    line: 31
+    path: [
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 32
+    path: [
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 33
+    path: [
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 34
+    path: [
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 35
+    path: [
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 36
+    path: [
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 37
+    path: [
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 38
+    path: [
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 39
+    path: [
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 40
+    path: [
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 41
+    path: [
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 42
+    path: [
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 43
+    path: [
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 44
+    path: []
+  }
+  {
+    line: 45
+    path: [
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 46
+    path: [
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 47
+    path: [
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 48
+    path: []
+  }
+  {
+    line: 49
+    path: [
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 50
+    path: [
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 51
+    path: [
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 52
+    path: []
+  }
+  {
+    line: 53
+    path: [
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 54
+    path: [
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 55
+    path: []
+  }
+  {
+    line: 56
+    path: [
+      {
+        tag: "h1"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 57
+    path: []
+  }
+  {
+    line: 58
+    path: [
+      {
+        tag: "p"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 59
+    path: []
+  }
+  {
+    line: 60
+    path: [
+      {
+        tag: "p"
+        index: 5
+      }
+    ]
+  }
+  {
+    line: 61
+    path: [
+      {
+        tag: "p"
+        index: 5
+      }
+    ]
+  }
+  {
+    line: 62
+    path: [
+      {
+        tag: "p"
+        index: 5
+      }
+    ]
+  }
+  {
+    line: 63
+    path: []
+  }
+  {
+    line: 64
+    path: [
+      {
+        tag: "p"
+        index: 6
+      }
+    ]
+  }
+  {
+    line: 65
+    path: [
+      {
+        tag: "p"
+        index: 6
+      }
+    ]
+  }
+  {
+    line: 66
+    path: [
+      {
+        tag: "p"
+        index: 6
+      }
+    ]
+  }
+  {
+    line: 67
+    path: [
+      {
+        tag: "p"
+        index: 6
+      }
+    ]
+  }
+  {
+    line: 68
+    path: [
+      {
+        tag: "p"
+        index: 6
+      }
+    ]
+  }
+  {
+    line: 69
+    path: [
+      {
+        tag: "p"
+        index: 6
+      }
+    ]
+  }
+  {
+    line: 70
+    path: [
+      {
+        tag: "p"
+        index: 6
+      }
+    ]
+  }
+  {
+    line: 71
+    path: [
+      {
+        tag: "p"
+        index: 6
+      }
+    ]
+  }
+  {
+    line: 72
+    path: []
+  }
+  {
+    line: 73
+    path: [
+      {
+        tag: "blockquote"
+        index: 2
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 74
+    path: []
+  }
+  {
+    line: 75
+    path: [
+      {
+        tag: "blockquote"
+        index: 3
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 76
+    path: [
+      {
+        tag: "blockquote"
+        index: 3
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 77
+    path: [
+      {
+        tag: "blockquote"
+        index: 3
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 78
+    path: []
+  }
+  {
+    line: 79
+    path: [
+      {
+        tag: "span"
+        index: 3
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 80
+    path: [
+      {
+        tag: "span"
+        index: 3
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 81
+    path: [
+      {
+        tag: "span"
+        index: 3
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 82
+    path: [
+      {
+        tag: "span"
+        index: 3
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 83
+    path: [
+      {
+        tag: "span"
+        index: 3
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 84
+    path: []
+  }
+  {
+    line: 85
+    path: [
+      {
+        tag: "hr"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 86
+    path: []
+  }
+  {
+    line: 87
+    path: [
+      {
+        tag: "ul"
+        index: 1
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 88
+    path: [
+      {
+        tag: "ul"
+        index: 1
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 89
+    path: [
+      {
+        tag: "ul"
+        index: 1
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 90
+    path: [
+      {
+        tag: "ul"
+        index: 1
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 91
+    path: [
+      {
+        tag: "ol"
+        index: 1
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 92
+    path: [
+      {
+        tag: "ol"
+        index: 1
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 93
+    path: [
+      {
+        tag: "ol"
+        index: 1
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 94
+    path: [
+      {
+        tag: "ol"
+        index: 1
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 95
+    path: [
+      {
+        tag: "table"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 96
+    path: [
+      {
+        tag: "table"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 97
+    path: [
+      {
+        tag: "table"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 98
+    path: [
+      {
+        tag: "table"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 99
+    path: [
+      {
+        tag: "table"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 100
+    path: []
+  }
+  {
+    line: 101
+    path: [
+      {
+        tag: "span"
+        index: 4
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 102
+    path: [
+      {
+        tag: "span"
+        index: 4
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 103
+    path: [
+      {
+        tag: "span"
+        index: 4
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 104
+    path: []
+  }
+  {
+    line: 105
+    path: [
+      {
+        tag: "span"
+        index: 5
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 106
+    path: [
+      {
+        tag: "span"
+        index: 5
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 107
+    path: [
+      {
+        tag: "span"
+        index: 5
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 108
+    path: []
+  }
+  {
+    line: 109
+    path: [
+      {
+        tag: "p"
+        index: 7
+      }
+    ]
+  }
+  {
+    line: 110
+    path: [
+      {
+        tag: "p"
+        index: 7
+      }
+    ]
+  }
+  {
+    line: 111
+    path: [
+      {
+        tag: "p"
+        index: 7
+      }
+    ]
+  }
+  {
+    line: 112
+    path: []
+  }
+  {
+    line: 113
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "h1"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 114
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 115
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 116
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 117
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 118
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 119
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 120
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 121
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 122
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 123
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 124
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 125
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 126
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 127
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 128
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 129
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 130
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "blockquote"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 131
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 132
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 133
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 134
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 135
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 136
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 137
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 138
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 139
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 140
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 141
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 142
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "hr"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 143
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 144
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 145
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 146
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 147
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 148
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 149
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 150
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 151
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 152
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 153
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 154
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 155
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 156
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 157
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 158
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 159
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 160
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 161
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+    ]
+  }
+  {
+    line: 162
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 163
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 164
+    path: [
+      {
+        tag: "blockquote"
+        index: 4
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 165
+    path: []
+  }
+  {
+    line: 166
+    path: [
+      {
+        tag: "p"
+        index: 8
+      }
+    ]
+  }
+  {
+    line: 167
+    path: []
+  }
+  {
+    line: 168
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 169
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 170
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "h1"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 171
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 172
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 173
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 174
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 175
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 176
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 177
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 178
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 179
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 180
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 181
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 182
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 183
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 184
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 185
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 186
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 187
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "blockquote"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 188
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 189
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 190
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 191
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 192
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 193
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 194
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 195
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 196
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 197
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 198
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 199
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "hr"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 200
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 201
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 202
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 203
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 204
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 205
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 206
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 207
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 208
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 209
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 210
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 211
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 212
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 213
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 214
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 215
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 216
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 217
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 218
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 219
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 220
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 221
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 222
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 223
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 224
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 225
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "h1"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 226
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 227
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 228
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 229
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 230
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 231
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 232
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 233
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 234
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 235
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 236
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 237
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 238
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 239
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 240
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 3
+      }
+    ]
+  }
+  {
+    line: 241
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 242
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "blockquote"
+        index: 0
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 243
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 244
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 245
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 246
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "blockquote"
+        index: 1
+      }
+      {
+        tag: "p"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 247
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 248
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 249
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 250
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 251
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 252
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 0
+        class: "atom-text-editor"
+      }
+    ]
+  }
+  {
+    line: 253
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 254
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "hr"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 255
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 256
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 257
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 258
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 259
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "ul"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 260
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 261
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 262
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 263
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "ol"
+        index: 0
+      }
+      {
+        tag: "li"
+        index: 2
+      }
+    ]
+  }
+  {
+    line: 264
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 265
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 266
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 267
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 268
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "table"
+        index: 0
+      }
+    ]
+  }
+  {
+    line: 269
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 270
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 271
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 272
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 1
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 273
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+    ]
+  }
+  {
+    line: 274
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 275
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 276
+    path: [
+      {
+        tag: "ul"
+        index: 2
+      }
+      {
+        tag: "li"
+        index: 1
+      }
+      {
+        tag: "span"
+        index: 2
+        class: "math"
+      }
+    ]
+  }
+  {
+    line: 277
+    path: []
+  }
+]

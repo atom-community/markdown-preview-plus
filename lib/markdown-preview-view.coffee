@@ -486,7 +486,7 @@ class MarkdownPreviewView extends ScrollView
             level++
           else
             pathToElement[0].index--
-        else if token.nesting is 0 and token.tag in ['math', 'code']
+        else if token.nesting is 0 and token.tag in ['math', 'code', 'hr']
           if pathToElement[0].index is 0
             finalToken = token
             break
