@@ -15,7 +15,10 @@
 ]
 
 'context-menu':
+  'atom-workspace atom-text-editor[data-grammar*="gfm"]':
+    [{label: 'Sync Preview', command: 'markdown-preview-plus:sync-preview'}]
   '.markdown-preview': [
+    {label: 'Sync Source', command: 'markdown-preview-plus:sync-source'}
     {label: 'Copy As HTML', command: 'core:copy'}
     {label: 'Save As HTML\u2026', command: 'core:save-as'}
   ]

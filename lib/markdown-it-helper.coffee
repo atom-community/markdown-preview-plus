@@ -53,3 +53,7 @@ exports.render = (text, rL) ->
 
 exports.decode = (url) ->
   markdownIt.normalizeLinkText url
+
+exports.getTokens = (text, rL) ->
+  init(rL) if needsInit(rL)
+  markdownIt.parse text
