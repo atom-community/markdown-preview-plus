@@ -79,12 +79,43 @@ describe "Markdown preview plus package", ->
       runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
       expectPreviewInSplitPane()
 
-    it "closes the existing preview when toggle is triggered a second time on the editor", ->
+    it "closes the existing preview when toggle is triggered a second time on the editor and when the preview is its panes active item", ->
       atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
 
       [editorPane, previewPane] = atom.workspace.getPanes()
       expect(editorPane.isActive()).toBe true
       expect(previewPane.getActiveItem()).toBeUndefined()
+
+    it "activates the existing preview when toggle is triggered a second time on the editor and when the preview is not its panes active item", ->
+      [editorPane, previewPane] = atom.workspace.getPanes()
+
+      editorPane.activate()
+      waitsForPromise -> atom.workspace.open("subdir/simple.md")
+      runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+
+      waitsFor "second markdown preview to be created", ->
+        previewPane.getItems().length is 2
+
+      runs ->
+        preview = previewPane.getActiveItem()
+        expect(preview).toBeInstanceOf(MarkdownPreviewView)
+        expect(previewPane.getActiveItemIndex()).toBe(1)
+        expect(preview.getPath()).toBe editorPane.getActiveItem().getPath()
+        expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
+
+        editorPane.activate()
+        editorPane.activateItemAtIndex(0)
+
+        atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+
+      waitsFor "first preview to be activated", ->
+        previewPane.getActiveItemIndex() is 0
+
+      runs ->
+        preview = previewPane.getActiveItem()
+        expect(previewPane.getItems().length).toBe(2)
+        expect(preview.getPath()).toBe editorPane.getActiveItem().getPath()
+        expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
 
     it "closes the existing preview when toggle is triggered on it and it has focus", ->
       [editorPane, previewPane] = atom.workspace.getPanes()
