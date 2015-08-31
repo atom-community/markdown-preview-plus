@@ -180,7 +180,11 @@ module.exports =
     uri = @uriForEditor(editor)
     previewPane = atom.workspace.paneForURI(uri)
     if previewPane?
-      previewPane.destroyItem(previewPane.itemForURI(uri))
+      preview = previewPane.itemForURI(uri)
+      if preview isnt previewPane.getActiveItem()
+        previewPane.activateItem(preview)
+        return false
+      previewPane.destroyItem(preview)
       true
     else
       false
