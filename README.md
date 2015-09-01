@@ -22,6 +22,7 @@ We also have a more detailed description of [features][features].
 -   Math rendering with persistent macro support, toggled with `ctrl-shift-x`
 -   Optionally use pandoc with citation support
 -   Live reload while editing
+-   On demand synchronization
 -   And many more...
 -   missing one? write an [issue][issue]
 

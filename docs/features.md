@@ -31,6 +31,14 @@ You may configure them in the [settings of MPP][options]
     [pandoc arguments][pandoc-args], adjust the [markdown flavor][pandoc-flavor]
     and enable [citation replacement][pandoc-cit].
 
+-   **On demand synchronization**
+
+    You can synchronize the positions of the markdown source editor and preview
+    on demand. To synchronize the position of the preview with the editor,
+    position the cursor, right click and then select **Sync Preview** form the
+    context menu. To synchronize the position of the editor with the preview,
+    right click the desired element of the preview and select **Sync Source**.
+
 [gfm]: https://help.github.com/articles/github-flavored-markdown/
 [options]: ./options.md
 [pandoc]: https://github.com/jgm/pandoc
