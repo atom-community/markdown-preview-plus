@@ -1,11 +1,11 @@
 # Change Log
 
-## [Unreleased](https://github.com/Galadirith/markdown-preview-plus/tree/HEAD)
-
-[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v1.7.0...HEAD)
+## [v2.0.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.0.0) (2015-09-01)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v1.7.0...v2.0.0)
 
 **Implemented enhancements:**
 
+- Add CHANGELOG.md [\#79](https://github.com/Galadirith/markdown-preview-plus/issues/79)
 - Shortcut to activate the preview of currently focused editor [\#74](https://github.com/Galadirith/markdown-preview-plus/issues/74)
 - create pathwatcher version without runas [\#67](https://github.com/Galadirith/markdown-preview-plus/issues/67)
 - Migrate from marked to markdown-it [\#47](https://github.com/Galadirith/markdown-preview-plus/issues/47)
