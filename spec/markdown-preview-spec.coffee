@@ -86,7 +86,7 @@ describe "Markdown preview plus package", ->
       expect(editorPane.isActive()).toBe true
       expect(previewPane.getActiveItem()).toBeUndefined()
 
-    it "activates the existing preview when toggle is triggered a second time on the editor and when the preview is not its panes active item", ->
+    it "activates the existing preview when toggle is triggered a second time on the editor and when the preview is not its panes active item #nottravis", ->
       [editorPane, previewPane] = atom.workspace.getPanes()
 
       editorPane.activate()
