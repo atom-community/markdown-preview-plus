@@ -45,7 +45,9 @@ init = (rL) ->
     markdownIt.use math, mathBrackets
 
 needsInit = (rL) ->
-  markdownItOptions isnt getOptions() or markdownIt? or rL isnt renderLaTeX
+  not markdownIt? or
+  markdownItOptions.breaks isnt atom.config.get('markdown-preview-plus.breakOnSingleNewline') or
+  rL isnt renderLaTeX
 
 exports.render = (text, rL) ->
   init(rL) if needsInit(rL)
