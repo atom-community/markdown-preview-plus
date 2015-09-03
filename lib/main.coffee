@@ -47,6 +47,7 @@ module.exports =
       order: 40
     useGitHubStyle:
       title: 'Use GitHub.com style'
+      description: 'Use github flavored markdown, for example: require no space after headings #'
       type: 'boolean'
       default: false
       order: 50
