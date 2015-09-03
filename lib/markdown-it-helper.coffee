@@ -66,4 +66,4 @@ exports.decode = (url) ->
 
 exports.getTokens = (text, rL) ->
   init(rL) if needsInit(rL)
-  markdownIt.parse text
+  markdownIt.parse text, {}
