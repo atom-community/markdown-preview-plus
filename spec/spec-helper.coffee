@@ -1,6 +1,7 @@
 require 'jasmine-tagged'
 
 _ = require 'underscore-plus'
+pathwatcher = require atom.packages.resourcePath + '/node_modules/pathwatcher/lib/main'
 
 tags = [process.platform]
 
@@ -12,3 +13,6 @@ original = jasmineEnv.setIncludedTags
 
 jasmineEnv.setIncludedTags = (t) ->
   original(_.union tags, t)
+
+afterEach ->
+  pathwatcher.closeAllWatchers()
