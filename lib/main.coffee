@@ -45,9 +45,14 @@ module.exports =
       type: 'boolean'
       default: false
       order: 40
+    useLazyHeaders:
+      title: 'Use Lazy Headers'
+      description: 'Require no space after headings #'
+      type: 'boolean'
+      default: true
+      order: 45
     useGitHubStyle:
       title: 'Use GitHub.com style'
-      description: 'Use github flavored markdown, for example: require no space after headings #'
       type: 'boolean'
       default: false
       order: 50

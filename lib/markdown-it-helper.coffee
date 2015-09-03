@@ -45,7 +45,7 @@ init = (rL) ->
     markdownIt.use math, mathDollars
     markdownIt.use math, mathBrackets
 
-  lazyHeaders = atom.config.get('markdown-preview-plus.useGitHubStyle')
+  lazyHeaders = atom.config.get('markdown-preview-plus.useLazyHeaders')
 
   if lazyHeaders
     markdownIt.use require('markdown-it-lazy-headers')
@@ -54,7 +54,7 @@ init = (rL) ->
 needsInit = (rL) ->
   not markdownIt? or
   markdownItOptions.breaks isnt atom.config.get('markdown-preview-plus.breakOnSingleNewline') or
-  lazyHeaders isnt atom.config.get('markdown-preview-plus.useGitHubStyle') or
+  lazyHeaders isnt atom.config.get('markdown-preview-plus.useLazyHeaders') or
   rL isnt renderLaTeX
 
 exports.render = (text, rL) ->

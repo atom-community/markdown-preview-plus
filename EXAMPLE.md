@@ -1,6 +1,3 @@
-#X
-# X
-
 $x$ math at the start of the document
 
 This document is to test $\LaTeX$ rendering with [markdown-preview-plus](https://atom.io/packages/markdown-preview-plus).
