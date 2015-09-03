@@ -2,6 +2,7 @@ markdownIt = null
 markdownItOptions = null
 renderLaTeX = null
 math = null
+lazyHeaders = null
 
 mathInline = (string) -> "<span class='math'><script type='math/tex'>#{string}</script></span>"
 mathBlock = (string) -> "<span class='math'><script type='math/tex; mode=display'>#{string}</script></span>"
@@ -44,9 +45,16 @@ init = (rL) ->
     markdownIt.use math, mathDollars
     markdownIt.use math, mathBrackets
 
+  lazyHeaders = atom.config.get('markdown-preview-plus.useLazyHeaders')
+
+  if lazyHeaders
+    markdownIt.use require('markdown-it-lazy-headers')
+
+
 needsInit = (rL) ->
   not markdownIt? or
   markdownItOptions.breaks isnt atom.config.get('markdown-preview-plus.breakOnSingleNewline') or
+  lazyHeaders isnt atom.config.get('markdown-preview-plus.useLazyHeaders') or
   rL isnt renderLaTeX
 
 exports.render = (text, rL) ->

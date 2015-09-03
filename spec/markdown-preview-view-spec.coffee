@@ -77,6 +77,31 @@ describe "MarkdownPreviewView", ->
         jasmine.attachToDOM(newPreview.element)
         expect(newPreview.getPath()).toBe preview.getPath()
 
+  describe "header rendering", ->
+
+    it "should render headings with and without space", ->
+
+      waitsForPromise -> preview.renderMarkdown()
+
+      runs ->
+        headlines = preview.find('h2')
+        expect(headlines).toExist()
+        expect(headlines.length).toBe(2)
+        expect(headlines[0].outerHTML).toBe("<h2>Level two header without space</h2>")
+        expect(headlines[1].outerHTML).toBe("<h2>Level two header with space</h2>")
+
+    it "should render headings with and without space", ->
+      atom.config.set 'markdown-preview-plus.useLazyHeaders', false
+
+      waitsForPromise -> preview.renderMarkdown()
+
+      runs ->
+        headlines = preview.find('h2')
+        expect(headlines).toExist()
+        expect(headlines.length).toBe(1)
+        expect(headlines[0].outerHTML).toBe("<h2>Level two header with space</h2>")
+
+
   describe "code block conversion to atom-text-editor tags", ->
     beforeEach ->
       waitsForPromise ->
