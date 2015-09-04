@@ -111,8 +111,10 @@ resolveImagePaths = (html, filePath) ->
   for imgElement in o('img')
     img = o(imgElement)
     if src = img.attr('src')
-      src = markdownIt.decode(src)
-      
+      if not atom.config.get('markdown-preview-plus.enablePandoc')
+        markdownIt ?= require './markdown-it-helper'
+        src = markdownIt.decode(src)
+
       continue if src.match(/^(https?|atom):\/\//)
       continue if src.startsWith(process.resourcesPath)
       continue if src.startsWith(resourcePath)
