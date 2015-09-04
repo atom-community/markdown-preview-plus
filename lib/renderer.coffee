@@ -4,11 +4,9 @@ cheerio = require 'cheerio'
 fs = require 'fs-plus'
 Highlights = require 'highlights'
 {$} = require 'atom-space-pen-views'
-roaster = null # Defer until used
 pandocHelper = null # Defer until used
 markdownIt = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
-mathjaxHelper = require './mathjax-helper'
 pathWatcher = require 'pathwatcher-without-runas'
 
 MarkdownPreviewView = null # Defer until used
