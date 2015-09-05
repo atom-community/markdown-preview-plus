@@ -2,13 +2,14 @@ path = require 'path'
 fs = require 'fs-plus'
 temp = require 'temp'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
+markdownIt = require '../lib/markdown-it-helper'
 url = require 'url'
 queryString = require 'querystring'
 
 require './spec-helper'
 
 describe "MarkdownPreviewView", ->
-  [file, preview, workspaceElement] = []
+  [filePath, preview] = []
 
   beforeEach ->
     filePath = atom.project.getDirectories()[0].resolve('subdir/file.markdown')
@@ -143,17 +144,20 @@ describe "MarkdownPreviewView", ->
 
   describe "image resolving", ->
     beforeEach ->
+      spyOn(markdownIt, 'decode').andCallThrough()
       waitsForPromise ->
         preview.renderMarkdown()
 
     describe "when the image uses a relative path", ->
       it "resolves to a path relative to the file", ->
         image = preview.find("img[alt=Image1]")
+        expect(markdownIt.decode).toHaveBeenCalled()
         expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('subdir/image1.png')
 
     describe "when the image uses an absolute path that does not exist", ->
       it "resolves to a path relative to the project root", ->
         image = preview.find("img[alt=Image2]")
+        expect(markdownIt.decode).toHaveBeenCalled()
         expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('tmp/image2.png')
 
     describe "when the image uses an absolute path that exists", ->
@@ -169,15 +173,17 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         runs ->
+          expect(markdownIt.decode).toHaveBeenCalled()
           expect(preview.find("img[alt=absolute]").attr('src')).toStartWith "#{filePath}?v="
 
     describe "when the image uses a web URL", ->
       it "doesn't change the URL", ->
         image = preview.find("img[alt=Image3]")
+        expect(markdownIt.decode).toHaveBeenCalled()
         expect(image.attr('src')).toBe 'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png'
 
   describe "image modification", ->
-    [dirPath, filePath, img1Path] = []
+    [dirPath, filePath, img1Path, workspaceElement] = []
 
     beforeEach ->
       preview.destroy()
