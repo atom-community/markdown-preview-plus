@@ -4,11 +4,9 @@ cheerio = require 'cheerio'
 fs = require 'fs-plus'
 Highlights = require 'highlights'
 {$} = require 'atom-space-pen-views'
-roaster = null # Defer until used
 pandocHelper = null # Defer until used
 markdownIt = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
-mathjaxHelper = require './mathjax-helper'
 pathWatcher = require 'pathwatcher-without-runas'
 
 MarkdownPreviewView = null # Defer until used
@@ -111,8 +109,10 @@ resolveImagePaths = (html, filePath) ->
   for imgElement in o('img')
     img = o(imgElement)
     if src = img.attr('src')
-      src = markdownIt.decode(src)
-      
+      if not atom.config.get('markdown-preview-plus.enablePandoc')
+        markdownIt ?= require './markdown-it-helper'
+        src = markdownIt.decode(src)
+
       continue if src.match(/^(https?|atom):\/\//)
       continue if src.startsWith(process.resourcesPath)
       continue if src.startsWith(resourcePath)
