@@ -1,7 +1,6 @@
 require 'jasmine-tagged'
 
 _ = require 'underscore-plus'
-pathwatcher = require atom.packages.resourcePath + '/node_modules/pathwatcher/lib/main'
 
 tags = [process.platform]
 

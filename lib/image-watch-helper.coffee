@@ -1,6 +1,8 @@
 fs = require 'fs-plus'
 _ = require 'lodash'
-pathWatcher = require atom.packages.resourcePath + '/node_modules/pathwatcher/lib/main'
+path = require 'path'
+pathWatcherPath = path.join(atom.packages.resourcePath, '/node_modules/pathwatcher/lib/main')
+pathWatcher = require  pathWatcherPath
 
 imageRegister = {}
 
