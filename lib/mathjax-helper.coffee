@@ -42,6 +42,15 @@ module.exports =
   mathProcessor: (domElements) ->
     if MathJax?
       MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
+    else
+      atom.notifications.addError """
+        It looks like your trying to render maths but
+        [`markdown-preview-plus`](https://atom.io/packages/markdown-preview-plus)
+        cannot find its maths rendering engine right now. Please make sure that
+        you have installed
+        [`mathjax-wrapper`](https://atom.io/packages/mathjax-wrapper) and try
+        re-opening your markdown preview.
+        """, dismissable: true
     return
 
 #
@@ -130,5 +139,6 @@ configureMathJax = ->
       Macros: userMacros
     messageStyle: "none"
     showMathMenu: false
+    skipStartupTypeset: true
   MathJax.Hub.Configured()
   return
