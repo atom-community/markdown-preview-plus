@@ -27,6 +27,11 @@ describe "Markdown preview plus package", ->
     waitsForPromise ->
       atom.packages.activatePackage('language-gfm')
 
+  afterEach ->
+    if preview instanceof MarkdownPreviewView
+      preview.destroy()
+    preview = null
+
   expectPreviewInSplitPane = ->
     runs ->
       expect(atom.workspace.getPanes()).toHaveLength 2
@@ -270,13 +275,15 @@ describe "Markdown preview plus package", ->
       runs ->
         expect(preview.getTitle()).toBe 'file.markdown Preview'
         preview.onDidChangeTitle(titleChangedCallback)
-        fs.renameSync(atom.workspace.getActiveTextEditor().getPath(), path.join(path.dirname(atom.workspace.getActiveTextEditor().getPath()), 'file2.md'))
+        filePath = atom.workspace.getActiveTextEditor().getPath()
+        fs.renameSync(filePath, path.join(path.dirname(filePath), 'file2.md'))
 
       waitsFor ->
         preview.getTitle() is "file2.md Preview"
 
       runs ->
         expect(titleChangedCallback).toHaveBeenCalled()
+        preview.destroy()
 
   describe "when the URI opened does not have a markdown-preview-plus protocol", ->
     it "does not throw an error trying to decode the URI (regression)", ->
