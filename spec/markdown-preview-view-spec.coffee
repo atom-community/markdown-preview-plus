@@ -32,6 +32,17 @@ describe "MarkdownPreviewView", ->
   afterEach ->
     preview.destroy()
 
+  expectPreviewInSplitPane = ->
+    runs ->
+      expect(atom.workspace.getPanes()).toHaveLength 2
+
+    waitsFor "markdown preview to be created", ->
+      preview = atom.workspace.getPanes()[1].getActiveItem()
+
+    runs ->
+      expect(preview).toBeInstanceOf(MarkdownPreviewView)
+      expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
+
   describe "::constructor", ->
     # Loading spinner disabled when DOM update by diff was introduced. If
     # spinner code in `lib/markdown-preview-view` is removed completly this
@@ -202,17 +213,6 @@ describe "MarkdownPreviewView", ->
 
       waitsForPromise ->
         atom.packages.activatePackage("markdown-preview-plus")
-
-    expectPreviewInSplitPane = ->
-      runs ->
-        expect(atom.workspace.getPanes()).toHaveLength 2
-
-      waitsFor "markdown preview to be created", ->
-        preview = atom.workspace.getPanes()[1].getActiveItem()
-
-      runs ->
-        expect(preview).toBeInstanceOf(MarkdownPreviewView)
-        expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
 
     getImageVersion = (imagePath, imageURL) ->
       expect(imageURL).toStartWith "#{imagePath}?v="
@@ -541,3 +541,30 @@ describe "MarkdownPreviewView", ->
          <pre class="editor-colors lang-javascript"><div class="line"><span class="source js"><span class="keyword control js"><span>if</span></span><span>&nbsp;a&nbsp;</span><span class="keyword operator js"><span>===</span></span><span>&nbsp;</span><span class="constant numeric js"><span>3</span></span><span>&nbsp;</span><span class="meta brace curly js"><span>{</span></span></span></div><div class="line"><span class="source js"><span>&nbsp;&nbsp;b&nbsp;</span><span class="keyword operator js"><span>=</span></span><span>&nbsp;</span><span class="constant numeric js"><span>5</span></span></span></div><div class="line"><span class="source js"><span class="meta brace curly js"><span>}</span></span></span></div></pre>
          <p>encoding \u2192 issue</p>
         """
+
+  describe "when maths rendering is enabled by default", ->
+    it "renders the preview without maths if it cannot find MathJax", ->
+      [workspaceElement] = []
+
+      preview.destroy()
+
+      waitsForPromise -> atom.packages.activatePackage('notifications')
+
+      runs ->
+        workspaceElement = atom.views.getView(atom.workspace)
+        jasmine.attachToDOM(workspaceElement)
+
+      waitsForPromise -> atom.workspace.open(filePath)
+
+      runs ->
+        atom.config.set 'markdown-preview-plus.enableLatexRenderingByDefault', true
+        atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
+
+      expectPreviewInSplitPane()
+
+      waitsFor "notification", ->
+        workspaceElement.querySelector 'atom-notification'
+
+      runs ->
+        notification = workspaceElement.querySelector 'atom-notification.info'
+        expect(notification).toExist()
