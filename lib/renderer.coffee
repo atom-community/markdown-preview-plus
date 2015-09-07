@@ -7,26 +7,14 @@ Highlights = require 'highlights'
 pandocHelper = null # Defer until used
 markdownIt = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
-pathWatcher = require atom.packages.resourcePath + '/node_modules/pathwatcher/lib/main'
-
-MarkdownPreviewView = null # Defer until used
-isMarkdownPreviewView = (object) ->
-  MarkdownPreviewView ?= require './markdown-preview-view'
-  object instanceof MarkdownPreviewView
-
-renderPreviews = _.debounce((->
-  for item in atom.workspace.getPaneItems()
-    if isMarkdownPreviewView(item)
-      item.renderMarkdown()
-  return), 250)
+imageWatcher = require './image-watch-helper'
 
 highlighter = null
 {resourcePath} = atom.getLoadSettings()
 packagePath = path.dirname(__dirname)
-imgVersion = []
 
 exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
-  render text, filePath, renderLaTeX, (error, html) ->
+  render text, filePath, renderLaTeX, false, (error, html) ->
     return callback(error) if error?
 
     template = document.createElement('template')
@@ -35,15 +23,15 @@ exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
 
     callback(null, domFragment)
 
-exports.toHTML = (text='', filePath, grammar, renderLaTeX, callback) ->
-  render text, filePath, renderLaTeX, (error, html) ->
+exports.toHTML = (text='', filePath, grammar, renderLaTeX, copyHTMLFlag, callback) ->
+  render text, filePath, renderLaTeX, copyHTMLFlag, (error, html) ->
     return callback(error) if error?
     # Default code blocks to be coffee in Literate CoffeeScript files
     defaultCodeLanguage = 'coffee' if grammar?.scopeName is 'source.litcoffee'
     html = tokenizeCodeBlocks(html, defaultCodeLanguage)
     callback(null, html)
 
-render = (text, filePath, renderLaTeX, callback) ->
+render = (text, filePath, renderLaTeX, copyHTMLFlag, callback) ->
   # Remove the <!doctype> since otherwise marked will escape it
   # https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
@@ -51,7 +39,7 @@ render = (text, filePath, renderLaTeX, callback) ->
   callbackFunction = (error, html) ->
     return callback(error) if error?
     html = sanitize(html)
-    html = resolveImagePaths(html, filePath)
+    html = resolveImagePaths(html, filePath, copyHTMLFlag)
     callback(null, html.trim())
 
   if atom.config.get('markdown-preview-plus.enablePandoc')
@@ -94,16 +82,9 @@ sanitize = (html) ->
   o('*').removeAttr(attribute) for attribute in attributesToRemove
   o.html()
 
-srcClosure = (src) ->
-  return (event, path) ->
-    if event is 'change' and fs.isFileSync(src)
-      imgVersion[src] = Date.now()
-    else
-      imgVersion[src] = null
-    renderPreviews()
-    return
 
-resolveImagePaths = (html, filePath) ->
+resolveImagePaths = (html, filePath, copyHTMLFlag) ->
+
   [rootDirectory] = atom.project.relativizePath(filePath)
   o = cheerio.load(html)
   for imgElement in o('img')
@@ -127,12 +108,9 @@ resolveImagePaths = (html, filePath) ->
         src = path.resolve(path.dirname(filePath), src)
 
       # Use most recent version of image
-
-      if not imgVersion[src] and fs.isFileSync(src)
-        imgVersion[src] = Date.now()
-        pathWatcher.watch src, srcClosure(src)
-
-      src = "#{src}?v=#{imgVersion[src]}" if imgVersion[src]
+      if not copyHTMLFlag
+        v = imageWatcher.getVersion(src, filePath)
+        src = "#{src}?v=#{v}" if v
 
       img.attr('src', src)
 

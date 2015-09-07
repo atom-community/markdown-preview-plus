@@ -10,6 +10,7 @@ fs = require 'fs-plus'
 renderer = require './renderer'
 UpdatePreview = require './update-preview'
 markdownIt = null # Defer until used
+imageWatcher = null
 
 module.exports =
 class MarkdownPreviewView extends ScrollView
@@ -45,6 +46,8 @@ class MarkdownPreviewView extends ScrollView
     editorId: @editorId
 
   destroy: ->
+    imageWatcher ?= require './image-watch-helper'
+    imageWatcher.removeFile(@getPath())
     @disposables.dispose()
 
   onDidChangeTitle: (callback) ->
@@ -169,7 +172,7 @@ class MarkdownPreviewView extends ScrollView
     @getMarkdownSource().then (source) =>
       return unless source?
 
-      renderer.toHTML source, @getPath(), @getGrammar(), @renderLaTeX, callback
+      renderer.toHTML source, @getPath(), @getGrammar(), @renderLaTeX, false, callback
 
   renderMarkdownText: (text) ->
     renderer.toDOMFragment text, @getPath(), @getGrammar(), @renderLaTeX, (error, domFragment) =>

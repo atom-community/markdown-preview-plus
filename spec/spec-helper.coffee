@@ -13,6 +13,3 @@ original = jasmineEnv.setIncludedTags
 
 jasmineEnv.setIncludedTags = (t) ->
   original(_.union tags, t)
-
-afterEach ->
-  pathwatcher.closeAllWatchers()
