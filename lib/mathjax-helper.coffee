@@ -43,7 +43,7 @@ module.exports =
     if MathJax?
       MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
     else
-      atom.notifications.addError """
+      atom.notifications.addInfo """
         It looks like your trying to render maths but
         [`markdown-preview-plus`](https://atom.io/packages/markdown-preview-plus)
         cannot find its maths rendering engine right now. Please make sure that
