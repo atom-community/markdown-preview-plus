@@ -133,11 +133,10 @@ describe "MarkdownItHelper (Math)", ->
 
           compareHTML(content, result)
 
-      # Disabled as markdown-it-math does not support it
-      xit "Inline Math without proper opening and closing", ->
+      it "Inline Math without proper opening and closing", ->
         runs ->
 
-          content = "a $5, a $10 and a \\$100 Bill"
+          content = "a $5, a $10 and a \\$100 Bill."
 
           result = '<p>a $5, a $10 and a $100 Bill.</p>'
 
@@ -183,8 +182,7 @@ describe "MarkdownItHelper (Math)", ->
 
           compareHTML(content, result)
 
-      # Disabled as markdown-it-math does not support it
-      xit "$$ should work singeline", ->
+      it "$$ should work singeline", ->
         runs ->
 
           content = "$$a+b$$"
@@ -193,8 +191,7 @@ describe "MarkdownItHelper (Math)", ->
 
           compareHTML(content, result)
 
-      # Disabled as markdown-it-math does not support it
-      xit "$$ should work directly after paragraph", ->
+      it "$$ should work directly after paragraph", ->
         runs ->
 
           content = """
@@ -221,8 +218,7 @@ describe "MarkdownItHelper (Math)", ->
 
           compareHTML(content, result)
 
-      # Disabled as markdown-it-math does not support it
-      xit "\\[ should work singeline", ->
+      it "\\[ should work singeline", ->
         runs ->
 
           content = "\\[a+b\\]"
@@ -231,8 +227,7 @@ describe "MarkdownItHelper (Math)", ->
 
           compareHTML(content, result)
 
-      # Disabled as markdown-it-math does not support it
-      xit "$$ should work directly after paragraph", ->
+      it "\\[ should work directly after paragraph", ->
         runs ->
 
           content = """

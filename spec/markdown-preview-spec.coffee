@@ -61,12 +61,14 @@ describe "Markdown preview plus package", ->
         runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
         expectPreviewInSplitPane()
 
+    # https://github.com/atom/markdown-preview/issues/28
     describe "when the path contains a space", ->
       it "renders the preview", ->
         waitsForPromise -> atom.workspace.open("subdir/file with space.md")
         runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
         expectPreviewInSplitPane()
 
+    # https://github.com/atom/markdown-preview/issues/29
     describe "when the path contains accented characters", ->
       it "renders the preview", ->
         waitsForPromise -> atom.workspace.open("subdir/áccéntéd.md")

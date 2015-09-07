@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "main": "./lib/main",
   "description": "Better markdown preview in atom (optional pandoc support)",
   "keywords": [
@@ -22,7 +22,8 @@
     "grim": "^1.2.1",
     "highlights": "^1.0.0",
     "markdown-it": "^4.4.0",
-    "markdown-it-math": "^2.0.1",
+    "markdown-it-lazy-headers": "^0.1.2",
+    "markdown-it-math": "^3.0.1",
     "pdc": "~0.2.2",
     "season": "^5.3",
     "temp": "^0.8.1",

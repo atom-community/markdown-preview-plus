@@ -1,5 +1,23 @@
 # Change Log
 
+## [v2.0.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.0.1) (2015-09-03)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.0.0...v2.0.1)
+
+**Fixed bugs:**
+
+- Version 2.0.0: headings no longer work [\#88](https://github.com/Galadirith/markdown-preview-plus/issues/88)
+
+**Closed issues:**
+
+- Fails on linux mint \(I know why\) [\#91](https://github.com/Galadirith/markdown-preview-plus/issues/91)
+- Updating to “markdown-preview-plus@2.0.0” failed [\#90](https://github.com/Galadirith/markdown-preview-plus/issues/90)
+
+**Merged pull requests:**
+
+- Added support for lazy headers \(missing space after \#\) [\#96](https://github.com/Galadirith/markdown-preview-plus/pull/96) ([leipert](https://github.com/leipert))
+- Fix math regressions [\#95](https://github.com/Galadirith/markdown-preview-plus/pull/95) ([leipert](https://github.com/leipert))
+- Correct instantiation conditions for markdown-it [\#92](https://github.com/Galadirith/markdown-preview-plus/pull/92) ([Galadirith](https://github.com/Galadirith))
+
 ## [v2.0.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.0.0) (2015-09-01)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v1.7.0...v2.0.0)
 
