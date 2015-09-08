@@ -1,15 +1,6 @@
 # Installation
 
-1.  **Check installation dependencies**
-
-    The installation process uses
-    [node-gyp](https://github.com/TooTallNate/node-gyp) which is installed when
-    you installed atom. Please check the
-    [installation](https://github.com/TooTallNate/node-gyp#installation) section
-    of node-gyp to ensure you have all the programs installed that it requires
-    to run.
-
-2.  **Install MPP**
+1.  **Install MPP**
 
     Search for **Markdown Preview Plus** in the menu **File &rsaquo; Settings
     &rsaquo; Install** and click **Install**. Please allow 3-5 mins for
@@ -20,7 +11,7 @@
     apm install markdown-preview-plus
     ````
 
-3.  **Install mathjax-wrapper**
+2.  **Install mathjax-wrapper**
 
     Search for **mathjax-wrapper** in the menu **File &rsaquo; Settings &rsaquo;
     Install** and click **Install**. Please allow 10-15 mins for installation
@@ -31,13 +22,13 @@
     apm install mathjax-wrapper
     ````
 
-4.  **Disable Markdown Preview**
+3.  **Disable Markdown Preview**
 
     Disable the built in Markdown Preview package. You can do this by searching
     for **Markdown Preview** in the menu **File &rsaquo; Settings &rsaquo;
     Packages** and clicking **Disable**.
 
-5.  **(Optional) Enable Pandoc**
+4.  **(Optional) Enable Pandoc**
 
     Optionally you may use Pandoc to render the Markdown preview. To enable
     Pandoc within MPP:
