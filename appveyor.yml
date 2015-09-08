@@ -2,7 +2,6 @@ version: "{build}"
 os: Visual Studio 2015
 environment:
   matrix:
-    - GYP_MSVS_VERSION: 2012
     - GYP_MSVS_VERSION: 2013
 
 build: off
