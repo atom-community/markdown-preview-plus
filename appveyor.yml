@@ -11,9 +11,9 @@ install:
   - cd %LOCALAPPDATA%
   - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/').trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
   - 7z -y x atom-windows.zip > nul
-  - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
+  - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%LOCALAPPDATA%\Atom\;%PATH%
   - apm --version
-  - %LOCALAPPDATA%\Atom\atom.exe --version
+  - atom --version
   - ps: |
       If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
         (New-Object Net.WebClient).DownloadFile("https://github.com/stedolan/jq/releases/download/jq-1.4/jq-win32.exe", "$(pwd)\jq-win32.exe")
