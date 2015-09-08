@@ -30,21 +30,10 @@ We also have a more detailed description of [features][features].
 
 Long instructions can be found [here][installation]. In short steps:
 
-1.  Make sure node-gyp is [installed correctly][node-gyp] with a python 2.7 version (and Visual Studio 2012 or 2013 if you are on Windows).
-
-2.  Install this package and [`mathjax-wrapper`][mathjax-wrapper]
-    for math rendering. Installation of mathjax-wrapper may take a long time.
-
-    ``` bash
-    apm install mathjax-wrapper
-    apm install markdown-preview-plus
-    ```
-
-    If you have issues installing on Windows, please [check here for help][win-install]
-
-3.  Disable built-in package *Markdown Preview*
-
-4.  (optional) enable pandoc
+1.  Install this package and [`mathjax-wrapper`][mathjax-wrapper]. Installation
+    of `mathjax-wrapper` may take a long time.
+2.  Disable built-in package *Markdown Preview*.
+3.  (Optional) Enable pandoc.
 
 ## Usage
 
@@ -62,7 +51,6 @@ Markdown Preview Plus (MPP) is released under the [MIT license][license].
 [changelog]: https://github.com/Galadirith/markdown-preview-plus/blob/master/CHANGELOG.md
 [issue]: https://github.com/Galadirith/markdown-preview-plus/issues
 [installation]: docs/installation.md
-[win-install]: docs/win-install.md
 [license]: LICENSE.md
 [math]: docs/math.md
 [features]: docs/features.md
