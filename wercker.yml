@@ -16,4 +16,5 @@ build:
           +extension GLX +extension RANDR +render -noreset &&
           sleep 3 &&
           export DISPLAY=:99 &&
+          atom --version &&
           apm test

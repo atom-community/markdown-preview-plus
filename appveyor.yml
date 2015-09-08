@@ -1,8 +1,4 @@
 version: "{build}"
-os: Visual Studio 2015
-environment:
-  matrix:
-    - GYP_MSVS_VERSION: 2013
 
 build: off
 deploy: off
@@ -17,6 +13,7 @@ install:
   - 7z -y x atom-windows.zip > nul
   - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%PATH%
   - apm --version
+  - %LOCALAPPDATA%\Atom\atom.exe --version
   - ps: |
       If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
         (New-Object Net.WebClient).DownloadFile("https://github.com/stedolan/jq/releases/download/jq-1.4/jq-win32.exe", "$(pwd)\jq-win32.exe")
