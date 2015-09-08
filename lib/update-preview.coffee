@@ -67,7 +67,26 @@ module.exports = class UpdatePreview
       if elm instanceof Element
         renderer.convertCodeBlocksToAtomEditors elm
 
+    @updateOrderedListsStart()
+
     return r
+
+  updateOrderedListsStart: ->
+    previewOLs = @tree.shownTree.dom.querySelectorAll('ol')
+    parsedOLs  = @domFragment.querySelectorAll('ol')
+
+    for i in [0..(parsedOLs.length-1)] by 1
+      previewStart  = previewOLs[i].getAttribute 'start'
+      parsedStart   = parsedOLs[i].getAttribute 'start'
+
+      if previewStart is parsedStart
+        continue
+      else if parsedStart?
+        previewOLs[i].setAttribute 'start', parsedStart
+      else
+        previewOLs[i].removeAttribute 'start'
+
+    return
 
 prepareCodeBlocksForAtomEditors = (domFragment) ->
   for preElement in domFragment.querySelectorAll('pre')
