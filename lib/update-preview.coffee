@@ -71,7 +71,7 @@ module.exports = class UpdatePreview
 
     return r
 
-  updateOrderedListsStart: () ->
+  updateOrderedListsStart: ->
     previewOLs = @tree.shownTree.dom.querySelectorAll('ol')
     parsedOLs  = @domFragment.querySelectorAll('ol')
 
