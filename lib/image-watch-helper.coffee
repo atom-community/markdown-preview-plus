@@ -28,8 +28,10 @@ srcClosure = (src) ->
 
 module.exports =
   removeFile: (file) ->
+
     imageRegister = _.mapValues imageRegister, (image) ->
       image.files = _.without image.files, file
+      image.files = _.filter image.files, fs.isFileSync
       if _.isEmpty image.files
         image.watched = false
         image.watcher.close()
