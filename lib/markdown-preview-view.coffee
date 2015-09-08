@@ -185,31 +185,7 @@ class MarkdownPreviewView extends ScrollView
         # be instanced in the constructor
         unless @updatePreview
           @updatePreview = new UpdatePreview(@find("div.update-preview")[0])
-        if @renderLaTeX and not MathJax?
-          @updatePreview.update(
-            '<p><strong>It looks like somethings missing. Lets fix
-            that :D</strong></p>
-            <p>Recent versions of
-            <a href="https://github.com/Galadirith/markdown-preview-plus">
-              markdown-preview-plus
-            </a>
-            require the package
-            <a href="https://github.com/Galadirith/mathjax-wrapper">
-              mathjax-wrapper
-            </a>
-            to be installed to preview LaTeX.
-            </p>
-            <p>
-            To install
-            <a href="https://github.com/Galadirith/mathjax-wrapper">
-              mathjax-wrapper
-            </a>
-            simply search for <strong>mathjax-wrapper</strong> in the menu
-            <strong>File &rsaquo; Settings &rsaquo; Packages</strong> and click
-            <strong>Install</strong>.'
-            , false)
-        else
-          @updatePreview.update(domFragment, @renderLaTeX)
+        @updatePreview.update(domFragment, @renderLaTeX)
         @emitter.emit 'did-change-markdown'
         @originalTrigger('markdown-preview-plus:markdown-changed')
 
