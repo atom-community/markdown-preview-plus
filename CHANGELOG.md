@@ -1,5 +1,39 @@
 # Change Log
 
+## [v2.1.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.1.0) (2015-09-09)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.0.2...v2.1.0)
+
+**Implemented enhancements:**
+
+- Clear Caches/Watchers upon closing a preview [\#52](https://github.com/Galadirith/markdown-preview-plus/issues/52)
+
+**Fixed bugs:**
+
+- Error on markdown-preview-plus:toggle and markdown-preview-plus:toggle-render-latex with pandoc backend [\#104](https://github.com/Galadirith/markdown-preview-plus/issues/104)
+- Diff algorithm is not working for changing OL start [\#98](https://github.com/Galadirith/markdown-preview-plus/issues/98)
+
+**Merged pull requests:**
+
+- Update ordered list start number when changed [\#109](https://github.com/Galadirith/markdown-preview-plus/pull/109) ([Galadirith](https://github.com/Galadirith))
+- Remove native build instructions from docs [\#108](https://github.com/Galadirith/markdown-preview-plus/pull/108) ([Galadirith](https://github.com/Galadirith))
+- Fix deserialization due to not passing domFragment [\#107](https://github.com/Galadirith/markdown-preview-plus/pull/107) ([Galadirith](https://github.com/Galadirith))
+- Remove dependencies which need to be built. [\#94](https://github.com/Galadirith/markdown-preview-plus/pull/94) ([leipert](https://github.com/leipert))
+
+## [v2.0.2](https://github.com/Galadirith/markdown-preview-plus/tree/v2.0.2) (2015-09-05)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.0.1...v2.0.2)
+
+**Fixed bugs:**
+
+- Initialize markdownIt during image rendering for pandoc users [\#99](https://github.com/Galadirith/markdown-preview-plus/issues/99)
+
+**Closed issues:**
+
+- Updating MPP from 2.0.0 to 2.0.1 fails on Windows 7 [\#97](https://github.com/Galadirith/markdown-preview-plus/issues/97)
+
+**Merged pull requests:**
+
+- Fix cannot read property decode [\#101](https://github.com/Galadirith/markdown-preview-plus/pull/101) ([Galadirith](https://github.com/Galadirith))
+
 ## [v2.0.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.0.1) (2015-09-03)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.0.0...v2.0.1)
 
