@@ -49,6 +49,7 @@ setPandocOptions = (filePath) ->
   getMathJaxPath() unless config.mathjax?
   config.args.mathjax = if config.renderMath then config.mathjax else undefined
   if atomConfig.pandocBibliography
+    config.args.filter = ['pandoc-citeproc']
     bibFile = findFileRecursive filePath, atomConfig.pandocBIBFile
     bibFile = atomConfig.pandocBIBFileFallback unless bibFile
     config.args.bibliography = if bibFile then bibFile else undefined
@@ -148,7 +149,10 @@ renderPandoc = (text, filePath, renderMath, cb) ->
 getArguments = (args) ->
   args = _.reduce args,
     (res, val, key) ->
-      res.push "--#{key}=#{val}" unless _.isEmpty val
+      unless _.isEmpty val
+        val = _.flatten([val])
+        _.forEach val, (v) ->
+          res.push "--#{key}=#{v}" unless _.isEmpty v
       return res
     , []
   args = _.union args, atom.config.get('markdown-preview-plus.pandocArguments')
