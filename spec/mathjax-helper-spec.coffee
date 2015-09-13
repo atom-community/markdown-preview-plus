@@ -15,18 +15,19 @@ describe "MathJax helper module", ->
       spyOn(atom, 'getConfigDirPath').andReturn configDirPath
       jasmine.useRealClock() # MathJax queue's will NOT work without this
 
-      waitsForPromise ->
-        atom.packages.activatePackage("mathjax-wrapper")
+      mathjaxHelper.resetMathJax()
 
     afterEach ->
-      $('script[src*="MathJax.js"]').remove()
-      window.MathJax = undefined # window is nessesary to prevent lexical scoping of MathJax to afterEach
+      mathjaxHelper.resetMathJax()
 
     waitsForMacrosToLoad = ->
       [span] = []
 
       waitsForPromise ->
         atom.packages.activatePackage("markdown-preview-plus")
+
+      runs ->
+        mathjaxHelper.loadMathJax()
 
       waitsFor "MathJax to load", ->
         MathJax?

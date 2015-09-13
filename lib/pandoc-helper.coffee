@@ -16,10 +16,7 @@ config = {}
  ###
 getMathJaxPath = ->
   try
-    path ?= require 'path'
-    config.mathjax = atom.packages.getLoadedPackage('mathjax-wrapper')
-    config.mathjax = path.join config.mathjax.path, 'node_modules/MathJax/MathJax.js'
-    config.mathjax = config.mathjax
+    config.mathjax = require.resolve 'MathJax'
   catch e
     config.mathjax = ''
 
