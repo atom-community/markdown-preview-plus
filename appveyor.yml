@@ -3,10 +3,6 @@ version: "{build}"
 build: off
 deploy: off
 
-cache:
-  - C:\Users\appveyor\.atom\packages\mathjax-wrapper
-  - C:\Users\appveyor\mathjax.version
-
 install:
   - cd %LOCALAPPDATA%
   - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/').trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
@@ -14,25 +10,6 @@ install:
   - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%LOCALAPPDATA%\Atom\;%PATH%
   - apm --version
   - atom --version
-  - ps: |
-      If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
-        (New-Object Net.WebClient).DownloadFile("https://github.com/stedolan/jq/releases/download/jq-1.4/jq-win32.exe", "$(pwd)\jq-win32.exe")
-        $a = (apm view mathjax-wrapper --json | .\jq-win32.exe '.version') | Out-String
-        $b = (.\jq-win32.exe '.version' $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json) | Out-String
-        Write-Host $a$b
-        If ($a.CompareTo($b)){
-          Write-Host "Newer mathjax version available, we delete the old one"
-          Remove-Item $env:USERPROFILE\.atom\packages\mathjax-wrapper -recurse -Force
-        }Else{
-          Write-Host "Mathjax Versions match"
-        }
-      }
-  - ps: |
-      If (Test-Path $env:USERPROFILE\.atom\packages\mathjax-wrapper\package.json){
-        Write-Host "Atom mathjax-wrapper already installed"
-      }Else{
-        apm install mathjax-wrapper
-      }
 
 test_script:
   - cd %APPVEYOR_BUILD_FOLDER%

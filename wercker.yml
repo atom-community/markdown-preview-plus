@@ -6,8 +6,7 @@ build:
     - script:
         name: Install dependencies
         code: >
-          apm install &&
-          apm install mathjax-wrapper
+          apm install
     - script:
         name: Test package
         code: >
