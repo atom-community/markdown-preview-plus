@@ -30,10 +30,9 @@ We also have a more detailed description of [features][features].
 
 Long instructions can be found [here][installation]. In short steps:
 
-1.  Install this package and [`mathjax-wrapper`][mathjax-wrapper]. Installation
-    of `mathjax-wrapper` may take a long time.
-2.  Disable built-in package *Markdown Preview*.
-3.  (Optional) Enable pandoc.
+1.  Search for and install `markdown-preview-plus` in Atom's Settings view.
+2.  Search for and disable the built-in package `markdown-preview`.
+3.  (Optional) Install and enable [Pandoc][pandoc].
 
 ## Usage
 
@@ -55,8 +54,8 @@ Markdown Preview Plus (MPP) is released under the [MIT license][license].
 [math]: docs/math.md
 [features]: docs/features.md
 [node-gyp]: https://github.com/TooTallNate/node-gyp#installation
-[mathjax-wrapper]: https://atom.io/packages/mathjax-wrapper
 [options]: docs/options.md
+[pandoc]: http://pandoc.org
 
 [ad]: https://img.shields.io/apm/dm/markdown-preview-plus.svg
 [av]: https://img.shields.io/apm/v/markdown-preview-plus.svg

@@ -3,6 +3,7 @@ fs = require 'fs-plus'
 temp = require 'temp'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
 markdownIt = require '../lib/markdown-it-helper'
+mathjaxHelper = require '../lib/mathjax-helper'
 url = require 'url'
 queryString = require 'querystring'
 
@@ -543,7 +544,7 @@ describe "MarkdownPreviewView", ->
         """
 
   describe "when maths rendering is enabled by default", ->
-    it "renders the preview without maths if it cannot find MathJax", ->
+    it "notifies the user MathJax is loading when first preview is opened", ->
       [workspaceElement] = []
 
       preview.destroy()
@@ -557,6 +558,7 @@ describe "MarkdownPreviewView", ->
       waitsForPromise -> atom.workspace.open(filePath)
 
       runs ->
+        mathjaxHelper.resetMathJax()
         atom.config.set 'markdown-preview-plus.enableLatexRenderingByDefault', true
         atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
 

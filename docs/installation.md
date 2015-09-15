@@ -2,8 +2,8 @@
 
 1.  **Install MPP**
 
-    Search for **Markdown Preview Plus** in the menu **File &rsaquo; Settings
-    &rsaquo; Install** and click **Install**. Please allow 3-5 mins for
+    Search for **Markdown Preview Plus** in Atom's Settings view **File &rsaquo;
+    Settings &rsaquo; Install** and click **Install**. Please allow 3-5 mins for
     installation. Alternatively if you would prefer to use the command line
     utility `apm`:
 
@@ -11,24 +11,13 @@
     apm install markdown-preview-plus
     ````
 
-2.  **Install mathjax-wrapper**
-
-    Search for **mathjax-wrapper** in the menu **File &rsaquo; Settings &rsaquo;
-    Install** and click **Install**. Please allow 10-15 mins for installation
-    of mathjax-wrapper. Alternatively if you would prefer to use the command
-    line utility `apm`:
-
-    ````bash
-    apm install mathjax-wrapper
-    ````
-
-3.  **Disable Markdown Preview**
+2.  **Disable Markdown Preview**
 
     Disable the built in Markdown Preview package. You can do this by searching
-    for **Markdown Preview** in the menu **File &rsaquo; Settings &rsaquo;
-    Packages** and clicking **Disable**.
+    for **Markdown Preview** in Atom's Settings view **File &rsaquo; Settings
+    &rsaquo; Packages** and clicking **Disable**.
 
-4.  **(Optional) Enable Pandoc**
+3.  **(Optional) Enable Pandoc**
 
     Optionally you may use Pandoc to render the Markdown preview. To enable
     Pandoc within MPP:

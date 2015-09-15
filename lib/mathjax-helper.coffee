@@ -5,32 +5,43 @@
 # for calls to MathJax to process LaTeX equations.
 #
 
+{$}     = require 'atom-space-pen-views'
 cheerio = require 'cheerio'
 path    = require 'path'
 CSON    = require 'season'
 fs      = require 'fs-plus'
+_       = require 'underscore-plus'
 
 module.exports =
   #
   # Load MathJax environment
   #
-  loadMathJax: ->
-    script = document.createElement("script")
-    script.addEventListener "load", ->
-      configureMathJax()
-    script.type   = "text/javascript"
-    try
-      # atom.packages.resolvePackagePath('mathjax-wrapper') doesn't work but
-      # does for other packages? Nor does 'atom://mathjax-wrapper' work (I get
-      # CSP errors). getLoaded over getActive is important.
-      mathjaxPath = atom.packages.getLoadedPackage('mathjax-wrapper')
-      script.src  = path.join(
-        mathjaxPath.path,
-        "node_modules/MathJax/MathJax.js?delayStartupUntil=configured" )
-      document.getElementsByTagName("head")[0].appendChild(script)
-    finally
-      return
+  # @param domElements An array of DOM elements to be processed by MathJax when
+  #   it has loaded. See
+  #   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
+  #   details on DOM elements.
+  #
+  loadMathJax: (domElements) ->
+    script = @attachMathJax()
+    if domElements? then script.addEventListener "load", ->
+      MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
     return
+
+  #
+  # Attach main MathJax script to the document
+  #
+  attachMathJax: _.once -> attachMathJax()
+
+  #
+  # Remove MathJax from the document and reset attach method
+  #
+  resetMathJax: ->
+    # Detach MathJax from the document
+    $('script[src*="MathJax.js"]').remove()
+    window.MathJax = undefined
+
+    # Reset attach for any subsequent calls
+    @attachMathJax = _.once -> attachMathJax()
 
   #
   # Process DOM elements for LaTeX equations with MathJax
@@ -41,16 +52,8 @@ module.exports =
   #
   mathProcessor: (domElements) ->
     if MathJax?
-      MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
-    else
-      atom.notifications.addInfo """
-        It looks like your trying to render maths but
-        [`markdown-preview-plus`](https://atom.io/packages/markdown-preview-plus)
-        cannot find its maths rendering engine right now. Please make sure that
-        you have installed
-        [`mathjax-wrapper`](https://atom.io/packages/mathjax-wrapper) and try
-        re-opening your markdown preview.
-        """, dismissable: true
+    then MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
+    else @loadMathJax domElements
     return
 
 #
@@ -142,3 +145,19 @@ configureMathJax = ->
     skipStartupTypeset: true
   MathJax.Hub.Configured()
   return
+
+#
+# Attach main MathJax script to the document
+#
+attachMathJax = ->
+  # Notify user MathJax is loading
+  atom.notifications.addInfo "Loading maths rendering engine MathJax", dismissable: true
+
+  # Attach MathJax script
+  script      = document.createElement("script")
+  script.src  = "#{require.resolve('MathJax')}?delayStartupUntil=configured"
+  script.type = "text/javascript"
+  script.addEventListener "load", -> configureMathJax()
+  document.getElementsByTagName("head")[0].appendChild(script)
+
+  return script

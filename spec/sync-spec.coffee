@@ -21,14 +21,10 @@ describe "Syncronization of source and preview", ->
     configDirPath = temp.mkdirSync('atom-config-dir-')
     spyOn(atom, 'getConfigDirPath').andReturn configDirPath
 
-    waitsForPromise ->
-      atom.packages.activatePackage("mathjax-wrapper")
+    mathjaxHelper.resetMathJax()
 
     waitsForPromise ->
       atom.packages.activatePackage("markdown-preview-plus")
-
-    waitsFor "MathJax to load", ->
-      MathJax?
 
     waitsFor "LaTeX rendering to be enabled", ->
       atom.config.set 'markdown-preview-plus.enableLatexRenderingByDefault', true
@@ -45,12 +41,14 @@ describe "Syncronization of source and preview", ->
     waitsFor "mathjaxHelper.mathProcessor to be called", ->
       mathjaxHelper.mathProcessor.calls.length
 
+    waitsFor "MathJax to load", ->
+      MathJax?
+
     waitsForQueuedMathJax()
 
   afterEach ->
     preview.destroy()
-    $('script[src*="MathJax.js"]').remove()
-    window.MathJax = undefined # window is nessesary to prevent lexical scoping of MathJax to afterEach
+    mathjaxHelper.resetMathJax()
 
   expectPreviewInSplitPane = ->
     runs ->
