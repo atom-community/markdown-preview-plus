@@ -15,6 +15,4 @@ test_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - apm clean
   - apm install
-  - apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd > log.txt && (echo Tests succeeded) || (echo Tests produced error)
-  - type log.txt
-  - ">nul find \", 0 failures,\" log.txt"
+  - powershell assets\appveyor.ps1
