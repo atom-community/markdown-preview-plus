@@ -15,4 +15,4 @@ test_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - apm clean
   - apm install
-  - apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
+  - powershell assets\appveyor.ps1
