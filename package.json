@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "main": "./lib/main",
   "description": "Better markdown preview in atom (optional pandoc support)",
   "keywords": [
@@ -25,7 +25,7 @@
     "MathJax": "https://github.com/Galadirith/MathJax/tarball/2.4.0-electron.0.2.0",
     "markdown-it": "^4.4.0",
     "markdown-it-lazy-headers": "^0.1.2",
-    "markdown-it-math": "^3.0.1",
+    "markdown-it-math": "https://github.com/leipert/markdown-it-math/tarball/quickfix3",
     "pdc": "~0.2.2",
     "season": "^5.3",
     "temp": "^0.8.1",
