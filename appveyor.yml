@@ -15,4 +15,6 @@ test_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - apm clean
   - apm install
-  - apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd
+  - (apm test --one --path %LOCALAPPDATA%\Atom\resources\cli\atom.cmd > log.txt) || echo ""
+  - type log.txt
+  - ">nul find \", 0 failures,\" log.txt"
