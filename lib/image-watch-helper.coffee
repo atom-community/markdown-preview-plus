@@ -12,9 +12,10 @@ isMarkdownPreviewView = (object) ->
   object instanceof MarkdownPreviewView
 
 renderPreviews = _.debounce((->
-  for item in atom.workspace.getPaneItems()
-    if isMarkdownPreviewView(item)
-      item.renderMarkdown()
+  if atom.workspace?
+    for item in atom.workspace.getPaneItems()
+      if isMarkdownPreviewView(item)
+        item.renderMarkdown()
   return), 250)
 
 srcClosure = (src) ->

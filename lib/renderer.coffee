@@ -84,8 +84,8 @@ sanitize = (html) ->
 
 
 resolveImagePaths = (html, filePath, copyHTMLFlag) ->
-
-  [rootDirectory] = atom.project.relativizePath(filePath)
+  if atom.project?
+    [rootDirectory] = atom.project.relativizePath(filePath)
   o = cheerio.load(html)
   for imgElement in o('img')
     img = o(imgElement)
