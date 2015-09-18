@@ -24,7 +24,7 @@
     "lodash": "^3.10.1",
     "markdown-it": "^4.4.0",
     "markdown-it-lazy-headers": "^0.1.2",
-    "markdown-it-math": "^3.0.1",
+    "markdown-it-math": "https://github.com/leipert/markdown-it-math/tarball/quickfix3",
     "pdc": "~0.2.2",
     "season": "^5.3",
     "temp": "^0.8.1",
