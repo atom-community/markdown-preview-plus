@@ -16,15 +16,12 @@ module.exports =
   #
   # Load MathJax environment
   #
-  # @param domElements An array of DOM elements to be processed by MathJax when
-  #   it has loaded. See
-  #   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
-  #   details on DOM elements.
+  # @param listener Optional method to call when the MathJax script was been
+  #   loaded to the window. The method is passed no arguments.
   #
-  loadMathJax: (domElements) ->
+  loadMathJax: (listener) ->
     script = @attachMathJax()
-    if domElements? then script.addEventListener "load", ->
-      MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
+    if listener? then script.addEventListener "load", -> listener()
     return
 
   #
@@ -53,7 +50,7 @@ module.exports =
   mathProcessor: (domElements) ->
     if MathJax?
     then MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
-    else @loadMathJax domElements
+    else @loadMathJax -> MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
     return
 
 #
