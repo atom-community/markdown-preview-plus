@@ -349,6 +349,91 @@ describe "Markdown preview plus package", ->
         it "detects and styles the block", ->
           expect(preview.find("pre.lang-javascript")).toHaveClass 'editor-colors'
 
+  describe "when main::copyHtml() is called directly", ->
+    mpp = null
+
+    beforeEach ->
+      mpp = atom.packages.getActivePackage('markdown-preview-plus').mainModule
+
+    it "copies the HTML to the clipboard by default", ->
+      waitsForPromise ->
+        atom.workspace.open("subdir/simple.md")
+
+      runs ->
+        mpp.copyHtml()
+        expect(atom.clipboard.read()).toBe """
+          <p><em>italic</em></p>
+          <p><strong>bold</strong></p>
+          <p>encoding \u2192 issue</p>
+        """
+
+        atom.workspace.getActiveTextEditor().setSelectedBufferRange [[0, 0], [1, 0]]
+        mpp.copyHtml()
+        expect(atom.clipboard.read()).toBe """
+          <p><em>italic</em></p>
+        """
+
+    it "passes the HTML to a callback if supplied as the first argument", ->
+      waitsForPromise ->
+        atom.workspace.open("subdir/simple.md")
+
+      runs ->
+        expect(mpp.copyHtml( (html) -> html )).toBe """
+          <p><em>italic</em></p>
+          <p><strong>bold</strong></p>
+          <p>encoding \u2192 issue</p>
+        """
+
+        atom.workspace.getActiveTextEditor().setSelectedBufferRange [[0, 0], [1, 0]]
+        expect(mpp.copyHtml( (html) -> html )).toBe """
+          <p><em>italic</em></p>
+        """
+
+    describe "when LaTeX rendering is enabled by default", ->
+      beforeEach ->
+        spyOn(atom.clipboard, 'write').andCallThrough()
+
+        waitsFor "LaTeX rendering to be enabled", ->
+          atom.config.set 'markdown-preview-plus.enableLatexRenderingByDefault', true
+
+        waitsForPromise ->
+          atom.workspace.open("subdir/simple.md")
+
+        runs ->
+          atom.workspace.getActiveTextEditor().setText '$$\\int_3^4$$'
+
+      it "copies the HTML with maths blocks as svg's to the clipboard by default", ->
+        mpp.copyHtml()
+
+        waitsFor "atom.clipboard.write to have been called", ->
+          atom.clipboard.write.callCount is 1
+
+        runs ->
+          clipboard = atom.clipboard.read()
+          expect(clipboard.match(/MathJax\_SVG\_Hidden/).length).toBe(1)
+          expect(clipboard.match(/class\=\"MathJax\_SVG\"/).length).toBe(1)
+
+      it "scales the svg's if the scaleMath parameter is passed", ->
+        mpp.copyHtml(null, 200)
+
+        waitsFor "atom.clipboard.write to have been called", ->
+          atom.clipboard.write.callCount is 1
+
+        runs ->
+          clipboard = atom.clipboard.read()
+          expect(clipboard.match(/font\-size\: 200%/).length).toBe(1)
+
+      it "passes the HTML to a callback if supplied as the first argument", ->
+        html = null
+        mpp.copyHtml (proHTML) ->
+          html = proHTML
+
+        waitsFor "markdown to be parsed and processed by MathJax", -> html?
+
+        runs ->
+          expect(html.match(/MathJax\_SVG\_Hidden/).length).toBe(1)
+          expect(html.match(/class\=\"MathJax\_SVG\"/).length).toBe(1)
+
   describe "sanitization", ->
     it "removes script tags and attributes that commonly contain inline scripts", ->
       waitsForPromise -> atom.workspace.open("subdir/evil.md")
