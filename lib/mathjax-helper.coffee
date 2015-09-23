@@ -53,6 +53,36 @@ module.exports =
     else @loadMathJax -> MathJax.Hub.Queue ["Typeset", MathJax.Hub, domElements]
     return
 
+  #
+  # Process maths in HTML fragment with MathJax
+  #
+  # @param html A HTML fragment string
+  # @param callback A callback method that accepts a single parameter, a HTML
+  #   fragment string that is the result of html processed by MathJax
+  #
+  processHTMLString: (html, callback) ->
+    element = document.createElement('div')
+    element.innerHTML = html
+
+    compileProcessedHTMLString = ->
+      svgGlyphs = document.getElementById('MathJax_SVG_Hidden')?.parentNode.cloneNode(true)
+      element.insertBefore(svgGlyphs, element.firstChild) if svgGlyphs?
+      return element.innerHTML
+
+    queueProcessHTMLString = ->
+      MathJax.Hub.Queue(
+        ["setRenderer", MathJax.Hub, "SVG"],
+        ["Typeset", MathJax.Hub, element],
+        ["setRenderer", MathJax.Hub, "HTML-CSS"],
+        [ -> callback compileProcessedHTMLString()]
+      )
+
+    if MathJax?
+    then queueProcessHTMLString()
+    else @loadMathJax queueProcessHTMLString
+
+    return
+
 #
 # Define some functions to help get a hold of the user's Latex
 # Macros.

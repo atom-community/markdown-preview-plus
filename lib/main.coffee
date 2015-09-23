@@ -2,6 +2,7 @@ url = require 'url'
 
 MarkdownPreviewView = null # Defer until used
 renderer = null # Defer until used
+mathjaxHelper = null # Defer until used
 
 createMarkdownPreviewView = (state) ->
   MarkdownPreviewView ?= require './markdown-preview-view'
@@ -213,14 +214,21 @@ module.exports =
 
     atom.workspace.open "markdown-preview-plus://#{encodeURI(filePath)}", searchAllPanes: true
 
-  copyHtml: ->
+  copyHtml: (callback = atom.clipboard.write.bind(atom.clipboard), scaleMath = 100) ->
     editor = atom.workspace.getActiveTextEditor()
     return unless editor?
 
     renderer ?= require './renderer'
     text = editor.getSelectedText() or editor.getText()
-    renderer.toHTML text, editor.getPath(), editor.getGrammar(), false, true, (error, html) ->
+    renderLaTeX = atom.config.get 'markdown-preview-plus.enableLatexRenderingByDefault'
+    renderer.toHTML text, editor.getPath(), editor.getGrammar(), renderLaTeX, true, (error, html) ->
       if error
         console.warn('Copying Markdown as HTML failed', error)
+      else if renderLaTeX
+        mathjaxHelper ?= require './mathjax-helper'
+        mathjaxHelper.processHTMLString html, (proHTML) ->
+          proHTML = proHTML.replace /MathJax\_SVG.*?font\-size\: 100%/g, (match) ->
+            match.replace /font\-size\: 100%/, "font-size: #{scaleMath}%"
+          callback(proHTML)
       else
-        atom.clipboard.write(html)
+        callback(html)
