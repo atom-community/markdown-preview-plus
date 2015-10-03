@@ -17,15 +17,13 @@ describe "the difference algorithm that updates the preview", ->
 
     runs ->
       editor = atom.workspace.getPanes()[0].getActiveItem()
-      atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
-
-    expectPreviewInSplitPane()
 
   afterEach ->
     preview.destroy()
 
-  expectPreviewInSplitPane = ->
+  loadPreviewInSplitPane = ->
     runs ->
+      atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
       expect(atom.workspace.getPanes()).toHaveLength 2
 
     waitsFor "markdown preview to be created", ->
@@ -39,7 +37,8 @@ describe "the difference algorithm that updates the preview", ->
     [orderedLists] = []
 
     beforeEach ->
-      orderedLists = preview.find('ol')
+      loadPreviewInSplitPane()
+      runs -> orderedLists = preview.find('ol')
 
     expectOrderedListsToStartAt = (startNumbers) ->
       runs ->
