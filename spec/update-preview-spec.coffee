@@ -1,6 +1,7 @@
 path                = require 'path'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
 mathjaxHelper       = require '../lib/mathjax-helper'
+renderer            = require '../lib/renderer'
 
 describe "the difference algorithm that updates the preview", ->
   [editor, preview, workspaceElement] = []
@@ -151,3 +152,33 @@ describe "the difference algorithm that updates the preview", ->
         expect(unprocessedMathBlocks[0].className).toBe('math')
         expect(unprocessedMathBlocks[0].children.length).toBe(1)
         expect(unprocessedMathBlocks[0].children[0].textContent).toBe("E=mc^2\n")
+
+  describe "when a code block is modified", ->
+    it "replaces the entire span.atom-text-editor container element", ->
+      loadPreviewInSplitPane()
+
+      runs ->
+        codeBlocks = preview.find('span.atom-text-editor')
+        expect(codeBlocks.length).toBe(5)
+        expect(codeBlocks.children().length).toBe(5)
+
+        atomTextEditors = codeBlocks.children('atom-text-editor')
+        expect(atomTextEditors.length).toBe(5)
+
+        spyOn(renderer, 'convertCodeBlocksToAtomEditors').andCallFake -> return
+        editor.setTextInBufferRange([[24, 0], [24, 9]], "This is a modified")
+
+      waitsFor "renderer.convertCodeBlocksToAtomEditors to be called", ->
+        renderer.convertCodeBlocksToAtomEditors.calls.length
+
+      runs ->
+        codeBlocks = preview.find('span.atom-text-editor')
+        expect(codeBlocks.length).toBe(5)
+        expect(codeBlocks.children().length).toBe(5)
+
+        atomTextEditors = codeBlocks.children('atom-text-editor')
+        expect(atomTextEditors.length).toBe(4)
+
+        modCodeBlock = codeBlocks.eq(0)
+        expect(modCodeBlock.children().length).toBe(1)
+        expect(modCodeBlock.children().prop('tagName').toLowerCase()).toBe('pre')
