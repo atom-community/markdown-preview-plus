@@ -171,6 +171,10 @@ configureMathJax = ->
     showMathMenu: false
     skipStartupTypeset: true
   MathJax.Hub.Configured()
+
+  # Notify user MathJax has loaded
+  atom.notifications.addSuccess "Loaded maths rendering engine MathJax", dismissable: true
+
   return
 
 #
