@@ -1,5 +1,49 @@
 # Change Log
 
+## [v2.2.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.2.1) (2015-10-13)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.2.0...v2.2.1)
+
+**Closed issues:**
+
+- list-style-type somehow unsupported [\#135](https://github.com/Galadirith/markdown-preview-plus/issues/135)
+- Error message when restarting Atom and restoring the session [\#129](https://github.com/Galadirith/markdown-preview-plus/issues/129)
+- Automatically open up preview pane when opening .md file [\#127](https://github.com/Galadirith/markdown-preview-plus/issues/127)
+- Incompatible with Atom 1.0.13? [\#118](https://github.com/Galadirith/markdown-preview-plus/issues/118)
+
+## [v2.2.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.2.0) (2015-10-04)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.1.1...v2.2.0)
+
+**Implemented enhancements:**
+
+- Add specs for update preview diff algorithm [\#58](https://github.com/Galadirith/markdown-preview-plus/issues/58)
+- Copy rendered equations when invoking `copyHtml\(\)` [\#55](https://github.com/Galadirith/markdown-preview-plus/issues/55)
+
+**Closed issues:**
+
+- MathJax-Wrapper not detected [\#124](https://github.com/Galadirith/markdown-preview-plus/issues/124)
+
+**Merged pull requests:**
+
+- Update preview specs [\#126](https://github.com/Galadirith/markdown-preview-plus/pull/126) ([Galadirith](https://github.com/Galadirith))
+- Copy maths as svg when invoking `main::copyHtml\(\)` [\#122](https://github.com/Galadirith/markdown-preview-plus/pull/122) ([Galadirith](https://github.com/Galadirith))
+- Adjusted appveyor to work correctly \(+4 squashed commits\) [\#120](https://github.com/Galadirith/markdown-preview-plus/pull/120) ([leipert](https://github.com/leipert))
+- Hotfix/2.1.1 [\#119](https://github.com/Galadirith/markdown-preview-plus/pull/119) ([leipert](https://github.com/leipert))
+
+## [v2.1.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.1.1) (2015-09-18)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.1.0...v2.1.1)
+
+**Closed issues:**
+
+- Could the preview automatically scroll to the changed section of source file? [\#116](https://github.com/Galadirith/markdown-preview-plus/issues/116)
+- Citations don't work for YAML embedded references? [\#111](https://github.com/Galadirith/markdown-preview-plus/issues/111)
+- Toggle not closing preview [\#110](https://github.com/Galadirith/markdown-preview-plus/issues/110)
+- Error Installing Package [\#105](https://github.com/Galadirith/markdown-preview-plus/issues/105)
+- Incompatible Modules [\#103](https://github.com/Galadirith/markdown-preview-plus/issues/103)
+
+**Merged pull requests:**
+
+- Add MathJax as explicit dependency [\#113](https://github.com/Galadirith/markdown-preview-plus/pull/113) ([Galadirith](https://github.com/Galadirith))
+
 ## [v2.1.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.1.0) (2015-09-09)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.0.2...v2.1.0)
 
@@ -113,7 +157,6 @@
 **Closed issues:**
 
 - Displaying LaTeX Tables in the Preview [\#46](https://github.com/Galadirith/markdown-preview-plus/issues/46)
-- Last table row does not respect alignment when rendering [\#42](https://github.com/Galadirith/markdown-preview-plus/issues/42)
 - install failed on Atom 0.189.0 ,windows 7 [\#31](https://github.com/Galadirith/markdown-preview-plus/issues/31)
 - Install failed on ubuntu 14.04 gnome [\#26](https://github.com/Galadirith/markdown-preview-plus/issues/26)
 - Cannot make it works in windows 8.1 x64 [\#25](https://github.com/Galadirith/markdown-preview-plus/issues/25)
