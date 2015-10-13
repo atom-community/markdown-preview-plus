@@ -74,6 +74,15 @@
   }
 
   // Lists, Blockquotes & Such
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
   ul,
   ol {
     li > :first-child,
@@ -83,11 +92,11 @@
   }
 
   ol > li {
-    list-style-type: decimal;
+    list-style-type: inherit;
   }
 
   ul > li {
-    list-style-type: disc;
+    list-style-type: inherit;
   }
 
   dl dt {
