@@ -167,6 +167,8 @@ configureMathJax = ->
         "noUndefined.js"
       ]
       Macros: userMacros
+    "HTML-CSS":
+      webFont: "TeX"
     messageStyle: "none"
     showMathMenu: false
     skipStartupTypeset: true
