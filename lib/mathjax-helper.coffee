@@ -168,6 +168,7 @@ configureMathJax = ->
       ]
       Macros: userMacros
     "HTML-CSS":
+      availableFonts: []
       webFont: "TeX"
     messageStyle: "none"
     showMathMenu: false
