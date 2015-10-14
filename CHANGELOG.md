@@ -1,5 +1,16 @@
 # Change Log
 
+## [v2.2.2](https://github.com/Galadirith/markdown-preview-plus/tree/v2.2.2) (2015-10-14)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.2.1...v2.2.2)
+
+**Closed issues:**
+
+- math font wrong v2.2.0 [\#132](https://github.com/Galadirith/markdown-preview-plus/issues/132)
+
+**Merged pull requests:**
+
+- Hotfix/2.2.2 [\#138](https://github.com/Galadirith/markdown-preview-plus/pull/138) ([leipert](https://github.com/leipert))
+
 ## [v2.2.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.2.1) (2015-10-13)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.2.0...v2.2.1)
 
