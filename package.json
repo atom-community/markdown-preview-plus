@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "main": "./lib/main",
   "description": "Better markdown preview in atom (optional pandoc support)",
   "keywords": [
