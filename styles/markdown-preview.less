@@ -67,6 +67,11 @@
   h6 + p {
     margin-top: 0;
   }
+  
+  // Allow tables to keep the background color of the editor theme
+  table, table * {
+    background: @syntax-background-color;
+  }
 
   // ReST first graf in nested list
   li p.first {
