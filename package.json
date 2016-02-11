@@ -35,5 +35,8 @@
   "devDependencies": {
     "coffeelint": "^1.9.7",
     "jasmine-tagged": "^1.1.4"
+  },
+  "deserializers": {
+    "MarkdownPreviewView": "createMarkdownPreviewView"
   }
 }
