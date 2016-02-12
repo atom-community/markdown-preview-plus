@@ -121,6 +121,11 @@ module.exports =
 
 
   activate: ->
+    if parseFloat(atom.getVersion()) < 1.7
+      atom.deserializers.add
+        name: 'MarkdownPreviewView'
+        deserialize: module.exports.createMarkdownPreviewView.bind(module.exports)
+
     atom.commands.add 'atom-workspace',
       'markdown-preview-plus:toggle': =>
         @toggle()
@@ -230,9 +235,3 @@ module.exports =
           callback(proHTML)
       else
         callback(html)
-
-if parseFloat(atom.getVersion()) < 1.7
-  atom.deserializers.add(
-    name: 'MarkdownPreviewView'
-    deserialize: module.exports.createMarkdownPreviewView.bind(module.exports)
-  )
