@@ -12,11 +12,6 @@ isMarkdownPreviewView = (object) ->
   MarkdownPreviewView ?= require './markdown-preview-view'
   object instanceof MarkdownPreviewView
 
-atom.deserializers.add
-  name: 'MarkdownPreviewView'
-  deserialize: (state) ->
-    createMarkdownPreviewView(state) if state.constructor is Object
-
 module.exports =
   config:
     breakOnSingleNewline:
@@ -128,6 +123,11 @@ module.exports =
 
 
   activate: ->
+    atom.deserializers.add
+      name: 'MarkdownPreviewView'
+      deserialize: (state) ->
+        createMarkdownPreviewView(state) if state.constructor is Object
+
     atom.commands.add 'atom-workspace',
       'markdown-preview-plus:toggle': =>
         @toggle()
