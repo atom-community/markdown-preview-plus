@@ -32,6 +32,7 @@ module.exports =
         'source.gfm'
         'source.litcoffee'
         'text.html.basic'
+        'text.md'
         'text.plain'
         'text.plain.null-grammar'
       ]
