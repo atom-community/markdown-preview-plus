@@ -135,7 +135,7 @@ describe "MarkdownPreviewView", ->
           end
         """
 
-      it "also assigns the grammer on the atom-text-editor when in a list item"
+      it "also assigns the grammer on the atom-text-editor when in a list item", ->
         # nested in a list item
         jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
         expect(jsEditor).toExist()
