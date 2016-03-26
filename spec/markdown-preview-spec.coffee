@@ -103,10 +103,12 @@ describe "Markdown preview plus package", ->
       waitsFor "second markdown preview to be created", ->
         previewPane.getItems().length is 2
 
+      waitsFor "second markdown preview to be activated", ->
+        previewPane.getActiveItemIndex() is 1
+
       runs ->
         preview = previewPane.getActiveItem()
         expect(preview).toBeInstanceOf(MarkdownPreviewView)
-        expect(previewPane.getActiveItemIndex()).toBe(1)
         expect(preview.getPath()).toBe editorPane.getActiveItem().getPath()
         expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
 
