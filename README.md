@@ -1,16 +1,13 @@
 # Markdown Preview Plus (MPP)
 
-[![appveyor][ab]][a] [![travis][tb]][t] [![wercker][wb]][w] ![apm version][av] ![apm downloads][ad]
+[![appveyor][ab]][a] [![travis][tb]][t] ![apm version][av] ![apm downloads][ad]
 
 Markdown Preview Plus (MPP) is a fork of
 [Markdown Preview](https://github.com/atom/markdown-preview) that provides a
 real-time preview of markdown documents.
 
-Should you have any problems while
-installing or using MPP, or if you would like to see a new feature added please
-open up a [new issue][issue].
-
-We also maintain a [changelog][changelog] for you to see what improved in MPP.
+Should you have any problems while installing or using MPP please open up a
+[new issue][issue].
 
 ![MPP][preview]
 
@@ -24,7 +21,6 @@ We also have a more detailed description of [features][features].
 -   Live reload while editing
 -   On demand synchronization
 -   And many more...
--   missing one? write an [issue][issue]
 
 ## Installation
 
@@ -63,5 +59,3 @@ Markdown Preview Plus (MPP) is released under the [MIT license][license].
 [a]: https://ci.appveyor.com/project/Galadirith/markdown-preview-plus/branch/master
 [tb]: https://img.shields.io/travis/Galadirith/markdown-preview-plus/master.svg?label=travis
 [t]: https://travis-ci.org/Galadirith/markdown-preview-plus
-[wb]: https://app.wercker.com/status/c2d80d0da6512a2c065a802a75b9a362/s/master
-[w]: https://app.wercker.com/project/bykey/c2d80d0da6512a2c065a802a75b9a362
