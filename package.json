@@ -2,7 +2,7 @@
   "name": "markdown-preview-plus",
   "version": "2.2.2",
   "main": "./lib/main",
-  "description": "Better markdown preview in atom (optional pandoc support)",
+  "description": "Markdown Preview + Community Features",
   "keywords": [
     "markdown",
     "maths",
