@@ -5,7 +5,7 @@ deploy: off
 
 install:
   - cd %LOCALAPPDATA%
-  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/').trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
+  - ps: (New-Object Net.WebClient).DownloadFile("https://atom.io/download/windows_zip?channel=stable", "$(pwd)\atom-windows.zip")
   - 7z -y x atom-windows.zip > nul
   - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%LOCALAPPDATA%\Atom\;%PATH%
   - apm --version
