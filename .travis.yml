@@ -31,5 +31,5 @@ addons:
     - fakeroot
 
 branches:
-  except:
+  only:
     - master

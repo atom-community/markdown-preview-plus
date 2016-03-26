@@ -3,7 +3,7 @@ version: "{build}"
 platform: x64
 
 branches:
-    except:
+    only:
       - master
 
 clone_depth: 10
