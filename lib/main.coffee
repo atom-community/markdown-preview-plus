@@ -200,7 +200,7 @@ module.exports =
       searchAllPanes: true
     if atom.config.get('markdown-preview-plus.openPreviewInSplitPane')
       options.split = 'right'
-    atom.workspace.open(uri, options).done (markdownPreviewView) ->
+    atom.workspace.open(uri, options).then (markdownPreviewView) ->
       if isMarkdownPreviewView(markdownPreviewView)
         previousActivePane.activate()
 
