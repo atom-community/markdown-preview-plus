@@ -1,18 +1,27 @@
 version: "{build}"
 
-build: off
-deploy: off
+platform: x64
+
+branches:
+    only:
+      - master
+
+clone_depth: 10
+
+skip_tags: true
+
+environment:
+  APM_TEST_PACKAGES:
+
+  matrix:
+  - ATOM_CHANNEL: stable
+  - ATOM_CHANNEL: beta
 
 install:
-  - cd %LOCALAPPDATA%
-  - ps: (New-Object Net.WebClient).DownloadFile("https://github.com/atom/atom/releases/download/$((Invoke-RestMethod -Method Get -Uri 'http://latest-atom-version.xyz/').trim())/atom-windows.zip", "$(pwd)\atom-windows.zip")
-  - 7z -y x atom-windows.zip > nul
-  - SET PATH=%LOCALAPPDATA%\Atom\resources\app\apm\bin;%LOCALAPPDATA%\Atom\;%PATH%
-  - apm --version
-  - atom --version
+  - ps: Install-Product node 5
 
-test_script:
-  - cd %APPVEYOR_BUILD_FOLDER%
-  - apm clean
-  - apm install
-  - powershell assets\appveyor.ps1
+build_script:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/atom/ci/master/build-package.ps1'))
+
+test: off
+deploy: off

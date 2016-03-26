@@ -161,10 +161,11 @@ module.exports = class WrappedDomTree
       return 0
 
     offset = 0
-    while(
+    forwardSearch = (offset) =>
       offset < @children.length and
       offset < otherTree.children.length and
-      @children[offset].equalTo otherTree.children[offset] )
+      @children[offset].equalTo otherTree.children[offset]
+    while forwardSearch(offset)
       offset++
 
     dp = new TwoDimArray @children.length + 1 - offset, otherTree.children.length + 1 - offset

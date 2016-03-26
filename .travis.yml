@@ -1,31 +1,35 @@
-language: objective-c
-
 notifications:
   email:
     on_success: never
     on_failure: change
 
-script:
-  - '(curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh) || true'
-  - './node_modules/.bin/coffeelint lib'
-  - './node_modules/.bin/coffeelint spec'
-  - >
-    for i in {1..5}; do
-        echo "Test Run: $i";
-        x=$(ATOM_PATH=./atom atom/Atom.app/Contents/Resources/app/apm/node_modules/.bin/apm test --path atom/Atom.app/Contents/Resources/app/atom.sh 2>&1);
-        rc=$?;
-        echo "$x";
-        echo "Test Exit Code: $rc";
-        if [[ $rc == 0 ]]; then
-          echo "Test Success :)";
-          exit 0;
-        fi
-        if [[ $rc != 0 && $x != *"FATAL:resource_dispatcher"* ]]; then
-          echo "Test Failed";
-          exit 1;
-        fi
-        echo "Test wrongly failed";
-    done;
+script: 'curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh'
 
 git:
   depth: 10
+
+sudo: false
+
+os:
+  - linux
+  - osx
+
+env:
+  global:
+    - APM_TEST_PACKAGES=""
+
+  matrix:
+    - ATOM_CHANNEL=stable
+    - ATOM_CHANNEL=beta
+
+addons:
+  apt:
+    packages:
+    - build-essential
+    - git
+    - libgnome-keyring-dev
+    - fakeroot
+
+branches:
+  only:
+    - master
