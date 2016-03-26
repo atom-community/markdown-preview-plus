@@ -28,7 +28,7 @@ describe "MarkdownPreviewView", ->
 
     this.addMatchers
       toStartWith: (expected) ->
-        this.actual.slice(0, expected.length) is expected;
+        this.actual.slice(0, expected.length) is expected
 
   afterEach ->
     preview.destroy()

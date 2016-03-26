@@ -31,7 +31,7 @@ describe "MarkdownPreviewView when Pandoc is enabled", ->
 
     this.addMatchers
       toStartWith: (expected) ->
-        this.actual.slice(0, expected.length) is expected;
+        this.actual.slice(0, expected.length) is expected
 
   afterEach ->
     preview.destroy()
