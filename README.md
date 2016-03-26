@@ -61,8 +61,7 @@ Markdown Preview Plus (MPP) is released under the [MIT license][license].
 [av]: https://img.shields.io/apm/v/markdown-preview-plus.svg
 [ab]: https://img.shields.io/appveyor/ci/Galadirith/markdown-preview-plus/master.svg?label=appveyor
 [a]: https://ci.appveyor.com/project/Galadirith/markdown-preview-plus/branch/master
-[tb]:
-https://img.shields.io/travis/Galadirith/markdown-preview-plus/master.svg?label=travis
+[tb]: https://img.shields.io/travis/Galadirith/markdown-preview-plus/master.svg?label=travis
 [t]: https://travis-ci.org/Galadirith/markdown-preview-plus
 [wb]: https://app.wercker.com/status/c2d80d0da6512a2c065a802a75b9a362/s/master
 [w]: https://app.wercker.com/project/bykey/c2d80d0da6512a2c065a802a75b9a362
