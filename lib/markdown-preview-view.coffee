@@ -42,7 +42,7 @@ class MarkdownPreviewView extends ScrollView
 
   serialize: ->
     deserializer: 'MarkdownPreviewView'
-    filePath: @getPath()
+    filePath: @getPath() ? @filePath
     editorId: @editorId
 
   destroy: ->
@@ -161,7 +161,7 @@ class MarkdownPreviewView extends ScrollView
     @getMarkdownSource().then (source) => @renderMarkdownText(source) if source?
 
   getMarkdownSource: ->
-    if @file?
+    if @file?.getPath()
       @file.read()
     else if @editor?
       Promise.resolve(@editor.getText())
