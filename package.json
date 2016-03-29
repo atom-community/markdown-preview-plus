@@ -23,7 +23,7 @@
     "highlights-native": "^2.1.0",
     "lodash": "^3.10.1",
     "MathJax": "https://github.com/Galadirith/MathJax/tarball/2.4.0-electron.0.2.0",
-    "markdown-it": "^4.4.0",
+    "markdown-it": "^5.1.0",
     "markdown-it-lazy-headers": "^0.1.2",
     "markdown-it-math": "https://github.com/leipert/markdown-it-math/tarball/quickfix3",
     "pdc": "~0.2.2",
