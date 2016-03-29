@@ -78,8 +78,8 @@ describe "MarkdownPreviewView", ->
       filePath = path.join(temp.mkdirSync('markdown-preview-'), 'foo.md')
       fs.writeFileSync(filePath, '# Hi')
 
-      preview = new MarkdownPreviewView({filePath})
-      serialized = preview.serialize()
+      newPreview = new MarkdownPreviewView({filePath})
+      serialized = newPreview.serialize()
       fs.removeSync(filePath)
 
       newPreview = atom.deserializers.deserialize(serialized)
