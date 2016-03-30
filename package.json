@@ -25,7 +25,7 @@
     "MathJax": "https://github.com/Galadirith/MathJax/tarball/2.4.0-electron.0.2.0",
     "markdown-it": "^5.1.0",
     "markdown-it-lazy-headers": "^0.1.2",
-    "markdown-it-math": "https://github.com/leipert/markdown-it-math/tarball/quickfix3",
+    "markdown-it-math": "https://github.com/Galadirith/markdown-it-math/tarball/fix-table-pipe-parse-no-ascii",
     "pdc": "~0.2.2",
     "season": "^5.3",
     "temp": "^0.8.1",
