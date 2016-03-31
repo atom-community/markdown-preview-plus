@@ -136,6 +136,31 @@ describe "MarkdownPreviewView", ->
       decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
       expect(decorations.length).toBe 0
 
+    it "removes a trailing newline but preserves remaining leading and trailing whitespace", ->
+      newFilePath = atom.project.getDirectories()[0].resolve('subdir/trim-nl.md')
+      newPreview = new MarkdownPreviewView({filePath: newFilePath})
+      jasmine.attachToDOM(newPreview.element)
+
+      waitsForPromise ->
+        newPreview.renderMarkdown()
+
+      runs ->
+        editor = newPreview.find("atom-text-editor")
+        expect(editor).toExist()
+        expect(editor[0].getModel().getText()).toBe """
+
+               a
+              b
+             c
+            d
+           e
+          f
+
+        """
+
+      runs ->
+        newPreview.destroy()
+
     describe "when the code block's fence name has a matching grammar", ->
       it "assigns the grammar on the atom-text-editor", ->
         rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
