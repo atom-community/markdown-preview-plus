@@ -197,7 +197,7 @@ class MarkdownPreviewView extends ScrollView
         @updatePreview.update(domFragment, @renderLaTeX)
         @emitter.emit 'did-change-markdown'
         @originalTrigger('markdown-preview-plus:markdown-changed')
-        @getScrollMap(text)
+        @getScrollMap(text) if @editor?
 
   getTitle: ->
     if @file?
