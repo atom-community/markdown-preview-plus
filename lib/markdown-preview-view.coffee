@@ -26,6 +26,7 @@ class MarkdownPreviewView extends ScrollView
     @emitter = new Emitter
     @disposables = new CompositeDisposable
     @loaded = true # Do not show the loading spinnor on initial load
+    @scrollMap = null
 
   attached: ->
     return if @isAttached
@@ -188,6 +189,7 @@ class MarkdownPreviewView extends ScrollView
         @updatePreview.update(domFragment, @renderLaTeX)
         @emitter.emit 'did-change-markdown'
         @originalTrigger('markdown-preview-plus:markdown-changed')
+        @getScrollMap(text)
 
   getTitle: ->
     if @file?
@@ -556,6 +558,94 @@ class MarkdownPreviewView extends ScrollView
     setTimeout ( -> element.removeClass('flash') ), 1000
 
     return element[0]
+
+  #
+  # Generate a map of the editors scroll percentage to the equivalent preview
+  # scroll percentage with respect to the parsed markdown.
+  #
+  # @param {string} Source markdown of the associated editor.
+  # @return {null}
+  #
+  getScrollMap: (text) ->
+    markdownIt  ?= require './markdown-it-helper'
+    tokens      = markdownIt.getTokens text, @renderLaTeX
+
+    level     = 0
+    path      = []
+    pathToks  = []
+    tagIdxLev = []
+
+    scrollMapDirty = tokens.map (e) ->
+        tag = if (e.tag is 'math' or e.tag is 'code') then 'span' else e.tag
+        if e.nesting > -1
+          level++
+          tagIdxLev[level] ?= []
+          if tagIdxLev[level][tag]?
+          then tagIdxLev[level][tag]++
+          else tagIdxLev[level][tag] = 0
+          path.push "#{tag}[#{tagIdxLev[level][tag]}]"
+          pathToks.push
+            tag: tag
+            idx: tagIdxLev[level][tag]
+        else
+          level--
+          tagIdxLev[level+2] = []
+          path.pop()
+          pathToks.pop()
+
+        tok =
+          nesting : e.nesting
+          level : level
+          tag: tag
+          line: e.map?[0]
+          path: path.join('/')
+          pathToks: pathToks.map (e) -> e
+
+        if e.nesting is 0
+          level--
+          path.pop()
+          pathToks.pop()
+
+        tok
+      .filter (e) ->
+        (e.nesting is 1 or
+        e.tag is 'span') and
+        e.line isnt null and not
+        e.path.match(/table.*?\//)
+
+    # Prepare editor anchors/nodes
+    scrollMap = []
+    lineCount = @editor.getLineCount()
+    for block, i in scrollMapDirty
+      if block.line is scrollMapDirty[i-1]?.line
+        scrollMap.pop()
+      block.linePct = 100*block.line/lineCount
+      scrollMap.push(block)
+
+    # Prepare preview anchors/nodes
+    scrollHeight = @[0].scrollHeight
+    for block in scrollMap
+      element = @find('.update-preview').eq(0)
+      for tok in block.pathToks
+        candidateElement = element.children(tok.tag).eq(tok.idx)
+        if candidateElement.length isnt 0
+        then element = candidateElement
+        else break
+      block.offsetTop     = element[0].offsetTop
+      block.offsetTopPct  = 100*element[0].offsetTop/scrollHeight
+
+    # Prepare start anchors
+    scrollMap[0].linePct      = 0
+    scrollMap[0].offsetTopPct = 0
+
+    # Prepare minimal end anchors
+    scrollMap.push
+      linePct: 100
+      offsetTopPct: 100
+
+    @scrollMap = scrollMap
+
+    return
 
 if Grim.includeDeprecatedAPIs
   MarkdownPreviewView::on = (eventName) ->
