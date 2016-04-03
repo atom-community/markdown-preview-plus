@@ -73,6 +73,7 @@ class MarkdownPreviewView extends ScrollView
 
       if @editor?
         @emitter.emit 'did-change-title' if @editor?
+        @editorView = atom.views.getView(@editor)
         @handleEvents()
         @renderMarkdown()
       else
@@ -156,6 +157,8 @@ class MarkdownPreviewView extends ScrollView
         @element.setAttribute('data-use-github-style', '')
       else
         @element.removeAttribute('data-use-github-style')
+
+    @disposables.add @editorView.onDidChangeScrollTop @onEditorScroll
 
   renderMarkdown: ->
     @showLoading() unless @loaded
@@ -646,6 +649,57 @@ class MarkdownPreviewView extends ScrollView
     @scrollMap = scrollMap
 
     return
+
+  #
+  # Editor scroll change event handler
+  #
+  # @param {int} The offset of the top of the editor (top of scrollHeight) with
+  #   respect to the top of the offsetHeight in pixels
+  # @return {undefined}
+  #
+  onEditorScroll: (scrollTop) =>
+    scrollHeight    = @editorView.getScrollHeight()
+    viewportHeight  = @editorView.getHeight()
+
+    if scrollHeight != viewportHeight
+      pctDirty = scrollTop / (scrollHeight - viewportHeight) * 100
+      pct = null
+
+      if isNaN(pctDirty)
+        pct = 100
+      else if pctDirty > 100
+        pct = 100
+      else if pctDirty < 0
+        pct = 0
+      else
+        pct = pctDirty
+
+    # Perform interval bisection to find bounding editor linePct nodes
+    left  = 0
+    mid   = Math.round @scrollMap.length/2
+    right = @scrollMap.length-1
+
+    for i in [0..31]
+      # Perform interval bisection
+      if pct < @scrollMap[mid].linePct
+      then right = mid
+      else left = mid
+
+      # Check if bisection has converged
+      if right-left <= 1
+      then break
+      else mid = Math.round (left+right)/2
+
+    # Set preview scroll position
+    leftLinePct   = @scrollMap[left].linePct
+    rightLinePct  = @scrollMap[left+1].linePct
+    leftOffPct    = @scrollMap[left].offsetTopPct
+    rightOffPct   = @scrollMap[left+1].offsetTopPct
+
+    remainderFrac = (pct - leftLinePct)/(rightLinePct - leftLinePct)
+    previewPct    = leftOffPct + remainderFrac*(rightOffPct - leftOffPct)
+
+    @[0].scrollTop = previewPct*(@[0].scrollHeight-@[0].offsetHeight)/100
 
 if Grim.includeDeprecatedAPIs
   MarkdownPreviewView::on = (eventName) ->
