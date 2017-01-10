@@ -175,17 +175,12 @@ configureMathJax = ->
     skipStartupTypeset: true
   MathJax.Hub.Configured()
 
-  # Notify user MathJax has loaded
-  atom.notifications.addSuccess "Loaded maths rendering engine MathJax", dismissable: true
-
   return
 
 #
 # Attach main MathJax script to the document
 #
 attachMathJax = ->
-  # Notify user MathJax is loading
-  atom.notifications.addInfo "Loading maths rendering engine MathJax", dismissable: true
 
   # Attach MathJax script
   script      = document.createElement("script")
