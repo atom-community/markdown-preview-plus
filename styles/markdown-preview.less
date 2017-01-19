@@ -4,15 +4,15 @@
 .markdown-preview {
   atom-text-editor {
     // only show scrollbars on hover
-    .scrollbars-visible-always &::shadow {
-      .vertical-scrollbar,
-      .horizontal-scrollbar {
+    .scrollbars-visible-always & {
+      .style--vertical-scrollbar,
+      .style--horizontal-scrollbar {
         visibility: hidden;
       }
     }
-    .scrollbars-visible-always &:hover::shadow {
-      .vertical-scrollbar,
-      .horizontal-scrollbar {
+    .scrollbars-visible-always &:hover {
+      .style--vertical-scrollbar,
+      .style--horizontal-scrollbar {
         visibility: visible;
       }
     }
