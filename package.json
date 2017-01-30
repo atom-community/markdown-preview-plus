@@ -13,7 +13,7 @@
   "repository": "https://github.com/Galadirith/markdown-preview-plus",
   "license": "MIT",
   "engines": {
-    "atom": "*"
+    "atom": ">=1.13.0 <2.0.0"
   },
   "dependencies": {
     "atom-space-pen-views": "^2.0.0",
