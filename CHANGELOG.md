@@ -1,5 +1,77 @@
 # Change Log
 
+## [v2.4.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.1) (2017-01-30)
+
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.0...v2.4.1)
+
+**Closed issues:**
+
+- Deprecated selector in `markdown-preview-plus\styles\markdown-preview.less` [\#252](https://github.com/Galadirith/markdown-preview-plus/issues/252)
+- Failed to activate the markdown-preview-plus package [\#234](https://github.com/Galadirith/markdown-preview-plus/issues/234)
+- Toggle Preview/LaTeX Rendering does not work when text type is set to "LaTeX" [\#232](https://github.com/Galadirith/markdown-preview-plus/issues/232)
+- Jekyll's {% highlight %} tag is not recognized [\#212](https://github.com/Galadirith/markdown-preview-plus/issues/212)
+- offline mathjax engine is possible or not [\#208](https://github.com/Galadirith/markdown-preview-plus/issues/208)
+- Tables within quote blocks render outside of quote level [\#205](https://github.com/Galadirith/markdown-preview-plus/issues/205)
+- Preview panel does not stick to the end of the file [\#197](https://github.com/Galadirith/markdown-preview-plus/issues/197)
+
+## [v2.4.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.0) (2016-03-31)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.3.0...v2.4.0)
+
+**Closed issues:**
+
+- Pipe character within $..$ in markdown table breaks equation across columns [\#185](https://github.com/Galadirith/markdown-preview-plus/issues/185)
+- Image cached and never updated [\#167](https://github.com/Galadirith/markdown-preview-plus/issues/167)
+- Leading spaces in the first line of backtick or fenced code blocks are missing [\#165](https://github.com/Galadirith/markdown-preview-plus/issues/165)
+- Bug: Preview not displaying in El Capitan [\#147](https://github.com/Galadirith/markdown-preview-plus/issues/147)
+- picture [\#145](https://github.com/Galadirith/markdown-preview-plus/issues/145)
+
+**Merged pull requests:**
+
+- Trim trailing newline only [\#196](https://github.com/Galadirith/markdown-preview-plus/pull/196) ([Galadirith](https://github.com/Galadirith))
+- Merge upstream existential checks and deserialization [\#193](https://github.com/Galadirith/markdown-preview-plus/pull/193) ([Galadirith](https://github.com/Galadirith))
+
+## [v2.3.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.3.0) (2016-03-26)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.2.2...v2.3.0)
+
+**Fixed bugs:**
+
+- Uncaught TypeError: Cannot read property 'getStyleElements' of undefined [\#143](https://github.com/Galadirith/markdown-preview-plus/issues/143)
+
+**Closed issues:**
+
+- markdown-preview-plus gets blocked when using language-markdown extension [\#189](https://github.com/Galadirith/markdown-preview-plus/issues/189)
+- Images are not shown when path contains a space [\#187](https://github.com/Galadirith/markdown-preview-plus/issues/187)
+- \[feature request\] Indent for markdown Table of Content preview when press "cmd + r" [\#181](https://github.com/Galadirith/markdown-preview-plus/issues/181)
+- Compatibility issue with package language-markdown [\#179](https://github.com/Galadirith/markdown-preview-plus/issues/179)
+- \[feature request\] dark background [\#178](https://github.com/Galadirith/markdown-preview-plus/issues/178)
+- Autoscroll [\#177](https://github.com/Galadirith/markdown-preview-plus/issues/177)
+- Doesn't work [\#174](https://github.com/Galadirith/markdown-preview-plus/issues/174)
+- Pandoc not rendering meta title/author [\#173](https://github.com/Galadirith/markdown-preview-plus/issues/173)
+- Links within lists don't render correctly [\#170](https://github.com/Galadirith/markdown-preview-plus/issues/170)
+- Font Size [\#169](https://github.com/Galadirith/markdown-preview-plus/issues/169)
+- text.md not one of the default scopes [\#168](https://github.com/Galadirith/markdown-preview-plus/issues/168)
+- Cannot control picture size in markdown-preview-plus [\#164](https://github.com/Galadirith/markdown-preview-plus/issues/164)
+- Tables do not respect theme color [\#161](https://github.com/Galadirith/markdown-preview-plus/issues/161)
+- Toggle doesnt work but copy html does [\#160](https://github.com/Galadirith/markdown-preview-plus/issues/160)
+- Atom hangs and crashes when trying to preview [\#159](https://github.com/Galadirith/markdown-preview-plus/issues/159)
+- Font selection for Pandoc-Markdown preview [\#158](https://github.com/Galadirith/markdown-preview-plus/issues/158)
+- Error: pandoc-citeproc not found [\#157](https://github.com/Galadirith/markdown-preview-plus/issues/157)
+- Backslash escape not rendered correctly [\#156](https://github.com/Galadirith/markdown-preview-plus/issues/156)
+- Uncaught Error: Must pass a styleManager parameter when initializing a StylesElement [\#155](https://github.com/Galadirith/markdown-preview-plus/issues/155)
+- Minimum pandoc options needed to preview a markdown document? Not working. [\#154](https://github.com/Galadirith/markdown-preview-plus/issues/154)
+- List Levels not showing [\#153](https://github.com/Galadirith/markdown-preview-plus/issues/153)
+- Scroll the preview pane with the editor pane [\#152](https://github.com/Galadirith/markdown-preview-plus/issues/152)
+- unable to preview Pandoc slides [\#151](https://github.com/Galadirith/markdown-preview-plus/issues/151)
+- LaTeX  not rendering, then issues with uninstalling [\#141](https://github.com/Galadirith/markdown-preview-plus/issues/141)
+- Updating to “markdown-preview-plus@2.2.2” failed [\#140](https://github.com/Galadirith/markdown-preview-plus/issues/140)
+
+**Merged pull requests:**
+
+- Themed preview [\#192](https://github.com/Galadirith/markdown-preview-plus/pull/192) ([Galadirith](https://github.com/Galadirith))
+- Fix style init [\#191](https://github.com/Galadirith/markdown-preview-plus/pull/191) ([Galadirith](https://github.com/Galadirith))
+- Use new promise api [\#184](https://github.com/Galadirith/markdown-preview-plus/pull/184) ([laokaplow](https://github.com/laokaplow))
+- Fix MD syntax glitch for Atom's internal parser [\#171](https://github.com/Galadirith/markdown-preview-plus/pull/171) ([alerque](https://github.com/alerque))
+
 ## [v2.2.2](https://github.com/Galadirith/markdown-preview-plus/tree/v2.2.2) (2015-10-14)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.2.1...v2.2.2)
 
@@ -28,6 +100,7 @@
 
 - Add specs for update preview diff algorithm [\#58](https://github.com/Galadirith/markdown-preview-plus/issues/58)
 - Copy rendered equations when invoking `copyHtml\(\)` [\#55](https://github.com/Galadirith/markdown-preview-plus/issues/55)
+- Copy maths as svg when invoking `main::copyHtml\(\)` [\#122](https://github.com/Galadirith/markdown-preview-plus/pull/122) ([Galadirith](https://github.com/Galadirith))
 
 **Closed issues:**
 
@@ -36,12 +109,15 @@
 **Merged pull requests:**
 
 - Update preview specs [\#126](https://github.com/Galadirith/markdown-preview-plus/pull/126) ([Galadirith](https://github.com/Galadirith))
-- Copy maths as svg when invoking `main::copyHtml\(\)` [\#122](https://github.com/Galadirith/markdown-preview-plus/pull/122) ([Galadirith](https://github.com/Galadirith))
 - Adjusted appveyor to work correctly \(+4 squashed commits\) [\#120](https://github.com/Galadirith/markdown-preview-plus/pull/120) ([leipert](https://github.com/leipert))
 - Hotfix/2.1.1 [\#119](https://github.com/Galadirith/markdown-preview-plus/pull/119) ([leipert](https://github.com/leipert))
 
 ## [v2.1.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.1.1) (2015-09-18)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.1.0...v2.1.1)
+
+**Implemented enhancements:**
+
+- Add MathJax as explicit dependency [\#113](https://github.com/Galadirith/markdown-preview-plus/pull/113) ([Galadirith](https://github.com/Galadirith))
 
 **Closed issues:**
 
@@ -51,16 +127,13 @@
 - Error Installing Package [\#105](https://github.com/Galadirith/markdown-preview-plus/issues/105)
 - Incompatible Modules [\#103](https://github.com/Galadirith/markdown-preview-plus/issues/103)
 
-**Merged pull requests:**
-
-- Add MathJax as explicit dependency [\#113](https://github.com/Galadirith/markdown-preview-plus/pull/113) ([Galadirith](https://github.com/Galadirith))
-
 ## [v2.1.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.1.0) (2015-09-09)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.0.2...v2.1.0)
 
 **Implemented enhancements:**
 
 - Clear Caches/Watchers upon closing a preview [\#52](https://github.com/Galadirith/markdown-preview-plus/issues/52)
+- Remove dependencies which need to be built. [\#94](https://github.com/Galadirith/markdown-preview-plus/pull/94) ([leipert](https://github.com/leipert))
 
 **Fixed bugs:**
 
@@ -72,7 +145,6 @@
 - Update ordered list start number when changed [\#109](https://github.com/Galadirith/markdown-preview-plus/pull/109) ([Galadirith](https://github.com/Galadirith))
 - Remove native build instructions from docs [\#108](https://github.com/Galadirith/markdown-preview-plus/pull/108) ([Galadirith](https://github.com/Galadirith))
 - Fix deserialization due to not passing domFragment [\#107](https://github.com/Galadirith/markdown-preview-plus/pull/107) ([Galadirith](https://github.com/Galadirith))
-- Remove dependencies which need to be built. [\#94](https://github.com/Galadirith/markdown-preview-plus/pull/94) ([leipert](https://github.com/leipert))
 
 ## [v2.0.2](https://github.com/Galadirith/markdown-preview-plus/tree/v2.0.2) (2015-09-05)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.0.1...v2.0.2)
@@ -95,17 +167,19 @@
 **Fixed bugs:**
 
 - Version 2.0.0: headings no longer work [\#88](https://github.com/Galadirith/markdown-preview-plus/issues/88)
+- Opening a preview causes ex-mode to malfunction [\#86](https://github.com/Galadirith/markdown-preview-plus/issues/86)
+- Correct instantiation conditions for markdown-it [\#92](https://github.com/Galadirith/markdown-preview-plus/pull/92) ([Galadirith](https://github.com/Galadirith))
 
 **Closed issues:**
 
 - Fails on linux mint \(I know why\) [\#91](https://github.com/Galadirith/markdown-preview-plus/issues/91)
 - Updating to “markdown-preview-plus@2.0.0” failed [\#90](https://github.com/Galadirith/markdown-preview-plus/issues/90)
+- Roadmap to 2.0.0 [\#51](https://github.com/Galadirith/markdown-preview-plus/issues/51)
 
 **Merged pull requests:**
 
 - Added support for lazy headers \(missing space after \#\) [\#96](https://github.com/Galadirith/markdown-preview-plus/pull/96) ([leipert](https://github.com/leipert))
 - Fix math regressions [\#95](https://github.com/Galadirith/markdown-preview-plus/pull/95) ([leipert](https://github.com/leipert))
-- Correct instantiation conditions for markdown-it [\#92](https://github.com/Galadirith/markdown-preview-plus/pull/92) ([Galadirith](https://github.com/Galadirith))
 
 ## [v2.0.0](https://github.com/Galadirith/markdown-preview-plus/tree/v2.0.0) (2015-09-01)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v1.7.0...v2.0.0)
@@ -119,6 +193,9 @@
 - Implement Specs from Stress Test Document [\#18](https://github.com/Galadirith/markdown-preview-plus/issues/18)
 - Allow defining new Tex Macros globally [\#11](https://github.com/Galadirith/markdown-preview-plus/issues/11)
 - Inline Math Rendering with "\\(...\\)" [\#7](https://github.com/Galadirith/markdown-preview-plus/issues/7)
+- Activate non-active open preview and don't destory [\#83](https://github.com/Galadirith/markdown-preview-plus/pull/83) ([Galadirith](https://github.com/Galadirith))
+- Prepare add macros merge [\#75](https://github.com/Galadirith/markdown-preview-plus/pull/75) ([Galadirith](https://github.com/Galadirith))
+- Migration to markdown-it and markdown-it-math [\#70](https://github.com/Galadirith/markdown-preview-plus/pull/70) ([leipert](https://github.com/leipert))
 
 **Fixed bugs:**
 
@@ -137,11 +214,8 @@
 
 **Merged pull requests:**
 
-- Activate non-active open preview and don't destory [\#83](https://github.com/Galadirith/markdown-preview-plus/pull/83) ([Galadirith](https://github.com/Galadirith))
 - Sync source and preview on demand [\#80](https://github.com/Galadirith/markdown-preview-plus/pull/80) ([Galadirith](https://github.com/Galadirith))
 - Improved CI testing \(appveyor builds and travis.ci false failures\) [\#78](https://github.com/Galadirith/markdown-preview-plus/pull/78) ([leipert](https://github.com/leipert))
-- Prepare add macros merge [\#75](https://github.com/Galadirith/markdown-preview-plus/pull/75) ([Galadirith](https://github.com/Galadirith))
-- Migration to markdown-it and markdown-it-math [\#70](https://github.com/Galadirith/markdown-preview-plus/pull/70) ([leipert](https://github.com/leipert))
 - Migrated to pathwatcher-without-runas [\#69](https://github.com/Galadirith/markdown-preview-plus/pull/69) ([leipert](https://github.com/leipert))
 - \[feat\] deactivated failing tests on wercker \(and only on wercker\) [\#68](https://github.com/Galadirith/markdown-preview-plus/pull/68) ([leipert](https://github.com/leipert))
 
@@ -179,6 +253,7 @@
 - \[wip\] Feature/ci [\#59](https://github.com/Galadirith/markdown-preview-plus/pull/59) ([leipert](https://github.com/leipert))
 - Preview most recent version of images [\#53](https://github.com/Galadirith/markdown-preview-plus/pull/53) ([Galadirith](https://github.com/Galadirith))
 - Fixed strikethrough layout  [\#28](https://github.com/Galadirith/markdown-preview-plus/pull/28) ([leipert](https://github.com/leipert))
+- first go at adding macro support [\#14](https://github.com/Galadirith/markdown-preview-plus/pull/14) ([KCErb](https://github.com/KCErb))
 
 ## [v1.6.0](https://github.com/Galadirith/markdown-preview-plus/tree/v1.6.0) (2015-07-09)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v1.5.0...v1.6.0)
