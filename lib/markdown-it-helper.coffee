@@ -45,6 +45,18 @@ init = (rL) ->
     markdownIt.use math, mathDollars
     markdownIt.use math, mathBrackets
 
+  markdownIt.core.ruler.push 'logger', (state) ->
+    recurse = (token) ->
+      if token.children?
+        token.children = token.children.map(recurse)
+      if token.map?
+        token.attrSet('data-map-lines', [token.map[0]...token.map[1]].join(' '))
+        return token
+      else
+        return token
+    state.tokens = state.tokens.map(recurse)
+    return state
+
   lazyHeaders = atom.config.get('markdown-preview-plus.useLazyHeaders')
 
   if lazyHeaders

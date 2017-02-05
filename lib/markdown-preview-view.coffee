@@ -442,40 +442,46 @@ class MarkdownPreviewView extends ScrollView
   #   line is identified `null` is returned.
   #
   syncSource: (text, element) =>
-    pathToElement = @getPathToElement element
-    pathToElement.shift() # remove div.markdown-preview
-    pathToElement.shift() # remove div.update-preview
-    return unless pathToElement.length
-
-    markdownIt  ?= require './markdown-it-helper'
-    tokens      = markdownIt.getTokens text, @renderLaTeX
-    finalToken  = null
-    level       = 0
-
-    for token in tokens
-      break if token.level < level
-      continue if token.hidden
-      if token.tag is pathToElement[0].tag and token.level is level
-        if token.nesting is 1
-          if pathToElement[0].index is 0
-            finalToken = token if token.map?
-            pathToElement.shift()
-            level++
-          else
-            pathToElement[0].index--
-        else if token.nesting is 0 and token.tag in ['math', 'code', 'hr']
-          if pathToElement[0].index is 0
-            finalToken = token
-            break
-          else
-            pathToElement[0].index--
-      break if pathToElement.length is 0
-
-    if finalToken?
-      @editor.setCursorBufferPosition [finalToken.map[0], 0]
-      return finalToken.map[0]
-    else
-      return null
+    until element.hasAttribute('data-map-lines') or not element?
+      element = element.parentElement
+    return unless element?
+    [line] = element.getAttribute('data-map-lines').split(' ')
+    return unless line?
+    @editor.setCursorBufferPosition [parseInt(line), 0]
+    # pathToElement = @getPathToElement element
+    # pathToElement.shift() # remove div.markdown-preview
+    # pathToElement.shift() # remove div.update-preview
+    # return unless pathToElement.length
+    #
+    # markdownIt  ?= require './markdown-it-helper'
+    # tokens      = markdownIt.getTokens text, @renderLaTeX
+    # finalToken  = null
+    # level       = 0
+    #
+    # for token in tokens
+    #   break if token.level < level
+    #   continue if token.hidden
+    #   if token.tag is pathToElement[0].tag and token.level is level
+    #     if token.nesting is 1
+    #       if pathToElement[0].index is 0
+    #         finalToken = token if token.map?
+    #         pathToElement.shift()
+    #         level++
+    #       else
+    #         pathToElement[0].index--
+    #     else if token.nesting is 0 and token.tag in ['math', 'code', 'hr']
+    #       if pathToElement[0].index is 0
+    #         finalToken = token
+    #         break
+    #       else
+    #         pathToElement[0].index--
+    #   break if pathToElement.length is 0
+    #
+    # if finalToken?
+    #   @editor.setCursorBufferPosition [finalToken.map[0], 0]
+    #   return finalToken.map[0]
+    # else
+    #   return null
 
   #
   # Determine path to a target token.
@@ -535,27 +541,37 @@ class MarkdownPreviewView extends ScrollView
   #   identified `null` is returned.
   #
   syncPreview: (text, line) =>
-    markdownIt  ?= require './markdown-it-helper'
-    tokens      = markdownIt.getTokens text, @renderLaTeX
-    pathToToken = @getPathToToken tokens, line
+    els = @element.querySelectorAll("*[data-map-lines~='#{line}']")
+    [el] = Array.prototype.slice.call(els).sort (a, b) -> a.getAttribute('data-map-lines') < b.getAttribute('data-map-lines')
 
-    element = @find('.update-preview').eq(0)
-    for token in pathToToken
-      candidateElement = element.children(token.tag).eq(token.index)
-      if candidateElement.length isnt 0
-      then element = candidateElement
-      else break
+    return unless el?
 
-    return null if element[0].classList.contains('update-preview') # Do not jump to the top of the preview for bad syncs
-
-    element[0].scrollIntoView() unless element[0].classList.contains('update-preview')
+    el.scrollIntoView()
     maxScrollTop = @element.scrollHeight - @innerHeight()
     @element.scrollTop -= @innerHeight()/4 unless @scrollTop() >= maxScrollTop
-
-    element.addClass('flash')
-    setTimeout ( -> element.removeClass('flash') ), 1000
-
-    return element[0]
+    el.classList.add('flash')
+    setTimeout ( -> el.classList.remove('flash') ), 1000
+  #   markdownIt  ?= require './markdown-it-helper'
+  #   tokens      = markdownIt.getTokens text, @renderLaTeX
+  #   pathToToken = @getPathToToken tokens, line
+  #
+  #   element = @find('.update-preview').eq(0)
+  #   for token in pathToToken
+  #     candidateElement = element.children(token.tag).eq(token.index)
+  #     if candidateElement.length isnt 0
+  #     then element = candidateElement
+  #     else break
+  #
+  #   return null if element[0].classList.contains('update-preview') # Do not jump to the top of the preview for bad syncs
+  #
+  #   element[0].scrollIntoView() unless element[0].classList.contains('update-preview')
+  #   maxScrollTop = @element.scrollHeight - @innerHeight()
+  #   @element.scrollTop -= @innerHeight()/4 unless @scrollTop() >= maxScrollTop
+  #
+  #   element.addClass('flash')
+  #   setTimeout ( -> element.removeClass('flash') ), 1000
+  #
+  #   return element[0]
 
 if Grim.includeDeprecatedAPIs
   MarkdownPreviewView::on = (eventName) ->
