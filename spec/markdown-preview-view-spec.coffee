@@ -18,13 +18,12 @@ describe "MarkdownPreviewView", ->
     jasmine.attachToDOM(preview.element)
 
     waitsForPromise ->
-      atom.packages.activatePackage('language-ruby')
-
-    waitsForPromise ->
-      atom.packages.activatePackage('language-javascript')
-
-    waitsForPromise ->
-      atom.packages.activatePackage('markdown-preview-plus')
+      Promise.all [
+        atom.packages.activatePackage('language-ruby')
+        atom.packages.activatePackage('language-javascript')
+      ]
+      .then ->
+        atom.packages.activatePackage('markdown-preview-plus')
 
     this.addMatchers
       toStartWith: (expected) ->
