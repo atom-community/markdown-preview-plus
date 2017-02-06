@@ -46,6 +46,7 @@ init = (rL) ->
     markdownIt.use math, mathBrackets
 
   markdownIt.core.ruler.push 'logger', (state) ->
+    return state unless state.env.sourceMap
     recurse = (token) ->
       if token.children?
         token.children = token.children.map(recurse)
@@ -69,9 +70,9 @@ needsInit = (rL) ->
   lazyHeaders isnt atom.config.get('markdown-preview-plus.useLazyHeaders') or
   rL isnt renderLaTeX
 
-exports.render = (text, rL) ->
-  init(rL) if needsInit(rL)
-  markdownIt.render text
+exports.render = (text, {renderLaTeX, sourceMap} = {}) ->
+  init(renderLaTeX) if needsInit(renderLaTeX)
+  markdownIt.render text, {sourceMap}
 
 exports.decode = (url) ->
   markdownIt.normalizeLinkText url
