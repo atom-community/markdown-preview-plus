@@ -139,10 +139,6 @@
         tag: "blockquote"
         index: 0
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -156,10 +152,6 @@
         tag: "blockquote"
         index: 1
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -169,10 +161,6 @@
         tag: "blockquote"
         index: 1
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -181,10 +169,6 @@
       {
         tag: "blockquote"
         index: 1
-      }
-      {
-        tag: "p"
-        index: 0
       }
     ]
   }
@@ -370,6 +354,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "thead"
+        index: 0
+      }
     ]
   }
   {
@@ -388,6 +376,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -397,6 +389,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -404,6 +400,10 @@
     path: [
       {
         tag: "table"
+        index: 0
+      }
+      {
+        tag: "tbody"
         index: 0
       }
     ]
@@ -642,10 +642,6 @@
         tag: "blockquote"
         index: 2
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -659,10 +655,6 @@
         tag: "blockquote"
         index: 3
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -672,10 +664,6 @@
         tag: "blockquote"
         index: 3
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -684,10 +672,6 @@
       {
         tag: "blockquote"
         index: 3
-      }
-      {
-        tag: "p"
-        index: 0
       }
     ]
   }
@@ -873,6 +857,10 @@
         tag: "table"
         index: 1
       }
+      {
+        tag: "thead"
+        index: 0
+      }
     ]
   }
   {
@@ -891,6 +879,10 @@
         tag: "table"
         index: 1
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -900,6 +892,10 @@
         tag: "table"
         index: 1
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -908,6 +904,10 @@
       {
         tag: "table"
         index: 1
+      }
+      {
+        tag: "tbody"
+        index: 0
       }
     ]
   }
@@ -1230,10 +1230,6 @@
         tag: "blockquote"
         index: 0
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -1256,10 +1252,6 @@
         tag: "blockquote"
         index: 1
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -1273,10 +1265,6 @@
         tag: "blockquote"
         index: 1
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -1289,10 +1277,6 @@
       {
         tag: "blockquote"
         index: 1
-      }
-      {
-        tag: "p"
-        index: 0
       }
     ]
   }
@@ -1553,6 +1537,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "thead"
+        index: 0
+      }
     ]
   }
   {
@@ -1579,6 +1567,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -1592,6 +1584,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -1603,6 +1599,10 @@
       }
       {
         tag: "table"
+        index: 0
+      }
+      {
+        tag: "tbody"
         index: 0
       }
     ]
@@ -2044,10 +2044,6 @@
         tag: "blockquote"
         index: 0
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -2078,10 +2074,6 @@
         tag: "blockquote"
         index: 1
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -2099,10 +2091,6 @@
         tag: "blockquote"
         index: 1
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -2119,10 +2107,6 @@
       {
         tag: "blockquote"
         index: 1
-      }
-      {
-        tag: "p"
-        index: 0
       }
     ]
   }
@@ -2455,6 +2439,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "thead"
+        index: 0
+      }
     ]
   }
   {
@@ -2489,6 +2477,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -2506,6 +2498,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -2521,6 +2517,10 @@
       }
       {
         tag: "table"
+        index: 0
+      }
+      {
+        tag: "tbody"
         index: 0
       }
     ]
@@ -2990,10 +2990,6 @@
         tag: "blockquote"
         index: 0
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -3024,10 +3020,6 @@
         tag: "blockquote"
         index: 1
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -3045,10 +3037,6 @@
         tag: "blockquote"
         index: 1
       }
-      {
-        tag: "p"
-        index: 0
-      }
     ]
   }
   {
@@ -3065,10 +3053,6 @@
       {
         tag: "blockquote"
         index: 1
-      }
-      {
-        tag: "p"
-        index: 0
       }
     ]
   }
@@ -3401,6 +3385,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "thead"
+        index: 0
+      }
     ]
   }
   {
@@ -3435,6 +3423,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -3452,6 +3444,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -3467,6 +3463,10 @@
       }
       {
         tag: "table"
+        index: 0
+      }
+      {
+        tag: "tbody"
         index: 0
       }
     ]

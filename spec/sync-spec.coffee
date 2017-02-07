@@ -26,6 +26,9 @@ describe "Syncronization of source and preview", ->
     waitsForPromise ->
       atom.packages.activatePackage("markdown-preview-plus")
 
+    runs ->
+      atom.packages.getActivePackage('markdown-preview-plus').mainModule.forceSourceMap = true
+
     waitsFor "LaTeX rendering to be enabled", ->
       atom.config.set 'markdown-preview-plus.enableLatexRenderingByDefault', true
 
@@ -82,13 +85,6 @@ describe "Syncronization of source and preview", ->
     beforeEach ->
       sourceMap = cson.readFileSync path.join(fixturesPath, 'sync-preview.cson')
       tokens = markdownIt.getTokens preview.editor.getText(), true
-
-    it "identifies the correct HTMLElement path", ->
-      for sourceLine in sourceMap
-        elementPath = preview.getPathToToken tokens, sourceLine.line
-        for i in [0..(elementPath.length-1)] by 1
-          expect(elementPath[i].tag).toBe(sourceLine.path[i].tag)
-          expect(elementPath[i].index).toBe(sourceLine.path[i].index)
 
     it "scrolls to the correct HTMLElement", ->
       for sourceLine in sourceMap
