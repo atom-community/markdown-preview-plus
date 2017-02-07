@@ -515,18 +515,25 @@ describe "MarkdownPreviewView", ->
       waitsForPromise "renderMarkdown", ->
         preview.renderMarkdown()
 
+      textEditor = null
+      openedPromise = new Promise (resolve) ->
+        atom.workspace.onDidAddTextEditor (event) ->
+          textEditor = event.textEditor
+          resolve()
+
       runs ->
         spyOn(atom, 'showSaveDialogSync').andReturn(outputPath)
         spyOn(preview, 'getDocumentStyleSheets').andReturn(markdownPreviewStyles)
         spyOn(preview, 'getTextEditorStyles').andReturn(atomTextEditorStyles)
         atom.commands.dispatch preview.element, 'core:save-as'
 
-      waitsFor "output exists", ->
-        fs.existsSync(outputPath) and atom.workspace.getActiveTextEditor()?.getPath() is fs.realpathSync(outputPath)
+      waitsForPromise "text editor opened", ->
+        openedPromise
 
       runs ->
         expect(fs.isFileSync(outputPath)).toBe true
-        savedHTML = atom.workspace.getActiveTextEditor().getText()
+        expect(textEditor.getPath()).toBe outputPath
+        savedHTML = textEditor.getText()
           .replace(/<body class='markdown-preview'><div>/, '<body class=\'markdown-preview\'>')
           .replace(/\n<\/div><\/body>/, '</body>')
         expect(savedHTML).toBe expectedOutput.replace(/\r\n/g, '\n')
