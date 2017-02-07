@@ -512,7 +512,7 @@ describe "MarkdownPreviewView", ->
 
       expect(fs.isFileSync(outputPath)).toBe false
 
-      waitsForPromise ->
+      waitsForPromise "renderMarkdown", ->
         preview.renderMarkdown()
 
       runs ->
@@ -521,7 +521,7 @@ describe "MarkdownPreviewView", ->
         spyOn(preview, 'getTextEditorStyles').andReturn(atomTextEditorStyles)
         atom.commands.dispatch preview.element, 'core:save-as'
 
-      waitsFor ->
+      waitsFor "output exists", ->
         fs.existsSync(outputPath) and atom.workspace.getActiveTextEditor()?.getPath() is fs.realpathSync(outputPath)
 
       runs ->
