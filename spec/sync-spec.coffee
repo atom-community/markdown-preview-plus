@@ -25,9 +25,8 @@ describe "Syncronization of source and preview", ->
 
     waitsForPromise ->
       atom.packages.activatePackage("markdown-preview-plus")
-
-    runs ->
-      atom.packages.getActivePackage('markdown-preview-plus').mainModule.forceSourceMap = true
+      .then (p) ->
+        p.mainModule.forceSourceMap = true
 
     waitsFor "LaTeX rendering to be enabled", ->
       atom.config.set 'markdown-preview-plus.enableLatexRenderingByDefault', true
