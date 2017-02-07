@@ -346,10 +346,11 @@ class MarkdownPreviewView extends ScrollView
   syncSource: (text, element) =>
     until element.hasAttribute('data-map-lines') or not element?
       element = element.parentElement
-    return unless element?
+    return null unless element?
     [line] = element.getAttribute('data-map-lines').split(' ')
-    return unless line?
+    return null unless line?
     @editor.setCursorBufferPosition [parseInt(line), 0]
+    return parseInt(line)
 
   #
   # Scroll the associated preview to the element representing the target line of
