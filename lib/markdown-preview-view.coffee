@@ -364,15 +364,25 @@ class MarkdownPreviewView extends ScrollView
   #
   syncPreview: (text, line) =>
     els = @element.querySelectorAll("*[data-map-lines~='#{line}']")
-    [el] = Array.prototype.slice.call(els).sort (a, b) -> a.getAttribute('data-map-lines') < b.getAttribute('data-map-lines')
+    [el] = Array.prototype.slice.call(els).sort (a, b) ->
+      cmp = a.getAttribute('data-map-lines').split(' ').length - b.getAttribute('data-map-lines').split(' ').length
+      if cmp is 0
+        switch
+          when a.contains(b) then -1
+          when b.contains(a) then 1
+          else 0
+      else
+        cmp
 
-    return unless el?
+    return null unless el?
 
     el.scrollIntoView()
     maxScrollTop = @element.scrollHeight - @innerHeight()
     @element.scrollTop -= @innerHeight()/4 unless @scrollTop() >= maxScrollTop
     el.classList.add('flash')
     setTimeout ( -> el.classList.remove('flash') ), 1000
+
+    return el
 
 if Grim.includeDeprecatedAPIs
   MarkdownPreviewView::on = (eventName) ->
