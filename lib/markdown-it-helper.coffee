@@ -44,6 +44,13 @@ init = (rL) ->
     math ?= require('markdown-it-math')
     markdownIt.use math, mathDollars
     markdownIt.use math, mathBrackets
+    markdownIt.renderer.rules.math_block = (token, idx) ->
+      attrs =
+        if token[idx].attrs?
+          ' ' + (token[idx].attrs.map ([name, value]) -> "#{name}=\"#{value}\"").join(' ')
+        else
+          ''
+      "<span class='math'#{attrs}><script type='math/tex; mode=display'>#{token[idx].content}</script></span>"
 
   markdownIt.core.ruler.push 'logger', (state) ->
     return state unless state.env.sourceMap
