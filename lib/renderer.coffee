@@ -13,8 +13,9 @@ highlighter = null
 {resourcePath} = atom.getLoadSettings()
 packagePath = path.dirname(__dirname)
 
-exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback, sourceMap) ->
-  render text, {filePath, renderLaTeX, copyHTMLFlag: false, sourceMap: sourceMap ? not atom.inSpecMode()}, (error, html) ->
+exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
+  forceSourceMap = atom.packages.getActivePackage('markdown-preview-plus').mainModule.forceSourceMap
+  render text, {filePath, renderLaTeX, copyHTMLFlag: false, sourceMap: forceSourceMap or not atom.inSpecMode()}, (error, html) ->
     return callback(error) if error?
 
     template = document.createElement('template')
