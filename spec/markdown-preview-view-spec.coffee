@@ -18,13 +18,12 @@ describe "MarkdownPreviewView", ->
     jasmine.attachToDOM(preview.element)
 
     waitsForPromise ->
-      atom.packages.activatePackage('language-ruby')
-
-    waitsForPromise ->
-      atom.packages.activatePackage('language-javascript')
-
-    waitsForPromise ->
-      atom.packages.activatePackage('markdown-preview-plus')
+      Promise.all [
+        atom.packages.activatePackage('language-ruby')
+        atom.packages.activatePackage('language-javascript')
+      ]
+      .then ->
+        atom.packages.activatePackage('markdown-preview-plus')
 
     this.addMatchers
       toStartWith: (expected) ->
@@ -513,8 +512,14 @@ describe "MarkdownPreviewView", ->
 
       expect(fs.isFileSync(outputPath)).toBe false
 
-      waitsForPromise ->
+      waitsForPromise "renderMarkdown", ->
         preview.renderMarkdown()
+
+      textEditor = null
+      openedPromise = new Promise (resolve) ->
+        atom.workspace.onDidAddTextEditor (event) ->
+          textEditor = event.textEditor
+          resolve()
 
       runs ->
         spyOn(atom, 'showSaveDialogSync').andReturn(outputPath)
@@ -522,12 +527,13 @@ describe "MarkdownPreviewView", ->
         spyOn(preview, 'getTextEditorStyles').andReturn(atomTextEditorStyles)
         atom.commands.dispatch preview.element, 'core:save-as'
 
-      waitsFor ->
-        fs.existsSync(outputPath) and atom.workspace.getActiveTextEditor()?.getPath() is fs.realpathSync(outputPath)
+      waitsForPromise "text editor opened", ->
+        openedPromise
 
       runs ->
         expect(fs.isFileSync(outputPath)).toBe true
-        savedHTML = atom.workspace.getActiveTextEditor().getText()
+        expect(fs.realpathSync(textEditor.getPath())).toBe fs.realpathSync(outputPath)
+        savedHTML = textEditor.getText()
           .replace(/<body class='markdown-preview'><div>/, '<body class=\'markdown-preview\'>')
           .replace(/\n<\/div><\/body>/, '</body>')
         expect(savedHTML).toBe expectedOutput.replace(/\r\n/g, '\n')
