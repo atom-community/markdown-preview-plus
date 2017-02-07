@@ -101,4 +101,4 @@ describe "Syncronization of source and preview", ->
         selector = generateSelector(sourceElement)
         if selector? then element = preview.find(selector)[0] else continue
         syncLine = preview.syncSource preview.editor.getText(), element
-        expect(syncLine).toBe(sourceElement.line) if syncLine
+        expect(syncLine).toBe(sourceElement.line)
