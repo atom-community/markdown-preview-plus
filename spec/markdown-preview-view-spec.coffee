@@ -532,7 +532,7 @@ describe "MarkdownPreviewView", ->
 
       runs ->
         expect(fs.isFileSync(outputPath)).toBe true
-        expect(textEditor.getPath()).toBe outputPath
+        expect(fs.realpathSync(textEditor.getPath())).toBe fs.realpathSync(outputPath)
         savedHTML = textEditor.getText()
           .replace(/<body class='markdown-preview'><div>/, '<body class=\'markdown-preview\'>')
           .replace(/\n<\/div><\/body>/, '</body>')
