@@ -334,11 +334,11 @@ describe "Markdown preview plus package", ->
 
       describe "when the code block's fence name has a matching grammar", ->
         it "tokenizes the code block with the grammar", ->
-          expect(preview.find("pre span.entity.name.function.ruby")).toExist()
+          expect(preview.find("pre span.syntax--entity.syntax--name.syntax--function.syntax--ruby")).toExist()
 
       describe "when the code block's fence name doesn't have a matching grammar", ->
         it "does not tokenize the code block", ->
-          expect(preview.find("pre.lang-kombucha .line .null-grammar").children().length).toBe 2
+          expect(preview.find("pre.lang-kombucha .line .syntax--null-grammar").children().length).toBe 2
 
       describe "when the code block contains empty lines", ->
         it "doesn't remove the empty lines", ->
