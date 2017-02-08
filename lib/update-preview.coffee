@@ -63,9 +63,11 @@ module.exports = class UpdatePreview
         !!elm
       MathJaxHelper.mathProcessor r.inserted
 
-    for elm in r.inserted
-      if elm instanceof Element
-        renderer.convertCodeBlocksToAtomEditors elm
+    unless atom.config.get('markdown-preview-plus.enablePandoc') \
+        and atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
+      for elm in r.inserted
+        if elm instanceof Element
+          renderer.convertCodeBlocksToAtomEditors elm
 
     @updateOrderedListsStart()
 
