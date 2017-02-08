@@ -14,7 +14,7 @@ highlighter = null
 packagePath = path.dirname(__dirname)
 
 exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
-  forceSourceMap = atom.packages.getActivePackage('markdown-preview-plus').mainModule.forceSourceMap
+  forceSourceMap = atom.packages.getLoadedPackage('markdown-preview-plus').mainModule.forceSourceMap
   render text, {filePath, renderLaTeX, copyHTMLFlag: false, sourceMap: forceSourceMap or not atom.inSpecMode()}, (error, html) ->
     return callback(error) if error?
 
