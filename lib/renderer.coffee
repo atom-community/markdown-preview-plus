@@ -123,7 +123,7 @@ exports.convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') -
 
   for preElement in domFragment.querySelectorAll('pre')
     codeBlock = preElement.firstElementChild ? preElement
-    fenceName = codeBlock.getAttribute('class')?.replace(/^lang-/, '') ? defaultLanguage
+    fenceName = codeBlock.getAttribute('class')?.replace(/^(lang-|sourceCode )/, '') ? defaultLanguage
 
     editorElement = document.createElement('atom-text-editor')
     editorElement.setAttributeNode(document.createAttribute('gutter-hidden'))
@@ -149,7 +149,7 @@ tokenizeCodeBlocks = (html, defaultLanguage='text') ->
 
   for preElement in o("pre")
     codeBlock = o(preElement).children().first()
-    fenceName = codeBlock.attr('class')?.replace(/^lang-/, '') ? defaultLanguage
+    fenceName = codeBlock.attr('class')?.replace(/^(lang-|sourceCode )/, '') ? defaultLanguage
 
     highlighter ?= new Highlights(registry: atom.grammars)
     highlightedHtml = highlighter.highlightSync
