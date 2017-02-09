@@ -2,7 +2,7 @@ path = require 'path'
 _ = require 'underscore-plus'
 cheerio = require 'cheerio'
 fs = require 'fs-plus'
-Highlights = require 'highlights-native'
+highlight = require 'atom-highlight'
 {$} = require 'atom-space-pen-views'
 pandocHelper = null # Defer until used
 markdownIt = null # Defer until used
@@ -151,14 +151,18 @@ tokenizeCodeBlocks = (html, defaultLanguage='text') ->
     codeBlock = o(preElement).children().first()
     fenceName = codeBlock.attr('class')?.replace(/^(lang-|sourceCode )/, '') ? defaultLanguage
 
-    highlighter ?= new Highlights(registry: atom.grammars)
-    highlightedHtml = highlighter.highlightSync
+    highlightedHtml = highlight
       fileContents: codeBlock.text()
       scopeName: scopeForFenceName(fenceName)
+      nbsp: true
+      lineDivs: true
+      editorDiv: true
+      editorDivTag: 'pre'
+      # The `editor` class messes things up as `.editor` has absolutely positioned lines
+      editorDivClass: 'editor-colors'
 
     highlightedBlock = o(highlightedHtml)
-    # The `editor` class messes things up as `.editor` has absolutely positioned lines
-    highlightedBlock.removeClass('editor').addClass("lang-#{fenceName}")
+    highlightedBlock.addClass("lang-#{fenceName}")
 
     o(preElement).replaceWith(highlightedBlock)
 
