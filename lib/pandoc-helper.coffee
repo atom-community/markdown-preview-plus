@@ -77,7 +77,7 @@ handleError = (error, html) ->
       r = new RegExp "@#{match}", 'gi'
       currentText = currentText.replace(r, "&#64;#{match}")
     currentText = html + currentText
-    pdc currentText, config.flavor, 'html', config.args, handleResponse
+    pdc currentText, config.flavor, 'html', getArguments(config.args), handleResponse
   [null, html]
 
 ###*
