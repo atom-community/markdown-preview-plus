@@ -62,7 +62,7 @@ setPandocOptions = (filePath) ->
  * @return {array} with Arguments for callbackFunction (error set to null)
  ###
 handleError = (error, html) ->
-  referenceSearch = /pandoc-citeproc: reference ([\S]+) not found?/ig
+  referenceSearch = /pandoc-citeproc: reference ([\S]+) not found/ig
   message =
     _.uniq error.message.split '\n'
     .join('<br>')
