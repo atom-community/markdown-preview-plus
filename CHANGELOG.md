@@ -1,7 +1,28 @@
 # Change Log
 
-## [v2.4.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.1) (2017-01-30)
+## [v2.4.2](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.2) (2017-02-11)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.1...v2.4.2)
 
+**Implemented enhancements:**
+
+- Create PR for markdown-pdf [\#56](https://github.com/Galadirith/markdown-preview-plus/issues/56)
+
+**Closed issues:**
+
+- Deprecated selector in `markdown-preview-plus/styles/markdown-preview.less` [\#242](https://github.com/Galadirith/markdown-preview-plus/issues/242)
+- Turn off Loading MathJax notification [\#239](https://github.com/Galadirith/markdown-preview-plus/issues/239)
+- Unhelpful error message on citeproc citation not found [\#128](https://github.com/Galadirith/markdown-preview-plus/issues/128)
+
+**Merged pull requests:**
+
+- Fix 'pandoc: \[object Object\]: does not exist' [\#265](https://github.com/Galadirith/markdown-preview-plus/pull/265) ([lierdakil](https://github.com/lierdakil))
+- Fix code highlighting with saveAs [\#263](https://github.com/Galadirith/markdown-preview-plus/pull/263) ([lierdakil](https://github.com/lierdakil))
+- Fix pandoc source code higlighting [\#262](https://github.com/Galadirith/markdown-preview-plus/pull/262) ([lierdakil](https://github.com/lierdakil))
+- SaveAs: MathJax should use request's schema [\#261](https://github.com/Galadirith/markdown-preview-plus/pull/261) ([lierdakil](https://github.com/lierdakil))
+- No mathjax success notifications if not in devMode [\#260](https://github.com/Galadirith/markdown-preview-plus/pull/260) ([lierdakil](https://github.com/lierdakil))
+- Fix specs [\#258](https://github.com/Galadirith/markdown-preview-plus/pull/258) ([lierdakil](https://github.com/lierdakil))
+
+## [v2.4.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.1) (2017-01-30)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.0...v2.4.1)
 
 **Closed issues:**
