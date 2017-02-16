@@ -23,6 +23,12 @@ module.exports =
       type: 'boolean'
       default: true
       order: 20
+    previewSplitPaneDir:
+      title: 'Direction to load the preview in split pane'
+      type: 'string'
+      default: 'right'
+      enum: ['down', 'right']
+      order: 25
     grammars:
       type: 'array'
       default: [
@@ -202,7 +208,7 @@ module.exports =
     options =
       searchAllPanes: true
     if atom.config.get('markdown-preview-plus.openPreviewInSplitPane')
-      options.split = 'right'
+      options.split = atom.config.get('markdown-preview-plus.previewSplitPaneDir')
     atom.workspace.open(uri, options).then (markdownPreviewView) ->
       if isMarkdownPreviewView(markdownPreviewView)
         previousActivePane.activate()
