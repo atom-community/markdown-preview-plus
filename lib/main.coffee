@@ -61,6 +61,13 @@ module.exports =
       default: false
       title: 'Enable Pandoc Parser'
       order: 100
+    useNativePandocCodeStyles:
+      type: 'boolean'
+      default: false
+      description: '''
+        Don't convert fenced code blocks to Atom editors when using
+        Pandoc parser'''
+      order: 105
     pandocPath:
       type: 'string'
       default: 'pandoc'

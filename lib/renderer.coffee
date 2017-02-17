@@ -28,7 +28,9 @@ exports.toHTML = (text='', filePath, grammar, renderLaTeX, copyHTMLFlag, callbac
     return callback(error) if error?
     # Default code blocks to be coffee in Literate CoffeeScript files
     defaultCodeLanguage = 'coffee' if grammar?.scopeName is 'source.litcoffee'
-    html = tokenizeCodeBlocks(html, defaultCodeLanguage)
+    unless atom.config.get('markdown-preview-plus.enablePandoc') \
+        and atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
+      html = tokenizeCodeBlocks(html, defaultCodeLanguage)
     callback(null, html)
 
 render = (text, filePath, renderLaTeX, copyHTMLFlag, callback) ->
