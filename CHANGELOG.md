@@ -1,14 +1,31 @@
 # Change Log
 
-## [v2.4.4](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.4) (2017-02-11)
+## [v2.4.4](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.4) (2017-02-22)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.3...v2.4.4)
 
-## [v2.4.3](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.3) (2017-02-11)
+## [v2.4.3](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.3) (2017-02-19)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.2...v2.4.3)
+
+**Implemented enhancements:**
+
+- Support For Gihub Todo [\#251](https://github.com/Galadirith/markdown-preview-plus/issues/251)
+- In preview, README.md is autolinked to someone's README.md on Github [\#139](https://github.com/Galadirith/markdown-preview-plus/issues/139)
+- I can't read my code because of the colors [\#123](https://github.com/Galadirith/markdown-preview-plus/issues/123)
 
 **Closed issues:**
 
 - CDN URL for mathjax [\#267](https://github.com/Galadirith/markdown-preview-plus/issues/267)
+- Request: Option for direction of split [\#248](https://github.com/Galadirith/markdown-preview-plus/issues/248)
+- Code highlight [\#245](https://github.com/Galadirith/markdown-preview-plus/issues/245)
+- Update MathJax CDN url from http to https [\#235](https://github.com/Galadirith/markdown-preview-plus/issues/235)
+- Uncaught Error: Cannot find module 'atom-space-pen-views' [\#190](https://github.com/Galadirith/markdown-preview-plus/issues/190)
+- Make extension-helper more dynamic [\#142](https://github.com/Galadirith/markdown-preview-plus/issues/142)
+- Investigate failing Travis CI test [\#84](https://github.com/Galadirith/markdown-preview-plus/issues/84)
+
+**Merged pull requests:**
+
+- update menu for split direction [\#266](https://github.com/Galadirith/markdown-preview-plus/pull/266) ([rkichenama](https://github.com/rkichenama))
+- pandoc native code style [\#264](https://github.com/Galadirith/markdown-preview-plus/pull/264) ([lierdakil](https://github.com/lierdakil))
 
 ## [v2.4.2](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.2) (2017-02-11)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.1...v2.4.2)
@@ -25,12 +42,12 @@
 
 **Merged pull requests:**
 
-- Fix 'pandoc: \[object Object\]: does not exist' [\#265](https://github.com/Galadirith/markdown-preview-plus/pull/265) ([lierdakil](https://github.com/lierdakil))
 - Fix code highlighting with saveAs [\#263](https://github.com/Galadirith/markdown-preview-plus/pull/263) ([lierdakil](https://github.com/lierdakil))
 - Fix pandoc source code higlighting [\#262](https://github.com/Galadirith/markdown-preview-plus/pull/262) ([lierdakil](https://github.com/lierdakil))
 - SaveAs: MathJax should use request's schema [\#261](https://github.com/Galadirith/markdown-preview-plus/pull/261) ([lierdakil](https://github.com/lierdakil))
 - No mathjax success notifications if not in devMode [\#260](https://github.com/Galadirith/markdown-preview-plus/pull/260) ([lierdakil](https://github.com/lierdakil))
 - Fix specs [\#258](https://github.com/Galadirith/markdown-preview-plus/pull/258) ([lierdakil](https://github.com/lierdakil))
+- Fix 'pandoc: \[object Object\]: does not exist' [\#265](https://github.com/Galadirith/markdown-preview-plus/pull/265) ([lierdakil](https://github.com/lierdakil))
 
 ## [v2.4.1](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.1) (2017-01-30)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.0...v2.4.1)
