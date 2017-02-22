@@ -1,3 +1,10 @@
+## 2.4.5
+* Update CHANGELOG
+* Update CHANGELOG
+* Merge branch '2.4-branch'
+* Merge branch 'lierdakil/pandoc-run-path' into 2.4-branch
+* Set pandoc run path to file dir
+
 ## 2.4.4
 * Prepare 2.4.4 release
 * Update CHANGELOG
