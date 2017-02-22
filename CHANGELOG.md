@@ -1,5 +1,15 @@
 # Change Log
 
+## [v2.4.4](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.4) (2017-02-11)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.3...v2.4.4)
+
+## [v2.4.3](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.3) (2017-02-11)
+[Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.2...v2.4.3)
+
+**Closed issues:**
+
+- CDN URL for mathjax [\#267](https://github.com/Galadirith/markdown-preview-plus/issues/267)
+
 ## [v2.4.2](https://github.com/Galadirith/markdown-preview-plus/tree/v2.4.2) (2017-02-11)
 [Full Changelog](https://github.com/Galadirith/markdown-preview-plus/compare/v2.4.1...v2.4.2)
 
