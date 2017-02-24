@@ -1,3 +1,7 @@
+## 2.4.6
+* Fix resource leak in image-watcher
+* [CHANGELOG] Markdown formatting fixes
+
 ## 2.4.5
 * Update CHANGELOG
 * Update CHANGELOG
