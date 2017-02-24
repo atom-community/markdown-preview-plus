@@ -23,7 +23,8 @@ srcClosure = (src) ->
     if event is 'change' and fs.isFileSync(src)
       imageRegister[src].version = Date.now()
     else
-      imageRegister[src].version = undefined
+      imageRegister[src].watcher.close()
+      delete imageRegister[src]
     renderPreviews()
     return
 
