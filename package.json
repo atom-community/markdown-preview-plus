@@ -20,6 +20,7 @@
     "cheerio": "0.15.0",
     "fs-plus": "^2.0.0",
     "grim": "^1.2.1",
+    "childprocess": "*",
     "atom-highlight": "^0.3.0",
     "lodash": "^3.10.1",
     "MathJax": "https://github.com/Galadirith/MathJax/tarball/2.4.0-electron.0.2.0",
@@ -30,8 +31,7 @@
     "season": "^5.3",
     "temp": "^0.8.1",
     "underscore-plus": "^1.0.0",
-    "wrench": "^1.5.0",
-    "html-pdf": "^2.1.0"
+    "wrench": "^1.5.0"
   },
   "devDependencies": {
     "coffeelint": "^1.9.7",
