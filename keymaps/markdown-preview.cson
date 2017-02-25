@@ -1,7 +1,8 @@
 'atom-workspace, atom-workspace atom-text-editor':
   'ctrl-M': 'markdown-preview-plus:toggle'
   'ctrl-X': 'markdown-preview-plus:toggle-render-latex'
-
+  'ctrl-J': 'markdown-preview-plus:save-as-pdf'
+    
 '.platform-darwin .markdown-preview-plus':
   'cmd-+': 'markdown-preview-plus:zoom-in'
   'cmd-=': 'markdown-preview-plus:zoom-in'

@@ -30,7 +30,8 @@
     "season": "^5.3",
     "temp": "^0.8.1",
     "underscore-plus": "^1.0.0",
-    "wrench": "^1.5.0"
+    "wrench": "^1.5.0",
+    "html-pdf": "^2.1.0"
   },
   "devDependencies": {
     "coffeelint": "^1.9.7",

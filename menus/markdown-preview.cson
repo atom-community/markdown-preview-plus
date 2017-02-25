@@ -9,6 +9,9 @@
       },{
         'label': 'Toggle LaTeX Rendering'
         'command': 'markdown-preview-plus:toggle-render-latex'
+      },{
+        'label': 'Save as PDF'
+        'command': 'markdown-preview-plus:save-as-pdf'
       }
     ]
   ]
