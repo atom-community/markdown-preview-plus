@@ -1,6 +1,6 @@
 url = require 'url'
 fs = require 'fs-plus'
-child_process = require "child_process"
+child_process = require "childprocess"
 
 MarkdownPreviewView = null
 renderer = null
