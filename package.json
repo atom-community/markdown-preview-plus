@@ -18,9 +18,9 @@
   "dependencies": {
     "atom-space-pen-views": "^2.0.0",
     "cheerio": "0.15.0",
+    "childprocess": "*",
     "fs-plus": "^2.0.0",
     "grim": "^1.2.1",
-    "childprocess": "*",
     "atom-highlight": "^0.3.0",
     "lodash": "^3.10.1",
     "MathJax": "https://github.com/Galadirith/MathJax/tarball/2.4.0-electron.0.2.0",
