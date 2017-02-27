@@ -45,7 +45,7 @@ setPandocOptions = (filePath) ->
   config.args = {}
   config.opts = {}
   path ?= require 'path'
-  config.opts.cwd = path.dirname(filePath)
+  config.opts.cwd = path.dirname(filePath) if filePath?
   getMathJaxPath() unless config.mathjax?
   config.args.mathjax = if config.renderMath then config.mathjax else undefined
   if atomConfig.pandocBibliography
