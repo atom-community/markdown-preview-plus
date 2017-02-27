@@ -1,3 +1,6 @@
+## 2.4.8
+* Do not re-render preview on image change
+
 ## 2.4.7
 * Fix #273
 
