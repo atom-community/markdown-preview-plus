@@ -1,3 +1,7 @@
+## 2.4.9
+* Atom community move (#276)
+* Fix image-update fail on win32
+
 ## 2.4.8
 * Do not re-render preview on image change
 
