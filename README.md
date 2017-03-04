@@ -42,9 +42,9 @@ Please see [options][options] for further details on configuring MPP and
 
 Markdown Preview Plus (MPP) is released under the [MIT license][license].
 
-[preview]: https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/imgs/mpp-full-res-invert.png
-[changelog]: https://github.com/Galadirith/markdown-preview-plus/blob/master/CHANGELOG.md
-[issue]: https://github.com/Galadirith/markdown-preview-plus/issues
+[preview]: https://raw.githubusercontent.com/atom-community/markdown-preview-plus/master/imgs/mpp-full-res-invert.png
+[changelog]: https://github.com/atom-community/markdown-preview-plus/blob/master/CHANGELOG.md
+[issue]: https://github.com/atom-community/markdown-preview-plus/issues
 [installation]: docs/installation.md
 [license]: LICENSE.md
 [math]: docs/math.md
@@ -55,7 +55,7 @@ Markdown Preview Plus (MPP) is released under the [MIT license][license].
 
 [ad]: https://img.shields.io/apm/dm/markdown-preview-plus.svg
 [av]: https://img.shields.io/apm/v/markdown-preview-plus.svg
-[ab]: https://img.shields.io/appveyor/ci/Galadirith/markdown-preview-plus/master.svg?label=appveyor
-[a]: https://ci.appveyor.com/project/Galadirith/markdown-preview-plus/branch/master
-[tb]: https://img.shields.io/travis/Galadirith/markdown-preview-plus/master.svg?label=travis
-[t]: https://travis-ci.org/Galadirith/markdown-preview-plus
+[ab]: https://img.shields.io/appveyor/ci/lierdakil/markdown-preview-plus/master.svg?label=appveyor
+[a]: https://ci.appveyor.com/project/lierdakil/markdown-preview-plus/branch/master
+[tb]: https://img.shields.io/travis/atom-community/markdown-preview-plus/master.svg?label=travis
+[t]: https://travis-ci.org/atom-community/markdown-preview-plus
