@@ -43,6 +43,9 @@ setPandocOptions = (filePath) ->
   pdc.path = atomConfig.pandocPath
   config.flavor = atomConfig.pandocMarkdownFlavor
   config.args = {}
+  config.opts = {}
+  path ?= require 'path'
+  config.opts.cwd = path.dirname(filePath) if filePath?
   getMathJaxPath() unless config.mathjax?
   config.args.mathjax = if config.renderMath then config.mathjax else undefined
   if atomConfig.pandocBibliography
@@ -77,7 +80,7 @@ handleError = (error, html) ->
       r = new RegExp "@#{match}", 'gi'
       currentText = currentText.replace(r, "&#64;#{match}")
     currentText = html + currentText
-    pdc currentText, config.flavor, 'html', config.args, handleResponse
+    pdc currentText, config.flavor, 'html', getArguments(config.args), config.opts, handleResponse
   [null, html]
 
 ###*
@@ -141,7 +144,7 @@ renderPandoc = (text, filePath, renderMath, cb) ->
   config.renderMath = renderMath
   config.callback = cb
   setPandocOptions filePath
-  pdc text, config.flavor, 'html', getArguments(config.args), handleResponse
+  pdc text, config.flavor, 'html', getArguments(config.args), config.opts, handleResponse
 
 getArguments = (args) ->
   args = _.reduce args,

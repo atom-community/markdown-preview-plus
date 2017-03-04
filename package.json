@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "2.4.1",
+  "version": "2.4.9",
   "main": "./lib/main",
   "description": "Markdown Preview + Community Features",
   "keywords": [
@@ -10,7 +10,7 @@
     "commonmark",
     "pandoc"
   ],
-  "repository": "https://github.com/Galadirith/markdown-preview-plus",
+  "repository": "https://github.com/atom-community/markdown-preview-plus",
   "license": "MIT",
   "engines": {
     "atom": ">=1.13.0 <2.0.0"
@@ -20,12 +20,12 @@
     "cheerio": "0.15.0",
     "fs-plus": "^2.0.0",
     "grim": "^1.2.1",
-    "highlights-native": "^2.1.0",
+    "atom-highlight": "^0.3.0",
     "lodash": "^3.10.1",
-    "MathJax": "https://github.com/Galadirith/MathJax/tarball/2.4.0-electron.0.2.0",
+    "MathJax": "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
     "markdown-it": "^5.1.0",
     "markdown-it-lazy-headers": "^0.1.2",
-    "markdown-it-math": "https://github.com/Galadirith/markdown-it-math/tarball/fix-table-pipe-parse-no-ascii",
+    "markdown-it-math": "https://github.com/atom-community/markdown-it-math/tarball/fix-table-pipe-parse-no-ascii",
     "pdc": "~0.2.2",
     "season": "^5.3",
     "temp": "^0.8.1",

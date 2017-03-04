@@ -2,7 +2,7 @@ path = require 'path'
 _ = require 'underscore-plus'
 cheerio = require 'cheerio'
 fs = require 'fs-plus'
-Highlights = require 'highlights-native'
+highlight = require 'atom-highlight'
 {$} = require 'atom-space-pen-views'
 pandocHelper = null # Defer until used
 markdownIt = null # Defer until used
@@ -29,7 +29,9 @@ exports.toHTML = (text='', filePath, grammar, renderLaTeX, copyHTMLFlag, callbac
     return callback(error) if error?
     # Default code blocks to be coffee in Literate CoffeeScript files
     defaultCodeLanguage = 'coffee' if grammar?.scopeName is 'source.litcoffee'
-    html = tokenizeCodeBlocks(html, defaultCodeLanguage)
+    unless atom.config.get('markdown-preview-plus.enablePandoc') \
+        and atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
+      html = tokenizeCodeBlocks(html, defaultCodeLanguage)
     callback(null, html)
 
 render = (text, {filePath, renderLaTeX, copyHTMLFlag, sourceMap}, callback) ->
@@ -124,7 +126,7 @@ exports.convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') -
 
   for preElement in domFragment.querySelectorAll('pre')
     codeBlock = preElement.firstElementChild ? preElement
-    fenceName = codeBlock.getAttribute('class')?.replace(/^lang-/, '') ? defaultLanguage
+    fenceName = codeBlock.getAttribute('class')?.replace(/^(lang-|sourceCode )/, '') ? defaultLanguage
 
     editorElement = document.createElement('atom-text-editor')
     editorElement.setAttributeNode(document.createAttribute('gutter-hidden'))
@@ -150,16 +152,20 @@ tokenizeCodeBlocks = (html, defaultLanguage='text') ->
 
   for preElement in o("pre")
     codeBlock = o(preElement).children().first()
-    fenceName = codeBlock.attr('class')?.replace(/^lang-/, '') ? defaultLanguage
+    fenceName = codeBlock.attr('class')?.replace(/^(lang-|sourceCode )/, '') ? defaultLanguage
 
-    highlighter ?= new Highlights(registry: atom.grammars)
-    highlightedHtml = highlighter.highlightSync
+    highlightedHtml = highlight
       fileContents: codeBlock.text()
       scopeName: scopeForFenceName(fenceName)
+      nbsp: true
+      lineDivs: true
+      editorDiv: true
+      editorDivTag: 'pre'
+      # The `editor` class messes things up as `.editor` has absolutely positioned lines
+      editorDivClass: 'editor-colors'
 
     highlightedBlock = o(highlightedHtml)
-    # The `editor` class messes things up as `.editor` has absolutely positioned lines
-    highlightedBlock.removeClass('editor').addClass("lang-#{fenceName}")
+    highlightedBlock.addClass("lang-#{fenceName}")
 
     o(preElement).replaceWith(highlightedBlock)
 

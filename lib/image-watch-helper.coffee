@@ -11,11 +11,12 @@ isMarkdownPreviewView = (object) ->
   MarkdownPreviewView ?= require './markdown-preview-view'
   object instanceof MarkdownPreviewView
 
-renderPreviews = _.debounce((->
+refreshImages = _.debounce(((src) ->
   if atom.workspace?
     for item in atom.workspace.getPaneItems()
       if isMarkdownPreviewView(item)
-        item.renderMarkdown()
+        # TODO: check against imageRegister[src].version.files
+        item.refreshImages(src)
   return), 250)
 
 srcClosure = (src) ->
@@ -23,8 +24,9 @@ srcClosure = (src) ->
     if event is 'change' and fs.isFileSync(src)
       imageRegister[src].version = Date.now()
     else
-      imageRegister[src].version = undefined
-    renderPreviews()
+      imageRegister[src].watcher.close()
+      delete imageRegister[src]
+    refreshImages(src)
     return
 
 module.exports =
