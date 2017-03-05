@@ -76,7 +76,7 @@ setPandocOptions = (filePath) ->
  * @param {string} Returned HTML
  * @return {array} with Arguments for callbackFunction (error set to null)
  ###
-handleError = (error, html, stderr) ->
+handleError = (error, html, stderr, nlines) ->
   referenceSearch = /pandoc-citeproc: reference ([\S]+) not found(<br>)?/ig
   [messageArr..., empty] = stderr.split '\n'
 
@@ -106,10 +106,11 @@ handleError = (error, html, stderr) ->
   buildMap = (trace) -> (index, element) ->
     t1 = trace[index]
     t2 = trace[index+1]
-    t2 ?= t1
-    o(element).attr('data-map-lines', [t1.i...t2.i].join(' '))
-    if t1.children?
-      o(element).children().each buildMap(t1.children)
+    t2 ?= {i: nlines}
+    if t1? and t2?
+      o(element).attr('data-map-lines', [t1.i...t2.i].join(' '))
+      if t1.children?
+        o(element).children().each buildMap(t1.children)
   o.root().children().each buildMap(trace)
   html = o.html()
 
@@ -165,8 +166,9 @@ handleSuccess = (html) ->
  * @param {Object} error if thrown
  * @param {string} Returned HTML
  ###
-handleResponse = (error, html, stderr) ->
-  array = if stderr then handleError error, html, stderr else handleSuccess html
+handleResponse = (text) -> (error, html, stderr) ->
+  nlines = text.split('\n').length
+  array = if stderr then handleError error, html, stderr, nlines else handleSuccess html
   config.callback.apply config.callback, array
 
 ###*
@@ -180,7 +182,7 @@ renderPandoc = (text, filePath, renderMath, cb) ->
   config.renderMath = renderMath
   config.callback = cb
   setPandocOptions filePath
-  pdc text, config.flavor, 'html', getArguments(config.args), config.opts, handleResponse
+  pdc text, config.flavor, 'html', getArguments(config.args), config.opts, handleResponse(text)
 
 getArguments = (args) ->
   args = _.reduce args,
