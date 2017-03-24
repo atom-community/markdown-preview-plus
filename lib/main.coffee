@@ -107,7 +107,7 @@ module.exports =
       type: 'string'
       default: 'bibliography.bib'
       title: 'Pandoc Options: Bibliography (bibfile)'
-      description: 'Name of bibfile to search for recursivly'
+      description: 'Name of bibfile to search for recursively'
       dependencies: ['pandocBibliography']
       order: 160
     pandocBIBFileFallback:
@@ -121,7 +121,7 @@ module.exports =
       type: 'string'
       default: 'custom.csl'
       title: 'Pandoc Options: Bibliography Style (cslfile)'
-      description: 'Name of cslfile to search for recursivly'
+      description: 'Name of cslfile to search for recursively'
       dependencies: ['pandocBibliography']
       order: 170
     pandocCSLFileFallback:
