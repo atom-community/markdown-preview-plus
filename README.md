@@ -51,7 +51,7 @@ Markdown Preview Plus (MPP) is released under the [MIT license][license].
 [features]: docs/features.md
 [node-gyp]: https://github.com/TooTallNate/node-gyp#installation
 [options]: docs/options.md
-[pandoc]: http://pandoc.org
+[pandoc]: https://pandoc.org
 
 [ad]: https://img.shields.io/apm/dm/markdown-preview-plus.svg
 [av]: https://img.shields.io/apm/v/markdown-preview-plus.svg
