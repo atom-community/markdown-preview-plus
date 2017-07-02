@@ -171,7 +171,10 @@ class MarkdownPreviewView extends ScrollView
         ov = parseInt(ov) if ov?
         v = imageWatcher.getVersion(src, @getPath())
         if v isnt ov
-          img.src = "#{src}?v=#{v}" if v
+          if v
+            img.src = "#{src}?v=#{v}"
+          else
+            img.src = "#{src}"
 
   getMarkdownSource: ->
     if @file?.getPath()
