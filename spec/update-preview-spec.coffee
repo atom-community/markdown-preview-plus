@@ -26,10 +26,12 @@ describe "the difference algorithm that updates the preview", ->
   loadPreviewInSplitPane = ->
     runs ->
       atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
-      expect(atom.workspace.getPanes()).toHaveLength 2
+
+    waitsFor ->
+      atom.workspace.getCenter().getPanes().length is 2
 
     waitsFor "markdown preview to be created", ->
-      preview = atom.workspace.getPanes()[1].getActiveItem()
+      preview = atom.workspace.getCenter().getPanes()[1].getActiveItem()
 
     runs ->
       expect(preview).toBeInstanceOf(MarkdownPreviewView)
