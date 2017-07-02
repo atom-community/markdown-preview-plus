@@ -13,31 +13,40 @@ describe "MarkdownPreviewView", ->
   [filePath, preview] = []
 
   beforeEach ->
-    filePath = atom.project.getDirectories()[0].resolve('subdir/file.markdown')
-    preview = new MarkdownPreviewView({filePath})
-    jasmine.attachToDOM(preview.element)
-
+    preview = filePath = null
     waitsForPromise ->
       Promise.all [
         atom.packages.activatePackage('language-ruby')
         atom.packages.activatePackage('language-javascript')
       ]
-      .then ->
-        atom.packages.activatePackage('markdown-preview-plus')
 
-    this.addMatchers
-      toStartWith: (expected) ->
-        this.actual.slice(0, expected.length) is expected
+    waitsFor ->
+      atom.grammars.grammarForScopeName('source.ruby') isnt undefined
+
+    waitsFor ->
+      atom.grammars.grammarForScopeName('source.js') isnt undefined
+
+    waitsForPromise ->
+      atom.packages.activatePackage('markdown-preview-plus')
+
+    runs ->
+      filePath = atom.project.getDirectories()[0].resolve('subdir/file.markdown')
+      preview = new MarkdownPreviewView({filePath})
+      jasmine.attachToDOM(preview.element)
+
+      this.addMatchers
+        toStartWith: (expected) ->
+          this.actual.slice(0, expected.length) is expected
 
   afterEach ->
     preview.destroy()
 
   expectPreviewInSplitPane = ->
-    runs ->
-      expect(atom.workspace.getPanes()).toHaveLength 2
+    waitsFor ->
+      atom.workspace.getCenter().getPanes().length is 2
 
     waitsFor "markdown preview to be created", ->
-      preview = atom.workspace.getPanes()[1].getActiveItem()
+      preview = atom.workspace.getCenter().getPanes()[1].getActiveItem()
 
     runs ->
       expect(preview).toBeInstanceOf(MarkdownPreviewView)
@@ -246,9 +255,6 @@ describe "MarkdownPreviewView", ->
 
       workspaceElement = atom.views.getView(atom.workspace)
       jasmine.attachToDOM(workspaceElement)
-
-      waitsForPromise ->
-        atom.packages.activatePackage("markdown-preview-plus")
 
     getImageVersion = (imagePath, imageURL) ->
       expect(imageURL).toStartWith "#{imagePath}?v="
