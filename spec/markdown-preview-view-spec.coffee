@@ -256,9 +256,6 @@ describe "MarkdownPreviewView", ->
       workspaceElement = atom.views.getView(atom.workspace)
       jasmine.attachToDOM(workspaceElement)
 
-      waitsForPromise ->
-        atom.packages.activatePackage("markdown-preview-plus")
-
     getImageVersion = (imagePath, imageURL) ->
       expect(imageURL).toStartWith "#{imagePath}?v="
       urlQueryStr = url.parse(imageURL).query
