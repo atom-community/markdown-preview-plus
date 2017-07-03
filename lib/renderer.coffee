@@ -14,7 +14,8 @@ highlighter = null
 packagePath = path.dirname(__dirname)
 
 exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
-  render text, filePath, renderLaTeX, false, (error, html) ->
+  forceSourceMap = atom.packages.getLoadedPackage('markdown-preview-plus').mainModule.forceSourceMap
+  render text, {filePath, renderLaTeX, copyHTMLFlag: false, sourceMap: forceSourceMap or not atom.inSpecMode()}, (error, html) ->
     return callback(error) if error?
 
     template = document.createElement('template')
@@ -24,7 +25,7 @@ exports.toDOMFragment = (text='', filePath, grammar, renderLaTeX, callback) ->
     callback(null, domFragment)
 
 exports.toHTML = (text='', filePath, grammar, renderLaTeX, copyHTMLFlag, callback) ->
-  render text, filePath, renderLaTeX, copyHTMLFlag, (error, html) ->
+  render text, {filePath, renderLaTeX, copyHTMLFlag}, (error, html) ->
     return callback(error) if error?
     # Default code blocks to be coffee in Literate CoffeeScript files
     defaultCodeLanguage = 'coffee' if grammar?.scopeName is 'source.litcoffee'
@@ -33,7 +34,7 @@ exports.toHTML = (text='', filePath, grammar, renderLaTeX, copyHTMLFlag, callbac
       html = tokenizeCodeBlocks(html, defaultCodeLanguage)
     callback(null, html)
 
-render = (text, filePath, renderLaTeX, copyHTMLFlag, callback) ->
+render = (text, {filePath, renderLaTeX, copyHTMLFlag, sourceMap}, callback) ->
   # Remove the <!doctype> since otherwise marked will escape it
   # https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
@@ -51,7 +52,7 @@ render = (text, filePath, renderLaTeX, copyHTMLFlag, callback) ->
 
     markdownIt ?= require './markdown-it-helper'
 
-    callbackFunction null, markdownIt.render(text, renderLaTeX)
+    callbackFunction null, markdownIt.render(text, {renderLaTeX, sourceMap})
 
 sanitize = (html) ->
   o = cheerio.load(html)

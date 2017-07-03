@@ -44,6 +44,26 @@ init = (rL) ->
     math ?= require('markdown-it-math')
     markdownIt.use math, mathDollars
     markdownIt.use math, mathBrackets
+    markdownIt.renderer.rules.math_block = (token, idx) ->
+      attrs =
+        if token[idx].attrs?
+          ' ' + (token[idx].attrs.map ([name, value]) -> "#{name}=\"#{value}\"").join(' ')
+        else
+          ''
+      "<span class='math'#{attrs}><script type='math/tex; mode=display'>#{token[idx].content}</script></span>"
+
+  markdownIt.core.ruler.push 'logger', (state) ->
+    return state unless state.env.sourceMap
+    recurse = (token) ->
+      if token.children?
+        token.children = token.children.map(recurse)
+      if token.map?
+        token.attrSet('data-map-lines', [token.map[0]...token.map[1]].join(' '))
+        return token
+      else
+        return token
+    state.tokens = state.tokens.map(recurse)
+    return state
 
   lazyHeaders = atom.config.get('markdown-preview-plus.useLazyHeaders')
 
@@ -57,9 +77,9 @@ needsInit = (rL) ->
   lazyHeaders isnt atom.config.get('markdown-preview-plus.useLazyHeaders') or
   rL isnt renderLaTeX
 
-exports.render = (text, rL) ->
-  init(rL) if needsInit(rL)
-  markdownIt.render text
+exports.render = (text, {renderLaTeX, sourceMap} = {}) ->
+  init(renderLaTeX) if needsInit(renderLaTeX)
+  markdownIt.render text, {sourceMap}
 
 exports.decode = (url) ->
   markdownIt.normalizeLinkText url

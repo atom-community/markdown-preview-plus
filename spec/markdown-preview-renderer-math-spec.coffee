@@ -7,7 +7,7 @@ renderMath = false
 
 compareHTML = (one, two) ->
 
-  one = markdownIt.render(one, renderMath)
+  one = markdownIt.render(one, {renderLaTeX: renderMath})
 
   one = one.replace(/\n\s*/g, '')
 

@@ -96,4 +96,6 @@ prepareCodeBlocksForAtomEditors = (domFragment) ->
     preWrapper.className = 'atom-text-editor'
     preElement.parentNode.insertBefore(preWrapper, preElement)
     preWrapper.appendChild(preElement)
+    codeBlock = preElement.firstElementChild ? preElement
+    preWrapper.setAttribute('data-map-lines', codeBlock.getAttribute('data-map-lines'))
   domFragment
