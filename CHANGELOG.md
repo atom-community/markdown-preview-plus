@@ -1,3 +1,11 @@
+## 2.4.10
+* Fix image update bug
+* Atom 1.19 compatibility
+* Use travis trusty env
+* Specs fix for newer Atom
+* Update README.md (#297) (Alan Yee)
+* Typo fix (#281) (Kevin Murray)
+
 ## 2.4.9
 * Atom community move (#276)
 * Fix image-update fail on win32
