@@ -1,3 +1,6 @@
+## 2.4.14
+* Add dedicated 'Pandoc Options: Filters' option
+
 ## 2.4.13
 * Undefined\/null-aware en-\/decodeURI
 * Properly handle link\/image urlencoding
