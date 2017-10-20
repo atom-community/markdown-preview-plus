@@ -96,7 +96,7 @@ resolveImagePaths = (html, filePath, copyHTMLFlag) ->
         markdownIt ?= require './markdown-it-helper'
         src = markdownIt.decode(src)
 
-      continue if src.match(/^(https?|atom):\/\//)
+      continue if src.match(/^(https?|atom|data):/)
       continue if src.startsWith(process.resourcesPath)
       continue if src.startsWith(resourcePath)
       continue if src.startsWith(packagePath)

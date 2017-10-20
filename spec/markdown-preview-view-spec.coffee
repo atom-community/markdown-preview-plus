@@ -232,11 +232,16 @@ describe "MarkdownPreviewView", ->
           expect(markdownIt.decode).toHaveBeenCalled()
           expect(preview.find("img[alt=absolute]").attr('src')).toStartWith "#{filePath}?v="
 
-    describe "when the image uses a web URL", ->
-      it "doesn't change the URL", ->
+    describe "when the image uses a URL", ->
+      it "doesn't change the web URL", ->
         image = preview.find("img[alt=Image3]")
         expect(markdownIt.decode).toHaveBeenCalled()
         expect(image.attr('src')).toBe 'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png'
+
+      it "doesn't change the data URL", ->
+        image = preview.find("img[alt=Image4]")
+        expect(markdownIt.decode).toHaveBeenCalled()
+        expect(image.attr('src')).toBe 'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7'
 
   describe "image modification", ->
     [dirPath, filePath, img1Path, workspaceElement] = []
