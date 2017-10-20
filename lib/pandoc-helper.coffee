@@ -1,24 +1,22 @@
-pdc = require 'pdc'
 _ = require 'underscore-plus'
+CP = require 'child_process'
 cheerio = null
 fs = null
 path = null
 
-# Current markdown text
-currentText = null
-
-atomConfig = null
-
-config = {}
+atomConfig = -> atom.config.get('markdown-preview-plus')
 
 ###*
  * Sets local mathjaxPath if available
  ###
-getMathJaxPath = ->
-  try
-    config.mathjax = require.resolve 'MathJax'
-  catch e
-    config.mathjax = ''
+getMathJaxPath = do ->
+  cached = null
+  ->
+    return cached if cached?
+    try
+      return cached = require.resolve 'MathJax'
+    catch e
+      return ''
 
 findFileRecursive = (filePath, fileName) ->
   fs ?= require 'fs'
@@ -38,50 +36,37 @@ findFileRecursive = (filePath, fileName) ->
  * @param {string} path to markdown file
  *
  ###
-setPandocOptions = (filePath) ->
-  atomConfig = atom.config.get('markdown-preview-plus')
-  pdc.path = atomConfig.pandocPath
-  config.flavor = atomConfig.pandocMarkdownFlavor
-  config.args = {}
-  config.opts = {}
+setPandocOptions = (filePath, renderMath) ->
+  args =
+    from: atomConfig().pandocMarkdownFlavor
+    to: 'html'
+  opts = {}
   path ?= require 'path'
-  config.opts.cwd = path.dirname(filePath) if filePath?
-  getMathJaxPath() unless config.mathjax?
-  config.args.mathjax = if config.renderMath then config.mathjax else undefined
-  if atomConfig.pandocBibliography
-    config.args.filter = ['pandoc-citeproc']
-    bibFile = findFileRecursive filePath, atomConfig.pandocBIBFile
-    bibFile = atomConfig.pandocBIBFileFallback unless bibFile
-    config.args.bibliography = if bibFile then bibFile else undefined
-    cslFile = findFileRecursive filePath, atomConfig.pandocCSLFile
-    cslFile = atomConfig.pandocCSLFileFallback unless cslFile
-    config.args.csl = if cslFile then cslFile else undefined
-  config
+  opts.cwd = path.dirname(filePath) if filePath?
+  mathjaxPath = getMathJaxPath()
+  args.mathjax = if renderMath then mathjaxPath else undefined
+  if atomConfig().pandocBibliography
+    args.filter = ['pandoc-citeproc']
+    bibFile = findFileRecursive filePath, atomConfig().pandocBIBFile
+    bibFile = atomConfig().pandocBIBFileFallback unless bibFile
+    args.bibliography = if bibFile then bibFile else undefined
+    cslFile = findFileRecursive filePath, atomConfig().pandocCSLFile
+    cslFile = atomConfig().pandocCSLFileFallback unless cslFile
+    args.csl = if cslFile then cslFile else undefined
+  {args, opts}
 
 ###*
- * Handle error response from pdc
+ * Handle error response from Pandoc
  * @param {error} Returned error
  * @param {string} Returned HTML
  * @return {array} with Arguments for callbackFunction (error set to null)
  ###
-handleError = (error, html) ->
-  referenceSearch = /pandoc-citeproc: reference ([\S]+) not found(<br>)?/ig
+handleError = (error, html, renderMath) ->
   message =
-    _.uniq error.message.split '\n'
+    _.uniq error.split '\n'
     .join('<br>')
-  html = "<h1>Pandoc Error:</h1><p><b>#{message}</b></p><hr>"
-  isOnlyMissingReferences =
-    message.replace referenceSearch, ''
-    .length is 0
-  if isOnlyMissingReferences
-    message.match referenceSearch
-    .forEach (match) ->
-      match = match.replace referenceSearch, '$1'
-      r = new RegExp "@#{match}", 'gi'
-      currentText = currentText.replace(r, "&#64;#{match}")
-    currentText = html + currentText
-    pdc currentText, config.flavor, 'html', getArguments(config.args), config.opts, handleResponse
-  [null, html]
+  html = "<h1>Pandoc Error:</h1><pre>#{error}</pre><hr>#{html}"
+  handleSuccess html, renderMath
 
 ###*
  * Adjusts all math environments in HTML
@@ -115,23 +100,22 @@ removeReferences = (html) ->
   o('div').html()
 
 ###*
- * Handle successful response from pdc
+ * Handle successful response from Pandoc
  * @param {string} Returned HTML
  * @return {array} with Arguments for callbackFunction (error set to null)
  ###
-handleSuccess = (html) ->
-  html = handleMath html if config.renderMath
-  html = removeReferences html if atomConfig.pandocRemoveReferences
+handleSuccess = (html, renderMath) ->
+  html = handleMath html if renderMath
+  html = removeReferences html if atomConfig().pandocRemoveReferences
   [null, html]
 
 ###*
- * Handle response from pdc
+ * Handle response from Pandoc
  * @param {Object} error if thrown
  * @param {string} Returned HTML
  ###
-handleResponse = (error, html) ->
-  array = if error? then handleError error, html else handleSuccess html
-  config.callback.apply config.callback, array
+handleResponse = (error, html, renderMath) ->
+  if error then handleError error, html, renderMath else handleSuccess html, renderMath
 
 ###*
  * Renders markdown with pandoc
@@ -140,11 +124,16 @@ handleResponse = (error, html) ->
  * @param {function} callbackFunction
  ###
 renderPandoc = (text, filePath, renderMath, cb) ->
-  currentText = text
-  config.renderMath = renderMath
-  config.callback = cb
-  setPandocOptions filePath
-  pdc text, config.flavor, 'html', getArguments(config.args), config.opts, handleResponse
+  {args, opts} = setPandocOptions filePath, renderMath
+  cp = CP.execFile atomConfig().pandocPath, getArguments(args), opts, (error, stdout, stderr) ->
+    if (error)
+      atom.notifications.addError error.toString(),
+        stack: error.stack
+        dismissable: true
+    cbargs = handleResponse (stderr ? ''), (stdout ? ''), renderMath
+    cb cbargs...
+  cp.stdin.write(text)
+  cp.stdin.end()
 
 getArguments = (args) ->
   args = _.reduce args,
