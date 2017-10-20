@@ -164,7 +164,7 @@ class MarkdownPreviewView extends ScrollView
     imgs = @element.querySelectorAll("img[src]")
     imageWatcher ?= require './image-watch-helper'
     for img in imgs
-      src = decodeURI(img.getAttribute('src'))
+      src = img.getAttribute('src')
       match = src.match(/^(.*)\?v=(\d+)$/)
       [src, ov] = match?.slice?(1) ? [src]
       if src is oldsrc
@@ -172,9 +172,9 @@ class MarkdownPreviewView extends ScrollView
         v = imageWatcher.getVersion(src, @getPath())
         if v isnt ov
           if v
-            img.src = encodeURI("#{src}?v=#{v}")
+            img.src = "#{src}?v=#{v}"
           else
-            img.src = encodeURI("#{src}")
+            img.src = "#{src}"
 
   getMarkdownSource: ->
     if @file?.getPath()
