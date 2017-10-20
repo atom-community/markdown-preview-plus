@@ -3,7 +3,6 @@ CP = require 'child_process'
 cheerio = null
 fs = null
 path = null
-{encodeURI, decodeURI} = require './util'
 
 atomConfig = -> atom.config.get('markdown-preview-plus')
 

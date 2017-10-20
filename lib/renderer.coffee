@@ -8,7 +8,6 @@ pandocHelper = null # Defer until used
 markdownIt = null # Defer until used
 {scopeForFenceName} = require './extension-helper'
 imageWatcher = require './image-watch-helper'
-{encodeURI, decodeURI} = require './util'
 
 highlighter = null
 {resourcePath} = atom.getLoadSettings()

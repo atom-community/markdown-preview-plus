@@ -1,5 +1,4 @@
 path = require 'path'
-{encodeURI, decodeURI} = require './util'
 
 {Emitter, Disposable, CompositeDisposable} = require 'atom'
 {$, $$$, ScrollView} = require 'atom-space-pen-views'
