@@ -76,6 +76,13 @@ module.exports =
       description: 'Please specify the correct path to your pandoc executable'
       dependencies: ['enablePandoc']
       order: 110
+    pandocFilters:
+      type: 'array'
+      default: []
+      title: 'Pandoc Options: Filters'
+      description: 'Comma separated pandoc filters, in order of application. Will be passed via command-line arguments'
+      dependencies: ['enablePandoc']
+      order: 115
     pandocArguments:
       type: 'array'
       default: []
@@ -94,7 +101,11 @@ module.exports =
       type: 'boolean'
       default: false
       title: 'Pandoc Options: Citations'
-      description: 'Enable this for bibliography parsing'
+      description: '''
+        Enable this for bibliography parsing.
+        Note: pandoc-citeproc is applied after other filters specified in
+        Filters, but before other commandline arguments
+        '''
       dependencies: ['enablePandoc']
       order: 140
     pandocRemoveReferences:

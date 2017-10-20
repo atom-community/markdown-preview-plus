@@ -46,8 +46,9 @@ setPandocOptions = (filePath, renderMath) ->
   opts.cwd = path.dirname(filePath) if filePath?
   mathjaxPath = getMathJaxPath()
   args.mathjax = if renderMath then mathjaxPath else undefined
+  args.filter = atomConfig().pandocFilters
   if atomConfig().pandocBibliography
-    args.filter = ['pandoc-citeproc']
+    args.filter.push 'pandoc-citeproc'
     bibFile = findFileRecursive filePath, atomConfig().pandocBIBFile
     bibFile = atomConfig().pandocBIBFileFallback unless bibFile
     args.bibliography = if bibFile then bibFile else undefined
