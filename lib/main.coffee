@@ -1,5 +1,6 @@
 url = require 'url'
 fs = require 'fs-plus'
+child_process = require "childprocess"
 
 MarkdownPreviewView = null
 renderer = null
@@ -142,6 +143,8 @@ module.exports =
     atom.commands.add 'atom-workspace',
       'markdown-preview-plus:toggle': =>
         @toggle()
+      'markdown-preview-plus:save-as-pdf': =>
+        @saveAsPdf()
       'markdown-preview-plus:copy-html': =>
         @copyHtml()
       'markdown-preview-plus:toggle-break-on-single-newline': ->
@@ -179,7 +182,16 @@ module.exports =
     if state.editorId or fs.isFileSync(state.filePath)
       MarkdownPreviewView ?= require './markdown-preview-view'
       new MarkdownPreviewView(state)
-
+  saveAsPdf: ->
+    editor = atom.workspace.getActivePaneItem()
+    file = editor?.buffer?.file
+    return unless file?
+    filePath = file?.path
+    inputFileName = filePath
+    outputFileName = inputFileName+".pdf"
+    child = child_process.spawnSync( 'pandoc', [ inputFileName ,'-o',outputFileName])
+    atom.notifications.addSuccess("Sucessfully created the PDF file "+outputFileName)
+    return
   toggle: ->
     if isMarkdownPreviewView(atom.workspace.getActivePaneItem())
       atom.workspace.destroyActivePaneItem()
