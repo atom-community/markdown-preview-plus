@@ -1,3 +1,7 @@
+## 2.4.13
+* Undefined\/null-aware en-\/decodeURI
+* Properly handle link\/image urlencoding
+
 ## 2.4.12
 * Do not break image data URIs
 
