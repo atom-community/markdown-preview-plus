@@ -1,3 +1,8 @@
+## 2.4.15
+* Remove dependency on cheerio
+* Revert "Properly handle link\/image urlencoding" (problems on Win32)
+* Revert "Undefined\/null-aware en-\/decodeURI" (problems on Win32)
+
 ## 2.4.14
 * Add dedicated 'Pandoc Options: Filters' option
 
