@@ -1,3 +1,6 @@
+## 2.4.11
+* [Pandoc] Remove dependency on pdc; saner Pandoc error handling
+
 ## 2.4.10
 * Fix image update bug
 * Atom 1.19 compatibility
