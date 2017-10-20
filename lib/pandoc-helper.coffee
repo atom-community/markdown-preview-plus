@@ -156,7 +156,7 @@ getArguments = (args) ->
           res.push "--#{key}=#{v}" unless _.isEmpty v
       return res
     , []
-  args = _.union args, atom.config.get('markdown-preview-plus.pandocArguments')
+  args = _.union atom.config.get('markdown-preview-plus.pandocArguments'), args
   args = _.map args,
     (val) ->
       val = val.replace(/^(--[\w\-]+)\s(.+)$/i, "$1=$2")
