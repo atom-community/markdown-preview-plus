@@ -1,6 +1,5 @@
 _ = require 'underscore-plus'
 CP = require 'child_process'
-cheerio = null
 fs = null
 path = null
 
@@ -75,30 +74,28 @@ handleError = (error, html, renderMath) ->
  * @return {string} HTML with adjusted math environments
  ###
 handleMath = (html) ->
-  cheerio ?= require 'cheerio'
-  o = cheerio.load("<div>#{html}</div>")
-  o('.math').each (i, elem) ->
-    math = cheerio(this).text()
+  doc = document.createElement('div')
+  doc.innerHTML = html
+  doc.querySelectorAll('.math').forEach (elem) ->
+    math = elem.innerText
     # Set mode if it is block math
     mode = if math.indexOf('\\[') > -1  then '; mode=display' else ''
 
     # Remove sourrounding \[ \] and \( \)
     math = math.replace(/\\[[()\]]/g, '')
-    newContent =
+    elem.outerHTML =
       '<span class="math">' +
       "<script type='math/tex#{mode}'>#{math}</script>" +
       '</span>'
 
-    cheerio(this).replaceWith newContent
-
-  o('div').html()
+  doc.innerHTML
 
 removeReferences = (html) ->
-  cheerio ?= require 'cheerio'
-  o = cheerio.load("<div>#{html}</div>")
-  o('.references').each (i, elem) ->
-    cheerio(this).remove()
-  o('div').html()
+  doc = document.createElement('div')
+  doc.innerHTML = html
+  doc.querySelectorAll('.references').forEach (elem) ->
+    elem.remove()
+  doc.innerHTML
 
 ###*
  * Handle successful response from Pandoc

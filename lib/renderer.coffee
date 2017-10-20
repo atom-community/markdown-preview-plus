@@ -1,6 +1,5 @@
 path = require 'path'
 _ = require 'underscore-plus'
-cheerio = require 'cheerio'
 fs = require 'fs-plus'
 highlight = require 'atom-highlight'
 {$} = require 'atom-space-pen-views'
@@ -54,9 +53,10 @@ render = (text, filePath, renderLaTeX, copyHTMLFlag, callback) ->
     callbackFunction null, markdownIt.render(text, renderLaTeX)
 
 sanitize = (html) ->
-  o = cheerio.load(html)
+  doc = document.createElement('div')
+  doc.innerHTML = html
   # Do not remove MathJax script delimited blocks
-  o("script:not([type^='math/tex'])").remove()
+  doc.querySelectorAll("script:not([type^='math/tex'])").forEach (elem) -> elem.remove()
   attributesToRemove = [
     'onabort'
     'onblur'
@@ -81,25 +81,26 @@ sanitize = (html) ->
     'onsubmit'
     'onunload'
   ]
-  o('*').removeAttr(attribute) for attribute in attributesToRemove
-  o.html()
+  doc.querySelectorAll('*').forEach (elem) ->
+    elem.removeAttribute(attribute) for attribute in attributesToRemove
+  doc.innerHTML
 
 
 resolveImagePaths = (html, filePath, copyHTMLFlag) ->
   if atom.project?
     [rootDirectory] = atom.project.relativizePath(filePath)
-  o = cheerio.load(html)
-  for imgElement in o('img')
-    img = o(imgElement)
-    if src = img.attr('src')
+  doc = document.createElement('div')
+  doc.innerHTML = html
+  doc.querySelectorAll('img').forEach (img) ->
+    if src = img.getAttribute('src')
       if not atom.config.get('markdown-preview-plus.enablePandoc')
         markdownIt ?= require './markdown-it-helper'
         src = markdownIt.decode(src)
 
-      continue if src.match(/^(https?|atom|data):/)
-      continue if src.startsWith(process.resourcesPath)
-      continue if src.startsWith(resourcePath)
-      continue if src.startsWith(packagePath)
+      return if src.match(/^(https?|atom|data):/)
+      return if src.startsWith(process.resourcesPath)
+      return if src.startsWith(resourcePath)
+      return if src.startsWith(packagePath)
 
       if src[0] is '/'
         unless fs.isFileSync(src)
@@ -114,9 +115,9 @@ resolveImagePaths = (html, filePath, copyHTMLFlag) ->
         v = imageWatcher.getVersion(src, filePath)
         src = "#{src}?v=#{v}" if v
 
-      img.attr('src', src)
+      img.src = src
 
-  o.html()
+  doc.innerHTML
 
 exports.convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') ->
   if fontFamily = atom.config.get('editor.fontFamily')
@@ -148,28 +149,31 @@ exports.convertCodeBlocksToAtomEditors = (domFragment, defaultLanguage='text') -
   domFragment
 
 tokenizeCodeBlocks = (html, defaultLanguage='text') ->
-  o = cheerio.load(html)
+  doc = document.createElement('div')
+  doc.innerHTML = html
 
   if fontFamily = atom.config.get('editor.fontFamily')
-    o('code').css('font-family', fontFamily)
+    doc.querySelectorAll('code').forEach (code) ->
+      code.style.fontFamily = fontFamily
 
-  for preElement in o("pre")
-    codeBlock = o(preElement).children().first()
-    fenceName = codeBlock.attr('class')?.replace(/^(lang-|sourceCode )/, '') ? defaultLanguage
+  doc.querySelectorAll("pre").forEach (preElement) ->
+    codeBlock = preElement.firstElementChild
+    fenceName = codeBlock.className.replace(/^(lang-|sourceCode )/, '') ? defaultLanguage
 
     highlightedHtml = highlight
-      fileContents: codeBlock.text()
+      fileContents: codeBlock.innerText
       scopeName: scopeForFenceName(fenceName)
       nbsp: true
       lineDivs: true
       editorDiv: true
       editorDivTag: 'pre'
       # The `editor` class messes things up as `.editor` has absolutely positioned lines
-      editorDivClass: 'editor-colors'
+      editorDivClass:
+        if fenceName
+          "editor-colors lang-#{fenceName}"
+        else
+          "editor-colors"
 
-    highlightedBlock = o(highlightedHtml)
-    highlightedBlock.addClass("lang-#{fenceName}")
+    preElement.outerHTML = highlightedHtml
 
-    o(preElement).replaceWith(highlightedBlock)
-
-  o.html()
+  doc.innerHTML

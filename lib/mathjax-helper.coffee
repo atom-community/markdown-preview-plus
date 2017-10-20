@@ -6,7 +6,6 @@
 #
 
 {$}     = require 'atom-space-pen-views'
-cheerio = require 'cheerio'
 path    = require 'path'
 CSON    = require 'season'
 fs      = require 'fs-plus'

@@ -1,5 +1,4 @@
 markdownIt = require '../lib/markdown-it-helper'
-cheerio = require 'cheerio'
 
 require './spec-helper'
 
