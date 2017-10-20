@@ -1,3 +1,6 @@
+## 2.4.12
+* Do not break image data URIs
+
 ## 2.4.11
 * [Pandoc] Remove dependency on pdc; saner Pandoc error handling
 
