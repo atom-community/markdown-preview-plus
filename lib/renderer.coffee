@@ -91,7 +91,7 @@ resolveImagePaths = (html, filePath, copyHTMLFlag) ->
   o = cheerio.load(html)
   for imgElement in o('img')
     img = o(imgElement)
-    if src = img.attr('src')
+    if src = decodeURI(img.attr('src'))
       if not atom.config.get('markdown-preview-plus.enablePandoc')
         markdownIt ?= require './markdown-it-helper'
         src = markdownIt.decode(src)
@@ -114,7 +114,7 @@ resolveImagePaths = (html, filePath, copyHTMLFlag) ->
         v = imageWatcher.getVersion(src, filePath)
         src = "#{src}?v=#{v}" if v
 
-      img.attr('src', src)
+      img.attr('src', encodeURI(src))
 
   o.html()
 

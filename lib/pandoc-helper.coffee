@@ -75,7 +75,7 @@ handleError = (error, html, renderMath) ->
  ###
 handleMath = (html) ->
   cheerio ?= require 'cheerio'
-  o = cheerio.load("<div>#{html}</div>")
+  o = cheerio.load(html)
   o('.math').each (i, elem) ->
     math = cheerio(this).text()
     # Set mode if it is block math
@@ -90,14 +90,24 @@ handleMath = (html) ->
 
     cheerio(this).replaceWith newContent
 
-  o('div').html()
+  o.html()
+
+handleHrefs = (html) ->
+  cheerio ?= require 'cheerio'
+  o = cheerio.load(html)
+  o('img').each (i, elem) ->
+    o(elem).attr('src', encodeURI(o(elem).attr('src')))
+  o('a').each (i, elem) ->
+    o(elem).attr('href', encodeURI(o(elem).attr('href')))
+
+  o.html()
 
 removeReferences = (html) ->
   cheerio ?= require 'cheerio'
-  o = cheerio.load("<div>#{html}</div>")
+  o = cheerio.load(html)
   o('.references').each (i, elem) ->
     cheerio(this).remove()
-  o('div').html()
+  o.html()
 
 ###*
  * Handle successful response from Pandoc
@@ -105,6 +115,7 @@ removeReferences = (html) ->
  * @return {array} with Arguments for callbackFunction (error set to null)
  ###
 handleSuccess = (html, renderMath) ->
+  html = handleHrefs html
   html = handleMath html if renderMath
   html = removeReferences html if atomConfig().pandocRemoveReferences
   [null, html]
