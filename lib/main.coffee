@@ -1,5 +1,6 @@
 url = require 'url'
 fs = require 'fs-plus'
+{encodeURI, decodeURI} = require './util'
 
 MarkdownPreviewView = null
 renderer = null
