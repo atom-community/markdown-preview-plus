@@ -39,7 +39,7 @@ setPandocOptions = (filePath, renderMath) ->
   args =
     from: atomConfig().pandocMarkdownFlavor
     to: 'html'
-  opts = {}
+  opts = maxBuffer: Infinity # see https://github.com/atom-community/markdown-preview-plus/issues/316
   path ?= require 'path'
   opts.cwd = path.dirname(filePath) if filePath?
   mathjaxPath = getMathJaxPath()
