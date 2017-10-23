@@ -1,3 +1,6 @@
+## 2.4.16
+* Tentative fix for #316
+
 ## 2.4.15
 * Remove dependency on cheerio
 * Revert "Properly handle link\/image urlencoding" (problems on Win32)
