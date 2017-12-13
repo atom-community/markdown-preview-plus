@@ -1,5 +1,7 @@
-import { MarkdownPreviewView } from './markdown-preview-view';
+import { MarkdownPreviewView } from "./markdown-preview-view"
 
-export function isMarkdownPreviewView(object: object): object is MarkdownPreviewView {
-  return object instanceof MarkdownPreviewView;
-};
+export function isMarkdownPreviewView(
+  object: object
+): object is MarkdownPreviewView {
+  return object instanceof MarkdownPreviewView
+}

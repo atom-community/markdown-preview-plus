@@ -27,94 +27,95 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-"use strict";
+"use strict"
 
-const WrappedDomTree  = require('./wrapped-dom-tree');
-const MathJaxHelper   = require('./mathjax-helper');
-const renderer        = require('./renderer');
+const WrappedDomTree = require("./wrapped-dom-tree")
+const MathJaxHelper = require("./mathjax-helper")
+const renderer = require("./renderer")
 
 export class UpdatePreview {
   // @param dom A DOM element object
   //    https://developer.mozilla.org/en-US/docs/Web/API/element
   constructor(dom) {
-    this.tree         = new WrappedDomTree(dom, true);
-    this.domFragment  = document.createDocumentFragment();
+    this.tree = new WrappedDomTree(dom, true)
+    this.domFragment = document.createDocumentFragment()
   }
 
   update(domFragment, renderLaTeX) {
-    prepareCodeBlocksForAtomEditors(domFragment);
+    prepareCodeBlocksForAtomEditors(domFragment)
 
     if (domFragment.isEqualNode(this.domFragment)) {
-      return;
+      return
     }
 
-    const firstTime     = this.domFragment.childElementCount === 0;
-    this.domFragment  = domFragment.cloneNode(true);
+    const firstTime = this.domFragment.childElementCount === 0
+    this.domFragment = domFragment.cloneNode(true)
 
-    const newDom            = document.createElement("div");
-    newDom.className  = "update-preview";
-    newDom.appendChild(domFragment);
-    const newTree           = new WrappedDomTree(newDom);
+    const newDom = document.createElement("div")
+    newDom.className = "update-preview"
+    newDom.appendChild(domFragment)
+    const newTree = new WrappedDomTree(newDom)
 
-    const r = this.tree.diffTo(newTree);
-    newTree.removeSelf();
+    const r = this.tree.diffTo(newTree)
+    newTree.removeSelf()
 
     if (firstTime) {
-      r.possibleReplace = null;
-      r.last            = null;
+      r.possibleReplace = null
+      r.last = null
     }
 
     if (renderLaTeX) {
       r.inserted = r.inserted.map(function(elm) {
         while (elm && !elm.innerHTML) {
-          elm = elm.parentElement;
+          elm = elm.parentElement
         }
-        return elm;
-      });
-      r.inserted = r.inserted.filter(elm => !!elm);
-      MathJaxHelper.mathProcessor(r.inserted);
+        return elm
+      })
+      r.inserted = r.inserted.filter(elm => !!elm)
+      MathJaxHelper.mathProcessor(r.inserted)
     }
 
-    if (!atom.config.get('markdown-preview-plus.enablePandoc')
-        || !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')) {
+    if (
+      !atom.config.get("markdown-preview-plus.enablePandoc") ||
+      !atom.config.get("markdown-preview-plus.useNativePandocCodeStyles")
+    ) {
       for (let elm of Array.from(r.inserted)) {
         if (elm instanceof Element) {
-          renderer.convertCodeBlocksToAtomEditors(elm);
+          renderer.convertCodeBlocksToAtomEditors(elm)
         }
       }
     }
 
-    this.updateOrderedListsStart();
+    this.updateOrderedListsStart()
 
-    return r;
+    return r
   }
 
   updateOrderedListsStart() {
-    const previewOLs = this.tree.shownTree.dom.querySelectorAll('ol');
-    const parsedOLs  = this.domFragment.querySelectorAll('ol');
+    const previewOLs = this.tree.shownTree.dom.querySelectorAll("ol")
+    const parsedOLs = this.domFragment.querySelectorAll("ol")
 
-    for (let i = 0, end = parsedOLs.length-1; i <= end; i++) {
-      const previewStart  = previewOLs[i].getAttribute('start');
-      const parsedStart   = parsedOLs[i].getAttribute('start');
+    for (let i = 0, end = parsedOLs.length - 1; i <= end; i++) {
+      const previewStart = previewOLs[i].getAttribute("start")
+      const parsedStart = parsedOLs[i].getAttribute("start")
 
       if (previewStart === parsedStart) {
-        continue;
+        continue
       } else if (parsedStart != null) {
-        previewOLs[i].setAttribute('start', parsedStart);
+        previewOLs[i].setAttribute("start", parsedStart)
       } else {
-        previewOLs[i].removeAttribute('start');
+        previewOLs[i].removeAttribute("start")
       }
     }
-
   }
 }
 
 function prepareCodeBlocksForAtomEditors(domFragment) {
-  for (let preElement of Array.from(domFragment.querySelectorAll('pre'))) {
-    const preWrapper = document.createElement('span');
-    preWrapper.className = 'atom-text-editor';
-    preElement.parentNode.insertBefore(preWrapper, preElement);
-    preWrapper.appendChild(preElement);
+  for (let preElement of Array.from(domFragment.querySelectorAll("pre"))) {
+    const preWrapper = document.createElement("span")
+    preWrapper.className = "atom-text-editor"
+    preElement.parentNode.insertBefore(preWrapper, preElement)
+    preWrapper.appendChild(preElement)
   }
-  return domFragment;
-};
+  return domFragment
+}
