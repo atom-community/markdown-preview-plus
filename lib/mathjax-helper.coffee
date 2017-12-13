@@ -9,7 +9,7 @@
 path    = require 'path'
 CSON    = require 'season'
 fs      = require 'fs-plus'
-_       = require 'underscore-plus'
+_       = require 'lodash'
 
 module.exports =
   #

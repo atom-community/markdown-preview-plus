@@ -3,7 +3,7 @@ path = require 'path'
 {Emitter, Disposable, CompositeDisposable} = require 'atom'
 {$, $$$, ScrollView} = require 'atom-space-pen-views'
 Grim = require 'grim'
-_ = require 'underscore-plus'
+_ = require 'lodash'
 fs = require 'fs-plus'
 {File} = require 'atom'
 

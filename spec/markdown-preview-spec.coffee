@@ -1,7 +1,7 @@
 path = require 'path'
 fs = require 'fs-plus'
 temp = require 'temp'
-wrench = require 'wrench'
+wrench = require 'fs-extra'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
 {$} = require 'atom-space-pen-views'
 
@@ -13,7 +13,7 @@ describe "Markdown preview plus package", ->
   beforeEach ->
     fixturesPath = path.join(__dirname, 'fixtures')
     tempPath = temp.mkdirSync('atom')
-    wrench.copyDirSyncRecursive(fixturesPath, tempPath, forceDelete: true)
+    wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
 
     jasmine.useRealClock()

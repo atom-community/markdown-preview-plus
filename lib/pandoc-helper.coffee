@@ -1,4 +1,4 @@
-_ = require 'underscore-plus'
+_ = require 'lodash'
 CP = require 'child_process'
 fs = null
 path = null
@@ -25,7 +25,7 @@ findFileRecursive = (filePath, fileName) ->
     bibFile
   else
     newPath = path.join bibFile, '..'
-    if newPath isnt filePath and not _.contains(atom.project.getPaths(), newPath)
+    if newPath isnt filePath and not _.includes(atom.project.getPaths(), newPath)
       findFileRecursive newPath, fileName
     else
       false

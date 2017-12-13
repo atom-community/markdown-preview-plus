@@ -1,7 +1,7 @@
 path = require 'path'
 fs = require 'fs-plus'
 temp = require 'temp'
-wrench = require 'wrench'
+wrench = require 'fs-extra'
 {$} = require 'atom-space-pen-views'
 pandocHelper = require '../lib/pandoc-helper.coffee'
 
@@ -19,7 +19,7 @@ describe "Markdown preview plus pandoc helper", ->
   beforeEach ->
     fixturesPath = path.join(__dirname, 'fixtures')
     tempPath = temp.mkdirSync('atom')
-    wrench.copyDirSyncRecursive(fixturesPath, tempPath, forceDelete: true)
+    wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
 
     jasmine.useRealClock()

@@ -57,7 +57,7 @@ module.exports =
         return false
 
     files = _.get(i, 'files')
-    if not _.contains(files, file)
+    if not _.includes(files, file)
       imageRegister[image].files.push file
 
     version = _.get(i, 'version')

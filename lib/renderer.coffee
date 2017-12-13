@@ -1,5 +1,4 @@
 path = require 'path'
-_ = require 'underscore-plus'
 fs = require 'fs-plus'
 highlight = require 'atom-highlight'
 {$} = require 'atom-space-pen-views'
