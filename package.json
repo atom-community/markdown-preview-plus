@@ -28,10 +28,16 @@
     "season": "^6.0"
   },
   "devDependencies": {
+    "@types/atom": "^1.22.3",
+    "@types/fs-plus": "^3.0.0",
+    "@types/lodash": "^4.14.88",
+    "@types/markdown-it": "0.0.4",
     "coffeelint": "^1",
     "fs-extra": "^5.0.0",
     "jasmine-tagged": "^1.1.4",
-    "temp": "^0.8.1"
+    "temp": "^0.8.1",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.2"
   },
   "deserializers": {
     "MarkdownPreviewView": "createMarkdownPreviewView"

@@ -4,7 +4,7 @@ temp          = require('temp').track()
 cson          = require 'season'
 markdownIt    = require '../lib/markdown-it-helper'
 mathjaxHelper = require '../lib/mathjax-helper'
-MarkdownPreviewView = require '../lib/markdown-preview-view'
+{MarkdownPreviewView} = require '../lib/markdown-preview-view'
 
 describe "Syncronization of source and preview", ->
   [preview, workspaceElement, fixturesPath] = []

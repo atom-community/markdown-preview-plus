@@ -2,7 +2,7 @@ path = require 'path'
 fs = require 'fs-plus'
 temp = require 'temp'
 wrench = require 'fs-extra'
-MarkdownPreviewView = require '../lib/markdown-preview-view'
+{MarkdownPreviewView} = require '../lib/markdown-preview-view'
 {$} = require 'atom-space-pen-views'
 
 require './spec-helper'
@@ -417,7 +417,7 @@ describe "Markdown preview plus package", ->
           expect(clipboard.match(/class\=\"MathJax\_SVG\"/).length).toBe(1)
 
       it "scales the svg's if the scaleMath parameter is passed", ->
-        mpp.copyHtml(null, 200)
+        mpp.copyHtml(undefined, 200)
 
         waitsFor "atom.clipboard.write to have been called", ->
           atom.clipboard.write.callCount is 1

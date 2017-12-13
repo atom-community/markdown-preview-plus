@@ -1,5 +1,5 @@
 path                = require 'path'
-MarkdownPreviewView = require '../lib/markdown-preview-view'
+{MarkdownPreviewView} = require '../lib/markdown-preview-view'
 mathjaxHelper       = require '../lib/mathjax-helper'
 renderer            = require '../lib/renderer'
 
