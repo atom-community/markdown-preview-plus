@@ -3,7 +3,7 @@ fs = require 'fs-plus'
 temp = require 'temp'
 wrench = require 'fs-extra'
 {$} = require 'atom-space-pen-views'
-pandocHelper = require '../lib/pandoc-helper.coffee'
+pandocHelper = require '../lib/pandoc-helper'
 
 bibFile = 'test.bib'
 cslFile = 'foo.csl'

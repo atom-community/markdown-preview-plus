@@ -3,7 +3,7 @@ fs = require 'fs-plus'
 temp = require 'temp'
 MarkdownPreviewView = require '../lib/markdown-preview-view'
 markdownIt = require '../lib/markdown-it-helper'
-pandocHelper = require '../lib/pandoc-helper.coffee'
+pandocHelper = require '../lib/pandoc-helper'
 url = require 'url'
 queryString = require 'querystring'
 
