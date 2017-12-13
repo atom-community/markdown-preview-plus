@@ -205,8 +205,8 @@ function tokenizeCodeBlocks(html, defaultLanguage) {
     const highlightedHtml = highlight({
       fileContents: codeBlock.innerText,
       scopeName: scopeForFenceName(fenceName),
-      nbsp: true,
-      lineDivs: true,
+      nbsp: false,
+      lineDivs: false,
       editorDiv: true,
       editorDivTag: 'pre',
       // The `editor` class messes things up as `.editor` has absolutely positioned lines
