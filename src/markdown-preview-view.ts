@@ -177,13 +177,14 @@ export class MarkdownPreviewView extends ScrollView {
         return this.css('zoom', zoomLevel - 0.1)
       },
       'markdown-preview-plus:reset-zoom': () => this.css('zoom', 1),
-      'markdown-preview-plus:sync-source': (event) =>
+      'markdown-preview-plus:sync-source': (event) => {
         this.getMarkdownSource().then((source?: string) => {
           if (source == null) {
             return
           }
-          return this.syncSource(source, event.target as HTMLElement)
-        }),
+          this.syncSource(source, event.target as HTMLElement)
+        })
+      },
     })
 
     const changeHandler = () => {

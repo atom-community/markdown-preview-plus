@@ -172,7 +172,7 @@ export function previewFile({ currentTarget }: CommandEvent) {
     }
   }
 
-  return atom.workspace.open(`markdown-preview-plus://${encodeURI(filePath)}`, {
+  atom.workspace.open(`markdown-preview-plus://${encodeURI(filePath)}`, {
     searchAllPanes: true,
   })
 }
