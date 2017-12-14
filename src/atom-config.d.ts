@@ -1,5 +1,5 @@
 export {}
-declare module "atom" {
+declare module 'atom' {
   interface ConfigValues {
     breakOnSingleNewline: boolean
     liveUpdate: boolean

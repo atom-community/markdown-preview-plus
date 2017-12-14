@@ -12,11 +12,11 @@
 // for calls to MathJax to process LaTeX equations.
 //
 
-const { $ } = require("atom-space-pen-views")
-const path = require("path")
-const CSON = require("season")
-const fs = require("fs-plus")
-const _ = require("lodash")
+const { $ } = require('atom-space-pen-views')
+const path = require('path')
+const CSON = require('season')
+const fs = require('fs-plus')
+const _ = require('lodash')
 
 export = {
   //
@@ -28,7 +28,7 @@ export = {
   loadMathJax(listener) {
     const script = this.attachMathJax()
     if (listener != null) {
-      script.addEventListener("load", () => listener())
+      script.addEventListener('load', () => listener())
     }
   },
 
@@ -57,11 +57,11 @@ export = {
   //   details on DOM elements.
   //
   mathProcessor(domElements) {
-    if (typeof MathJax !== "undefined" && MathJax !== null) {
-      MathJax.Hub.Queue(["Typeset", MathJax.Hub, domElements])
+    if (typeof MathJax !== 'undefined' && MathJax !== null) {
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElements])
     } else {
       this.loadMathJax(() =>
-        MathJax.Hub.Queue(["Typeset", MathJax.Hub, domElements])
+        MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElements]),
       )
     }
   },
@@ -74,13 +74,13 @@ export = {
   //   fragment string that is the result of html processed by MathJax
   //
   processHTMLString(html, callback) {
-    const element = document.createElement("div")
+    const element = document.createElement('div')
     element.innerHTML = html
 
     const compileProcessedHTMLString = function() {
       const svgGlyphs = __guard__(
-        document.getElementById("MathJax_SVG_Hidden"),
-        x => x.parentNode.cloneNode(true)
+        document.getElementById('MathJax_SVG_Hidden'),
+        (x) => x.parentNode.cloneNode(true),
       )
       if (svgGlyphs != null) {
         element.insertBefore(svgGlyphs, element.firstChild)
@@ -90,18 +90,18 @@ export = {
 
     const queueProcessHTMLString = () =>
       MathJax.Hub.Queue(
-        ["setRenderer", MathJax.Hub, "SVG"],
-        ["Typeset", MathJax.Hub, element],
-        ["setRenderer", MathJax.Hub, "HTML-CSS"],
-        [() => callback(compileProcessedHTMLString())]
+        ['setRenderer', MathJax.Hub, 'SVG'],
+        ['Typeset', MathJax.Hub, element],
+        ['setRenderer', MathJax.Hub, 'HTML-CSS'],
+        [() => callback(compileProcessedHTMLString())],
       )
 
-    if (typeof MathJax !== "undefined" && MathJax !== null) {
+    if (typeof MathJax !== 'undefined' && MathJax !== null) {
       queueProcessHTMLString()
     } else {
       this.loadMathJax(queueProcessHTMLString)
     }
-  }
+  },
 }
 
 //
@@ -116,11 +116,11 @@ const namePattern = new RegExp(`\
 
 const getUserMacrosPath = function() {
   const userMacrosPath = CSON.resolve(
-    path.join(atom.getConfigDirPath(), "markdown-preview-plus")
+    path.join(atom.getConfigDirPath(), 'markdown-preview-plus'),
   )
   return userMacrosPath != null
     ? userMacrosPath
-    : path.join(atom.getConfigDirPath(), "markdown-preview-plus.cson")
+    : path.join(atom.getConfigDirPath(), 'markdown-preview-plus.cson')
 }
 
 const loadMacrosFile = function(filePath) {
@@ -135,12 +135,12 @@ const loadMacrosFile = function(filePath) {
       console.warn(
         `Error reading Latex Macros file '${filePath}': ${
           error.stack != null ? error.stack : error
-        }`
+        }`,
       )
       if (atom.notifications != null) {
         atom.notifications.addError(
           `Failed to load Latex Macros from '${filePath}'`,
-          { detail: error.message, dismissable: true }
+          { detail: error.message, dismissable: true },
         )
       }
     }
@@ -155,7 +155,7 @@ const loadUserMacros = function() {
     return (result = loadMacrosFile(userMacrosPath))
   } else {
     console.log(
-      "Creating markdown-preview-plus.cson, this is a one-time operation."
+      'Creating markdown-preview-plus.cson, this is a one-time operation.',
     )
     createMacrosTemplate(userMacrosPath)
     return (result = loadMacrosFile(userMacrosPath))
@@ -163,8 +163,8 @@ const loadUserMacros = function() {
 }
 
 var createMacrosTemplate = function(filePath) {
-  const templatePath = path.join(__dirname, "../assets/macros-template.cson")
-  const templateFile = fs.readFileSync(templatePath, "utf8")
+  const templatePath = path.join(__dirname, '../assets/macros-template.cson')
+  const templateFile = fs.readFileSync(templatePath, 'utf8')
   return fs.writeFileSync(filePath, templateFile)
 }
 
@@ -176,7 +176,7 @@ const checkMacros = function(macrosObject) {
       if (atom.notifications != null) {
         atom.notifications.addError(
           `Failed to load LaTeX macro named '${name}'. Please see the [LaTeX guide](https://github.com/Galadirith/markdown-preview-plus/blob/master/LATEX.md#macro-names)`,
-          { dismissable: true }
+          { dismissable: true },
         )
       }
     }
@@ -188,16 +188,16 @@ var valueMatchesPattern = function(value) {
   // Different check based on whether value is string or array
   switch (false) {
     // If it is an array then it should be [string, integer]
-    case Object.prototype.toString.call(value) !== "[object Array]":
+    case Object.prototype.toString.call(value) !== '[object Array]':
       var macroDefinition = value[0]
       var numberOfArgs = value[1]
-      if (typeof numberOfArgs === "number") {
-        return numberOfArgs % 1 === 0 && typeof macroDefinition === "string"
+      if (typeof numberOfArgs === 'number') {
+        return numberOfArgs % 1 === 0 && typeof macroDefinition === 'string'
       } else {
         return false
       }
     // If it is just a string then that's OK, any string is acceptable
-    case typeof value !== "string":
+    case typeof value !== 'string':
       return true
     default:
       return false
@@ -217,30 +217,30 @@ const configureMathJax = function() {
 
   //Now Configure MathJax
   MathJax.Hub.Config({
-    jax: ["input/TeX", "output/HTML-CSS"],
+    jax: ['input/TeX', 'output/HTML-CSS'],
     extensions: [],
     TeX: {
       extensions: [
-        "AMSmath.js",
-        "AMSsymbols.js",
-        "noErrors.js",
-        "noUndefined.js"
+        'AMSmath.js',
+        'AMSsymbols.js',
+        'noErrors.js',
+        'noUndefined.js',
       ],
-      Macros: userMacros
+      Macros: userMacros,
     },
-    "HTML-CSS": {
+    'HTML-CSS': {
       availableFonts: [],
-      webFont: "TeX"
+      webFont: 'TeX',
     },
-    messageStyle: "none",
+    messageStyle: 'none',
     showMathMenu: false,
-    skipStartupTypeset: true
+    skipStartupTypeset: true,
   })
   MathJax.Hub.Configured()
 
   // Notify user MathJax has loaded
   if (atom.inDevMode()) {
-    atom.notifications.addSuccess("Loaded maths rendering engine MathJax")
+    atom.notifications.addSuccess('Loaded maths rendering engine MathJax')
   }
 }
 
@@ -250,21 +250,21 @@ const configureMathJax = function() {
 var attachMathJax = function() {
   // Notify user MathJax is loading
   if (atom.inDevMode()) {
-    atom.notifications.addInfo("Loading maths rendering engine MathJax")
+    atom.notifications.addInfo('Loading maths rendering engine MathJax')
   }
 
   // Attach MathJax script
-  const script = document.createElement("script")
-  script.src = `${require.resolve("MathJax")}?delayStartupUntil=configured`
-  script.type = "text/javascript"
-  script.addEventListener("load", () => configureMathJax())
-  document.getElementsByTagName("head")[0].appendChild(script)
+  const script = document.createElement('script')
+  script.src = `${require.resolve('MathJax')}?delayStartupUntil=configured`
+  script.type = 'text/javascript'
+  script.addEventListener('load', () => configureMathJax())
+  document.getElementsByTagName('head')[0].appendChild(script)
 
   return script
 }
 
 function __guard__(value, transform) {
-  return typeof value !== "undefined" && value !== null
+  return typeof value !== 'undefined' && value !== null
     ? transform(value)
     : undefined
 }

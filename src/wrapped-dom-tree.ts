@@ -27,10 +27,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-"use strict"
+'use strict'
 
 let WrappedDomTree
-const TwoDimArray = require("./two-dim-array")
+const TwoDimArray = require('./two-dim-array')
 
 let curHash = 0
 const hashTo = {}
@@ -65,7 +65,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       this.children = [].map.call(
         this.dom.childNodes,
         (dom, ind) =>
-          new WrappedDomTree(dom, false, rep ? rep.children[ind] : null)
+          new WrappedDomTree(dom, false, rep ? rep.children[ind] : null),
       )
       this.size = this.children.length
         ? this.children.reduce((prev, cur) => prev + cur.size, 0)
@@ -95,14 +95,14 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       r,
       lastOp,
       lastElmDeleted,
-      lastElmInserted
+      lastElmInserted,
     ] = Array.from([])
 
     if (operations) {
       if (operations instanceof Array) {
         for (let op of Array.from(operations)) {
-          ;(op => {
-            if (op.type === "d") {
+          ;((op) => {
+            if (op.type === 'd') {
               const possibleLastDeleted = this.children[op.tree + indexShift]
                 .dom
               r = this.remove(op.tree + indexShift)
@@ -121,15 +121,15 @@ module.exports = WrappedDomTree = class WrappedDomTree {
               }
               indexShift--
               return
-            } else if (op.type === "i") {
+            } else if (op.type === 'i') {
               this.rep.insert(
                 op.pos + indexShift,
-                otherTree.children[op.otherTree]
+                otherTree.children[op.otherTree],
               )
               r = this.insert(
                 op.pos + indexShift,
                 otherTree.children[op.otherTree],
-                this.rep.children[op.pos + indexShift]
+                this.rep.children[op.pos + indexShift],
               )
               inserted.push(r)
               if (!last || last.nextSibling === r) {
@@ -141,7 +141,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
               return
             } else {
               const re = this.children[op.tree + indexShift].diffTo(
-                otherTree.children[op.otherTree]
+                otherTree.children[op.otherTree],
               )
               if (
                 !last ||
@@ -162,21 +162,21 @@ module.exports = WrappedDomTree = class WrappedDomTree {
         }
       } else {
         console.log(operations)
-        throw new Error("invalid operations")
+        throw new Error('invalid operations')
       }
     }
 
-    if (lastOp && lastOp.type !== "i" && lastElmInserted && lastElmDeleted) {
+    if (lastOp && lastOp.type !== 'i' && lastElmInserted && lastElmDeleted) {
       possibleReplace = {
         cur: lastElmInserted,
-        prev: lastElmDeleted
+        prev: lastElmDeleted,
       }
     }
 
     return {
       last,
       inserted,
-      possibleReplace
+      possibleReplace,
     }
   }
 
@@ -223,7 +223,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
     }
 
     let offset = 0
-    const forwardSearch = offset => {
+    const forwardSearch = (offset) => {
       return (
         offset < this.children.length &&
         offset < otherTree.children.length &&
@@ -236,11 +236,11 @@ module.exports = WrappedDomTree = class WrappedDomTree {
 
     const dp = new TwoDimArray(
       this.children.length + 1 - offset,
-      otherTree.children.length + 1 - offset
+      otherTree.children.length + 1 - offset,
     )
     const p = new TwoDimArray(
       this.children.length + 1 - offset,
-      otherTree.children.length + 1 - offset
+      otherTree.children.length + 1 - offset,
     )
     dp.set(0, 0, 0)
 
@@ -264,7 +264,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       p.set(
         0,
         otherTree.children.length - offset,
-        otherTree.children.length - 1 - offset
+        otherTree.children.length - 1 - offset,
       )
     }
 
@@ -288,7 +288,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       p.set(
         this.children.length - offset,
         0,
-        (this.children.length - 1 - offset) * p.col
+        (this.children.length - 1 - offset) * p.col,
       )
     }
 
@@ -307,7 +307,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       const bound = max
       const subdiff = this.children[i - 1 + offset].diff(
         otherTree.children[j - 1 + offset],
-        bound
+        bound,
       ).score
       let force = false
       if (
@@ -326,7 +326,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
           getScore(
             i - 1,
             j,
-            Math.min(val, max) - this.children[i - 1 + offset].size
+            Math.min(val, max) - this.children[i - 1 + offset].size,
           ) + this.children[i - 1 + offset].size
         if (other < val) {
           prev = p.getInd(i - 1, j)
@@ -337,7 +337,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
           getScore(
             i,
             j - 1,
-            Math.min(val, max) - otherTree.children[j - 1 + offset].size
+            Math.min(val, max) - otherTree.children[j - 1 + offset].size,
           ) + otherTree.children[j - 1 + offset].size
         if (other < val) {
           prev = p.getInd(i, j - 1)
@@ -357,13 +357,13 @@ module.exports = WrappedDomTree = class WrappedDomTree {
     const score = getScore(
       this.children.length - offset,
       otherTree.children.length - offset,
-      tmax
+      tmax,
     )
     const operations = []
 
     let cur = p.getInd(
       this.children.length - offset,
-      otherTree.children.length - offset
+      otherTree.children.length - offset,
     )
     let cr = this.children.length - 1 - offset
     let cc = otherTree.children.length - 1 - offset
@@ -376,24 +376,24 @@ module.exports = WrappedDomTree = class WrappedDomTree {
 
       if (pr === cr) {
         operations.unshift({
-          type: "i",
+          type: 'i',
           otherTree: cc + offset,
-          pos: cr + 1 + offset
+          pos: cr + 1 + offset,
         })
       } else if (pc === cc) {
         operations.unshift({
-          type: "d",
-          tree: cr + offset
+          type: 'd',
+          tree: cr + offset,
         })
       } else {
         const op = this.children[cr + offset].diff(
-          otherTree.children[cc + offset]
+          otherTree.children[cc + offset],
         ).operations
         if (op && op.length) {
           operations.unshift({
-            type: "r",
+            type: 'r',
             tree: cr + offset,
-            otherTree: cc + offset
+            otherTree: cc + offset,
           })
         }
       }
@@ -404,7 +404,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
 
     this.diffHash[key] = {
       score,
-      operations
+      operations,
     }
 
     return this.diffHash[key]
@@ -420,10 +420,10 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       otherTree.isText ||
       this.tagName !== otherTree.tagName ||
       this.className !== otherTree.className ||
-      this.className === "math" ||
-      this.className === "atom-text-editor" ||
-      this.tagName === "A" ||
-      (this.tagName === "IMG" && !this.dom.isEqualNode(otherTree.dom))
+      this.className === 'math' ||
+      this.className === 'atom-text-editor' ||
+      this.tagName === 'A' ||
+      (this.tagName === 'IMG' && !this.dom.isEqualNode(otherTree.dom))
     )
   }
 
@@ -437,6 +437,6 @@ module.exports = WrappedDomTree = class WrappedDomTree {
 
   removeSelf() {
     hashTo[this.hash] = null
-    this.children && this.children.forEach(c => c.removeSelf())
+    this.children && this.children.forEach((c) => c.removeSelf())
   }
 }

@@ -1,5 +1,5 @@
 export {}
-declare module "atom" {
+declare module 'atom' {
   interface CommandEvent {
     currentTarget: TextEditorElement
   }

@@ -4,66 +4,66 @@
  * DS104: Avoid inline assignments
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const url = require("url")
-const fs = require("fs-plus")
+const url = require('url')
+const fs = require('fs-plus')
 
-import { MarkdownPreviewView, MPVParams } from "./markdown-preview-view"
-import renderer = require("./renderer")
-import mathjaxHelper = require("./mathjax-helper")
-import { isMarkdownPreviewView } from "./cast"
-import { TextEditor } from "atom"
-import { WorkspaceOpenOptions } from "atom"
-import { CommandEvent } from "atom"
+import { MarkdownPreviewView, MPVParams } from './markdown-preview-view'
+import renderer = require('./renderer')
+import mathjaxHelper = require('./mathjax-helper')
+import { isMarkdownPreviewView } from './cast'
+import { TextEditor } from 'atom'
+import { WorkspaceOpenOptions } from 'atom'
+import { CommandEvent } from 'atom'
 
-export { config } from "./config"
+export { config } from './config'
 
 export function activate() {
-  atom.commands.add("atom-workspace", {
-    "markdown-preview-plus:toggle": toggle,
-    "markdown-preview-plus:copy-html": () => copyHtml(),
-    "markdown-preview-plus:toggle-break-on-single-newline"() {
-      const keyPath = "markdown-preview-plus.breakOnSingleNewline"
+  atom.commands.add('atom-workspace', {
+    'markdown-preview-plus:toggle': toggle,
+    'markdown-preview-plus:copy-html': () => copyHtml(),
+    'markdown-preview-plus:toggle-break-on-single-newline'() {
+      const keyPath = 'markdown-preview-plus.breakOnSingleNewline'
       return atom.config.set(keyPath, !atom.config.get(keyPath))
-    }
+    },
   })
 
   atom.commands.add(
-    ".tree-view .file .name[data-name$=\\.markdown]",
-    "markdown-preview-plus:preview-file",
-    previewFile
+    '.tree-view .file .name[data-name$=\\.markdown]',
+    'markdown-preview-plus:preview-file',
+    previewFile,
   )
   atom.commands.add(
-    ".tree-view .file .name[data-name$=\\.md]",
-    "markdown-preview-plus:preview-file",
-    previewFile
+    '.tree-view .file .name[data-name$=\\.md]',
+    'markdown-preview-plus:preview-file',
+    previewFile,
   )
   atom.commands.add(
-    ".tree-view .file .name[data-name$=\\.mdown]",
-    "markdown-preview-plus:preview-file",
-    previewFile
+    '.tree-view .file .name[data-name$=\\.mdown]',
+    'markdown-preview-plus:preview-file',
+    previewFile,
   )
   atom.commands.add(
-    ".tree-view .file .name[data-name$=\\.mkd]",
-    "markdown-preview-plus:preview-file",
-    previewFile
+    '.tree-view .file .name[data-name$=\\.mkd]',
+    'markdown-preview-plus:preview-file',
+    previewFile,
   )
   atom.commands.add(
-    ".tree-view .file .name[data-name$=\\.mkdown]",
-    "markdown-preview-plus:preview-file",
-    previewFile
+    '.tree-view .file .name[data-name$=\\.mkdown]',
+    'markdown-preview-plus:preview-file',
+    previewFile,
   )
   atom.commands.add(
-    ".tree-view .file .name[data-name$=\\.ron]",
-    "markdown-preview-plus:preview-file",
-    previewFile
+    '.tree-view .file .name[data-name$=\\.ron]',
+    'markdown-preview-plus:preview-file',
+    previewFile,
   )
   atom.commands.add(
-    ".tree-view .file .name[data-name$=\\.txt]",
-    "markdown-preview-plus:preview-file",
-    previewFile
+    '.tree-view .file .name[data-name$=\\.txt]',
+    'markdown-preview-plus:preview-file',
+    previewFile,
   )
 
-  return atom.workspace.addOpener(uriToOpen => {
+  return atom.workspace.addOpener((uriToOpen) => {
     let host, pathname, protocol
     try {
       ;({ protocol, host, pathname } = url.parse(uriToOpen))
@@ -72,7 +72,7 @@ export function activate() {
       return
     }
 
-    if (protocol !== "markdown-preview-plus:") {
+    if (protocol !== 'markdown-preview-plus:') {
       return
     }
 
@@ -85,9 +85,9 @@ export function activate() {
       return
     }
 
-    if (host === "editor") {
+    if (host === 'editor') {
       return createMarkdownPreviewView({
-        editorId: parseInt(pathname.substring(1), 10)
+        editorId: parseInt(pathname.substring(1), 10),
       })
     } else {
       return createMarkdownPreviewView({ filePath: pathname })
@@ -114,7 +114,7 @@ export function toggle() {
     return
   }
 
-  const grammars = atom.config.get("markdown-preview-plus.grammars") || []
+  const grammars = atom.config.get('markdown-preview-plus.grammars') || []
   if (((needle = editor.getGrammar().scopeName), !grammars.includes(needle))) {
     return
   }
@@ -149,8 +149,8 @@ export function addPreviewForEditor(editor: TextEditor) {
   const uri = uriForEditor(editor)
   const previousActivePane = atom.workspace.getActivePane()
   const options: WorkspaceOpenOptions = { searchAllPanes: true }
-  if (atom.config.get("markdown-preview-plus.openPreviewInSplitPane")) {
-    options.split = atom.config.get("markdown-preview-plus.previewSplitPaneDir")
+  if (atom.config.get('markdown-preview-plus.openPreviewInSplitPane')) {
+    options.split = atom.config.get('markdown-preview-plus.previewSplitPaneDir')
   }
   return atom.workspace.open(uri, options).then(function(markdownPreviewView) {
     if (isMarkdownPreviewView(markdownPreviewView)) {
@@ -173,7 +173,7 @@ export function previewFile({ currentTarget }: CommandEvent) {
   }
 
   return atom.workspace.open(`markdown-preview-plus://${encodeURI(filePath)}`, {
-    searchAllPanes: true
+    searchAllPanes: true,
   })
 }
 
@@ -182,11 +182,11 @@ const clipboardCopy = (text: string) => atom.clipboard.write(text)
 export function copyHtml(callback?: undefined, scaleMath?: number): void
 export function copyHtml<T>(
   callback?: (text: string) => T,
-  scaleMath?: number
+  scaleMath?: number,
 ): T
 export function copyHtml(
   callback: (text: string) => any = clipboardCopy,
-  scaleMath = 100
+  scaleMath = 100,
 ): any {
   const editor = atom.workspace.getActiveTextEditor()
   if (editor == null) {
@@ -195,7 +195,7 @@ export function copyHtml(
 
   const text = editor.getSelectedText() || editor.getText()
   const renderLaTeX = atom.config.get(
-    "markdown-preview-plus.enableLatexRenderingByDefault"
+    'markdown-preview-plus.enableLatexRenderingByDefault',
   )
   return renderer.toHTML(
     text,
@@ -205,19 +205,19 @@ export function copyHtml(
     true,
     function(error: Error | null, html: string) {
       if (error) {
-        return console.warn("Copying Markdown as HTML failed", error)
+        return console.warn('Copying Markdown as HTML failed', error)
       } else if (renderLaTeX) {
         return mathjaxHelper.processHTMLString(html, function(proHTML: string) {
           proHTML = proHTML.replace(
             /MathJax\_SVG.*?font\-size\: 100%/g,
-            match =>
-              match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`)
+            (match) =>
+              match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
           )
           return callback(proHTML)
         })
       } else {
         return callback(html)
       }
-    }
+    },
   )
 }

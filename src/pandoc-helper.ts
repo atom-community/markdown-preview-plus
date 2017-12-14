@@ -5,12 +5,12 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash")
-const CP = require("child_process")
+const _ = require('lodash')
+const CP = require('child_process')
 let fs = null
 let path = null
 
-const atomConfig = () => atom.config.get("markdown-preview-plus")
+const atomConfig = () => atom.config.get('markdown-preview-plus')
 
 /**
  * Sets local mathjaxPath if available
@@ -22,25 +22,25 @@ const getMathJaxPath = (function() {
       return cached
     }
     try {
-      return (cached = require.resolve("MathJax"))
+      return (cached = require.resolve('MathJax'))
     } catch (e) {
-      return ""
+      return ''
     }
   }
 })()
 
 var findFileRecursive = function(filePath, fileName) {
   if (fs == null) {
-    fs = require("fs")
+    fs = require('fs')
   }
   if (path == null) {
-    path = require("path")
+    path = require('path')
   }
-  const bibFile = path.join(filePath, "../", fileName)
+  const bibFile = path.join(filePath, '../', fileName)
   if (fs.existsSync(bibFile)) {
     return bibFile
   } else {
-    const newPath = path.join(bibFile, "..")
+    const newPath = path.join(bibFile, '..')
     if (newPath !== filePath && !_.includes(atom.project.getPaths(), newPath)) {
       return findFileRecursive(newPath, fileName)
     } else {
@@ -57,11 +57,11 @@ var findFileRecursive = function(filePath, fileName) {
 const setPandocOptions = function(filePath, renderMath) {
   const args = {
     from: atomConfig().pandocMarkdownFlavor,
-    to: "html"
+    to: 'html',
   }
   const opts = { maxBuffer: Infinity } // see https://github.com/atom-community/markdown-preview-plus/issues/316
   if (path == null) {
-    path = require("path")
+    path = require('path')
   }
   if (filePath != null) {
     opts.cwd = path.dirname(filePath)
@@ -70,7 +70,7 @@ const setPandocOptions = function(filePath, renderMath) {
   args.mathjax = renderMath ? mathjaxPath : undefined
   args.filter = atomConfig().pandocFilters
   if (atomConfig().pandocBibliography) {
-    args.filter.push("pandoc-citeproc")
+    args.filter.push('pandoc-citeproc')
     let bibFile = findFileRecursive(filePath, atomConfig().pandocBIBFile)
     if (!bibFile) {
       bibFile = atomConfig().pandocBIBFileFallback
@@ -92,7 +92,7 @@ const setPandocOptions = function(filePath, renderMath) {
  * @return {array} with Arguments for callbackFunction (error set to null)
  */
 const handleError = function(error, html, renderMath) {
-  const message = _.uniq(error.split("\n")).join("<br>")
+  const message = _.uniq(error.split('\n')).join('<br>')
   html = `<h1>Pandoc Error:</h1><pre>${error}</pre><hr>${html}`
   return handleSuccess(html, renderMath)
 }
@@ -103,28 +103,28 @@ const handleError = function(error, html, renderMath) {
  * @return {string} HTML with adjusted math environments
  */
 const handleMath = function(html) {
-  const doc = document.createElement("div")
+  const doc = document.createElement('div')
   doc.innerHTML = html
-  doc.querySelectorAll(".math").forEach(function(elem) {
+  doc.querySelectorAll('.math').forEach(function(elem) {
     let math = elem.innerText
     // Set mode if it is block math
-    const mode = math.indexOf("\\[") > -1 ? "; mode=display" : ""
+    const mode = math.indexOf('\\[') > -1 ? '; mode=display' : ''
 
     // Remove sourrounding \[ \] and \( \)
-    math = math.replace(/\\[[()\]]/g, "")
+    math = math.replace(/\\[[()\]]/g, '')
     return (elem.outerHTML =
       '<span class="math">' +
       `<script type='math/tex${mode}'>${math}</script>` +
-      "</span>")
+      '</span>')
   })
 
   return doc.innerHTML
 }
 
 const removeReferences = function(html) {
-  const doc = document.createElement("div")
+  const doc = document.createElement('div')
   doc.innerHTML = html
-  doc.querySelectorAll(".references").forEach(elem => elem.remove())
+  doc.querySelectorAll('.references').forEach((elem) => elem.remove())
   return doc.innerHTML
 }
 
@@ -172,16 +172,16 @@ const renderPandoc = function(text, filePath, renderMath, cb) {
       if (error) {
         atom.notifications.addError(error.toString(), {
           stack: error.stack,
-          dismissable: true
+          dismissable: true,
         })
       }
       const cbargs = handleResponse(
-        stderr != null ? stderr : "",
-        stdout != null ? stdout : "",
-        renderMath
+        stderr != null ? stderr : '',
+        stdout != null ? stdout : '',
+        renderMath,
       )
       return cb(...Array.from(cbargs || []))
-    }
+    },
   )
   cp.stdin.write(text)
   return cp.stdin.end()
@@ -201,12 +201,12 @@ var getArguments = function(args) {
       }
       return res
     },
-    []
+    [],
   )
-  args = _.union(args, atom.config.get("markdown-preview-plus.pandocArguments"))
+  args = _.union(args, atom.config.get('markdown-preview-plus.pandocArguments'))
   args = _.map(args, function(val) {
-    val = val.replace(/^(--[\w\-]+)\s(.+)$/i, "$1=$2")
-    if (val.substr(0, 1) !== "-") {
+    val = val.replace(/^(--[\w\-]+)\s(.+)$/i, '$1=$2')
+    if (val.substr(0, 1) !== '-') {
       return undefined
     } else {
       return val
@@ -220,6 +220,6 @@ export = {
   __testing__: {
     findFileRecursive,
     setPandocOptions,
-    getArguments
-  }
+    getArguments,
+  },
 }

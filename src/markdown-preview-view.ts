@@ -1,5 +1,5 @@
-import { CommandEvent } from "atom"
-import { Token } from "markdown-it"
+import { CommandEvent } from 'atom'
+import { Token } from 'markdown-it'
 
 /*
  * decaffeinate suggestions:
@@ -11,19 +11,19 @@ import { Token } from "markdown-it"
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const path = require("path")
+const path = require('path')
 
-const { Emitter, Disposable, CompositeDisposable } = require("atom")
-const { $, $$$, ScrollView } = require("atom-space-pen-views")
-const Grim = require("grim")
-const _ = require("lodash")
-const fs = require("fs-plus")
-const { File } = require("atom")
+const { Emitter, Disposable, CompositeDisposable } = require('atom')
+const { $, $$$, ScrollView } = require('atom-space-pen-views')
+const Grim = require('grim')
+const _ = require('lodash')
+const fs = require('fs-plus')
+const { File } = require('atom')
 
-import renderer = require("./renderer")
-import { UpdatePreview } from "./update-preview"
-import markdownIt = require("./markdown-it-helper")
-import imageWatcher = require("./image-watch-helper")
+import renderer = require('./renderer')
+import { UpdatePreview } from './update-preview'
+import markdownIt = require('./markdown-it-helper')
+import imageWatcher = require('./image-watch-helper')
 
 export interface MPVParamsEditor {
   editorId: number
@@ -41,11 +41,11 @@ export class MarkdownPreviewView extends ScrollView {
   private element: HTMLElement
   static content() {
     return this.div(
-      { class: "markdown-preview native-key-bindings", tabindex: -1 },
+      { class: 'markdown-preview native-key-bindings', tabindex: -1 },
       () => {
         // If you dont explicitly declare a class then the elements wont be created
-        return this.div({ class: "update-preview" })
-      }
+        return this.div({ class: 'update-preview' })
+      },
     )
   }
 
@@ -59,7 +59,7 @@ export class MarkdownPreviewView extends ScrollView {
     this.filePath = filePath
     this.updatePreview = null
     this.renderLaTeX = atom.config.get(
-      "markdown-preview-plus.enableLatexRenderingByDefault"
+      'markdown-preview-plus.enableLatexRenderingByDefault',
     )
     this.emitter = new Emitter()
     this.disposables = new CompositeDisposable()
@@ -81,7 +81,7 @@ export class MarkdownPreviewView extends ScrollView {
         return this.disposables.add(
           atom.packages.onDidActivateInitialPackages(() => {
             return this.subscribeToFilePath(this.filePath)
-          })
+          }),
         )
       }
     }
@@ -90,22 +90,22 @@ export class MarkdownPreviewView extends ScrollView {
   serialize() {
     let left
     return {
-      deserializer: "MarkdownPreviewView",
+      deserializer: 'MarkdownPreviewView',
       filePath: (left = this.getPath()) != null ? left : this.filePath,
-      editorId: this.editorId
+      editorId: this.editorId,
     }
   }
 
   destroy() {
     if (imageWatcher == null) {
-      imageWatcher = require("./image-watch-helper")
+      imageWatcher = require('./image-watch-helper')
     }
     imageWatcher.removeFile(this.getPath())
     return this.disposables.dispose()
   }
 
   onDidChangeTitle(callback) {
-    return this.emitter.on("did-change-title", callback)
+    return this.emitter.on('did-change-title', callback)
   }
 
   onDidChangeModified(callback) {
@@ -114,12 +114,12 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   onDidChangeMarkdown(callback) {
-    return this.emitter.on("did-change-markdown", callback)
+    return this.emitter.on('did-change-markdown', callback)
   }
 
   subscribeToFilePath(filePath: string) {
     this.file = new File(filePath)
-    this.emitter.emit("did-change-title")
+    this.emitter.emit('did-change-title')
     this.handleEvents()
     return this.renderMarkdown()
   }
@@ -130,7 +130,7 @@ export class MarkdownPreviewView extends ScrollView {
 
       if (this.editor != null) {
         if (this.editor != null) {
-          this.emitter.emit("did-change-title")
+          this.emitter.emit('did-change-title')
         }
         this.handleEvents()
         return this.renderMarkdown()
@@ -139,7 +139,7 @@ export class MarkdownPreviewView extends ScrollView {
         // this preview since a preview cannot be rendered without an editor
         return __guard__(
           atom.workspace != null ? atom.workspace.paneForItem(this) : undefined,
-          x => x.destroyItem(this)
+          (x) => x.destroyItem(this),
         )
       }
     }
@@ -148,7 +148,7 @@ export class MarkdownPreviewView extends ScrollView {
       return resolve()
     } else {
       return this.disposables.add(
-        atom.packages.onDidActivateInitialPackages(resolve)
+        atom.packages.onDidActivateInitialPackages(resolve),
       )
     }
   }
@@ -165,48 +165,48 @@ export class MarkdownPreviewView extends ScrollView {
   handleEvents() {
     this.disposables.add(
       atom.grammars.onDidAddGrammar(() =>
-        _.debounce(() => this.renderMarkdown(), 250)
-      )
+        _.debounce(() => this.renderMarkdown(), 250),
+      ),
     )
     this.disposables.add(
       atom.grammars.onDidUpdateGrammar(
-        _.debounce(() => this.renderMarkdown(), 250)
-      )
+        _.debounce(() => this.renderMarkdown(), 250),
+      ),
     )
 
     atom.commands.add(this.element, {
-      "core:move-up": () => {
+      'core:move-up': () => {
         return this.scrollUp()
       },
-      "core:move-down": () => {
+      'core:move-down': () => {
         return this.scrollDown()
       },
-      "core:save-as": event => {
+      'core:save-as': (event) => {
         event.stopPropagation()
         return this.saveAs()
       },
-      "core:copy": (event: CommandEvent) => {
+      'core:copy': (event: CommandEvent) => {
         if (this.copyToClipboard()) event.stopPropagation()
       },
-      "markdown-preview-plus:zoom-in": () => {
-        const zoomLevel = parseFloat(this.css("zoom")) || 1
-        return this.css("zoom", zoomLevel + 0.1)
+      'markdown-preview-plus:zoom-in': () => {
+        const zoomLevel = parseFloat(this.css('zoom')) || 1
+        return this.css('zoom', zoomLevel + 0.1)
       },
-      "markdown-preview-plus:zoom-out": () => {
-        const zoomLevel = parseFloat(this.css("zoom")) || 1
-        return this.css("zoom", zoomLevel - 0.1)
+      'markdown-preview-plus:zoom-out': () => {
+        const zoomLevel = parseFloat(this.css('zoom')) || 1
+        return this.css('zoom', zoomLevel - 0.1)
       },
-      "markdown-preview-plus:reset-zoom": () => {
-        return this.css("zoom", 1)
+      'markdown-preview-plus:reset-zoom': () => {
+        return this.css('zoom', 1)
       },
-      "markdown-preview-plus:sync-source": event => {
+      'markdown-preview-plus:sync-source': (event) => {
         return this.getMarkdownSource().then((source?: string) => {
           if (source == null) {
             return
           }
           return this.syncSource(source, event.target)
         })
-      }
+      },
     })
 
     const changeHandler = () => {
@@ -216,7 +216,7 @@ export class MarkdownPreviewView extends ScrollView {
       // TODO: Remove paneForURI call when ::paneForItem is released
       const pane =
         (left =
-          typeof atom.workspace.paneForItem === "function"
+          typeof atom.workspace.paneForItem === 'function'
             ? atom.workspace.paneForItem(this)
             : undefined) != null
           ? left
@@ -231,56 +231,58 @@ export class MarkdownPreviewView extends ScrollView {
     } else if (this.editor != null) {
       this.disposables.add(
         this.editor.getBuffer().onDidStopChanging(function() {
-          if (atom.config.get("markdown-preview-plus.liveUpdate")) {
+          if (atom.config.get('markdown-preview-plus.liveUpdate')) {
             return changeHandler()
           }
-        })
+        }),
       )
       this.disposables.add(
-        this.editor.onDidChangePath(() => this.emitter.emit("did-change-title"))
+        this.editor.onDidChangePath(() =>
+          this.emitter.emit('did-change-title'),
+        ),
       )
       this.disposables.add(
         this.editor.getBuffer().onDidSave(function() {
-          if (!atom.config.get("markdown-preview-plus.liveUpdate")) {
+          if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
             return changeHandler()
           }
-        })
+        }),
       )
       this.disposables.add(
         this.editor.getBuffer().onDidReload(function() {
-          if (!atom.config.get("markdown-preview-plus.liveUpdate")) {
+          if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
             return changeHandler()
           }
-        })
+        }),
       )
       this.disposables.add(
         atom.commands.add(atom.views.getView(this.editor), {
-          "markdown-preview-plus:sync-preview": _event => {
+          'markdown-preview-plus:sync-preview': (_event) => {
             return this.getMarkdownSource().then((source?: string) => {
               if (source == null) {
                 return
               }
               return this.syncPreview(
                 source,
-                this.editor.getCursorBufferPosition().row
+                this.editor.getCursorBufferPosition().row,
               )
             })
-          }
-        })
+          },
+        }),
       )
     }
 
     this.disposables.add(
       atom.config.onDidChange(
-        "markdown-preview-plus.breakOnSingleNewline",
-        changeHandler
-      )
+        'markdown-preview-plus.breakOnSingleNewline',
+        changeHandler,
+      ),
     )
 
     // Toggle LaTeX rendering if focus is on preview pane or associated editor.
     this.disposables.add(
-      atom.commands.add("atom-workspace", {
-        "markdown-preview-plus:toggle-render-latex": () => {
+      atom.commands.add('atom-workspace', {
+        'markdown-preview-plus:toggle-render-latex': () => {
           if (
             atom.workspace.getActivePaneItem() === this ||
             atom.workspace.getActiveTextEditor() === this.editor
@@ -288,21 +290,21 @@ export class MarkdownPreviewView extends ScrollView {
             this.renderLaTeX = !this.renderLaTeX
             changeHandler()
           }
-        }
-      })
+        },
+      }),
     )
 
     return this.disposables.add(
       atom.config.observe(
-        "markdown-preview-plus.useGitHubStyle",
-        useGitHubStyle => {
+        'markdown-preview-plus.useGitHubStyle',
+        (useGitHubStyle) => {
           if (useGitHubStyle) {
-            return this.element.setAttribute("data-use-github-style", "")
+            return this.element.setAttribute('data-use-github-style', '')
           } else {
-            return this.element.removeAttribute("data-use-github-style")
+            return this.element.removeAttribute('data-use-github-style')
           }
-        }
-      )
+        },
+      ),
     )
   }
 
@@ -310,7 +312,7 @@ export class MarkdownPreviewView extends ScrollView {
     if (!this.loaded) {
       this.showLoading()
     }
-    return this.getMarkdownSource().then(source => {
+    return this.getMarkdownSource().then((source) => {
       if (source != null) {
         return this.renderMarkdownText(source)
       }
@@ -318,19 +320,19 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   refreshImages(oldsrc: string) {
-    const imgs = this.element.querySelectorAll("img[src]") as NodeListOf<
+    const imgs = this.element.querySelectorAll('img[src]') as NodeListOf<
       HTMLImageElement
     >
     return (() => {
       const result = []
       for (let img of Array.from(imgs)) {
         var left, ov
-        let src = img.getAttribute("src")!
+        let src = img.getAttribute('src')!
         const match = src.match(/^(.*)\?v=(\d+)$/)
         ;[src, ov] = Array.from(
-          (left = __guardMethod__(match, "slice", o => o.slice(1))) != null
+          (left = __guardMethod__(match, 'slice', (o) => o.slice(1))) != null
             ? left
-            : [src]
+            : [src],
         )
         if (src === oldsrc) {
           if (ov != null) {
@@ -365,7 +367,7 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   getHTML(callback) {
-    return this.getMarkdownSource().then(source => {
+    return this.getMarkdownSource().then((source) => {
       if (source == null) {
         return
       }
@@ -376,7 +378,7 @@ export class MarkdownPreviewView extends ScrollView {
         this.getGrammar(),
         this.renderLaTeX,
         false,
-        callback
+        callback,
       )
     })
   }
@@ -397,14 +399,14 @@ export class MarkdownPreviewView extends ScrollView {
           // be instanced in the constructor
           if (!this.updatePreview) {
             this.updatePreview = new UpdatePreview(
-              this.find("div.update-preview")[0]
+              this.find('div.update-preview')[0],
             )
           }
           this.updatePreview.update(domFragment, this.renderLaTeX)
-          this.emitter.emit("did-change-markdown")
-          return this.originalTrigger("markdown-preview-plus:markdown-changed")
+          this.emitter.emit('did-change-markdown')
+          return this.originalTrigger('markdown-preview-plus:markdown-changed')
         }
-      }
+      },
     )
   }
 
@@ -414,12 +416,12 @@ export class MarkdownPreviewView extends ScrollView {
     } else if (this.editor != null) {
       return `${this.editor.getTitle()} Preview`
     } else {
-      return "Markdown Preview"
+      return 'Markdown Preview'
     }
   }
 
   getIconName() {
-    return "markdown"
+    return 'markdown'
   }
 
   getURI() {
@@ -448,15 +450,15 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   getTextEditorStyles() {
-    const textEditorStyles = document.createElement("atom-styles")
+    const textEditorStyles = document.createElement('atom-styles')
     textEditorStyles.initialize(atom.styles)
-    textEditorStyles.setAttribute("context", "atom-text-editor")
+    textEditorStyles.setAttribute('context', 'atom-text-editor')
     document.body.appendChild(textEditorStyles)
 
     // Extract style elements content
     return Array.prototype.slice
       .apply(textEditorStyles.childNodes)
-      .map(styleElement => styleElement.innerText)
+      .map((styleElement) => styleElement.innerText)
   }
 
   getMarkdownPreviewCSS() {
@@ -481,14 +483,14 @@ export class MarkdownPreviewView extends ScrollView {
 
     return markdowPreviewRules
       .concat(this.getTextEditorStyles())
-      .join("\n")
-      .replace(/atom-text-editor/g, "pre.editor-colors")
-      .replace(/:host/g, ".host") // Remove shadow-dom :host selector causing problem on FF
+      .join('\n')
+      .replace(/atom-text-editor/g, 'pre.editor-colors')
+      .replace(/:host/g, '.host') // Remove shadow-dom :host selector causing problem on FF
       .replace(cssUrlRefExp, function(match, assetsName, offset, string) {
         // base64 encode assets
-        const assetPath = path.join(__dirname, "../assets", assetsName)
-        const originalData = fs.readFileSync(assetPath, "binary")
-        const base64Data = new Buffer(originalData, "binary").toString("base64")
+        const assetPath = path.join(__dirname, '../assets', assetsName)
+        const originalData = fs.readFileSync(assetPath, 'binary')
+        const base64Data = new Buffer(originalData, 'binary').toString('base64')
         return `url('data:image/jpeg;base64,${base64Data}')`
       })
   }
@@ -498,11 +500,11 @@ export class MarkdownPreviewView extends ScrollView {
 
     return this.html(
       $$$(function() {
-        this.h2("Previewing Markdown Failed")
+        this.h2('Previewing Markdown Failed')
         if (failureMessage != null) {
           return this.h3(failureMessage)
         }
-      })
+      }),
     )
   }
 
@@ -510,8 +512,8 @@ export class MarkdownPreviewView extends ScrollView {
     this.loading = true
     return this.html(
       $$$(function() {
-        return this.div({ class: "markdown-spinner" }, "Loading Markdown\u2026")
-      })
+        return this.div({ class: 'markdown-spinner' }, 'Loading Markdown\u2026')
+      }),
     )
   }
 
@@ -535,7 +537,7 @@ export class MarkdownPreviewView extends ScrollView {
 
     this.getHTML(function(error, html) {
       if (error != null) {
-        return console.warn("Copying Markdown as HTML failed", error)
+        return console.warn('Copying Markdown as HTML failed', error)
       } else {
         return atom.clipboard.write(html)
       }
@@ -551,13 +553,13 @@ export class MarkdownPreviewView extends ScrollView {
     }
 
     let filePath = this.getPath()
-    let title = "Markdown to HTML"
+    let title = 'Markdown to HTML'
     if (filePath) {
       title = path.parse(filePath).name
-      filePath += ".html"
+      filePath += '.html'
     } else {
       let projectPath
-      filePath = "untitled.md.html"
+      filePath = 'untitled.md.html'
       if ((projectPath = atom.project.getPaths()[0])) {
         filePath = path.join(projectPath, filePath)
       }
@@ -566,7 +568,7 @@ export class MarkdownPreviewView extends ScrollView {
     if ((htmlFilePath = atom.showSaveDialogSync(filePath))) {
       return this.getHTML((error, htmlBody) => {
         if (error != null) {
-          return console.warn("Saving Markdown as HTML failed", error)
+          return console.warn('Saving Markdown as HTML failed', error)
         } else {
           let mathjaxScript
           if (this.renderLaTeX) {
@@ -586,7 +588,7 @@ export class MarkdownPreviewView extends ScrollView {
 </script>\
 `
           } else {
-            mathjaxScript = ""
+            mathjaxScript = ''
           }
           const html =
             `\
@@ -598,7 +600,7 @@ export class MarkdownPreviewView extends ScrollView {
       <style>${this.getMarkdownPreviewCSS()}</style>
   </head>
   <body class='markdown-preview'>${htmlBody}</body>
-</html>` + "\n" // Ensure trailing newline
+</html>` + '\n' // Ensure trailing newline
 
           fs.writeFileSync(htmlFilePath, html)
           return atom.workspace.open(htmlFilePath)
@@ -624,10 +626,10 @@ export class MarkdownPreviewView extends ScrollView {
     let testElement = element
     while (testElement !== document.body) {
       const parent = testElement.parentElement!
-      if (parent.classList.contains("MathJax_Display")) {
+      if (parent.classList.contains('MathJax_Display')) {
         return parent.parentElement!
       }
-      if (parent.classList.contains("atom-text-editor")) {
+      if (parent.classList.contains('atom-text-editor')) {
         return parent
       }
       testElement = parent
@@ -650,7 +652,7 @@ export class MarkdownPreviewView extends ScrollView {
   //
   bubbleToContainerToken(pathToToken: Array<{ tag: string; index: number }>) {
     for (let i = 0, end = pathToToken.length - 1; i <= end; i++) {
-      if (pathToToken[i].tag === "table") {
+      if (pathToToken[i].tag === 'table') {
         return pathToToken.slice(0, i + 1)
       }
     }
@@ -664,11 +666,11 @@ export class MarkdownPreviewView extends ScrollView {
   // @return {string} Encoded tag.
   //
   encodeTag(element: HTMLElement): string {
-    if (element.classList.contains("math")) {
-      return "math"
+    if (element.classList.contains('math')) {
+      return 'math'
     }
-    if (element.classList.contains("atom-text-editor")) {
-      return "code"
+    if (element.classList.contains('atom-text-editor')) {
+      return 'code'
     } // only token.type is `fence` code blocks should ever be found in the first level of the tokens array
     return element.tagName.toLowerCase()
   }
@@ -680,13 +682,13 @@ export class MarkdownPreviewView extends ScrollView {
   // @return {string|null} Decoded tag or `null` if the token has no tag.
   //
   decodeTag(token: Token): string | null {
-    if (token.tag === "math") {
-      return "span"
+    if (token.tag === 'math') {
+      return 'span'
     }
-    if (token.tag === "code") {
-      return "span"
+    if (token.tag === 'code') {
+      return 'span'
     }
-    if (token.tag === "") {
+    if (token.tag === '') {
       return null
     }
     return token.tag
@@ -704,14 +706,14 @@ export class MarkdownPreviewView extends ScrollView {
   //   `tag`.
   //
   getPathToElement(
-    element: HTMLElement
+    element: HTMLElement,
   ): Array<{ tag: string; index: number }> {
-    if (element.classList.contains("markdown-preview")) {
+    if (element.classList.contains('markdown-preview')) {
       return [
         {
-          tag: "div",
-          index: 0
-        }
+          tag: 'div',
+          index: 0,
+        },
       ]
     }
 
@@ -727,14 +729,14 @@ export class MarkdownPreviewView extends ScrollView {
         const pathToElement = this.getPathToElement(element.parentElement!)
         pathToElement.push({
           tag,
-          index: siblingsCount
+          index: siblingsCount,
         })
         return pathToElement
       } else if (siblingTag === tag) {
         siblingsCount++
       }
     }
-    throw new Error("failure in getPathToElement")
+    throw new Error('failure in getPathToElement')
   }
 
   //
@@ -757,7 +759,7 @@ export class MarkdownPreviewView extends ScrollView {
     }
 
     if (markdownIt == null) {
-      markdownIt = require("./markdown-it-helper")
+      markdownIt = require('./markdown-it-helper')
     }
     const tokens = markdownIt.getTokens(text, this.renderLaTeX)
     let finalToken = null
@@ -783,7 +785,7 @@ export class MarkdownPreviewView extends ScrollView {
           }
         } else if (
           token.nesting === 0 &&
-          ["math", "code", "hr"].includes(token.tag)
+          ['math', 'code', 'hr'].includes(token.tag)
         ) {
           if (pathToElement[0].index === 0) {
             finalToken = token
@@ -849,7 +851,7 @@ export class MarkdownPreviewView extends ScrollView {
           pathToToken.push({
             tag: token.tag,
             index:
-              tokenTagCount[token.tag] != null ? tokenTagCount[token.tag] : 0
+              tokenTagCount[token.tag] != null ? tokenTagCount[token.tag] : 0,
           })
           tokenTagCount = []
           level++
@@ -857,7 +859,7 @@ export class MarkdownPreviewView extends ScrollView {
           pathToToken.push({
             tag: token.tag,
             index:
-              tokenTagCount[token.tag] != null ? tokenTagCount[token.tag] : 0
+              tokenTagCount[token.tag] != null ? tokenTagCount[token.tag] : 0,
           })
           break
         }
@@ -887,12 +889,12 @@ export class MarkdownPreviewView extends ScrollView {
   //
   syncPreview(text, line) {
     if (markdownIt == null) {
-      markdownIt = require("./markdown-it-helper")
+      markdownIt = require('./markdown-it-helper')
     }
     const tokens = markdownIt.getTokens(text, this.renderLaTeX)
     const pathToToken = this.getPathToToken(tokens, line)
 
-    let element = this.find(".update-preview").eq(0)
+    let element = this.find('.update-preview').eq(0)
     for (let token of Array.from(pathToToken)) {
       const candidateElement = element.children(token.tag).eq(token.index)
       if (candidateElement.length !== 0) {
@@ -902,11 +904,11 @@ export class MarkdownPreviewView extends ScrollView {
       }
     }
 
-    if (element[0].classList.contains("update-preview")) {
+    if (element[0].classList.contains('update-preview')) {
       return null
     } // Do not jump to the top of the preview for bad syncs
 
-    if (!element[0].classList.contains("update-preview")) {
+    if (!element[0].classList.contains('update-preview')) {
       element[0].scrollIntoView()
     }
     const maxScrollTop = this.element.scrollHeight - this.innerHeight()
@@ -914,23 +916,23 @@ export class MarkdownPreviewView extends ScrollView {
       this.element.scrollTop -= this.innerHeight() / 4
     }
 
-    element.addClass("flash")
-    setTimeout(() => element.removeClass("flash"), 1000)
+    element.addClass('flash')
+    setTimeout(() => element.removeClass('flash'), 1000)
 
     return element[0]
   }
 }
 
 function __guard__(value, transform) {
-  return typeof value !== "undefined" && value !== null
+  return typeof value !== 'undefined' && value !== null
     ? transform(value)
     : undefined
 }
 function __guardMethod__(obj, methodName, transform) {
   if (
-    typeof obj !== "undefined" &&
+    typeof obj !== 'undefined' &&
     obj !== null &&
-    typeof obj[methodName] === "function"
+    typeof obj[methodName] === 'function'
   ) {
     return transform(obj, methodName)
   } else {

@@ -41,7 +41,7 @@ module.exports = TwoDimArray = class TwoDimArray {
   get2DInd(ind) {
     return {
       r: (ind / this.col) | 0,
-      c: ind % this.col
+      c: ind % this.col,
     }
   }
 
