@@ -248,7 +248,9 @@ function attachMathJax() {
   const script = document.createElement('script')
   script.src = `${require.resolve('MathJax')}?delayStartupUntil=configured`
   script.type = 'text/javascript'
-  script.addEventListener('load', () => { configureMathJax() })
+  script.addEventListener('load', () => {
+    configureMathJax()
+  })
   document.getElementsByTagName('head')[0].appendChild(script)
 
   return script

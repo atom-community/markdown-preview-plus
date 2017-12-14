@@ -121,7 +121,9 @@ function handleMath(html: string) {
 function removeReferences(html: string) {
   const doc = document.createElement('div')
   doc.innerHTML = html
-  doc.querySelectorAll('.references').forEach((elem) => { elem.remove() })
+  doc.querySelectorAll('.references').forEach((elem) => {
+    elem.remove()
+  })
   return doc.innerHTML
 }
 

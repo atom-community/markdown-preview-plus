@@ -468,6 +468,9 @@ export class WrappedDomTree {
 
   removeSelf() {
     hashTo[this.hash] = undefined
-    this.children && this.children.forEach((c) => { c.removeSelf() })
+    this.children &&
+      this.children.forEach((c) => {
+        c.removeSelf()
+      })
   }
 }

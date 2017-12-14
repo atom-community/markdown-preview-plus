@@ -18,7 +18,9 @@ export { config } from './config'
 export function activate() {
   atom.commands.add('atom-workspace', {
     'markdown-preview-plus:toggle': toggle,
-    'markdown-preview-plus:copy-html': () => { copyHtml() },
+    'markdown-preview-plus:copy-html': () => {
+      copyHtml()
+    },
     'markdown-preview-plus:toggle-break-on-single-newline'() {
       const keyPath = 'markdown-preview-plus.breakOnSingleNewline'
       atom.config.set(keyPath, !atom.config.get(keyPath))
@@ -177,7 +179,9 @@ export function previewFile({ currentTarget }: CommandEvent) {
   })
 }
 
-const clipboardCopy = (text: string) => { atom.clipboard.write(text) }
+const clipboardCopy = (text: string) => {
+  atom.clipboard.write(text)
+}
 
 export function copyHtml(
   callback: (text: string) => any = clipboardCopy,

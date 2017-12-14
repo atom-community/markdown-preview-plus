@@ -103,9 +103,9 @@ function sanitize(html: string) {
   const doc = document.createElement('div')
   doc.innerHTML = html
   // Do not remove MathJax script delimited blocks
-  doc
-    .querySelectorAll("script:not([type^='math/tex'])")
-    .forEach((elem) => { elem.remove() })
+  doc.querySelectorAll("script:not([type^='math/tex'])").forEach((elem) => {
+    elem.remove()
+  })
   const attributesToRemove = [
     'onabort',
     'onblur',
@@ -130,13 +130,11 @@ function sanitize(html: string) {
     'onsubmit',
     'onunload',
   ]
-  doc
-    .querySelectorAll('*')
-    .forEach((elem) =>
-      Array.from(attributesToRemove).map((attribute) => {
-        elem.removeAttribute(attribute)
-      }),
-    )
+  doc.querySelectorAll('*').forEach((elem) =>
+    Array.from(attributesToRemove).map((attribute) => {
+      elem.removeAttribute(attribute)
+    }),
+  )
   return doc.innerHTML
 }
 
