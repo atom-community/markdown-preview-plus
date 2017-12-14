@@ -1,7 +1,7 @@
 export {}
 declare module "atom" {
   interface CommandEvent {
-    currentTarget: HTMLElement & { getModel(): TextEditor }
+    currentTarget: TextEditorElement
   }
   interface Grammar {
     scopeName: string
@@ -11,5 +11,11 @@ declare module "atom" {
   }
   interface PackageManager {
     resourcePath: string
+  }
+  interface TextEditorElement extends HTMLElement {
+    getModel(): TextEditor
+  }
+  interface TextEditor {
+    cursorLineDecorations: LayerDecoration[] | null
   }
 }

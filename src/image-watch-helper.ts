@@ -45,7 +45,7 @@ export function removeFile(file: string) {
   })
 }
 
-export function getVersion(image: string, file: string) {
+export function getVersion(image: string, file?: string) {
   let version
   const i = _.get(imageRegister, image, {})
   if (_.isEmpty(i)) {

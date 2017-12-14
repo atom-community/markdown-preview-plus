@@ -203,7 +203,7 @@ export function copyHtml(
     editor.getGrammar(),
     renderLaTeX,
     true,
-    function(error: Error, html: string) {
+    function(error: Error | null, html: string) {
       if (error) {
         return console.warn("Copying Markdown as HTML failed", error)
       } else if (renderLaTeX) {
