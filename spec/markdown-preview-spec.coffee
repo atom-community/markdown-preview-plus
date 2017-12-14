@@ -339,7 +339,7 @@ describe "Markdown preview plus package", ->
 
       describe "when the code block's fence name doesn't have a matching grammar", ->
         it "does not tokenize the code block", ->
-          expect(preview.find("pre.lang-kombucha .line .syntax--null-grammar").children().length).toBe 2
+          expect(preview.find("pre.lang-kombucha .syntax--null-grammar").children().length).toBe 2
 
       describe "when the code block contains empty lines", ->
         it "doesn't remove the empty lines", ->
