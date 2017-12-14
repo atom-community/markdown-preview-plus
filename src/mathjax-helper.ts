@@ -11,8 +11,10 @@
 // for calls to MathJax to process LaTeX equations.
 //
 
+// tslint:disable-next-line:no-var-requires
 const { $ } = require('atom-space-pen-views')
 import path = require('path')
+// tslint:disable-next-line:no-var-requires
 const CSON = require('season')
 import fs = require('fs-plus')
 import _ = require('lodash')
@@ -21,14 +23,12 @@ export = {
   //
   // Load MathJax environment
   //
-  // @param listener Optional method to call when the MathJax script was been
+  // @param listener method to call when the MathJax script was been
   //   loaded to the window. The method is passed no arguments.
   //
-  loadMathJax(listener: () => any) {
+  loadMathJax(listener?: () => any) {
     const script = this.attachMathJax()
-    if (listener != null) {
-      script.addEventListener('load', () => listener())
-    }
+    if (listener) script.addEventListener('load', () => listener())
   },
 
   //
@@ -134,12 +134,10 @@ function loadMacrosFile(filePath: string) {
           error.stack != null ? error.stack : error
         }`,
       )
-      if (atom.notifications != null) {
-        atom.notifications.addError(
-          `Failed to load Latex Macros from '${filePath}'`,
-          { detail: error.message, dismissable: true },
-        )
-      }
+      atom.notifications.addError(
+        `Failed to load Latex Macros from '${filePath}'`,
+        { detail: error.message, dismissable: true },
+      )
     }
     return object
   })
@@ -166,16 +164,14 @@ function createMacrosTemplate(filePath: string) {
 }
 
 function checkMacros(macrosObject: object) {
-  for (let name in macrosObject) {
+  for (const name in macrosObject) {
     const value = macrosObject[name]
     if (!name.match(namePattern) || !valueMatchesPattern(value)) {
       delete macrosObject[name]
-      if (atom.notifications != null) {
-        atom.notifications.addError(
-          `Failed to load LaTeX macro named '${name}'. Please see the [LaTeX guide](https://github.com/Galadirith/markdown-preview-plus/blob/master/LATEX.md#macro-names)`,
-          { dismissable: true },
-        )
-      }
+      atom.notifications.addError(
+        `Failed to load LaTeX macro named '${name}'. Please see the [LaTeX guide](https://github.com/Galadirith/markdown-preview-plus/blob/master/LATEX.md#macro-names)`,
+        { dismissable: true },
+      )
     }
   }
   return macrosObject
@@ -184,8 +180,8 @@ function checkMacros(macrosObject: object) {
 function valueMatchesPattern(value: any) {
   // Different check based on whether value is string or array
   if (Array.isArray(value)) {
-    var macroDefinition = value[0]
-    var numberOfArgs = value[1]
+    const macroDefinition = value[0]
+    const numberOfArgs = value[1]
     if (typeof numberOfArgs === 'number') {
       return numberOfArgs % 1 === 0 && typeof macroDefinition === 'string'
     } else {
@@ -209,7 +205,7 @@ const configureMathJax = function() {
     userMacros = {}
   }
 
-  //Now Configure MathJax
+  // Now Configure MathJax
   MathJax!.Hub.Config({
     jax: ['input/TeX', 'output/HTML-CSS'],
     extensions: [],

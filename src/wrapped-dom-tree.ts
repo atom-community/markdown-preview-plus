@@ -322,7 +322,7 @@ export class WrappedDomTree {
       )
     }
 
-    const getScore = (i: number, j: number, max: number): number => {
+    const getScore = (i: number, j: number, max?: number): number => {
       const res = dp.get(i, j)
       if (res !== undefined) {
         return res

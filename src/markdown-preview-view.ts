@@ -1,6 +1,3 @@
-import { CommandEvent } from 'atom'
-import { Token } from 'markdown-it'
-
 /*
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
@@ -11,9 +8,18 @@ import { Token } from 'markdown-it'
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import { Token } from 'markdown-it'
 import path = require('path')
 
-import { Emitter, Disposable, CompositeDisposable, File } from 'atom'
+import {
+  CommandEvent,
+  Emitter,
+  Disposable,
+  CompositeDisposable,
+  File,
+  StyleManager,
+} from 'atom'
+// tslint:disable-next-line:no-var-requires
 const { $, $$$, ScrollView } = require('atom-space-pen-views')
 import _ = require('lodash')
 import fs = require('fs-plus')
@@ -22,7 +28,6 @@ import renderer = require('./renderer')
 import { UpdatePreview } from './update-preview'
 import markdownIt = require('./markdown-it-helper')
 import imageWatcher = require('./image-watch-helper')
-import { StyleManager } from 'atom'
 
 export interface MPVParamsEditor {
   editorId: number
@@ -45,10 +50,8 @@ export class MarkdownPreviewView extends ScrollView {
   static content() {
     return this.div(
       { class: 'markdown-preview native-key-bindings', tabindex: -1 },
-      () => {
-        // If you dont explicitly declare a class then the elements wont be created
-        return this.div({ class: 'update-preview' })
-      },
+      // If you dont explicitly declare a class then the elements wont be created
+      () => this.div({ class: 'update-preview' }),
     )
   }
 
@@ -83,9 +86,9 @@ export class MarkdownPreviewView extends ScrollView {
         return this.subscribeToFilePath(this.filePath)
       } else {
         return this.disposables.add(
-          atom.packages.onDidActivateInitialPackages(() => {
-            return this.subscribeToFilePath(this.filePath)
-          }),
+          atom.packages.onDidActivateInitialPackages(() =>
+            this.subscribeToFilePath(this.filePath),
+          ),
         )
       }
     }
@@ -138,24 +141,16 @@ export class MarkdownPreviewView extends ScrollView {
       } else {
         // The editor this preview was created for has been closed so close
         // this preview since a preview cannot be rendered without an editor
-        return __guard__(
-          atom.workspace != null ? atom.workspace.paneForItem(this) : undefined,
-          (x) => x.destroyItem(this),
-        )
+        const pane = atom.workspace.paneForItem(this)
+        pane && pane.destroyItem(this)
       }
     }
 
-    if (atom.workspace != null) {
-      return resolve()
-    } else {
-      return this.disposables.add(
-        atom.packages.onDidActivateInitialPackages(resolve),
-      )
-    }
+    return resolve()
   }
 
   editorForId(editorId: number) {
-    for (let editor of Array.from(atom.workspace.getTextEditors())) {
+    for (const editor of Array.from(atom.workspace.getTextEditors())) {
       if (editor.id === editorId) {
         return editor
       }
@@ -176,12 +171,8 @@ export class MarkdownPreviewView extends ScrollView {
     )
 
     atom.commands.add(this.element, {
-      'core:move-up': () => {
-        return this.scrollUp()
-      },
-      'core:move-down': () => {
-        return this.scrollDown()
-      },
+      'core:move-up': () => this.scrollUp(),
+      'core:move-down': () => this.scrollDown(),
       'core:save-as': (event) => {
         event.stopPropagation()
         return this.saveAs()
@@ -197,17 +188,14 @@ export class MarkdownPreviewView extends ScrollView {
         const zoomLevel = parseFloat(this.css('zoom')) || 1
         return this.css('zoom', zoomLevel - 0.1)
       },
-      'markdown-preview-plus:reset-zoom': () => {
-        return this.css('zoom', 1)
-      },
-      'markdown-preview-plus:sync-source': (event) => {
-        return this.getMarkdownSource().then((source?: string) => {
+      'markdown-preview-plus:reset-zoom': () => this.css('zoom', 1),
+      'markdown-preview-plus:sync-source': (event) =>
+        this.getMarkdownSource().then((source?: string) => {
           if (source == null) {
             return
           }
           return this.syncSource(source, event.target as HTMLElement)
-        })
-      },
+        }),
     })
 
     const changeHandler = () => {
@@ -258,8 +246,8 @@ export class MarkdownPreviewView extends ScrollView {
       )
       this.disposables.add(
         atom.commands.add(atom.views.getView(this.editor), {
-          'markdown-preview-plus:sync-preview': (_event) => {
-            return this.getMarkdownSource().then((source?: string) => {
+          'markdown-preview-plus:sync-preview': (_event) =>
+            this.getMarkdownSource().then((source?: string) => {
               if (source == null) {
                 return
               }
@@ -267,8 +255,7 @@ export class MarkdownPreviewView extends ScrollView {
                 source,
                 this.editor.getCursorBufferPosition().row,
               )
-            })
-          },
+            }),
         }),
       )
     }
@@ -326,18 +313,17 @@ export class MarkdownPreviewView extends ScrollView {
     >
     return (() => {
       const result = []
-      for (let img of Array.from(imgs)) {
-        var left, ov
+      for (const img of Array.from(imgs)) {
+        let ovs: string | undefined
+        let ov: number | undefined
         let src = img.getAttribute('src')!
         const match = src.match(/^(.*)\?v=(\d+)$/)
-        ;[src, ov] = Array.from(
-          (left = __guardMethod__(match, 'slice', (o) => o.slice(1))) != null
-            ? left
-            : [src],
-        )
+        if (match) {
+          ;[, src, ovs] = match
+        }
         if (src === oldsrc) {
-          if (ov != null) {
-            ov = parseInt(ov)
+          if (ovs !== undefined) {
+            ov = parseInt(ovs, 10)
           }
           const v = imageWatcher.getVersion(src, this.getPath())
           if (v !== ov) {
@@ -398,12 +384,13 @@ export class MarkdownPreviewView extends ScrollView {
           this.loaded = true
           // div.update-preview created after constructor st UpdatePreview cannot
           // be instanced in the constructor
-          if (!this.updatePreview) {
+          if (!this.updatePreview && this.find('div.update-preview')[0]) {
             this.updatePreview = new UpdatePreview(
               this.find('div.update-preview')[0],
             )
           }
-          this.updatePreview.update(domFragment, this.renderLaTeX)
+          this.updatePreview &&
+            this.updatePreview.update(domFragment, this.renderLaTeX)
           this.emitter.emit('did-change-markdown')
           return this.originalTrigger('markdown-preview-plus:markdown-changed')
         }
@@ -469,9 +456,9 @@ export class MarkdownPreviewView extends ScrollView {
     const ruleRegExp = /\.markdown-preview/
     const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
-    for (let stylesheet of Array.from(this.getDocumentStyleSheets())) {
+    for (const stylesheet of Array.from(this.getDocumentStyleSheets())) {
       if (stylesheet.rules != null) {
-        for (let rule of Array.from(stylesheet.rules)) {
+        for (const rule of Array.from(stylesheet.rules)) {
           // We only need `.markdown-review` css
           if (
             (rule.selectorText != null
@@ -728,7 +715,7 @@ export class MarkdownPreviewView extends ScrollView {
     const siblings = element.parentElement!.children
     let siblingsCount = 0
 
-    for (let sibling of Array.from(siblings)) {
+    for (const sibling of Array.from(siblings)) {
       const siblingTag =
         sibling.nodeType === 1 ? this.encodeTag(sibling as HTMLElement) : null
       if (sibling === element) {
@@ -768,7 +755,7 @@ export class MarkdownPreviewView extends ScrollView {
     let finalToken = null
     let level = 0
 
-    for (let token of Array.from(tokens)) {
+    for (const token of Array.from(tokens)) {
       if (token.level < level) {
         break
       }
@@ -829,7 +816,7 @@ export class MarkdownPreviewView extends ScrollView {
     let tokenTagCount: number[] = []
     let level = 0
 
-    for (let token of tokens) {
+    for (const token of tokens) {
       if (token.level < level) {
         break
       }
@@ -896,7 +883,7 @@ export class MarkdownPreviewView extends ScrollView {
     const pathToToken = this.getPathToToken(tokens, line)
 
     let element = this.find('.update-preview').eq(0)
-    for (let token of Array.from(pathToToken)) {
+    for (const token of Array.from(pathToToken)) {
       const candidateElement = element.children(token.tag).eq(token.index)
       if (candidateElement.length !== 0) {
         element = candidateElement
@@ -921,26 +908,5 @@ export class MarkdownPreviewView extends ScrollView {
     setTimeout(() => element.removeClass('flash'), 1000)
 
     return element[0]
-  }
-}
-
-function __guard__(value: any, transform: (x: any) => any) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}
-function __guardMethod__(
-  obj: RegExpMatchArray | null,
-  methodName: string,
-  transform: (o: any, m: string) => any,
-) {
-  if (
-    typeof obj !== 'undefined' &&
-    obj !== null &&
-    typeof obj[methodName] === 'function'
-  ) {
-    return transform(obj, methodName)
-  } else {
-    return undefined
   }
 }

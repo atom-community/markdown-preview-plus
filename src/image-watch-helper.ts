@@ -6,17 +6,16 @@ const pathWatcherPath = path.join(
   atom.packages.resourcePath,
   '/node_modules/pathwatcher/lib/main',
 )
+// tslint:disable-next-line:no-var-requires
 const pathWatcher = require(pathWatcherPath)
 
 let imageRegister = {}
 
 const refreshImages = _.debounce(function(src) {
-  if (atom.workspace != null) {
-    for (let item of atom.workspace.getPaneItems()) {
-      if (isMarkdownPreviewView(item)) {
-        // TODO: check against imageRegister[src].version.files
-        item.refreshImages(src)
-      }
+  for (const item of atom.workspace.getPaneItems()) {
+    if (isMarkdownPreviewView(item)) {
+      // TODO: check against imageRegister[src].version.files
+      item.refreshImages(src)
     }
   }
 }, 250)

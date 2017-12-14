@@ -11,9 +11,7 @@ import { MarkdownPreviewView, MPVParams } from './markdown-preview-view'
 import renderer = require('./renderer')
 import mathjaxHelper = require('./mathjax-helper')
 import { isMarkdownPreviewView } from './cast'
-import { TextEditor } from 'atom'
-import { WorkspaceOpenOptions } from 'atom'
-import { CommandEvent } from 'atom'
+import { TextEditor, WorkspaceOpenOptions, CommandEvent } from 'atom'
 
 export { config } from './config'
 
@@ -65,20 +63,21 @@ export function activate() {
 
   atom.workspace.addOpener((uriToOpen) => {
     try {
+      // tslint:disable-next-line:no-var-keyword prefer-const
       var { protocol, host, pathname } = url.parse(uriToOpen)
     } catch (e) {
       console.error(e)
-      return
+      return undefined
     }
 
-    if (protocol !== 'markdown-preview-plus:') return
-    if (pathname == null) return
+    if (protocol !== 'markdown-preview-plus:') return undefined
+    if (pathname === undefined) return undefined
 
     try {
       pathname = decodeURI(pathname)
     } catch (e) {
       console.error(e)
-      return
+      return undefined
     }
 
     if (host === 'editor') {
@@ -108,7 +107,7 @@ export function toggle() {
   }
 
   const editor = atom.workspace.getActiveTextEditor()
-  if (editor == null) {
+  if (editor === undefined) {
     return
   }
 
@@ -153,7 +152,7 @@ export function addPreviewForEditor(editor: TextEditor) {
       'markdown-preview-plus.previewSplitPaneDir',
     )!
   }
-  return atom.workspace.open(uri, options).then(function(markdownPreviewView) {
+  atom.workspace.open(uri, options).then(function(markdownPreviewView) {
     if (isMarkdownPreviewView(markdownPreviewView)) {
       return previousActivePane.activate()
     }
@@ -166,7 +165,7 @@ export function previewFile({ currentTarget }: CommandEvent) {
     return
   }
 
-  for (let editor of atom.workspace.getTextEditors()) {
+  for (const editor of atom.workspace.getTextEditors()) {
     if (editor.getPath() === filePath) {
       addPreviewForEditor(editor)
       return

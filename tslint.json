@@ -5,6 +5,8 @@
     "align": false,
     "semicolon": false,
     "no-null-keyword": false,
-    "no-non-null-assertion": false
+    "no-non-null-assertion": false,
+    "ter-no-sparse-arrays": false,
+    "space-before-function-paren": false
   }
 }

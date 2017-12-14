@@ -46,7 +46,7 @@ export class UpdatePreview {
     prepareCodeBlocksForAtomEditors(domFragment)
 
     if (this.domFragment && domFragment.isEqualNode(this.domFragment)) {
-      return
+      return undefined
     }
 
     const firstTime = this.domFragment === undefined
@@ -80,7 +80,7 @@ export class UpdatePreview {
       !atom.config.get('markdown-preview-plus.enablePandoc') ||
       !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
     ) {
-      for (let elm of Array.from(r.inserted)) {
+      for (const elm of Array.from(r.inserted)) {
         if (elm instanceof Element) {
           renderer.convertCodeBlocksToAtomEditors(elm)
         }
@@ -99,13 +99,14 @@ export class UpdatePreview {
     const previewOLs = this.tree.shownTree.dom.querySelectorAll('ol')
     const parsedOLs = fragment.querySelectorAll('ol')
 
-    for (let i = 0, end = parsedOLs.length - 1; i <= end; i++) {
+    const end = parsedOLs.length - 1
+    for (let i = 0; i <= end; i++) {
       const previewStart = previewOLs[i].getAttribute('start')
       const parsedStart = parsedOLs[i].getAttribute('start')
 
       if (previewStart === parsedStart) {
         continue
-      } else if (parsedStart != null) {
+      } else if (parsedStart !== null) {
         previewOLs[i].setAttribute('start', parsedStart)
       } else {
         previewOLs[i].removeAttribute('start')
@@ -115,7 +116,7 @@ export class UpdatePreview {
 }
 
 function prepareCodeBlocksForAtomEditors(domFragment: Element) {
-  for (let preElement of Array.from(domFragment.querySelectorAll('pre'))) {
+  for (const preElement of Array.from(domFragment.querySelectorAll('pre'))) {
     const preWrapper = document.createElement('span')
     preWrapper.className = 'atom-text-editor'
     preElement.parentNode!.insertBefore(preWrapper, preElement)

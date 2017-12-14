@@ -16,7 +16,7 @@ declare module 'atom' {
     getModel(): TextEditor
   }
   interface TextEditor {
-    cursorLineDecorations: LayerDecoration[] | null
+    cursorLineDecorations: LayerDecoration[] | null | undefined
   }
   interface AtomEnvironment {
     getConfigDirPath(): string

@@ -26,9 +26,6 @@ export function toDOMFragment(
   renderLaTeX: boolean,
   callback: (error: Error | null, domFragment?: Node) => string,
 ): void {
-  if (text == null) {
-    text = ''
-  }
   render(text, filePath, renderLaTeX, false, function(
     error: Error | null,
     html?: string,
@@ -148,15 +145,14 @@ function resolveImagePaths(
   filePath: string | undefined,
   copyHTMLFlag: boolean,
 ) {
-  let rootDirectory: string
-  if (atom.project != null) {
-    ;[rootDirectory] = Array.from(atom.project.relativizePath(filePath || ''))
-  }
+  const [rootDirectory] = Array.from(
+    atom.project.relativizePath(filePath || ''),
+  )
   const doc = document.createElement('div')
   doc.innerHTML = html
   doc.querySelectorAll('img').forEach(function(img) {
-    let src
-    if ((src = img.getAttribute('src'))) {
+    let src = img.getAttribute('src')
+    if (src) {
       if (!atom.config.get('markdown-preview-plus.enablePandoc')) {
         src = markdownIt.decode(src)
       }
@@ -179,7 +175,9 @@ function resolveImagePaths(
         if (!fs.isFileSync(src)) {
           try {
             src = path.join(rootDirectory, src.substring(1))
-          } catch (e) {}
+          } catch (e) {
+            // noop
+          }
         }
       } else if (filePath) {
         src = path.resolve(path.dirname(filePath), src)
@@ -205,16 +203,18 @@ export function convertCodeBlocksToAtomEditors(
   domFragment: Element,
   defaultLanguage: string = 'text',
 ) {
-  let fontFamily
-  if ((fontFamily = atom.config.get('editor.fontFamily'))) {
-    for (let codeElement of Array.from(domFragment.querySelectorAll('code'))) {
+  const fontFamily = atom.config.get('editor.fontFamily')
+  if (fontFamily) {
+    for (const codeElement of Array.from(
+      domFragment.querySelectorAll('code'),
+    )) {
       codeElement.style.fontFamily = fontFamily
     }
   }
 
-  for (let preElement of Array.from(domFragment.querySelectorAll('pre'))) {
+  for (const preElement of Array.from(domFragment.querySelectorAll('pre'))) {
     const codeBlock =
-      preElement.firstElementChild != null
+      preElement.firstElementChild !== null
         ? preElement.firstElementChild
         : preElement
     const cbClass = codeBlock.className
@@ -233,7 +233,7 @@ export function convertCodeBlocksToAtomEditors(
     const editor = editorElement.getModel()
     // remove the default selection of a line in each editor
     if (editor.cursorLineDecorations != null) {
-      for (let cursorLineDecoration of editor.cursorLineDecorations) {
+      for (const cursorLineDecoration of editor.cursorLineDecorations) {
         cursorLineDecoration.destroy()
       }
     }
@@ -249,23 +249,20 @@ export function convertCodeBlocksToAtomEditors(
 }
 
 function tokenizeCodeBlocks(html: string, defaultLanguage: string = 'text') {
-  let fontFamily: string | undefined
   const doc = document.createElement('div')
   doc.innerHTML = html
 
-  if ((fontFamily = atom.config.get('editor.fontFamily'))) {
+  const fontFamily = atom.config.get('editor.fontFamily')
+  if (fontFamily) {
     doc
       .querySelectorAll('code')
       .forEach((code) => (code.style.fontFamily = fontFamily || null))
   }
 
   doc.querySelectorAll('pre').forEach(function(preElement) {
-    let left
     const codeBlock = preElement.firstElementChild as HTMLElement
     const fenceName =
-      (left = codeBlock.className.replace(/^(lang-|sourceCode )/, '')) != null
-        ? left
-        : defaultLanguage
+      codeBlock.className.replace(/^(lang-|sourceCode )/, '') || defaultLanguage
 
     const highlightedHtml = highlight({
       fileContents: codeBlock.innerText,
