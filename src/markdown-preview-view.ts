@@ -93,7 +93,7 @@ export class MarkdownPreviewView extends ScrollView {
 
   destroy() {
     imageWatcher.removeFile(this.getPath())
-    return this.disposables.dispose()
+    this.disposables.dispose()
   }
 
   onDidChangeTitle(callback: () => void) {
@@ -191,7 +191,7 @@ export class MarkdownPreviewView extends ScrollView {
 
       const pane = atom.workspace.paneForItem(this)
       if (pane !== undefined && pane !== atom.workspace.getActivePane()) {
-        return pane.activateItem(this)
+        pane.activateItem(this)
       }
     }
 
@@ -201,26 +201,26 @@ export class MarkdownPreviewView extends ScrollView {
       this.disposables.add(
         this.editor.getBuffer().onDidStopChanging(function() {
           if (atom.config.get('markdown-preview-plus.liveUpdate')) {
-            return changeHandler()
+            changeHandler()
           }
         }),
       )
       this.disposables.add(
-        this.editor.onDidChangePath(() =>
-          this.emitter.emit('did-change-title'),
-        ),
+        this.editor.onDidChangePath(() => {
+          this.emitter.emit('did-change-title')
+        }),
       )
       this.disposables.add(
         this.editor.getBuffer().onDidSave(function() {
           if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
-            return changeHandler()
+            changeHandler()
           }
         }),
       )
       this.disposables.add(
         this.editor.getBuffer().onDidReload(function() {
           if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
-            return changeHandler()
+            changeHandler()
           }
         }),
       )
@@ -262,14 +262,14 @@ export class MarkdownPreviewView extends ScrollView {
       }),
     )
 
-    return this.disposables.add(
+    this.disposables.add(
       atom.config.observe(
         'markdown-preview-plus.useGitHubStyle',
         (useGitHubStyle) => {
           if (useGitHubStyle) {
-            return this.element.setAttribute('data-use-github-style', '')
+            this.element.setAttribute('data-use-github-style', '')
           } else {
-            return this.element.removeAttribute('data-use-github-style')
+            this.element.removeAttribute('data-use-github-style')
           }
         },
       ),
@@ -282,7 +282,7 @@ export class MarkdownPreviewView extends ScrollView {
     }
     return this.getMarkdownSource().then((source?: string) => {
       if (source !== undefined) {
-        return this.renderMarkdownText(source)
+        this.renderMarkdownText(source)
       }
     })
   }
@@ -337,7 +337,7 @@ export class MarkdownPreviewView extends ScrollView {
         return
       }
 
-      return renderer.toHTML(
+      renderer.toHTML(
         source,
         this.getPath(),
         this.getGrammar(),
@@ -349,7 +349,7 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   renderMarkdownText(text: string) {
-    return renderer.toDOMFragment(
+    renderer.toDOMFragment(
       text,
       this.getPath(),
       this.getGrammar(),
@@ -506,9 +506,9 @@ export class MarkdownPreviewView extends ScrollView {
 
     this.getHTML(function(error, html) {
       if (error !== null) {
-        return console.warn('Copying Markdown as HTML failed', error)
+        console.warn('Copying Markdown as HTML failed', error)
       } else {
-        return atom.clipboard.write(html)
+        atom.clipboard.write(html)
       }
     })
 
@@ -537,7 +537,7 @@ export class MarkdownPreviewView extends ScrollView {
     if (htmlFilePath) {
       return this.getHTML((error: Error | null, htmlBody: string) => {
         if (error !== null) {
-          return console.warn('Saving Markdown as HTML failed', error)
+          console.warn('Saving Markdown as HTML failed', error)
         } else {
           let mathjaxScript
           if (this.renderLaTeX) {
@@ -572,7 +572,7 @@ export class MarkdownPreviewView extends ScrollView {
 </html>` + '\n' // Ensure trailing newline
 
           fs.writeFileSync(htmlFilePath, html)
-          return atom.workspace.open(htmlFilePath)
+          atom.workspace.open(htmlFilePath)
         }
       })
     }

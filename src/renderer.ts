@@ -56,7 +56,7 @@ export function toHTML(
   render(text, filePath, renderLaTeX, copyHTMLFlag, function(error, html) {
     let defaultCodeLanguage: string | undefined
     if (error != null) {
-      return callback(error, '')
+      callback(error, '')
     }
     // Default code blocks to be coffee in Literate CoffeeScript files
     if ((grammar && grammar.scopeName) === 'source.litcoffee') {
@@ -68,7 +68,7 @@ export function toHTML(
     ) {
       html = tokenizeCodeBlocks(html, defaultCodeLanguage)
     }
-    return callback(null, html)
+    callback(null, html)
   })
 }
 
@@ -85,11 +85,11 @@ function render(
 
   const callbackFunction = function(error: Error | null, html: string) {
     if (error != null) {
-      return callback(error, '')
+      callback(error, '')
     }
     html = sanitize(html)
     html = resolveImagePaths(html, filePath, copyHTMLFlag)
-    return callback(null, html.trim())
+    callback(null, html.trim())
   }
 
   if (atom.config.get('markdown-preview-plus.enablePandoc')) {
@@ -105,7 +105,7 @@ function sanitize(html: string) {
   // Do not remove MathJax script delimited blocks
   doc
     .querySelectorAll("script:not([type^='math/tex'])")
-    .forEach((elem) => elem.remove())
+    .forEach((elem) => { elem.remove() })
   const attributesToRemove = [
     'onabort',
     'onblur',
@@ -133,9 +133,9 @@ function sanitize(html: string) {
   doc
     .querySelectorAll('*')
     .forEach((elem) =>
-      Array.from(attributesToRemove).map((attribute) =>
-        elem.removeAttribute(attribute),
-      ),
+      Array.from(attributesToRemove).map((attribute) => {
+        elem.removeAttribute(attribute)
+      }),
     )
   return doc.innerHTML
 }

@@ -121,7 +121,7 @@ function handleMath(html: string) {
 function removeReferences(html: string) {
   const doc = document.createElement('div')
   doc.innerHTML = html
-  doc.querySelectorAll('.references').forEach((elem) => elem.remove())
+  doc.querySelectorAll('.references').forEach((elem) => { elem.remove() })
   return doc.innerHTML
 }
 
@@ -178,7 +178,7 @@ function renderPandoc(
         })
       }
       const result = handleResponse(stderr || '', stdout || '', renderMath)
-      return cb(null, result)
+      cb(null, result)
     },
   )
   cp.stdin.write(text)

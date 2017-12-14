@@ -59,9 +59,9 @@ export = {
     if (MathJax) {
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElements])
     } else {
-      this.loadMathJax(() =>
-        MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements]),
-      )
+      this.loadMathJax(() => {
+        MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements])
+      })
     }
   },
 
@@ -85,13 +85,14 @@ export = {
       return element.innerHTML
     }
 
-    const queueProcessHTMLString = () =>
+    const queueProcessHTMLString = () => {
       MathJax!.Hub.Queue(
         ['setRenderer', MathJax!.Hub, 'SVG'],
         ['Typeset', MathJax!.Hub, element],
         ['setRenderer', MathJax!.Hub, 'HTML-CSS'],
         [() => callback(compileProcessedHTMLString())],
       )
+    }
 
     if (window.MathJax) {
       queueProcessHTMLString()
@@ -160,7 +161,7 @@ const loadUserMacros = function() {
 function createMacrosTemplate(filePath: string) {
   const templatePath = path.join(__dirname, '../assets/macros-template.cson')
   const templateFile = fs.readFileSync(templatePath, 'utf8')
-  return fs.writeFileSync(filePath, templateFile)
+  fs.writeFileSync(filePath, templateFile)
 }
 
 function checkMacros(macrosObject: object) {
@@ -247,7 +248,7 @@ function attachMathJax() {
   const script = document.createElement('script')
   script.src = `${require.resolve('MathJax')}?delayStartupUntil=configured`
   script.type = 'text/javascript'
-  script.addEventListener('load', () => configureMathJax())
+  script.addEventListener('load', () => { configureMathJax() })
   document.getElementsByTagName('head')[0].appendChild(script)
 
   return script
