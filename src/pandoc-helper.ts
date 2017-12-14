@@ -211,7 +211,6 @@ function getArguments(iargs: Args) {
       res.push(newval)
     }
   }
-  console.warn(res)
   return res
 }
 

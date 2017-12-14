@@ -63,7 +63,7 @@ export function activate() {
     previewFile,
   )
 
-  return atom.workspace.addOpener((uriToOpen) => {
+  atom.workspace.addOpener((uriToOpen) => {
     try {
       var { protocol, host, pathname } = url.parse(uriToOpen)
     } catch (e) {
@@ -72,12 +72,10 @@ export function activate() {
     }
 
     if (protocol !== 'markdown-preview-plus:') return
-    if (!pathname) return
+    if (pathname == null) return
 
     try {
-      if (pathname) {
-        pathname = decodeURI(pathname)
-      }
+      pathname = decodeURI(pathname)
     } catch (e) {
       console.error(e)
       return
@@ -94,14 +92,13 @@ export function activate() {
 }
 
 export function createMarkdownPreviewView(state: MPVParams) {
-  if (state.editorId || (state.filePath && fs.isFileSync(state.filePath))) {
+  if (state.editorId !== undefined || (state.filePath && fs.isFileSync(state.filePath))) {
     return new MarkdownPreviewView(state)
   }
   return undefined
 }
 
 export function toggle() {
-  let needle
   if (isMarkdownPreviewView(atom.workspace.getActivePaneItem())) {
     atom.workspace.destroyActivePaneItem()
     return
@@ -113,7 +110,8 @@ export function toggle() {
   }
 
   const grammars = atom.config.get('markdown-preview-plus.grammars') || []
-  if (((needle = editor.getGrammar().scopeName), !grammars.includes(needle))) {
+  const scope = editor.getGrammar().scopeName
+  if (!grammars.includes(scope)) {
     return
   }
 
