@@ -4,8 +4,8 @@
  * DS104: Avoid inline assignments
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const url = require('url')
-const fs = require('fs-plus')
+import url = require('url')
+import fs = require('fs-plus')
 
 import { MarkdownPreviewView, MPVParams } from './markdown-preview-view'
 import renderer = require('./renderer')
@@ -64,17 +64,15 @@ export function activate() {
   )
 
   return atom.workspace.addOpener((uriToOpen) => {
-    let host, pathname, protocol
     try {
-      ;({ protocol, host, pathname } = url.parse(uriToOpen))
+      var { protocol, host, pathname } = url.parse(uriToOpen)
     } catch (e) {
       console.error(e)
       return
     }
 
-    if (protocol !== 'markdown-preview-plus:') {
-      return
-    }
+    if (protocol !== 'markdown-preview-plus:') return
+    if (!pathname) return
 
     try {
       if (pathname) {
@@ -96,7 +94,7 @@ export function activate() {
 }
 
 export function createMarkdownPreviewView(state: MPVParams) {
-  if (state.editorId || fs.isFileSync(state.filePath)) {
+  if (state.editorId || (state.filePath && fs.isFileSync(state.filePath))) {
     return new MarkdownPreviewView(state)
   }
   return undefined
@@ -150,7 +148,9 @@ export function addPreviewForEditor(editor: TextEditor) {
   const previousActivePane = atom.workspace.getActivePane()
   const options: WorkspaceOpenOptions = { searchAllPanes: true }
   if (atom.config.get('markdown-preview-plus.openPreviewInSplitPane')) {
-    options.split = atom.config.get('markdown-preview-plus.previewSplitPaneDir')
+    options.split = atom.config.get(
+      'markdown-preview-plus.previewSplitPaneDir',
+    )!
   }
   return atom.workspace.open(uri, options).then(function(markdownPreviewView) {
     if (isMarkdownPreviewView(markdownPreviewView)) {
@@ -179,15 +179,10 @@ export function previewFile({ currentTarget }: CommandEvent) {
 
 const clipboardCopy = (text: string) => atom.clipboard.write(text)
 
-export function copyHtml(callback?: undefined, scaleMath?: number): void
-export function copyHtml<T>(
-  callback?: (text: string) => T,
-  scaleMath?: number,
-): T
 export function copyHtml(
   callback: (text: string) => any = clipboardCopy,
   scaleMath = 100,
-): any {
+): void {
   const editor = atom.workspace.getActiveTextEditor()
   if (editor == null) {
     return
@@ -197,26 +192,26 @@ export function copyHtml(
   const renderLaTeX = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
-  return renderer.toHTML(
+  renderer.toHTML(
     text,
     editor.getPath(),
     editor.getGrammar(),
-    renderLaTeX,
+    !!renderLaTeX,
     true,
     function(error: Error | null, html: string) {
       if (error) {
-        return console.warn('Copying Markdown as HTML failed', error)
+        console.warn('Copying Markdown as HTML failed', error)
       } else if (renderLaTeX) {
-        return mathjaxHelper.processHTMLString(html, function(proHTML: string) {
+        mathjaxHelper.processHTMLString(html, function(proHTML: string) {
           proHTML = proHTML.replace(
             /MathJax\_SVG.*?font\-size\: 100%/g,
             (match) =>
               match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
           )
-          return callback(proHTML)
+          callback(proHTML)
         })
       } else {
-        return callback(html)
+        callback(html)
       }
     },
   )

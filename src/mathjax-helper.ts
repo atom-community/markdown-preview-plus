@@ -1,7 +1,6 @@
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -13,10 +12,10 @@
 //
 
 const { $ } = require('atom-space-pen-views')
-const path = require('path')
+import path = require('path')
 const CSON = require('season')
-const fs = require('fs-plus')
-const _ = require('lodash')
+import fs = require('fs-plus')
+import _ = require('lodash')
 
 export = {
   //
@@ -25,7 +24,7 @@ export = {
   // @param listener Optional method to call when the MathJax script was been
   //   loaded to the window. The method is passed no arguments.
   //
-  loadMathJax(listener) {
+  loadMathJax(listener: () => any) {
     const script = this.attachMathJax()
     if (listener != null) {
       script.addEventListener('load', () => listener())
@@ -56,12 +55,12 @@ export = {
   //   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
   //   details on DOM elements.
   //
-  mathProcessor(domElements) {
-    if (typeof MathJax !== 'undefined' && MathJax !== null) {
+  mathProcessor(domElements: Node[]) {
+    if (MathJax) {
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElements])
     } else {
       this.loadMathJax(() =>
-        MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElements]),
+        MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements]),
       )
     }
   },
@@ -73,15 +72,13 @@ export = {
   // @param callback A callback method that accepts a single parameter, a HTML
   //   fragment string that is the result of html processed by MathJax
   //
-  processHTMLString(html, callback) {
+  processHTMLString(html: string, callback: (proHTML: string) => any) {
     const element = document.createElement('div')
     element.innerHTML = html
 
     const compileProcessedHTMLString = function() {
-      const svgGlyphs = __guard__(
-        document.getElementById('MathJax_SVG_Hidden'),
-        (x) => x.parentNode.cloneNode(true),
-      )
+      const msvgh = document.getElementById('MathJax_SVG_Hidden')
+      const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
       if (svgGlyphs != null) {
         element.insertBefore(svgGlyphs, element.firstChild)
       }
@@ -89,14 +86,14 @@ export = {
     }
 
     const queueProcessHTMLString = () =>
-      MathJax.Hub.Queue(
-        ['setRenderer', MathJax.Hub, 'SVG'],
-        ['Typeset', MathJax.Hub, element],
-        ['setRenderer', MathJax.Hub, 'HTML-CSS'],
+      MathJax!.Hub.Queue(
+        ['setRenderer', MathJax!.Hub, 'SVG'],
+        ['Typeset', MathJax!.Hub, element],
+        ['setRenderer', MathJax!.Hub, 'HTML-CSS'],
         [() => callback(compileProcessedHTMLString())],
       )
 
-    if (typeof MathJax !== 'undefined' && MathJax !== null) {
+    if (window.MathJax) {
       queueProcessHTMLString()
     } else {
       this.loadMathJax(queueProcessHTMLString)
@@ -123,11 +120,11 @@ const getUserMacrosPath = function() {
     : path.join(atom.getConfigDirPath(), 'markdown-preview-plus.cson')
 }
 
-const loadMacrosFile = function(filePath) {
+function loadMacrosFile(filePath: string) {
   if (!CSON.isObjectPath(filePath)) {
     return {}
   }
-  return CSON.readFileSync(filePath, function(error, object) {
+  return CSON.readFileSync(filePath, function(error?: Error, object?: object) {
     if (object == null) {
       object = {}
     }
@@ -162,13 +159,13 @@ const loadUserMacros = function() {
   }
 }
 
-var createMacrosTemplate = function(filePath) {
+function createMacrosTemplate(filePath: string) {
   const templatePath = path.join(__dirname, '../assets/macros-template.cson')
   const templateFile = fs.readFileSync(templatePath, 'utf8')
   return fs.writeFileSync(filePath, templateFile)
 }
 
-const checkMacros = function(macrosObject) {
+function checkMacros(macrosObject: object) {
   for (let name in macrosObject) {
     const value = macrosObject[name]
     if (!name.match(namePattern) || !valueMatchesPattern(value)) {
@@ -184,23 +181,20 @@ const checkMacros = function(macrosObject) {
   return macrosObject
 }
 
-var valueMatchesPattern = function(value) {
+function valueMatchesPattern(value: any) {
   // Different check based on whether value is string or array
-  switch (false) {
-    // If it is an array then it should be [string, integer]
-    case Object.prototype.toString.call(value) !== '[object Array]':
-      var macroDefinition = value[0]
-      var numberOfArgs = value[1]
-      if (typeof numberOfArgs === 'number') {
-        return numberOfArgs % 1 === 0 && typeof macroDefinition === 'string'
-      } else {
-        return false
-      }
-    // If it is just a string then that's OK, any string is acceptable
-    case typeof value !== 'string':
-      return true
-    default:
+  if (Array.isArray(value)) {
+    var macroDefinition = value[0]
+    var numberOfArgs = value[1]
+    if (typeof numberOfArgs === 'number') {
+      return numberOfArgs % 1 === 0 && typeof macroDefinition === 'string'
+    } else {
       return false
+    }
+  } else if (typeof value == 'string') {
+    return true
+  } else {
+    return false
   }
 }
 
@@ -216,7 +210,7 @@ const configureMathJax = function() {
   }
 
   //Now Configure MathJax
-  MathJax.Hub.Config({
+  MathJax!.Hub.Config({
     jax: ['input/TeX', 'output/HTML-CSS'],
     extensions: [],
     TeX: {
@@ -236,7 +230,7 @@ const configureMathJax = function() {
     showMathMenu: false,
     skipStartupTypeset: true,
   })
-  MathJax.Hub.Configured()
+  MathJax!.Hub.Configured()
 
   // Notify user MathJax has loaded
   if (atom.inDevMode()) {
@@ -247,7 +241,7 @@ const configureMathJax = function() {
 //
 // Attach main MathJax script to the document
 //
-var attachMathJax = function() {
+function attachMathJax() {
   // Notify user MathJax is loading
   if (atom.inDevMode()) {
     atom.notifications.addInfo('Loading maths rendering engine MathJax')
@@ -261,10 +255,4 @@ var attachMathJax = function() {
   document.getElementsByTagName('head')[0].appendChild(script)
 
   return script
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

@@ -25,11 +25,11 @@ export function toDOMFragment(
   _grammar: any,
   renderLaTeX: boolean,
   callback: (error: Error | null, domFragment?: Node) => string,
-): string {
+): void {
   if (text == null) {
     text = ''
   }
-  return render(text, filePath, renderLaTeX, false, function(
+  render(text, filePath, renderLaTeX, false, function(
     error: Error | null,
     html?: string,
   ) {
@@ -51,15 +51,12 @@ export function toHTML(
   grammar: Grammar | null,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
-  callback: (error: Error | null, html: string) => string,
-): string {
+  callback: (error: Error | null, html: string) => void,
+): void {
   if (text == null) {
     text = ''
   }
-  return render(text, filePath, renderLaTeX, copyHTMLFlag, function(
-    error,
-    html,
-  ) {
+  render(text, filePath, renderLaTeX, copyHTMLFlag, function(error, html) {
     let defaultCodeLanguage: string | undefined
     if (error != null) {
       return callback(error, '')
@@ -83,8 +80,8 @@ function render(
   filePath: string | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
-  callback: (error: Error | null, html: string) => string,
-): string {
+  callback: (error: Error | null, html: string) => void,
+): void {
   // Remove the <!doctype> since otherwise marked will escape it
   // https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
@@ -99,14 +96,9 @@ function render(
   }
 
   if (atom.config.get('markdown-preview-plus.enablePandoc')) {
-    return pandocHelper.renderPandoc(
-      text,
-      filePath,
-      renderLaTeX,
-      callbackFunction,
-    )
+    pandocHelper.renderPandoc(text, filePath, renderLaTeX, callbackFunction)
   } else {
-    return callbackFunction(null, markdownIt.render(text, renderLaTeX))
+    callbackFunction(null, markdownIt.render(text, renderLaTeX))
   }
 }
 
@@ -210,13 +202,10 @@ function resolveImagePaths(
 }
 
 export function convertCodeBlocksToAtomEditors(
-  domFragment: HTMLElement,
-  defaultLanguage: string,
+  domFragment: Element,
+  defaultLanguage: string = 'text',
 ) {
   let fontFamily
-  if (defaultLanguage == null) {
-    defaultLanguage = 'text'
-  }
   if ((fontFamily = atom.config.get('editor.fontFamily'))) {
     for (let codeElement of Array.from(domFragment.querySelectorAll('code'))) {
       codeElement.style.fontFamily = fontFamily

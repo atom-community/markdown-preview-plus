@@ -75,6 +75,7 @@ export function render(text: string, rL: boolean) {
 }
 
 export function decode(url: string) {
+  if (!markdownIt) throw new Error('markdownIt not initialized')
   return markdownIt.normalizeLinkText(url)
 }
 

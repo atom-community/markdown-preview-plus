@@ -18,4 +18,8 @@ declare module 'atom' {
   interface TextEditor {
     cursorLineDecorations: LayerDecoration[] | null
   }
+  interface AtomEnvironment {
+    getConfigDirPath(): string
+    showSaveDialogSync(path: string): string | undefined
+  }
 }

@@ -381,14 +381,17 @@ describe "Markdown preview plus package", ->
         atom.workspace.open("subdir/simple.md")
 
       runs ->
-        expect(mpp.copyHtml( (html) -> html )).toBe """
+        savedHtml = null
+        mpp.copyHtml( (html) -> savedHtml = html )
+        expect(savedHtml).toBe """
           <p><em>italic</em></p>
           <p><strong>bold</strong></p>
           <p>encoding \u2192 issue</p>
         """
 
         atom.workspace.getActiveTextEditor().setSelectedBufferRange [[0, 0], [1, 0]]
-        expect(mpp.copyHtml( (html) -> html )).toBe """
+        mpp.copyHtml( (html) -> savedHtml = html )
+        expect(savedHtml).toBe """
           <p><em>italic</em></p>
         """
 

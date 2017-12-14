@@ -29,44 +29,45 @@
 // THE SOFTWARE.
 'use strict'
 
-const WrappedDomTree = require('./wrapped-dom-tree')
-const MathJaxHelper = require('./mathjax-helper')
-const renderer = require('./renderer')
+import { WrappedDomTree } from './wrapped-dom-tree'
+import MathJaxHelper = require('./mathjax-helper')
+import renderer = require('./renderer')
 
 export class UpdatePreview {
+  private domFragment?: Element
+  private tree: WrappedDomTree
   // @param dom A DOM element object
   //    https://developer.mozilla.org/en-US/docs/Web/API/element
-  constructor(dom) {
+  constructor(dom: Element) {
     this.tree = new WrappedDomTree(dom, true)
-    this.domFragment = document.createDocumentFragment()
   }
 
-  update(domFragment, renderLaTeX) {
+  public update(domFragment: Element, renderLaTeX: boolean) {
     prepareCodeBlocksForAtomEditors(domFragment)
 
-    if (domFragment.isEqualNode(this.domFragment)) {
+    if (this.domFragment && domFragment.isEqualNode(this.domFragment)) {
       return
     }
 
-    const firstTime = this.domFragment.childElementCount === 0
-    this.domFragment = domFragment.cloneNode(true)
+    const firstTime = this.domFragment === undefined
+    this.domFragment = domFragment.cloneNode(true) as Element
 
     const newDom = document.createElement('div')
     newDom.className = 'update-preview'
     newDom.appendChild(domFragment)
-    const newTree = new WrappedDomTree(newDom)
+    const newTree = new WrappedDomTree(newDom, false)
 
     const r = this.tree.diffTo(newTree)
     newTree.removeSelf()
 
     if (firstTime) {
-      r.possibleReplace = null
-      r.last = null
+      r.possibleReplace = undefined
+      r.last = undefined
     }
 
     if (renderLaTeX) {
-      r.inserted = r.inserted.map(function(elm) {
-        while (elm && !elm.innerHTML) {
+      r.inserted = r.inserted.map(function(elm: Node) {
+        while (elm.parentElement && !(elm as HTMLElement).innerHTML) {
           elm = elm.parentElement
         }
         return elm
@@ -86,14 +87,14 @@ export class UpdatePreview {
       }
     }
 
-    this.updateOrderedListsStart()
+    this.updateOrderedListsStart(this.domFragment)
 
     return r
   }
 
-  updateOrderedListsStart() {
+  private updateOrderedListsStart(fragment: Element) {
     const previewOLs = this.tree.shownTree.dom.querySelectorAll('ol')
-    const parsedOLs = this.domFragment.querySelectorAll('ol')
+    const parsedOLs = fragment.querySelectorAll('ol')
 
     for (let i = 0, end = parsedOLs.length - 1; i <= end; i++) {
       const previewStart = previewOLs[i].getAttribute('start')
@@ -110,11 +111,11 @@ export class UpdatePreview {
   }
 }
 
-function prepareCodeBlocksForAtomEditors(domFragment) {
+function prepareCodeBlocksForAtomEditors(domFragment: Element) {
   for (let preElement of Array.from(domFragment.querySelectorAll('pre'))) {
     const preWrapper = document.createElement('span')
     preWrapper.className = 'atom-text-editor'
-    preElement.parentNode.insertBefore(preWrapper, preElement)
+    preElement.parentNode!.insertBefore(preWrapper, preElement)
     preWrapper.appendChild(preElement)
   }
   return domFragment

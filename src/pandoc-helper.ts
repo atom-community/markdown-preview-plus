@@ -5,18 +5,18 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require('lodash')
-const CP = require('child_process')
-let fs = null
-let path = null
+import _ = require('lodash')
+import CP = require('child_process')
+import fs = require('fs')
+import path = require('path')
 
-const atomConfig = () => atom.config.get('markdown-preview-plus')
+const atomConfig = () => atom.config.get('markdown-preview-plus')!
 
 /**
  * Sets local mathjaxPath if available
  */
 const getMathJaxPath = (function() {
-  let cached = null
+  let cached: string | null = null
   return function() {
     if (cached != null) {
       return cached
@@ -29,13 +29,7 @@ const getMathJaxPath = (function() {
   }
 })()
 
-var findFileRecursive = function(filePath, fileName) {
-  if (fs == null) {
-    fs = require('fs')
-  }
-  if (path == null) {
-    path = require('path')
-  }
+function findFileRecursive(filePath: string, fileName: string): string | false {
   const bibFile = path.join(filePath, '../', fileName)
   if (fs.existsSync(bibFile)) {
     return bibFile
@@ -49,34 +43,38 @@ var findFileRecursive = function(filePath, fileName) {
   }
 }
 
-/**
- * Sets local variables needed for everything
- * @param {string} path to markdown file
- *
- */
-const setPandocOptions = function(filePath, renderMath) {
-  const args = {
-    from: atomConfig().pandocMarkdownFlavor,
-    to: 'html',
-  }
-  const opts = { maxBuffer: Infinity } // see https://github.com/atom-community/markdown-preview-plus/issues/316
-  if (path == null) {
-    path = require('path')
-  }
+interface Args {
+  from: string
+  to: 'html'
+  mathjax?: string
+  filter: string[]
+  bibliography?: string
+  csl?: string
+}
+
+function setPandocOptions(filePath: string | undefined, renderMath: boolean) {
+  // see https://github.com/atom-community/markdown-preview-plus/issues/316
+  const opts: CP.ExecFileOptions = { maxBuffer: Infinity }
   if (filePath != null) {
     opts.cwd = path.dirname(filePath)
   }
   const mathjaxPath = getMathJaxPath()
-  args.mathjax = renderMath ? mathjaxPath : undefined
-  args.filter = atomConfig().pandocFilters
+  const args: Args = {
+    from: atomConfig().pandocMarkdownFlavor,
+    to: 'html',
+    mathjax: renderMath ? mathjaxPath : undefined,
+    filter: atomConfig().pandocFilters,
+  }
   if (atomConfig().pandocBibliography) {
     args.filter.push('pandoc-citeproc')
-    let bibFile = findFileRecursive(filePath, atomConfig().pandocBIBFile)
+    let bibFile =
+      filePath && findFileRecursive(filePath, atomConfig().pandocBIBFile)
     if (!bibFile) {
       bibFile = atomConfig().pandocBIBFileFallback
     }
     args.bibliography = bibFile ? bibFile : undefined
-    let cslFile = findFileRecursive(filePath, atomConfig().pandocCSLFile)
+    let cslFile =
+      filePath && findFileRecursive(filePath, atomConfig().pandocCSLFile)
     if (!cslFile) {
       cslFile = atomConfig().pandocCSLFileFallback
     }
@@ -91,8 +89,7 @@ const setPandocOptions = function(filePath, renderMath) {
  * @param {string} Returned HTML
  * @return {array} with Arguments for callbackFunction (error set to null)
  */
-const handleError = function(error, html, renderMath) {
-  const message = _.uniq(error.split('\n')).join('<br>')
+function handleError(error: string, html: string, renderMath: boolean) {
   html = `<h1>Pandoc Error:</h1><pre>${error}</pre><hr>${html}`
   return handleSuccess(html, renderMath)
 }
@@ -102,11 +99,11 @@ const handleError = function(error, html, renderMath) {
  * @param {string} HTML to be adjusted
  * @return {string} HTML with adjusted math environments
  */
-const handleMath = function(html) {
+function handleMath(html: string) {
   const doc = document.createElement('div')
   doc.innerHTML = html
   doc.querySelectorAll('.math').forEach(function(elem) {
-    let math = elem.innerText
+    let math = (elem as HTMLElement).innerText
     // Set mode if it is block math
     const mode = math.indexOf('\\[') > -1 ? '; mode=display' : ''
 
@@ -121,7 +118,7 @@ const handleMath = function(html) {
   return doc.innerHTML
 }
 
-const removeReferences = function(html) {
+function removeReferences(html: string) {
   const doc = document.createElement('div')
   doc.innerHTML = html
   doc.querySelectorAll('.references').forEach((elem) => elem.remove())
@@ -133,14 +130,14 @@ const removeReferences = function(html) {
  * @param {string} Returned HTML
  * @return {array} with Arguments for callbackFunction (error set to null)
  */
-var handleSuccess = function(html, renderMath) {
+function handleSuccess(html: string, renderMath: boolean) {
   if (renderMath) {
     html = handleMath(html)
   }
   if (atomConfig().pandocRemoveReferences) {
     html = removeReferences(html)
   }
-  return [null, html]
+  return html
 }
 
 /**
@@ -148,7 +145,7 @@ var handleSuccess = function(html, renderMath) {
  * @param {Object} error if thrown
  * @param {string} Returned HTML
  */
-const handleResponse = function(error, html, renderMath) {
+function handleResponse(error: string, html: string, renderMath: boolean) {
   if (error) {
     return handleError(error, html, renderMath)
   } else {
@@ -162,7 +159,12 @@ const handleResponse = function(error, html, renderMath) {
  * @param {boolean} whether to render the math with mathjax
  * @param {function} callbackFunction
  */
-const renderPandoc = function(text, filePath, renderMath, cb) {
+function renderPandoc(
+  text: string,
+  filePath: string | undefined,
+  renderMath: boolean,
+  cb: (err: Error | null, result: string) => void,
+) {
   const { args, opts } = setPandocOptions(filePath, renderMath)
   const cp = CP.execFile(
     atomConfig().pandocPath,
@@ -175,27 +177,23 @@ const renderPandoc = function(text, filePath, renderMath, cb) {
           dismissable: true,
         })
       }
-      const cbargs = handleResponse(
-        stderr != null ? stderr : '',
-        stdout != null ? stdout : '',
-        renderMath,
-      )
-      return cb(...Array.from(cbargs || []))
+      const result = handleResponse(stderr || '', stdout || '', renderMath)
+      return cb(null, result)
     },
   )
   cp.stdin.write(text)
-  return cp.stdin.end()
+  cp.stdin.end()
 }
 
-var getArguments = function(args) {
-  args = _.reduce(
-    args,
-    function(res, val, key) {
-      if (!_.isEmpty(val)) {
-        val = _.flatten([val])
-        _.forEach(val, function(v) {
+function getArguments(iargs: Args) {
+  const args = _.reduce(
+    iargs,
+    function(res: string[], val, key) {
+      if (val && !_.isEmpty(val)) {
+        const nval: string[] = _.flatten([val])
+        _.forEach(nval, function(v: string) {
           if (!_.isEmpty(v)) {
-            return res.push(`--${key}=${v}`)
+            res.push(`--${key}=${v}`)
           }
         })
       }
@@ -203,16 +201,18 @@ var getArguments = function(args) {
     },
     [],
   )
-  args = _.union(args, atom.config.get('markdown-preview-plus.pandocArguments'))
-  args = _.map(args, function(val) {
-    val = val.replace(/^(--[\w\-]+)\s(.+)$/i, '$1=$2')
-    if (val.substr(0, 1) !== '-') {
-      return undefined
-    } else {
-      return val
+  const res: string[] = []
+  for (const val of [
+    ...args,
+    ...atom.config.get('markdown-preview-plus.pandocArguments')!,
+  ]) {
+    const newval = val.replace(/^(--[\w\-]+)\s(.+)$/i, '$1=$2')
+    if (newval.substr(0, 1) === '-') {
+      res.push(newval)
     }
-  })
-  return _.reject(args, _.isEmpty)
+  }
+  console.warn(res)
+  return res
 }
 
 export = {

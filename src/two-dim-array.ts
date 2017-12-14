@@ -26,34 +26,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-let TwoDimArray
-module.exports = TwoDimArray = class TwoDimArray {
-  constructor(rows, cols) {
-    this._arr = new Array(rows * cols)
-    this.row = rows
-    this.col = cols
+export class TwoDimArray<T> {
+  private readonly _arr: T[]
+  constructor(public readonly row: number, public readonly col: number) {
+    this._arr = new Array(row * col)
   }
 
-  getInd(row, col) {
+  getInd(row: number, col: number) {
     return row * this.col + col
   }
 
-  get2DInd(ind) {
+  get2DInd(ind: number) {
     return {
       r: (ind / this.col) | 0,
       c: ind % this.col,
     }
   }
 
-  get(row, col) {
+  get(row: number, col: number) {
     return this._arr[this.getInd(row, col)]
   }
 
-  set(row, col, val) {
+  set(row: number, col: number, val: T) {
     this._arr[row * this.col + col] = val
   }
 
-  rawGet(ind) {
+  rawGet(ind: number) {
     return this._arr[ind]
   }
 }

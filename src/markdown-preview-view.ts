@@ -11,19 +11,18 @@ import { Token } from 'markdown-it'
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const path = require('path')
+import path = require('path')
 
-const { Emitter, Disposable, CompositeDisposable } = require('atom')
+import { Emitter, Disposable, CompositeDisposable, File } from 'atom'
 const { $, $$$, ScrollView } = require('atom-space-pen-views')
-const Grim = require('grim')
-const _ = require('lodash')
-const fs = require('fs-plus')
-const { File } = require('atom')
+import _ = require('lodash')
+import fs = require('fs-plus')
 
 import renderer = require('./renderer')
 import { UpdatePreview } from './update-preview'
 import markdownIt = require('./markdown-it-helper')
 import imageWatcher = require('./image-watch-helper')
+import { StyleManager } from 'atom'
 
 export interface MPVParamsEditor {
   editorId: number
@@ -39,6 +38,10 @@ export type MPVParams = MPVParamsEditor | MPVParamsPath
 
 export class MarkdownPreviewView extends ScrollView {
   private element: HTMLElement
+  private emitter: Emitter<{
+    'did-change-title': undefined
+    'did-change-markdown': undefined
+  }>
   static content() {
     return this.div(
       { class: 'markdown-preview native-key-bindings', tabindex: -1 },
@@ -50,6 +53,7 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   constructor({ editorId, filePath }: MPVParams) {
+    // @ts-ignore
     super()
     this.getPathToElement = this.getPathToElement.bind(this)
     this.syncSource = this.syncSource.bind(this)
@@ -97,23 +101,20 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   destroy() {
-    if (imageWatcher == null) {
-      imageWatcher = require('./image-watch-helper')
-    }
     imageWatcher.removeFile(this.getPath())
     return this.disposables.dispose()
   }
 
-  onDidChangeTitle(callback) {
+  onDidChangeTitle(callback: () => void) {
     return this.emitter.on('did-change-title', callback)
   }
 
-  onDidChangeModified(callback) {
+  onDidChangeModified(_callback: any) {
     // No op to suppress deprecation warning
     return new Disposable()
   }
 
-  onDidChangeMarkdown(callback) {
+  onDidChangeMarkdown(callback: () => void) {
     return this.emitter.on('did-change-markdown', callback)
   }
 
@@ -204,7 +205,7 @@ export class MarkdownPreviewView extends ScrollView {
           if (source == null) {
             return
           }
-          return this.syncSource(source, event.target)
+          return this.syncSource(source, event.target as HTMLElement)
         })
       },
     })
@@ -312,7 +313,7 @@ export class MarkdownPreviewView extends ScrollView {
     if (!this.loaded) {
       this.showLoading()
     }
-    return this.getMarkdownSource().then((source) => {
+    return this.getMarkdownSource().then((source?: string) => {
       if (source != null) {
         return this.renderMarkdownText(source)
       }
@@ -366,8 +367,8 @@ export class MarkdownPreviewView extends ScrollView {
     }
   }
 
-  getHTML(callback) {
-    return this.getMarkdownSource().then((source) => {
+  getHTML(callback: (error: Error | null, htmlBody: string) => void) {
+    return this.getMarkdownSource().then((source?: string) => {
       if (source == null) {
         return
       }
@@ -450,15 +451,17 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   getTextEditorStyles() {
-    const textEditorStyles = document.createElement('atom-styles')
+    const textEditorStyles = document.createElement(
+      'atom-styles',
+    ) as HTMLElement & { initialize(styles: StyleManager): void }
     textEditorStyles.initialize(atom.styles)
     textEditorStyles.setAttribute('context', 'atom-text-editor')
     document.body.appendChild(textEditorStyles)
 
     // Extract style elements content
-    return Array.prototype.slice
-      .apply(textEditorStyles.childNodes)
-      .map((styleElement) => styleElement.innerText)
+    return Array.from(textEditorStyles.childNodes).map(
+      (styleElement) => (styleElement as HTMLElement).innerText,
+    )
   }
 
   getMarkdownPreviewCSS() {
@@ -486,7 +489,7 @@ export class MarkdownPreviewView extends ScrollView {
       .join('\n')
       .replace(/atom-text-editor/g, 'pre.editor-colors')
       .replace(/:host/g, '.host') // Remove shadow-dom :host selector causing problem on FF
-      .replace(cssUrlRefExp, function(match, assetsName, offset, string) {
+      .replace(cssUrlRefExp, function(_match, assetsName, _offset, _string) {
         // base64 encode assets
         const assetPath = path.join(__dirname, '../assets', assetsName)
         const originalData = fs.readFileSync(assetPath, 'binary')
@@ -495,13 +498,15 @@ export class MarkdownPreviewView extends ScrollView {
       })
   }
 
-  showError(result) {
+  showError(result: Error) {
     const failureMessage = result != null ? result.message : undefined
 
     return this.html(
       $$$(function() {
+        // @ts-ignore
         this.h2('Previewing Markdown Failed')
         if (failureMessage != null) {
+          // @ts-ignore
           return this.h3(failureMessage)
         }
       }),
@@ -512,6 +517,7 @@ export class MarkdownPreviewView extends ScrollView {
     this.loading = true
     return this.html(
       $$$(function() {
+        // @ts-ignore
         return this.div({ class: 'markdown-spinner' }, 'Loading Markdown\u2026')
       }),
     )
@@ -547,7 +553,6 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   saveAs() {
-    let htmlFilePath
     if (this.loading) {
       return
     }
@@ -565,8 +570,9 @@ export class MarkdownPreviewView extends ScrollView {
       }
     }
 
-    if ((htmlFilePath = atom.showSaveDialogSync(filePath))) {
-      return this.getHTML((error, htmlBody) => {
+    const htmlFilePath = atom.showSaveDialogSync(filePath)
+    if (htmlFilePath) {
+      return this.getHTML((error: Error | null, htmlBody: string) => {
         if (error != null) {
           return console.warn('Saving Markdown as HTML failed', error)
         } else {
@@ -609,7 +615,7 @@ export class MarkdownPreviewView extends ScrollView {
     }
   }
 
-  isEqual(other) {
+  isEqual(other: null | [Node]) {
     return this[0] === (other != null ? other[0] : undefined) // Compare DOM elements
   }
 
@@ -750,7 +756,7 @@ export class MarkdownPreviewView extends ScrollView {
   // @return {number|null} The line of `text` that represents `element`. If no
   //   line is identified `null` is returned.
   //
-  syncSource(text, element) {
+  syncSource(text: string, element: HTMLElement) {
     const pathToElement = this.getPathToElement(element)
     pathToElement.shift() // remove div.markdown-preview
     pathToElement.shift() // remove div.update-preview
@@ -758,9 +764,6 @@ export class MarkdownPreviewView extends ScrollView {
       return
     }
 
-    if (markdownIt == null) {
-      markdownIt = require('./markdown-it-helper')
-    }
     const tokens = markdownIt.getTokens(text, this.renderLaTeX)
     let finalToken = null
     let level = 0
@@ -837,10 +840,11 @@ export class MarkdownPreviewView extends ScrollView {
         continue
       }
 
-      token.tag = this.decodeTag(token)
-      if (token.tag == null) {
+      const tag = this.decodeTag(token)
+      if (tag == null) {
         continue
       }
+      token.tag = tag
 
       if (
         token.map != null &&
@@ -887,10 +891,7 @@ export class MarkdownPreviewView extends ScrollView {
   // @return {number|null} The element that represents `line`. If no element is
   //   identified `null` is returned.
   //
-  syncPreview(text, line) {
-    if (markdownIt == null) {
-      markdownIt = require('./markdown-it-helper')
-    }
+  syncPreview(text: string, line: number) {
     const tokens = markdownIt.getTokens(text, this.renderLaTeX)
     const pathToToken = this.getPathToToken(tokens, line)
 
@@ -923,12 +924,16 @@ export class MarkdownPreviewView extends ScrollView {
   }
 }
 
-function __guard__(value, transform) {
+function __guard__(value: any, transform: (x: any) => any) {
   return typeof value !== 'undefined' && value !== null
     ? transform(value)
     : undefined
 }
-function __guardMethod__(obj, methodName, transform) {
+function __guardMethod__(
+  obj: RegExpMatchArray | null,
+  methodName: string,
+  transform: (o: any, m: string) => any,
+) {
   if (
     typeof obj !== 'undefined' &&
     obj !== null &&

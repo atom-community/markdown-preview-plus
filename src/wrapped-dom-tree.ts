@@ -27,23 +27,34 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-'use strict'
-
-let WrappedDomTree
-const TwoDimArray = require('./two-dim-array')
+import { TwoDimArray } from './two-dim-array'
 
 let curHash = 0
 const hashTo = {}
 
-module.exports = WrappedDomTree = class WrappedDomTree {
+export class WrappedDomTree {
+  textData: string
+  children: WrappedDomTree[]
+  size: number
+  diffHash: { [key: string]: any }
+  className: string
+  tagName: string
+  rep?: WrappedDomTree
+  isText: boolean
+  hash: number
+  clone: boolean
+  dom: Element
+  shownTree: WrappedDomTree
   // @param dom A DOM element object
   //    https://developer.mozilla.org/en-US/docs/Web/API/element
   // @param clone Boolean flag indicating if this is the DOM tree to modify
   // @param rep WrappedDomTree of a DOM element node in dom
-  constructor(dom, clone, rep) {
+  constructor(dom: Element, clone: true)
+  constructor(dom: Element, clone: false, rep?: WrappedDomTree)
+  constructor(dom: Element, clone: boolean, rep?: WrappedDomTree) {
     if (clone) {
       this.shownTree = new WrappedDomTree(dom, false, this)
-      this.dom = dom.cloneNode(true)
+      this.dom = dom.cloneNode(true) as Element
     } else {
       this.dom = dom
       this.rep = rep
@@ -55,17 +66,20 @@ module.exports = WrappedDomTree = class WrappedDomTree {
     this.isText = dom.nodeType === 3
     this.tagName = dom.tagName
     this.className = dom.className
-    this.textData = dom.data
+    this.textData = (dom as any).data
     this.diffHash = {}
 
     if (this.isText) {
       this.size = 1
     } else {
       ;({ rep } = this)
-      this.children = [].map.call(
-        this.dom.childNodes,
+      this.children = Array.from(this.dom.childNodes).map(
         (dom, ind) =>
-          new WrappedDomTree(dom, false, rep ? rep.children[ind] : null),
+          new WrappedDomTree(
+            dom as Element,
+            false,
+            rep ? rep.children[ind] : undefined,
+          ),
       )
       this.size = this.children.length
         ? this.children.reduce((prev, cur) => prev + cur.size, 0)
@@ -77,26 +91,32 @@ module.exports = WrappedDomTree = class WrappedDomTree {
   }
 
   // @param otherTree WrappedDomTree of a DOM element to diff against
-  diffTo(otherTree) {
+  diffTo(
+    otherTree: WrappedDomTree,
+  ): {
+    possibleReplace?: {
+      cur?: Node
+      prev?: Element
+    }
+    inserted: Node[]
+    last?: Node
+  } {
     if (this.clone) {
       return this.shownTree.diffTo(otherTree)
     }
 
-    const diff = this.rep.diff(otherTree)
-    const { score } = diff
+    const diff = this.rep && this.rep.diff(otherTree)
     const { operations } = diff
     let indexShift = 0
-    let inserted = []
+    let inserted: Node[] = []
 
     // Force variables to leak to diffTo scope
-    let [
-      last,
-      possibleReplace,
-      r,
-      lastOp,
-      lastElmDeleted,
-      lastElmInserted,
-    ] = Array.from([])
+    let last
+    let possibleReplace
+    let r
+    let lastOp
+    let lastElmDeleted
+    let lastElmInserted
 
     if (operations) {
       if (operations instanceof Array) {
@@ -106,7 +126,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
               const possibleLastDeleted = this.children[op.tree + indexShift]
                 .dom
               r = this.remove(op.tree + indexShift)
-              this.rep.remove(op.tree + indexShift)
+              this.rep && this.rep.remove(op.tree + indexShift)
               if (!last || last.nextSibling === r || last === r) {
                 last = r
                 // Undefined errors can be throw so we add a condition on lastOp
@@ -122,14 +142,15 @@ module.exports = WrappedDomTree = class WrappedDomTree {
               indexShift--
               return
             } else if (op.type === 'i') {
-              this.rep.insert(
-                op.pos + indexShift,
-                otherTree.children[op.otherTree],
-              )
+              this.rep &&
+                this.rep.insert(
+                  op.pos + indexShift,
+                  otherTree.children[op.otherTree],
+                )
               r = this.insert(
                 op.pos + indexShift,
                 otherTree.children[op.otherTree],
-                this.rep.children[op.pos + indexShift],
+                this.rep && this.rep.children[op.pos + indexShift],
               )
               inserted.push(r)
               if (!last || last.nextSibling === r) {
@@ -180,7 +201,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
     }
   }
 
-  insert(i, tree, rep) {
+  insert(i: number, tree: WrappedDomTree, rep?: WrappedDomTree) {
     const dom = tree.dom.cloneNode(true)
     if (i === this.dom.childNodes.length) {
       this.dom.appendChild(dom)
@@ -188,19 +209,19 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       this.dom.insertBefore(dom, this.dom.childNodes[i])
     }
 
-    const ctree = new WrappedDomTree(dom, false, rep)
+    const ctree = new WrappedDomTree(dom as Element, false, rep)
     this.children.splice(i, 0, ctree)
     return this.dom.childNodes[i]
   }
 
-  remove(i) {
+  remove(i: number) {
     this.dom.removeChild(this.dom.childNodes[i])
     this.children[i].removeSelf()
     this.children.splice(i, 1)
     return this.dom.childNodes[i - 1]
   }
 
-  diff(otherTree, tmax) {
+  diff(otherTree: WrappedDomTree, tmax?: number) {
     let i
     if (this.equalTo(otherTree)) {
       return { score: 0, operations: null }
@@ -211,7 +232,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
     }
 
     const key = otherTree.hash
-    if (Array.from(this.diffHash).includes(key)) {
+    if (Object.keys(this.diffHash).includes(key.toString())) {
       return this.diffHash[key]
     }
 
@@ -223,7 +244,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
     }
 
     let offset = 0
-    const forwardSearch = (offset) => {
+    const forwardSearch = (offset: number) => {
       return (
         offset < this.children.length &&
         offset < otherTree.children.length &&
@@ -234,11 +255,11 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       offset++
     }
 
-    const dp = new TwoDimArray(
+    const dp = new TwoDimArray<number>(
       this.children.length + 1 - offset,
       otherTree.children.length + 1 - offset,
     )
-    const p = new TwoDimArray(
+    const p = new TwoDimArray<number>(
       this.children.length + 1 - offset,
       otherTree.children.length + 1 - offset,
     )
@@ -292,7 +313,7 @@ module.exports = WrappedDomTree = class WrappedDomTree {
       )
     }
 
-    var getScore = (i, j, max) => {
+    var getScore = (i: number, j: number, max: number) => {
       if (dp.get(i, j) !== undefined) {
         return dp.get(i, j)
       }
@@ -410,11 +431,11 @@ module.exports = WrappedDomTree = class WrappedDomTree {
     return this.diffHash[key]
   }
 
-  equalTo(otherTree) {
+  equalTo(otherTree: WrappedDomTree) {
     return this.dom.isEqualNode(otherTree.dom)
   }
 
-  cannotReplaceWith(otherTree) {
+  cannotReplaceWith(otherTree: WrappedDomTree) {
     return (
       this.isText ||
       otherTree.isText ||
