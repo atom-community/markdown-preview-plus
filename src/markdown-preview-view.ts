@@ -42,11 +42,20 @@ export interface MPVParamsPath {
 export type MPVParams = MPVParamsEditor | MPVParamsPath
 
 export class MarkdownPreviewView extends ScrollView {
+  // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
   private emitter: Emitter<{
     'did-change-title': undefined
     'did-change-markdown': undefined
-  }>
+  }> = new Emitter()
+  private updatePreview?: UpdatePreview
+  private renderLaTeX: boolean = !!atom.config.get(
+    'markdown-preview-plus.enableLatexRenderingByDefault',
+  )
+  private disposables = new CompositeDisposable()
+  private loaded = true // Do not show the loading spinnor on initial load
+  private editorId?: number
+  private filePath?: string
   static content() {
     return this.div(
       { class: 'markdown-preview native-key-bindings', tabindex: -1 },
@@ -64,13 +73,6 @@ export class MarkdownPreviewView extends ScrollView {
     this.syncPreview = this.syncPreview.bind(this)
     this.editorId = editorId
     this.filePath = filePath
-    this.updatePreview = null
-    this.renderLaTeX = atom.config.get(
-      'markdown-preview-plus.enableLatexRenderingByDefault',
-    )
-    this.emitter = new Emitter()
-    this.disposables = new CompositeDisposable()
-    this.loaded = true // Do not show the loading spinnor on initial load
   }
 
   attached() {
@@ -79,26 +81,17 @@ export class MarkdownPreviewView extends ScrollView {
     }
     this.isAttached = true
 
-    if (this.editorId != null) {
+    if (this.editorId !== undefined) {
       return this.resolveEditor(this.editorId)
-    } else {
-      if (atom.workspace != null) {
-        return this.subscribeToFilePath(this.filePath)
-      } else {
-        return this.disposables.add(
-          atom.packages.onDidActivateInitialPackages(() =>
-            this.subscribeToFilePath(this.filePath),
-          ),
-        )
-      }
+    } else if (this.filePath !== undefined) {
+      return this.subscribeToFilePath(this.filePath)
     }
   }
 
   serialize() {
-    let left
     return {
       deserializer: 'MarkdownPreviewView',
-      filePath: (left = this.getPath()) != null ? left : this.filePath,
+      filePath: this.getPath() || this.filePath,
       editorId: this.editorId,
     }
   }
@@ -199,18 +192,10 @@ export class MarkdownPreviewView extends ScrollView {
     })
 
     const changeHandler = () => {
-      let left
       this.renderMarkdown()
 
-      // TODO: Remove paneForURI call when ::paneForItem is released
-      const pane =
-        (left =
-          typeof atom.workspace.paneForItem === 'function'
-            ? atom.workspace.paneForItem(this)
-            : undefined) != null
-          ? left
-          : atom.workspace.paneForURI(this.getURI())
-      if (pane != null && pane !== atom.workspace.getActivePane()) {
+      const pane = atom.workspace.paneForItem(this)
+      if (pane !== undefined && pane !== atom.workspace.getActivePane()) {
         return pane.activateItem(this)
       }
     }
@@ -248,7 +233,7 @@ export class MarkdownPreviewView extends ScrollView {
         atom.commands.add(atom.views.getView(this.editor), {
           'markdown-preview-plus:sync-preview': (_event) =>
             this.getMarkdownSource().then((source?: string) => {
-              if (source == null) {
+              if (source === undefined) {
                 return
               }
               return this.syncPreview(
@@ -301,7 +286,7 @@ export class MarkdownPreviewView extends ScrollView {
       this.showLoading()
     }
     return this.getMarkdownSource().then((source?: string) => {
-      if (source != null) {
+      if (source !== undefined) {
         return this.renderMarkdownText(source)
       }
     })
@@ -355,7 +340,7 @@ export class MarkdownPreviewView extends ScrollView {
 
   getHTML(callback: (error: Error | null, htmlBody: string) => void) {
     return this.getMarkdownSource().then((source?: string) => {
-      if (source == null) {
+      if (source === undefined) {
         return
       }
 
@@ -389,8 +374,8 @@ export class MarkdownPreviewView extends ScrollView {
               this.find('div.update-preview')[0],
             )
           }
-          this.updatePreview &&
-            this.updatePreview.update(domFragment, this.renderLaTeX)
+          this.updatePreview && domFragment &&
+            this.updatePreview.update(domFragment as Element, this.renderLaTeX)
           this.emitter.emit('did-change-markdown')
           return this.originalTrigger('markdown-preview-plus:markdown-changed')
         }
@@ -486,16 +471,12 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   showError(result: Error) {
-    const failureMessage = result != null ? result.message : undefined
-
     return this.html(
       $$$(function() {
         // @ts-ignore
         this.h2('Previewing Markdown Failed')
-        if (failureMessage != null) {
-          // @ts-ignore
-          return this.h3(failureMessage)
-        }
+        // @ts-ignore
+        return this.h3(result.message)
       }),
     )
   }
@@ -522,6 +503,7 @@ export class MarkdownPreviewView extends ScrollView {
     // Use default copy event handler if there is selected text inside this view
     if (
       selectedText &&
+      // tslint:disable-next-line:strict-type-predicates //TODO: complain on TS
       selectedNode != null &&
       (this[0] === selectedNode || $.contains(this[0], selectedNode))
     ) {
@@ -550,9 +532,9 @@ export class MarkdownPreviewView extends ScrollView {
       title = path.parse(filePath).name
       filePath += '.html'
     } else {
-      let projectPath
+      const projectPath = atom.project.getPaths()[0]
       filePath = 'untitled.md.html'
-      if ((projectPath = atom.project.getPaths()[0])) {
+      if (projectPath) {
         filePath = path.join(projectPath, filePath)
       }
     }
@@ -765,6 +747,7 @@ export class MarkdownPreviewView extends ScrollView {
       if (token.tag === pathToElement[0].tag && token.level === level) {
         if (token.nesting === 1) {
           if (pathToElement[0].index === 0) {
+            // tslint:disable-next-line:strict-type-predicates
             if (token.map != null) {
               finalToken = token
             }
@@ -828,13 +811,14 @@ export class MarkdownPreviewView extends ScrollView {
       }
 
       const tag = this.decodeTag(token)
-      if (tag == null) {
+      if (tag === null) {
         continue
       }
       token.tag = tag
 
       if (
-        token.map != null &&
+        // tslint:disable-next-line:strict-type-predicates
+        token.map != null && // token.map *can* be null // TODO: complain on DT
         line >= token.map[0] &&
         line <= token.map[1] - 1
       ) {
