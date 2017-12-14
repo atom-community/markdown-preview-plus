@@ -18,9 +18,9 @@ interface NodeListOf<TNode extends Node> extends NodeList {
 }
 
 interface StyleSheet {
-  rules?: CSSRuleList
+  rules?: CSSRuleList | null
 }
 
 interface CSSRule {
-  selectorText?: string
+  selectorText?: string | null
 }
