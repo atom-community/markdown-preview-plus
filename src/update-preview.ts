@@ -93,6 +93,9 @@ export class UpdatePreview {
   }
 
   private updateOrderedListsStart(fragment: Element) {
+    if (this.tree.shownTree === undefined) {
+      throw new Error('shownTree undefined in updateOrderedListsStart')
+    }
     const previewOLs = this.tree.shownTree.dom.querySelectorAll('ol')
     const parsedOLs = fragment.querySelectorAll('ol')
 

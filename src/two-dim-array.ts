@@ -43,7 +43,7 @@ export class TwoDimArray<T> {
     }
   }
 
-  get(row: number, col: number) {
+  get(row: number, col: number): T | undefined {
     return this._arr[this.getInd(row, col)]
   }
 
@@ -51,7 +51,7 @@ export class TwoDimArray<T> {
     this._arr[row * this.col + col] = val
   }
 
-  rawGet(ind: number) {
+  rawGet(ind: number): T | undefined {
     return this._arr[ind]
   }
 }

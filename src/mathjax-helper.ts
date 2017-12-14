@@ -191,7 +191,7 @@ function valueMatchesPattern(value: any) {
     } else {
       return false
     }
-  } else if (typeof value == 'string') {
+  } else if (typeof value === 'string') {
     return true
   } else {
     return false

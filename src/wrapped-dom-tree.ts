@@ -30,21 +30,27 @@
 import { TwoDimArray } from './two-dim-array'
 
 let curHash = 0
-const hashTo = {}
+const hashTo: { [key: string]: WrappedDomTree | undefined } = {}
+
+type Operation =
+  | { type: 'r'; tree: number; otherTree: number }
+  | { type: 'd'; tree: number }
+  | { type: 'i'; otherTree: number; pos: number }
 
 export class WrappedDomTree {
-  textData: string
-  children: WrappedDomTree[]
-  size: number
-  diffHash: { [key: string]: any }
-  className: string
-  tagName: string
-  rep?: WrappedDomTree
-  isText: boolean
-  hash: number
-  clone: boolean
-  dom: Element
-  shownTree: WrappedDomTree
+  public readonly shownTree?: WrappedDomTree
+  public readonly dom: Element
+  private textData: string
+  private children: WrappedDomTree[] = []
+  private size: number = 0
+  private diffHash: { [key: string]: any }
+  private className: string
+  private tagName: string
+  private rep?: WrappedDomTree
+  private isText: boolean
+  private hash: number
+  private clone: boolean
+  // tslint:disable-next-line:no-uninitialized
   // @param dom A DOM element object
   //    https://developer.mozilla.org/en-US/docs/Web/API/element
   // @param clone Boolean flag indicating if this is the DOM tree to modify
@@ -72,7 +78,6 @@ export class WrappedDomTree {
     if (this.isText) {
       this.size = 1
     } else {
-      ;({ rep } = this)
       this.children = Array.from(this.dom.childNodes).map(
         (dom, ind) =>
           new WrappedDomTree(
@@ -91,7 +96,7 @@ export class WrappedDomTree {
   }
 
   // @param otherTree WrappedDomTree of a DOM element to diff against
-  diffTo(
+  public diffTo(
     otherTree: WrappedDomTree,
   ): {
     possibleReplace?: {
@@ -101,85 +106,84 @@ export class WrappedDomTree {
     inserted: Node[]
     last?: Node
   } {
-    if (this.clone) {
+    if (this.clone && this.shownTree) {
       return this.shownTree.diffTo(otherTree)
     }
 
     const diff = this.rep && this.rep.diff(otherTree)
-    const { operations } = diff
+    const operations = diff && diff.operations
     let indexShift = 0
     let inserted: Node[] = []
 
     // Force variables to leak to diffTo scope
-    let last
+    let last: Node | undefined
     let possibleReplace
     let r
-    let lastOp
-    let lastElmDeleted
-    let lastElmInserted
+    let lastOp: Operation | undefined
+    let lastElmDeleted: Element | undefined
+    let lastElmInserted: Element | undefined
 
     if (operations) {
-      if (operations instanceof Array) {
-        for (let op of Array.from(operations)) {
-          ;((op) => {
-            if (op.type === 'd') {
-              const possibleLastDeleted = this.children[op.tree + indexShift]
-                .dom
-              r = this.remove(op.tree + indexShift)
-              this.rep && this.rep.remove(op.tree + indexShift)
-              if (!last || last.nextSibling === r || last === r) {
-                last = r
-                // Undefined errors can be throw so we add a condition on lastOp
-                // being defined
-                if (last && lastOp && op.tree === lastOp.pos) {
-                  lastElmDeleted = possibleLastDeleted
-                } else {
-                  lastElmDeleted = null
-                  lastElmInserted = null
-                }
-                lastOp = op
+      if (Array.isArray(operations)) {
+        for (const op of operations) {
+          if (op.type === 'd') {
+            const possibleLastDeleted = this.children[op.tree + indexShift].dom
+            r = this.remove(op.tree + indexShift)
+            this.rep && this.rep.remove(op.tree + indexShift)
+            if (!last || last.nextSibling === r || last === r) {
+              last = r
+              // Undefined errors can be throw so we add a condition on lastOp
+              // being defined
+              if (
+                last &&
+                lastOp &&
+                lastOp.type === 'i' &&
+                op.tree === lastOp.pos
+              ) {
+                lastElmDeleted = possibleLastDeleted
+              } else {
+                lastElmDeleted = undefined
+                lastElmInserted = undefined
               }
-              indexShift--
-              return
-            } else if (op.type === 'i') {
-              this.rep &&
-                this.rep.insert(
-                  op.pos + indexShift,
-                  otherTree.children[op.otherTree],
-                )
-              r = this.insert(
+              lastOp = op
+            }
+            indexShift--
+          } else if (op.type === 'i') {
+            this.rep &&
+              this.rep.insert(
                 op.pos + indexShift,
                 otherTree.children[op.otherTree],
-                this.rep && this.rep.children[op.pos + indexShift],
               )
-              inserted.push(r)
-              if (!last || last.nextSibling === r) {
-                last = r
-                lastOp = op
-                lastElmInserted = r
-              }
-              indexShift++
-              return
-            } else {
-              const re = this.children[op.tree + indexShift].diffTo(
-                otherTree.children[op.otherTree],
-              )
-              if (
-                !last ||
-                (last.nextSibling === this.children[op.tree + indexShift].dom &&
-                  re.last)
-              ) {
-                ;({ last } = re)
-                if (re.possibleReplace) {
-                  lastElmInserted = re.possibleReplace.cur
-                  lastElmDeleted = re.possibleReplace.prev
-                }
-                lastOp = op
-              }
-              inserted = inserted.concat(re.inserted)
-              return
+            r = this.insert(
+              op.pos + indexShift,
+              otherTree.children[op.otherTree],
+              this.rep && this.rep.children[op.pos + indexShift],
+            )
+            inserted.push(r)
+            if (!last || last.nextSibling === r) {
+              last = r
+              lastOp = op
+              lastElmInserted = r as Element
             }
-          })(op)
+            indexShift++
+          } else {
+            const re = this.children[op.tree + indexShift].diffTo(
+              otherTree.children[op.otherTree],
+            )
+            if (
+              !last ||
+              (last.nextSibling === this.children[op.tree + indexShift].dom &&
+                re.last)
+            ) {
+              ;({ last } = re)
+              if (re.possibleReplace) {
+                lastElmInserted = re.possibleReplace.cur as Element | undefined
+                lastElmDeleted = re.possibleReplace.prev
+              }
+              lastOp = op
+            }
+            inserted = inserted.concat(re.inserted)
+          }
         }
       } else {
         console.log(operations)
@@ -221,14 +225,20 @@ export class WrappedDomTree {
     return this.dom.childNodes[i - 1]
   }
 
-  diff(otherTree: WrappedDomTree, tmax?: number) {
+  private diff(
+    otherTree: WrappedDomTree,
+    tmax?: number,
+  ): {
+    score: number
+    operations?: Operation[]
+  } {
     let i
     if (this.equalTo(otherTree)) {
-      return { score: 0, operations: null }
+      return { score: 0, operations: undefined }
     }
 
     if (this.cannotReplaceWith(otherTree)) {
-      return { score: 1 / 0, operations: null }
+      return { score: 1 / 0, operations: undefined }
     }
 
     const key = otherTree.hash
@@ -240,17 +250,14 @@ export class WrappedDomTree {
       tmax = 100000
     }
     if (tmax <= 0) {
-      return 0
+      return { score: 0 }
     }
 
     let offset = 0
-    const forwardSearch = (offset: number) => {
-      return (
-        offset < this.children.length &&
-        offset < otherTree.children.length &&
-        this.children[offset].equalTo(otherTree.children[offset])
-      )
-    }
+    const forwardSearch = (offset: number) =>
+      offset < this.children.length &&
+      offset < otherTree.children.length &&
+      this.children[offset].equalTo(otherTree.children[offset])
     while (forwardSearch(offset)) {
       offset++
     }
@@ -269,7 +276,8 @@ export class WrappedDomTree {
     // Because coffescripts allows biderctional loops we need this condition
     // gaurd to prevent a decreasing array list
     if (otherTree.children.length - offset > 1) {
-      let asc, end
+      let asc: boolean
+      let end: number
       for (
         i = 1, end = otherTree.children.length - offset - 1, asc = 1 <= end;
         asc ? i <= end : i >= end;
@@ -293,7 +301,8 @@ export class WrappedDomTree {
     // Because coffescripts allows biderctional loops we need this condition
     // gaurd to prevent a decreasing array list
     if (this.children.length - offset > 1) {
-      let asc1, end1
+      let asc1: boolean
+      let end1: number
       for (
         i = 1, end1 = this.children.length - offset - 1, asc1 = 1 <= end1;
         asc1 ? i <= end1 : i >= end1;
@@ -313,9 +322,10 @@ export class WrappedDomTree {
       )
     }
 
-    var getScore = (i: number, j: number, max: number) => {
-      if (dp.get(i, j) !== undefined) {
-        return dp.get(i, j)
+    const getScore = (i: number, j: number, max: number): number => {
+      const res = dp.get(i, j)
+      if (res !== undefined) {
+        return res
       }
       if (max === undefined) {
         max = 1 / 0
@@ -380,7 +390,7 @@ export class WrappedDomTree {
       otherTree.children.length - offset,
       tmax,
     )
-    const operations = []
+    const operations: Operation[] = []
 
     let cur = p.getInd(
       this.children.length - offset,
@@ -390,7 +400,7 @@ export class WrappedDomTree {
     let cc = otherTree.children.length - 1 - offset
 
     while (p.rawGet(cur) !== undefined) {
-      const prev = p.rawGet(cur)
+      const prev = p.rawGet(cur)!
       const rc = p.get2DInd(prev)
       const pr = rc.r - 1
       const pc = rc.c - 1
@@ -457,7 +467,7 @@ export class WrappedDomTree {
   }
 
   removeSelf() {
-    hashTo[this.hash] = null
+    hashTo[this.hash] = undefined
     this.children && this.children.forEach((c) => c.removeSelf())
   }
 }

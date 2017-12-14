@@ -92,7 +92,10 @@ export function activate() {
 }
 
 export function createMarkdownPreviewView(state: MPVParams) {
-  if (state.editorId !== undefined || (state.filePath && fs.isFileSync(state.filePath))) {
+  if (
+    state.editorId !== undefined ||
+    (state.filePath && fs.isFileSync(state.filePath))
+  ) {
     return new MarkdownPreviewView(state)
   }
   return undefined
