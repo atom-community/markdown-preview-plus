@@ -7,6 +7,7 @@
     "no-null-keyword": false,
     "no-non-null-assertion": false,
     "ter-no-sparse-arrays": false,
-    "space-before-function-paren": false
+    "space-before-function-paren": false,
+    "no-unsafe-any": true
   }
 }

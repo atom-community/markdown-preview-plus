@@ -1,6 +1,5 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -80,7 +79,7 @@ export class UpdatePreview {
       !atom.config.get('markdown-preview-plus.enablePandoc') ||
       !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
     ) {
-      for (const elm of Array.from(r.inserted)) {
+      for (const elm of r.inserted) {
         if (elm instanceof Element) {
           renderer.convertCodeBlocksToAtomEditors(elm)
         }

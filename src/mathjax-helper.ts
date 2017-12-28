@@ -11,6 +11,9 @@
 // for calls to MathJax to process LaTeX equations.
 //
 
+// TODO: Fix this
+// tslint:disable: no-unsafe-any
+
 // tslint:disable-next-line:no-var-requires
 const { $ } = require('atom-space-pen-views')
 import path = require('path')
@@ -112,8 +115,8 @@ const namePattern = new RegExp(`\
 ^[a-zA-Z]*$\
 `) // letters, but no numerals.
 
-const getUserMacrosPath = function() {
-  const userMacrosPath = CSON.resolve(
+function getUserMacrosPath(): string {
+  const userMacrosPath: string | undefined | null = CSON.resolve(
     path.join(atom.getConfigDirPath(), 'markdown-preview-plus'),
   )
   return userMacrosPath != null
@@ -121,7 +124,7 @@ const getUserMacrosPath = function() {
     : path.join(atom.getConfigDirPath(), 'markdown-preview-plus.cson')
 }
 
-function loadMacrosFile(filePath: string) {
+function loadMacrosFile(filePath: string): object {
   if (!CSON.isObjectPath(filePath)) {
     return {}
   }
@@ -144,17 +147,16 @@ function loadMacrosFile(filePath: string) {
   })
 }
 
-const loadUserMacros = function() {
-  let result
+function loadUserMacros() {
   const userMacrosPath = getUserMacrosPath()
   if (fs.isFileSync(userMacrosPath)) {
-    return (result = loadMacrosFile(userMacrosPath))
+    return loadMacrosFile(userMacrosPath)
   } else {
     console.log(
       'Creating markdown-preview-plus.cson, this is a one-time operation.',
     )
     createMacrosTemplate(userMacrosPath)
-    return (result = loadMacrosFile(userMacrosPath))
+    return loadMacrosFile(userMacrosPath)
   }
 }
 

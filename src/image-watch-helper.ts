@@ -9,9 +9,18 @@ const pathWatcherPath = path.join(
 // tslint:disable-next-line:no-var-requires
 const pathWatcher = require(pathWatcherPath)
 
-let imageRegister = {}
+// TODO: Fixme
+// tslint:disable: no-unsafe-any
 
-const refreshImages = _.debounce(function(src) {
+let imageRegister: { [key: string]: {
+  version: number
+  watcher: any
+  files: string[]
+  watched: boolean
+  path: string
+} | undefined } = {}
+
+const refreshImages = _.debounce(function(src: string) {
   for (const item of atom.workspace.getPaneItems()) {
     if (isMarkdownPreviewView(item)) {
       // TODO: check against imageRegister[src].version.files
@@ -22,10 +31,12 @@ const refreshImages = _.debounce(function(src) {
 
 function srcClosure(src: string) {
   return function(event: string, _path: string) {
+    const i = imageRegister[src]
+    if (!i) return
     if (event === 'change' && fs.isFileSync(src)) {
-      imageRegister[src].version = Date.now()
+      i.version = Date.now()
     } else {
-      imageRegister[src].watcher.close()
+      i.watcher.close()
       delete imageRegister[src]
     }
     refreshImages(src)
@@ -34,6 +45,7 @@ function srcClosure(src: string) {
 
 export function removeFile(file: string) {
   imageRegister = _.mapValues(imageRegister, function(image) {
+    if (!image) return image
     image.files = _.without(image.files, file)
     image.files = _.filter(image.files, fs.isFileSync)
     if (_.isEmpty(image.files)) {
@@ -46,14 +58,14 @@ export function removeFile(file: string) {
 
 export function getVersion(image: string, file?: string) {
   let version
-  const i = _.get(imageRegister, image, {})
-  if (_.isEmpty(i)) {
+  const i = imageRegister[image]
+  if (!i) {
     if (fs.isFileSync(image)) {
       version = Date.now()
       imageRegister[image] = {
         path: image,
         watched: true,
-        files: [file],
+        files: file ? [file] : [],
         version,
         watcher: pathWatcher.watch(image, srcClosure(image)),
       }
@@ -63,15 +75,15 @@ export function getVersion(image: string, file?: string) {
     }
   }
 
-  const files = _.get(i, 'files')
-  if (!_.includes(files, file)) {
-    imageRegister[image].files.push(file)
+  const files: string[] = i.files
+  if (file && !_.includes(files, file)) {
+    i.files.push(file)
   }
 
-  version = _.get(i, 'version')
+  version = i.version
   if (!version && fs.isFileSync(image)) {
     version = Date.now()
-    imageRegister[image].version = version
+    i.version = version
   }
   return version
 }

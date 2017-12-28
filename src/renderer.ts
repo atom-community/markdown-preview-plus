@@ -1,8 +1,6 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.frconst cbClass = codeBlock.className
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS104: Avoid inline assignments
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
@@ -21,7 +19,7 @@ const packagePath = path.dirname(__dirname)
 
 export function toDOMFragment(
   text: string,
-  filePath: any,
+  filePath: string | undefined,
   _grammar: any,
   renderLaTeX: boolean,
   callback: (error: Error | null, domFragment?: Node) => string,
@@ -45,7 +43,7 @@ export function toDOMFragment(
 export function toHTML(
   text: string | null,
   filePath: string | undefined,
-  grammar: Grammar | null,
+  grammar: Grammar | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
   callback: (error: Error | null, html: string) => void,
@@ -131,7 +129,7 @@ function sanitize(html: string) {
     'onunload',
   ]
   doc.querySelectorAll('*').forEach((elem) =>
-    Array.from(attributesToRemove).map((attribute) => {
+    attributesToRemove.map((attribute) => {
       elem.removeAttribute(attribute)
     }),
   )
@@ -143,9 +141,7 @@ function resolveImagePaths(
   filePath: string | undefined,
   copyHTMLFlag: boolean,
 ) {
-  const [rootDirectory] = Array.from(
-    atom.project.relativizePath(filePath || ''),
-  )
+  const [rootDirectory] = atom.project.relativizePath(filePath || '')
   const doc = document.createElement('div')
   doc.innerHTML = html
   doc.querySelectorAll('img').forEach(function(img) {
@@ -159,7 +155,7 @@ function resolveImagePaths(
         return
       }
       // @ts-ignore
-      if (src.startsWith(process.resourcesPath)) {
+      if (src.startsWith(process.resourcesPath as string)) {
         return
       }
       if (src.startsWith(resourcePath)) {
@@ -172,7 +168,7 @@ function resolveImagePaths(
       if (src[0] === '/') {
         if (!fs.isFileSync(src)) {
           try {
-            src = path.join(rootDirectory, src.substring(1))
+            if (rootDirectory !== null) src = path.join(rootDirectory, src.substring(1))
           } catch (e) {
             // noop
           }
@@ -262,7 +258,8 @@ function tokenizeCodeBlocks(html: string, defaultLanguage: string = 'text') {
     const fenceName =
       codeBlock.className.replace(/^(lang-|sourceCode )/, '') || defaultLanguage
 
-    const highlightedHtml = highlight({
+    // tslint:disable-next-line:no-unsafe-any
+    const highlightedHtml: string = highlight({
       fileContents: codeBlock.innerText,
       scopeName: scopeForFenceName(fenceName),
       nbsp: false,
@@ -275,7 +272,7 @@ function tokenizeCodeBlocks(html: string, defaultLanguage: string = 'text') {
         : 'editor-colors',
     })
 
-    return (preElement.outerHTML = highlightedHtml)
+    preElement.outerHTML = highlightedHtml
   })
 
   return doc.innerHTML

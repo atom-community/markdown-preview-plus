@@ -35,6 +35,7 @@ const scopesByFenceName = {
   yml: 'source.yaml',
 }
 
-export function scopeForFenceName(fenceName: string) {
+export function scopeForFenceName(fenceName: string): string {
+  // tslint:disable-next-line:no-unsafe-any
   return scopesByFenceName[fenceName] || `source.${fenceName}`
 }
