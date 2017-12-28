@@ -164,7 +164,7 @@ export function addPreviewForEditor(editor: TextEditor) {
 }
 
 export function previewFile({ currentTarget }: CommandEvent) {
-  const filePath = currentTarget.dataset.path
+  const filePath = (currentTarget as HTMLElement).dataset.path
   if (!filePath) {
     return
   }

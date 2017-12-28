@@ -28,7 +28,7 @@
     "season": "^6.0"
   },
   "devDependencies": {
-    "@types/atom": "^1.22.3",
+    "@types/atom": "^1.23.0",
     "@types/fs-plus": "^3.0.0",
     "@types/lodash": "^4.14.88",
     "@types/markdown-it": "0.0.4",
