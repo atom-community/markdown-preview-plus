@@ -2,7 +2,7 @@ import { Token } from 'markdown-it'
 import path = require('path')
 
 // TODO: Fixme
-// tslint:disable: no-unsafe-any no-floating-promises
+// tslint:disable: no-floating-promises
 import {
   CommandEvent,
   Emitter,
@@ -12,16 +12,6 @@ import {
   StyleManager,
   TextEditor,
 } from 'atom'
-const {
-  $,
-  $$$,
-  ScrollView,
-}: {
-  $: JQueryStatic
-  $$$: JQueryStatic
-  ScrollView: any
-  // tslint:disable-next-line:no-var-requires no-unsafe-any
-} = require('atom-space-pen-views')
 import _ = require('lodash')
 import fs = require('fs-plus')
 
@@ -42,13 +32,15 @@ export interface MPVParamsPath {
 
 export type MPVParams = MPVParamsEditor | MPVParamsPath
 
-export class MarkdownPreviewView extends ScrollView {
+export class MarkdownPreviewView {
+  private loading: boolean;
   private resolve: () => void
   public readonly renderPromise: Promise<void> = new Promise<void>(
     (resolve) => (this.resolve = resolve),
   )
   // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
+  private preview: HTMLElement
   private emitter: Emitter<{
     'did-change-title': undefined
     'did-change-markdown': undefined
@@ -64,31 +56,22 @@ export class MarkdownPreviewView extends ScrollView {
   private file?: File
   // tslint:disable-next-line:no-uninitialized
   private editor?: TextEditor
-  static content() {
-    return this.div(
-      { class: 'markdown-preview native-key-bindings', tabindex: -1 },
-      // If you dont explicitly declare a class then the elements wont be created
-      () => this.div({ class: 'update-preview' }),
-    )
-  }
 
   constructor({ editorId, filePath }: MPVParams) {
-    // @ts-ignore
-    super()
     this.getPathToElement = this.getPathToElement.bind(this)
     this.syncSource = this.syncSource.bind(this)
     this.getPathToToken = this.getPathToToken.bind(this)
     this.syncPreview = this.syncPreview.bind(this)
     this.editorId = editorId
     this.filePath = filePath
-  }
+    this.element = document.createElement('div')
+    this.element.classList.add('markdown-preview', 'native-key-bindings')
+    this.element.tabIndex = -1
+    this.preview = document.createElement('div')
+    this.preview.classList.add('update-preview')
+    this.element.appendChild(this.preview)
 
-  attached() {
-    if (this.isAttached) {
-      return
-    }
-    this.isAttached = true
-
+    // TODO: on attach?
     if (this.editorId !== undefined) {
       this.resolveEditor(this.editorId)
     } else if (this.filePath !== undefined) {
@@ -108,6 +91,7 @@ export class MarkdownPreviewView extends ScrollView {
     const path = this.getPath()
     path && imageWatcher.removeFile(path)
     this.disposables.dispose()
+    this.element.remove()
   }
 
   onDidChangeTitle(callback: () => void) {
@@ -171,8 +155,8 @@ export class MarkdownPreviewView extends ScrollView {
     )
 
     atom.commands.add(this.element, {
-      'core:move-up': () => this.scrollUp(),
-      'core:move-down': () => this.scrollDown(),
+      'core:move-up': () => this.element.scrollBy({ top: -10 }),
+      'core:move-down': () => this.element.scrollBy({ top: 10 }),
       'core:save-as': (event) => {
         event.stopPropagation()
         // tslint:disable-next-line:no-floating-promises
@@ -182,14 +166,14 @@ export class MarkdownPreviewView extends ScrollView {
         if (this.copyToClipboard()) event.stopPropagation()
       },
       'markdown-preview-plus:zoom-in': () => {
-        const zoomLevel = parseFloat(this.css('zoom')) || 1
-        this.css('zoom', zoomLevel + 0.1)
+        const zoomLevel = parseFloat(this.element.style.zoom || '1')
+        this.element.style.zoom = (zoomLevel + 0.1).toString()
       },
       'markdown-preview-plus:zoom-out': () => {
-        const zoomLevel = parseFloat(this.css('zoom')) || 1
-        this.css('zoom', zoomLevel - 0.1)
+        const zoomLevel = parseFloat(this.element.style.zoom || '1')
+        this.element.style.zoom = (zoomLevel - 0.1).toString()
       },
-      'markdown-preview-plus:reset-zoom': () => this.css('zoom', 1),
+      'markdown-preview-plus:reset-zoom': () => this.element.style.zoom = '1',
       'markdown-preview-plus:sync-source': (event) => {
         // tslint:disable-next-line:no-floating-promises
         this.getMarkdownSource().then((source?: string) => {
@@ -377,16 +361,13 @@ export class MarkdownPreviewView extends ScrollView {
           this.loaded = true
           // div.update-preview created after constructor st UpdatePreview cannot
           // be instanced in the constructor
-          if (!this.updatePreview && this.find('div.update-preview')[0]) {
-            this.updatePreview = new UpdatePreview(
-              this.find('div.update-preview')[0],
-            )
+          if (!this.updatePreview && this.preview) {
+            this.updatePreview = new UpdatePreview(this.preview)
           }
           this.updatePreview &&
             domFragment &&
             this.updatePreview.update(domFragment as Element, this.renderLaTeX)
           this.emitter.emit('did-change-markdown')
-          return this.originalTrigger('markdown-preview-plus:markdown-changed')
         }
       },
     )
@@ -487,24 +468,17 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   showError(result: Error) {
-    this.html(
-      $$$(function() {
-        // @ts-ignore
-        this.h2('Previewing Markdown Failed')
-        // @ts-ignore
-        this.h3(result.message)
-      }),
-    )
+    const error = document.createElement('div')
+    error.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${result.message}</h3>`
+    this.preview.appendChild(error)
   }
 
   showLoading() {
     this.loading = true
-    this.html(
-      $$$(function() {
-        // @ts-ignore
-        this.div({ class: 'markdown-spinner' }, 'Loading Markdown\u2026')
-      }),
-    )
+    const spinner = document.createElement('div')
+    spinner.classList.add('markdown-spinner')
+    spinner.innerText = 'Loading Markdown\u2026'
+    this.preview.appendChild(spinner)
   }
 
   copyToClipboard() {
@@ -521,7 +495,7 @@ export class MarkdownPreviewView extends ScrollView {
       selectedText &&
       // tslint:disable-next-line:strict-type-predicates //TODO: complain on TS
       selectedNode != null &&
-      (this[0] === selectedNode || $.contains(this[0], selectedNode))
+      (this.element === selectedNode || this.element.contains(selectedNode))
     ) {
       return false
     }
@@ -815,7 +789,7 @@ export class MarkdownPreviewView extends ScrollView {
   //
   getPathToToken(tokens: Token[], line: number) {
     let pathToToken: Array<{ tag: string; index: number }> = []
-    let tokenTagCount: number[] = []
+    let tokenTagCount: { [key: string]: number | undefined } = {}
     let level = 0
 
     for (const token of tokens) {
@@ -844,22 +818,20 @@ export class MarkdownPreviewView extends ScrollView {
         if (token.nesting === 1) {
           pathToToken.push({
             tag: token.tag,
-            index:
-              tokenTagCount[token.tag] != null ? tokenTagCount[token.tag] : 0,
+            index: tokenTagCount[token.tag] || 0,
           })
-          tokenTagCount = []
+          tokenTagCount = {}
           level++
         } else if (token.nesting === 0) {
           pathToToken.push({
             tag: token.tag,
-            index:
-              tokenTagCount[token.tag] != null ? tokenTagCount[token.tag] : 0,
+            index: tokenTagCount[token.tag] || 0,
           })
           break
         }
       } else if (token.level === level) {
-        if (tokenTagCount[token.tag] != null) {
-          tokenTagCount[token.tag]++
+        if (tokenTagCount[token.tag] !== undefined) {
+          tokenTagCount[token.tag]!++
         } else {
           tokenTagCount[token.tag] = 1
         }
@@ -885,31 +857,32 @@ export class MarkdownPreviewView extends ScrollView {
     const tokens = markdownIt.getTokens(text, this.renderLaTeX)
     const pathToToken = this.getPathToToken(tokens, line)
 
-    let element: JQuery = this.find('.update-preview').eq(0)
+    let element = this.preview
     for (const token of pathToToken) {
-      const candidateElement = element.children(token.tag).eq(token.index)
-      if (candidateElement.length !== 0) {
+      const candidateElement: HTMLElement | null =
+        element.querySelectorAll(token.tag).item(token.index) as HTMLElement
+      if (candidateElement) {
         element = candidateElement
       } else {
         break
       }
     }
 
-    if (element[0].classList.contains('update-preview')) {
-      return null
+    if (element.classList.contains('update-preview')) {
+      return undefined
     } // Do not jump to the top of the preview for bad syncs
 
-    if (!element[0].classList.contains('update-preview')) {
-      element[0].scrollIntoView()
+    if (!element.classList.contains('update-preview')) {
+      element.scrollIntoView()
     }
-    const maxScrollTop = this.element.scrollHeight - this.innerHeight()
-    if (!(this.scrollTop() >= maxScrollTop)) {
-      this.element.scrollTop -= this.innerHeight() / 4
+    const maxScrollTop = this.element.scrollHeight - this.element.clientHeight
+    if (!(this.element.scrollTop >= maxScrollTop)) {
+      this.element.scrollTop -= this.element.clientHeight / 4
     }
 
-    element.addClass('flash')
-    setTimeout(() => element.removeClass('flash'), 1000)
+    element.classList.add('flash')
+    setTimeout(() => element!.classList.remove('flash'), 1000)
 
-    return element[0]
+    return element
   }
 }

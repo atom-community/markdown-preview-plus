@@ -17,13 +17,13 @@ import { Grammar, TextEditorElement } from 'atom'
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
 
-export async function toDOMFragment(
+export async function toDOMFragment<T>(
   text: string,
   filePath: string | undefined,
   _grammar: any,
   renderLaTeX: boolean,
-  callback: (error: Error | null, domFragment?: Node) => string,
-): Promise<void> {
+  callback: (error: Error | null, domFragment?: Node) => T,
+): Promise<T> {
   return render(text, filePath, renderLaTeX, false, function(
     error: Error | null,
     html?: string,
@@ -73,13 +73,13 @@ export async function toHTML(
   })
 }
 
-async function render(
+async function render<T>(
   text: string,
   filePath: string | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
-  callback: (error: Error | null, html: string) => void,
-): Promise<void> {
+  callback: (error: Error | null, html: string) => T,
+): Promise<T> {
   // Remove the <!doctype> since otherwise marked will escape it
   // https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
@@ -90,11 +90,11 @@ async function render(
     }
     html = sanitize(html)
     html = await resolveImagePaths(html, filePath, copyHTMLFlag)
-    callback(null, html.trim())
+    return callback(null, html.trim())
   }
 
   if (atom.config.get('markdown-preview-plus.enablePandoc')) {
-    pandocHelper.renderPandoc(text, filePath, renderLaTeX, callbackFunction)
+    return pandocHelper.renderPandoc(text, filePath, renderLaTeX, callbackFunction)
   } else {
     return callbackFunction(null, markdownIt.render(text, renderLaTeX))
   }

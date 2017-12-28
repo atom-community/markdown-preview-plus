@@ -160,30 +160,33 @@ function handleResponse(error: string, html: string, renderMath: boolean) {
  * @param {boolean} whether to render the math with mathjax
  * @param {function} callbackFunction
  */
-function renderPandoc(
+async function renderPandoc<T>(
   text: string,
   filePath: string | undefined,
   renderMath: boolean,
-  cb: (err: Error | null, result: string) => void,
-) {
+  cb: (err: Error | null, result: string) => T,
+): Promise<T> {
   const { args, opts } = setPandocOptions(filePath, renderMath)
-  const cp = CP.execFile(
-    atomConfig().pandocPath,
-    getArguments(args),
-    opts,
-    function(error, stdout, stderr) {
-      if (error) {
-        atom.notifications.addError(error.toString(), {
-          stack: error.stack,
-          dismissable: true,
-        })
-      }
-      const result = handleResponse(stderr || '', stdout || '', renderMath)
-      cb(null, result)
-    },
-  )
-  cp.stdin.write(text)
-  cp.stdin.end()
+  return new Promise<T>((resolve, reject) => {
+    const cp = CP.execFile(
+      atomConfig().pandocPath,
+      getArguments(args),
+      opts,
+      function(error, stdout, stderr) {
+        if (error) {
+          atom.notifications.addError(error.toString(), {
+            stack: error.stack,
+            dismissable: true,
+          })
+          reject(error)
+        }
+        const result = handleResponse(stderr || '', stdout || '', renderMath)
+        resolve(cb(null, result))
+      },
+    )
+    cp.stdin.write(text)
+    cp.stdin.end()
+  })
 }
 
 function getArguments(iargs: Args) {
