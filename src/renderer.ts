@@ -30,7 +30,7 @@ export function toDOMFragment(
     error: Error | null,
     html?: string,
   ) {
-    if (error != null) {
+    if (error !== null) {
       return callback(error)
     }
 
@@ -50,12 +50,12 @@ export function toHTML(
   copyHTMLFlag: boolean,
   callback: (error: Error | null, html: string) => void,
 ): void {
-  if (text == null) {
+  if (text === null) {
     text = ''
   }
   render(text, filePath, renderLaTeX, copyHTMLFlag, function(error, html) {
     let defaultCodeLanguage: string | undefined
-    if (error != null) {
+    if (error !== null) {
       callback(error, '')
     }
     // Default code blocks to be coffee in Literate CoffeeScript files
@@ -84,7 +84,7 @@ function render(
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
   const callbackFunction = function(error: Error | null, html: string) {
-    if (error != null) {
+    if (error !== null) {
       callback(error, '')
     }
     html = sanitize(html)

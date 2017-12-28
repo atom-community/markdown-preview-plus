@@ -60,8 +60,8 @@ const init = function(rL: boolean) {
 }
 
 const needsInit = (rL: boolean) =>
-  markdownIt == null ||
-  markdownItOptions == null ||
+  markdownIt === null ||
+  markdownItOptions === null ||
   markdownItOptions.breaks !==
     atom.config.get('markdown-preview-plus.breakOnSingleNewline') ||
   lazyHeaders !== atom.config.get('markdown-preview-plus.useLazyHeaders') ||

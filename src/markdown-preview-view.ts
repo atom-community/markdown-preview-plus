@@ -179,7 +179,7 @@ export class MarkdownPreviewView extends ScrollView {
       'markdown-preview-plus:reset-zoom': () => this.css('zoom', 1),
       'markdown-preview-plus:sync-source': (event) => {
         this.getMarkdownSource().then((source?: string) => {
-          if (source == null) {
+          if (source === undefined) {
             return
           }
           this.syncSource(source, event.target as HTMLElement)
@@ -573,6 +573,7 @@ export class MarkdownPreviewView extends ScrollView {
 </html>` + '\n' // Ensure trailing newline
 
           fs.writeFileSync(htmlFilePath, html)
+          // tslint:disable-next-line:no-floating-promises
           atom.workspace.open(htmlFilePath)
         }
       })

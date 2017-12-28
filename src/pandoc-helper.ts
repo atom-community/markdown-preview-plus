@@ -18,7 +18,7 @@ const atomConfig = () => atom.config.get('markdown-preview-plus')!
 const getMathJaxPath = (function() {
   let cached: string | null = null
   return function() {
-    if (cached != null) {
+    if (cached !== null) {
       return cached
     }
     try {
@@ -55,7 +55,7 @@ interface Args {
 function setPandocOptions(filePath: string | undefined, renderMath: boolean) {
   // see https://github.com/atom-community/markdown-preview-plus/issues/316
   const opts: CP.ExecFileOptions = { maxBuffer: Infinity }
-  if (filePath != null) {
+  if (filePath !== undefined) {
     opts.cwd = path.dirname(filePath)
   }
   const mathjaxPath = getMathJaxPath()

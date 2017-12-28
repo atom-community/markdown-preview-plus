@@ -131,13 +131,14 @@ export function uriForEditor(editor: TextEditor) {
 export function removePreviewForEditor(editor: TextEditor) {
   const uri = uriForEditor(editor)
   const previewPane = atom.workspace.paneForURI(uri)
-  if (previewPane != null) {
+  if (previewPane !== undefined) {
     const preview = previewPane.itemForURI(uri)
     if (preview === undefined) return false
     if (preview !== previewPane.getActiveItem()) {
       previewPane.activateItem(preview)
       return false
     }
+    // tslint:disable-next-line:no-floating-promises
     previewPane.destroyItem(preview)
     return true
   } else {
@@ -154,6 +155,7 @@ export function addPreviewForEditor(editor: TextEditor) {
       'markdown-preview-plus.previewSplitPaneDir',
     )!
   }
+  // tslint:disable-next-line:no-floating-promises
   atom.workspace.open(uri, options).then(function(markdownPreviewView) {
     if (isMarkdownPreviewView(markdownPreviewView)) {
       previousActivePane.activate()
@@ -174,6 +176,7 @@ export function previewFile({ currentTarget }: CommandEvent) {
     }
   }
 
+  // tslint:disable-next-line:no-floating-promises
   atom.workspace.open(`markdown-preview-plus://${encodeURI(filePath)}`, {
     searchAllPanes: true,
   })
@@ -188,7 +191,7 @@ export function copyHtml(
   scaleMath = 100,
 ): void {
   const editor = atom.workspace.getActiveTextEditor()
-  if (editor == null) {
+  if (editor === undefined) {
     return
   }
 

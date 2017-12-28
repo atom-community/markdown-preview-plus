@@ -79,7 +79,7 @@ export = {
     const compileProcessedHTMLString = function() {
       const msvgh = document.getElementById('MathJax_SVG_Hidden')
       const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
-      if (svgGlyphs != null) {
+      if (svgGlyphs !== null) {
         element.insertBefore(svgGlyphs, element.firstChild)
       }
       return element.innerHTML
@@ -126,13 +126,13 @@ function loadMacrosFile(filePath: string) {
     return {}
   }
   return CSON.readFileSync(filePath, function(error?: Error, object?: object) {
-    if (object == null) {
+    if (object === undefined) {
       object = {}
     }
-    if (error != null) {
+    if (error !== undefined) {
       console.warn(
         `Error reading Latex Macros file '${filePath}': ${
-          error.stack != null ? error.stack : error
+          error.stack !== undefined ? error.stack : error
         }`,
       )
       atom.notifications.addError(
