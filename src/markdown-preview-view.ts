@@ -12,11 +12,15 @@ import {
   StyleManager,
   TextEditor,
 } from 'atom'
-const { $, $$$, ScrollView }: {
+const {
+  $,
+  $$$,
+  ScrollView,
+}: {
   $: JQueryStatic
   $$$: JQueryStatic
   ScrollView: any
-// tslint:disable-next-line:no-var-requires no-unsafe-any
+  // tslint:disable-next-line:no-var-requires no-unsafe-any
 } = require('atom-space-pen-views')
 import _ = require('lodash')
 import fs = require('fs-plus')
@@ -40,7 +44,9 @@ export type MPVParams = MPVParamsEditor | MPVParamsPath
 
 export class MarkdownPreviewView extends ScrollView {
   private resolve: () => void
-  public readonly renderPromise: Promise<void> = new Promise<void>((resolve) => this.resolve = resolve)
+  public readonly renderPromise: Promise<void> = new Promise<void>(
+    (resolve) => (this.resolve = resolve),
+  )
   // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
   private emitter: Emitter<{
@@ -151,12 +157,16 @@ export class MarkdownPreviewView extends ScrollView {
   handleEvents() {
     this.disposables.add(
       atom.grammars.onDidAddGrammar(() =>
-        _.debounce(() => { this.renderMarkdown() }, 250),
+        _.debounce(() => {
+          this.renderMarkdown()
+        }, 250),
       ),
     )
     this.disposables.add(
       atom.grammars.onDidUpdateGrammar(
-        _.debounce(() => { this.renderMarkdown() }, 250),
+        _.debounce(() => {
+          this.renderMarkdown()
+        }, 250),
       ),
     )
 
@@ -237,10 +247,7 @@ export class MarkdownPreviewView extends ScrollView {
               return
             }
             if (!this.editor) return
-            this.syncPreview(
-              source,
-              this.editor.getCursorBufferPosition().row,
-            )
+            this.syncPreview(source, this.editor.getCursorBufferPosition().row)
           },
         }),
       )
@@ -465,7 +472,12 @@ export class MarkdownPreviewView extends ScrollView {
       .join('\n')
       .replace(/atom-text-editor/g, 'pre.editor-colors')
       .replace(/:host/g, '.host') // Remove shadow-dom :host selector causing problem on FF
-      .replace(cssUrlRefExp, function(_match, assetsName: string, _offset, _string) {
+      .replace(cssUrlRefExp, function(
+        _match,
+        assetsName: string,
+        _offset,
+        _string,
+      ) {
         // base64 encode assets
         const assetPath = path.join(__dirname, '../assets', assetsName)
         const originalData = fs.readFileSync(assetPath, 'binary')

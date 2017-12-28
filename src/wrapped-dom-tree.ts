@@ -42,10 +42,12 @@ export class WrappedDomTree {
   private textData: string
   private children: WrappedDomTree[] = []
   private size: number = 0
-  private diffHash: { [key: string]: {
-    score: number
-    operations?: Operation[]
-  } }
+  private diffHash: {
+    [key: string]: {
+      score: number
+      operations?: Operation[]
+    }
+  }
   private className: string
   private tagName: string
   private rep?: WrappedDomTree
@@ -74,7 +76,7 @@ export class WrappedDomTree {
     this.isText = dom.nodeType === 3
     this.tagName = dom.tagName
     this.className = dom.className
-    this.textData = (dom as Element & {data: string}).data
+    this.textData = (dom as Element & { data: string }).data
     this.diffHash = {}
 
     if (this.isText) {

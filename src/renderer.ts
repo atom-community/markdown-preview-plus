@@ -51,7 +51,10 @@ export async function toHTML(
   if (text === null) {
     text = ''
   }
-  return render(text, filePath, renderLaTeX, copyHTMLFlag, function(error, html) {
+  return render(text, filePath, renderLaTeX, copyHTMLFlag, function(
+    error,
+    html,
+  ) {
     let defaultCodeLanguage: string | undefined
     if (error !== null) {
       callback(error, '')
@@ -144,51 +147,55 @@ async function resolveImagePaths(
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
   const doc = document.createElement('div')
   doc.innerHTML = html
-  await Promise.all(Array.from(doc.querySelectorAll('img')).map(async function(img) {
-    let src = img.getAttribute('src')
-    if (src) {
-      if (!atom.config.get('markdown-preview-plus.enablePandoc')) {
-        src = markdownIt.decode(src)
-      }
+  await Promise.all(
+    Array.from(doc.querySelectorAll('img')).map(async function(img) {
+      let src = img.getAttribute('src')
+      if (src) {
+        if (!atom.config.get('markdown-preview-plus.enablePandoc')) {
+          src = markdownIt.decode(src)
+        }
 
-      if (src.match(/^(https?|atom|data):/)) {
-        return
-      }
-      // @ts-ignore
-      if (src.startsWith(process.resourcesPath as string)) {
-        return
-      }
-      if (src.startsWith(resourcePath)) {
-        return
-      }
-      if (src.startsWith(packagePath)) {
-        return
-      }
+        if (src.match(/^(https?|atom|data):/)) {
+          return
+        }
+        // @ts-ignore
+        if (src.startsWith(process.resourcesPath as string)) {
+          return
+        }
+        if (src.startsWith(resourcePath)) {
+          return
+        }
+        if (src.startsWith(packagePath)) {
+          return
+        }
 
-      if (src[0] === '/') {
-        if (!fs.isFileSync(src)) {
-          try {
-            if (rootDirectory !== null) src = path.join(rootDirectory, src.substring(1))
-          } catch (e) {
-            // noop
+        if (src[0] === '/') {
+          if (!fs.isFileSync(src)) {
+            try {
+              if (rootDirectory !== null) {
+                src = path.join(rootDirectory, src.substring(1))
+              }
+            } catch (e) {
+              // noop
+            }
+          }
+        } else if (filePath) {
+          src = path.resolve(path.dirname(filePath), src)
+        }
+
+        // Use most recent version of image
+        if (!copyHTMLFlag) {
+          const v = await imageWatcher.getVersion(src, filePath)
+          if (v) {
+            src = `${src}?v=${v}`
           }
         }
-      } else if (filePath) {
-        src = path.resolve(path.dirname(filePath), src)
-      }
 
-      // Use most recent version of image
-      if (!copyHTMLFlag) {
-        const v = await imageWatcher.getVersion(src, filePath)
-        if (v) {
-          src = `${src}?v=${v}`
-        }
+        img.src = src
       }
-
-      img.src = src
-    }
-    return
-  }))
+      return
+    }),
+  )
 
   return doc.innerHTML
 }

@@ -6,13 +6,17 @@ import { watchPath, FilesystemChangeEvent, PathWatcher } from 'atom'
 // TODO: Fixme
 // tslint:disable: no-unsafe-any
 
-let imageRegister: { [key: string]: {
+interface ImageRegisterRec {
   version: number
   watcher: PathWatcher
   files: string[]
   watched: boolean
   path: string
-} | undefined } = {}
+}
+
+let imageRegister: {
+  [key: string]: ImageRegisterRec | undefined
+} = {}
 
 const refreshImages = _.debounce(async function(src: string) {
   for (const item of atom.workspace.getPaneItems()) {
