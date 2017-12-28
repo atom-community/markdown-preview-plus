@@ -39,6 +39,8 @@ export interface MPVParamsPath {
 export type MPVParams = MPVParamsEditor | MPVParamsPath
 
 export class MarkdownPreviewView extends ScrollView {
+  private resolve: () => void
+  public readonly renderPromise: Promise<void> = new Promise<void>((resolve) => this.resolve = resolve)
   // tslint:disable-next-line:no-uninitialized
   private element: HTMLElement
   private emitter: Emitter<{
@@ -123,22 +125,18 @@ export class MarkdownPreviewView extends ScrollView {
   }
 
   resolveEditor(editorId: number) {
-    const resolve = () => {
-      this.editor = this.editorForId(editorId)
+    this.editor = this.editorForId(editorId)
 
-      if (this.editor) {
-        this.emitter.emit('did-change-title')
-        this.handleEvents()
-        this.renderMarkdown()
-      } else {
-        // The editor this preview was created for has been closed so close
-        // this preview since a preview cannot be rendered without an editor
-        const pane = atom.workspace.paneForItem(this)
-        pane && pane.destroyItem(this)
-      }
+    if (this.editor) {
+      this.emitter.emit('did-change-title')
+      this.handleEvents()
+      this.renderMarkdown()
+    } else {
+      // The editor this preview was created for has been closed so close
+      // this preview since a preview cannot be rendered without an editor
+      const pane = atom.workspace.paneForItem(this)
+      pane && pane.destroyItem(this)
     }
-
-    resolve()
   }
 
   editorForId(editorId: number) {
@@ -288,14 +286,16 @@ export class MarkdownPreviewView extends ScrollView {
     if (!this.loaded) {
       this.showLoading()
     }
-    return this.getMarkdownSource().then((source?: string) => {
+    await this.getMarkdownSource().then(async (source?: string) => {
       if (source) {
-        this.renderMarkdownText(source)
+        return this.renderMarkdownText(source)
       }
+      return
     })
+    this.resolve()
   }
 
-  refreshImages(oldsrc: string) {
+  async refreshImages(oldsrc: string) {
     const imgs = this.element.querySelectorAll('img[src]') as NodeListOf<
       HTMLImageElement
     >
@@ -312,7 +312,7 @@ export class MarkdownPreviewView extends ScrollView {
         if (ovs !== undefined) {
           ov = parseInt(ovs, 10)
         }
-        const v = imageWatcher.getVersion(src, this.getPath())
+        const v = await imageWatcher.getVersion(src, this.getPath())
         if (v !== ov) {
           if (v) {
             result.push((img.src = `${src}?v=${v}`))
@@ -356,8 +356,8 @@ export class MarkdownPreviewView extends ScrollView {
     })
   }
 
-  renderMarkdownText(text: string) {
-    renderer.toDOMFragment(
+  async renderMarkdownText(text: string): Promise<void> {
+    return renderer.toDOMFragment(
       text,
       this.getPath(),
       this.getGrammar(),

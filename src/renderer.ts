@@ -17,14 +17,14 @@ import { Grammar, TextEditorElement } from 'atom'
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
 
-export function toDOMFragment(
+export async function toDOMFragment(
   text: string,
   filePath: string | undefined,
   _grammar: any,
   renderLaTeX: boolean,
   callback: (error: Error | null, domFragment?: Node) => string,
-): void {
-  render(text, filePath, renderLaTeX, false, function(
+): Promise<void> {
+  return render(text, filePath, renderLaTeX, false, function(
     error: Error | null,
     html?: string,
   ) {
@@ -40,18 +40,18 @@ export function toDOMFragment(
   })
 }
 
-export function toHTML(
+export async function toHTML(
   text: string | null,
   filePath: string | undefined,
   grammar: Grammar | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
   callback: (error: Error | null, html: string) => void,
-): void {
+): Promise<void> {
   if (text === null) {
     text = ''
   }
-  render(text, filePath, renderLaTeX, copyHTMLFlag, function(error, html) {
+  return render(text, filePath, renderLaTeX, copyHTMLFlag, function(error, html) {
     let defaultCodeLanguage: string | undefined
     if (error !== null) {
       callback(error, '')
@@ -70,30 +70,30 @@ export function toHTML(
   })
 }
 
-function render(
+async function render(
   text: string,
   filePath: string | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
   callback: (error: Error | null, html: string) => void,
-): void {
+): Promise<void> {
   // Remove the <!doctype> since otherwise marked will escape it
   // https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
-  const callbackFunction = function(error: Error | null, html: string) {
+  const callbackFunction = async function(error: Error | null, html: string) {
     if (error !== null) {
       callback(error, '')
     }
     html = sanitize(html)
-    html = resolveImagePaths(html, filePath, copyHTMLFlag)
+    html = await resolveImagePaths(html, filePath, copyHTMLFlag)
     callback(null, html.trim())
   }
 
   if (atom.config.get('markdown-preview-plus.enablePandoc')) {
     pandocHelper.renderPandoc(text, filePath, renderLaTeX, callbackFunction)
   } else {
-    callbackFunction(null, markdownIt.render(text, renderLaTeX))
+    return callbackFunction(null, markdownIt.render(text, renderLaTeX))
   }
 }
 
@@ -136,7 +136,7 @@ function sanitize(html: string) {
   return doc.innerHTML
 }
 
-function resolveImagePaths(
+async function resolveImagePaths(
   html: string,
   filePath: string | undefined,
   copyHTMLFlag: boolean,
@@ -144,7 +144,7 @@ function resolveImagePaths(
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
   const doc = document.createElement('div')
   doc.innerHTML = html
-  doc.querySelectorAll('img').forEach(function(img) {
+  await Promise.all(Array.from(doc.querySelectorAll('img')).map(async function(img) {
     let src = img.getAttribute('src')
     if (src) {
       if (!atom.config.get('markdown-preview-plus.enablePandoc')) {
@@ -179,16 +179,16 @@ function resolveImagePaths(
 
       // Use most recent version of image
       if (!copyHTMLFlag) {
-        const v = imageWatcher.getVersion(src, filePath)
+        const v = await imageWatcher.getVersion(src, filePath)
         if (v) {
           src = `${src}?v=${v}`
         }
       }
 
-      return (img.src = src)
+      img.src = src
     }
     return
-  })
+  }))
 
   return doc.innerHTML
 }

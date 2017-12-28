@@ -1,45 +1,42 @@
 import fs = require('fs-plus')
 import _ = require('lodash')
-import path = require('path')
 import { isMarkdownPreviewView } from './cast'
-const pathWatcherPath = path.join(
-  atom.packages.resourcePath,
-  '/node_modules/pathwatcher/lib/main',
-)
-// tslint:disable-next-line:no-var-requires
-const pathWatcher = require(pathWatcherPath)
+import { watchPath, FilesystemChangeEvent, PathWatcher } from 'atom'
 
 // TODO: Fixme
 // tslint:disable: no-unsafe-any
 
 let imageRegister: { [key: string]: {
   version: number
-  watcher: any
+  watcher: PathWatcher
   files: string[]
   watched: boolean
   path: string
 } | undefined } = {}
 
-const refreshImages = _.debounce(function(src: string) {
+const refreshImages = _.debounce(async function(src: string) {
   for (const item of atom.workspace.getPaneItems()) {
     if (isMarkdownPreviewView(item)) {
       // TODO: check against imageRegister[src].version.files
-      item.refreshImages(src)
+      await item.refreshImages(src)
     }
   }
 }, 250)
 
 function srcClosure(src: string) {
-  return function(event: string, _path: string) {
-    const i = imageRegister[src]
-    if (!i) return
-    if (event === 'change' && fs.isFileSync(src)) {
-      i.version = Date.now()
-    } else {
-      i.watcher.close()
-      delete imageRegister[src]
+  return function(events: FilesystemChangeEvent) {
+    for (const event of events) {
+      const i = imageRegister[src]
+      if (!i) return
+      if (event.action === 'modified' && fs.isFileSync(src)) {
+        i.version = Date.now()
+      } else {
+        i.watcher.dispose()
+        delete imageRegister[src]
+      }
+      // tslint:disable-next-line: no-floating-promises
+      refreshImages(src)
     }
-    refreshImages(src)
   }
 }
 
@@ -50,13 +47,13 @@ export function removeFile(file: string) {
     image.files = _.filter(image.files, fs.isFileSync)
     if (_.isEmpty(image.files)) {
       image.watched = false
-      image.watcher.close()
+      image.watcher.dispose()
     }
     return image
   })
 }
 
-export function getVersion(image: string, file?: string) {
+export async function getVersion(image: string, file?: string) {
   let version
   const i = imageRegister[image]
   if (!i) {
@@ -67,7 +64,7 @@ export function getVersion(image: string, file?: string) {
         watched: true,
         files: file ? [file] : [],
         version,
-        watcher: pathWatcher.watch(image, srcClosure(image)),
+        watcher: await watchPath(image, {}, srcClosure(image)),
       }
       return version
     } else {

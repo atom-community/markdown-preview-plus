@@ -297,20 +297,34 @@ describe "Markdown preview plus package", ->
         expect(atom.workspace.getActiveTextEditor()).toBeTruthy()
 
   describe "when markdown-preview-plus:copy-html is triggered", ->
+    beforeEach ->
+      spyOn(atom.clipboard, 'write').andCallThrough()
+
     it "copies the HTML to the clipboard", ->
       waitsForPromise ->
         atom.workspace.open("subdir/simple.md")
 
       runs ->
         atom.commands.dispatch workspaceElement, 'markdown-preview-plus:copy-html'
+
+      waitsFor "atom.clipboard.write to have been called", ->
+        atom.clipboard.write.callCount is 1
+
+      runs ->
         expect(atom.clipboard.read()).toBe """
           <p><em>italic</em></p>
           <p><strong>bold</strong></p>
           <p>encoding \u2192 issue</p>
         """
 
+      runs ->
         atom.workspace.getActiveTextEditor().setSelectedBufferRange [[0, 0], [1, 0]]
         atom.commands.dispatch workspaceElement, 'markdown-preview-plus:copy-html'
+
+      waitsFor "atom.clipboard.write to have been called", ->
+        atom.clipboard.write.callCount is 2
+
+      runs ->
         expect(atom.clipboard.read()).toBe """
           <p><em>italic</em></p>
         """
@@ -331,6 +345,11 @@ describe "Markdown preview plus package", ->
         runs ->
           workspaceElement = atom.views.getView(atom.workspace)
           atom.commands.dispatch workspaceElement, 'markdown-preview-plus:copy-html'
+
+        waitsFor "atom.clipboard.write to have been called", ->
+          atom.clipboard.write.callCount is 1
+
+        runs ->
           preview = $('<div>').append(atom.clipboard.read())
 
       describe "when the code block's fence name has a matching grammar", ->
@@ -357,6 +376,7 @@ describe "Markdown preview plus package", ->
 
     beforeEach ->
       mpp = atom.packages.getActivePackage('markdown-preview-plus').mainModule
+      spyOn(atom.clipboard, 'write').andCallThrough()
 
     it "copies the HTML to the clipboard by default", ->
       waitsForPromise ->
@@ -364,14 +384,21 @@ describe "Markdown preview plus package", ->
 
       runs ->
         mpp.copyHtml()
+      waitsFor "atom.clipboard.write to have been called", ->
+        atom.clipboard.write.callCount is 1
+      runs ->
         expect(atom.clipboard.read()).toBe """
           <p><em>italic</em></p>
           <p><strong>bold</strong></p>
           <p>encoding \u2192 issue</p>
         """
 
+      runs ->
         atom.workspace.getActiveTextEditor().setSelectedBufferRange [[0, 0], [1, 0]]
         mpp.copyHtml()
+      waitsFor "atom.clipboard.write to have been called", ->
+        atom.clipboard.write.callCount is 2
+      runs ->
         expect(atom.clipboard.read()).toBe """
           <p><em>italic</em></p>
         """
@@ -380,25 +407,31 @@ describe "Markdown preview plus package", ->
       waitsForPromise ->
         atom.workspace.open("subdir/simple.md")
 
+      savedHtml = null
       runs ->
         savedHtml = null
         mpp.copyHtml( (html) -> savedHtml = html )
+      waitsFor ->
+        savedHtml
+      runs ->
         expect(savedHtml).toBe """
           <p><em>italic</em></p>
           <p><strong>bold</strong></p>
           <p>encoding \u2192 issue</p>
         """
-
+      runs ->
+        savedHtml = null
         atom.workspace.getActiveTextEditor().setSelectedBufferRange [[0, 0], [1, 0]]
         mpp.copyHtml( (html) -> savedHtml = html )
+      waitsFor ->
+        savedHtml
+      runs ->
         expect(savedHtml).toBe """
           <p><em>italic</em></p>
         """
 
     describe "when LaTeX rendering is enabled by default", ->
       beforeEach ->
-        spyOn(atom.clipboard, 'write').andCallThrough()
-
         waitsFor "LaTeX rendering to be enabled", ->
           atom.config.set 'markdown-preview-plus.enableLatexRenderingByDefault', true
 

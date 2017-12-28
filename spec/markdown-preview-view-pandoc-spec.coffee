@@ -41,18 +41,28 @@ describe "MarkdownPreviewView when Pandoc is enabled", ->
       spyOn(markdownIt, 'decode').andCallThrough()
       waitsForPromise ->
         preview.renderMarkdown()
+      waitsForPromise ->
+        preview.renderPromise
 
     describe "when the image uses a relative path", ->
       it "resolves to a path relative to the file", ->
-        image = preview.find("img[alt=Image1]")
-        expect(markdownIt.decode).not.toHaveBeenCalled()
-        expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('subdir/image1.png')
+        image = []
+        waitsFor ->
+          image = preview.find("img[alt=Image1]")
+          image[0]
+        runs ->
+          expect(markdownIt.decode).not.toHaveBeenCalled()
+          expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('subdir/image1.png')
 
     describe "when the image uses an absolute path that does not exist", ->
       it "resolves to a path relative to the project root", ->
-        image = preview.find("img[alt=Image2]")
-        expect(markdownIt.decode).not.toHaveBeenCalled()
-        expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('tmp/image2.png')
+        image = []
+        waitsFor ->
+          image = preview.find("img[alt=Image2]")
+          image[0]
+        runs ->
+          expect(markdownIt.decode).not.toHaveBeenCalled()
+          expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('tmp/image2.png')
 
     describe "when the image uses an absolute path that exists", ->
       it "adds a query to the URL", ->
@@ -74,6 +84,9 @@ describe "MarkdownPreviewView when Pandoc is enabled", ->
 
         waitsForPromise ->
           preview.renderMarkdown()
+
+        waitsFor ->
+          preview.find("img[alt=absolute]")[0]
 
         runs ->
           expect(markdownIt.decode).not.toHaveBeenCalled()

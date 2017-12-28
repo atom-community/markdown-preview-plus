@@ -52,6 +52,9 @@ describe "MarkdownPreviewView", ->
       expect(preview).toBeInstanceOf(MarkdownPreviewView)
       expect(preview.getPath()).toBe atom.workspace.getActivePaneItem().getPath()
 
+    waitsForPromise ->
+      preview.renderPromise
+
   describe "::constructor", ->
     # Loading spinner disabled when DOM update by diff was introduced. If
     # spinner code in `lib/markdown-preview-view` is removed completly this

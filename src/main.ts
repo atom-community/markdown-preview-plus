@@ -12,8 +12,8 @@ export { config } from './config'
 export function activate() {
   atom.commands.add('atom-workspace', {
     'markdown-preview-plus:toggle': toggle,
-    'markdown-preview-plus:copy-html': () => {
-      copyHtml()
+    'markdown-preview-plus:copy-html': async () => {
+      await copyHtml()
     },
     'markdown-preview-plus:toggle-break-on-single-newline'() {
       const keyPath = 'markdown-preview-plus.breakOnSingleNewline'
@@ -180,10 +180,10 @@ const clipboardCopy = (text: string) => {
   atom.clipboard.write(text)
 }
 
-export function copyHtml(
+export async function copyHtml(
   callback: (text: string) => any = clipboardCopy,
   scaleMath = 100,
-): void {
+): Promise<void> {
   const editor = atom.workspace.getActiveTextEditor()
   if (editor === undefined) {
     return
@@ -193,7 +193,7 @@ export function copyHtml(
   const renderLaTeX = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
-  renderer.toHTML(
+  return renderer.toHTML(
     text,
     editor.getPath(),
     editor.getGrammar(),
