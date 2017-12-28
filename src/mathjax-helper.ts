@@ -56,8 +56,8 @@ export = {
   //   details on DOM elements.
   //
   mathProcessor(domElements: Node[]) {
-    if (MathJax) {
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElements])
+    if (window.MathJax) {
+      window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, domElements])
     } else {
       this.loadMathJax(() => {
         MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements])
