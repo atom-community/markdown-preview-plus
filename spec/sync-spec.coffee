@@ -69,11 +69,9 @@ describe "Syncronization of source and preview", ->
 
   findInPreview = (token) ->
     el = preview.element.querySelector('.update-preview')
-    console.debug(token.path)
     for element in token.path
-      tmp = el.querySelectorAll("#{element.tag}")[element.index]
-      break unless tmp?
-      el = tmp
+      el = el.querySelectorAll(":scope > #{element.tag}")[element.index]
+      break unless el
     return el
 
   describe "Syncronizing preview with source", ->
@@ -93,9 +91,11 @@ describe "Syncronization of source and preview", ->
     it "scrolls to the correct HTMLElement", ->
       for sourceLine in sourceMap
         element = findInPreview(sourceLine)
-        # continue unless element
+        continue unless element?
         syncElement = preview.syncPreview preview.editor.getText(), sourceLine.line
-        expect(element).toBe(syncElement) if syncElement?
+        continue unless syncElement?
+        expect(element).toBe(syncElement)
+        console.debug(element, syncElement, preview.editor.getBuffer().getLines()[sourceLine.line]) if element isnt syncElement
 
   describe "Syncronizing source with preview", ->
     it "sets the editors cursor buffer location to the correct line", ->

@@ -874,7 +874,7 @@ export class MarkdownPreviewView {
     let element = this.preview
     for (const token of pathToToken) {
       const candidateElement: HTMLElement | null = element
-        .querySelectorAll(token.tag)
+        .querySelectorAll(`:scope > ${token.tag}`)
         .item(token.index) as HTMLElement
       if (candidateElement) {
         element = candidateElement
