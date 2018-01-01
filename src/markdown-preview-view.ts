@@ -79,6 +79,18 @@ export class MarkdownPreviewView {
     }
   }
 
+  text() {
+    return this.element.innerText
+  }
+
+  find(what: string) {
+    return this.element.querySelector(what)
+  }
+
+  findAll(what: string) {
+    return this.element.querySelectorAll(what)
+  }
+
   serialize() {
     return {
       deserializer: 'MarkdownPreviewView',

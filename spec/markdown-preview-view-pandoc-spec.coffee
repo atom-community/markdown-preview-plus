@@ -46,23 +46,21 @@ describe "MarkdownPreviewView when Pandoc is enabled", ->
 
     describe "when the image uses a relative path", ->
       it "resolves to a path relative to the file", ->
-        image = []
+        image = null
         waitsFor ->
           image = preview.find("img[alt=Image1]")
-          image[0]
         runs ->
           expect(markdownIt.decode).not.toHaveBeenCalled()
-          expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('subdir/image1.png')
+          expect(image.getAttribute('src')).toStartWith atom.project.getDirectories()[0].resolve('subdir/image1.png')
 
     describe "when the image uses an absolute path that does not exist", ->
       it "resolves to a path relative to the project root", ->
-        image = []
+        image = null
         waitsFor ->
           image = preview.find("img[alt=Image2]")
-          image[0]
         runs ->
           expect(markdownIt.decode).not.toHaveBeenCalled()
-          expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('tmp/image2.png')
+          expect(image.getAttribute('src')).toStartWith atom.project.getDirectories()[0].resolve('tmp/image2.png')
 
     describe "when the image uses an absolute path that exists", ->
       it "adds a query to the URL", ->
@@ -86,19 +84,19 @@ describe "MarkdownPreviewView when Pandoc is enabled", ->
           preview.renderMarkdown()
 
         waitsFor ->
-          preview.find("img[alt=absolute]")[0]
+          preview.find("img[alt=absolute]")
 
         runs ->
           expect(markdownIt.decode).not.toHaveBeenCalled()
-          expect(preview.find("img[alt=absolute]").attr('src')).toStartWith "#{filePath}?v="
+          expect(preview.find("img[alt=absolute]").getAttribute('src')).toStartWith "#{filePath}?v="
 
     describe "when the image uses an URL", ->
       it "doesn't change the http(s) URL", ->
         image = preview.find("img[alt=Image3]")
         expect(markdownIt.decode).not.toHaveBeenCalled()
-        expect(image.attr('src')).toBe 'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png'
+        expect(image.getAttribute('src')).toBe 'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png'
 
       it "doesn't change the data URL", ->
         image = preview.find("img[alt=Image4]")
         expect(markdownIt.decode).not.toHaveBeenCalled()
-        expect(image.attr('src')).toBe 'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7'
+        expect(image.getAttribute('src')).toBe 'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7'

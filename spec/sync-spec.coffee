@@ -67,13 +67,14 @@ describe "Syncronization of source and preview", ->
     runs -> MathJax.Hub.Queue [callback]
     waitsFor "queued MathJax operations to complete", -> done
 
-  generateSelector = (token) ->
-    selector = null
+  findInPreview = (token) ->
+    el = preview.element.querySelector('.update-preview')
+    console.debug(token.path)
     for element in token.path
-      if selector is null
-      then selector = ".update-preview > #{element.tag}:eq(#{element.index})"
-      else selector = "#{selector} > #{element.tag}:eq(#{element.index})"
-    return selector
+      tmp = el.querySelectorAll("#{element.tag}")[element.index]
+      break unless tmp?
+      el = tmp
+    return el
 
   describe "Syncronizing preview with source", ->
     [sourceMap, tokens] = []
@@ -91,17 +92,17 @@ describe "Syncronization of source and preview", ->
 
     it "scrolls to the correct HTMLElement", ->
       for sourceLine in sourceMap
-        selector = generateSelector(sourceLine)
-        if selector? then element = preview.find(selector)[0] else continue
+        element = findInPreview(sourceLine)
+        # continue unless element
         syncElement = preview.syncPreview preview.editor.getText(), sourceLine.line
-        expect(element).toBe(syncElement)
+        expect(element).toBe(syncElement) if syncElement?
 
   describe "Syncronizing source with preview", ->
     it "sets the editors cursor buffer location to the correct line", ->
       sourceMap = cson.readFileSync path.join(fixturesPath, 'sync-source.cson')
 
       for sourceElement in sourceMap
-        selector = generateSelector(sourceElement)
-        if selector? then element = preview.find(selector)[0] else continue
+        element = findInPreview(sourceElement)
+        continue unless element
         syncLine = preview.syncSource preview.editor.getText(), element
         expect(syncLine).toBe(sourceElement.line) if syncLine

@@ -223,7 +223,7 @@ describe "Markdown preview plus package", ->
         """
 
         waitsFor "markdown to be rendered after its text changed", ->
-          preview.find("atom-text-editor").data("grammar") is "text plain null-grammar"
+          preview.find("atom-text-editor")?.dataset?["grammar"] is "text plain null-grammar"
 
         grammarAdded = false
         runs ->
@@ -236,7 +236,7 @@ describe "Markdown preview plus package", ->
         waitsFor "grammar to be added", -> grammarAdded
 
         waitsFor "markdown to be rendered after grammar was added", ->
-          preview.find("atom-text-editor").data("grammar") isnt "source js"
+          preview.find("atom-text-editor")?.dataset?["grammar"] isnt "text plain null-grammar"
 
   describe "when the markdown preview view is requested by file URI", ->
     it "opens a preview editor and watches the file for changes", ->
@@ -329,7 +329,7 @@ describe "Markdown preview plus package", ->
         """
 
     describe "code block tokenization", ->
-      preview = null
+      element = document.createElement('div')
 
       beforeEach ->
         waitsForPromise ->
@@ -349,26 +349,27 @@ describe "Markdown preview plus package", ->
           atom.clipboard.write.callCount is 1
 
         runs ->
-          preview = $('<div>').append(atom.clipboard.read())
+          element.innerHTML=atom.clipboard.read()
 
       describe "when the code block's fence name has a matching grammar", ->
         it "tokenizes the code block with the grammar", ->
-          expect(preview.find("pre span.syntax--entity.syntax--name.syntax--function.syntax--ruby")).toExist()
+          expect(element.querySelector("pre span.syntax--entity.syntax--name.syntax--function.syntax--ruby")).toExist()
 
       describe "when the code block's fence name doesn't have a matching grammar", ->
         it "does not tokenize the code block", ->
-          expect(preview.find("pre.lang-kombucha .syntax--null-grammar").children().length).toBe 2
+          console.debug(element)
+          expect(element.querySelectorAll("pre.lang-kombucha .syntax--null-grammar").length).toBe 2
 
       describe "when the code block contains empty lines", ->
         it "doesn't remove the empty lines", ->
-          expect(preview.find("pre.lang-python").children().length).toBe 6
-          expect(preview.find("pre.lang-python div:nth-child(2)").text().trim()).toBe ''
-          expect(preview.find("pre.lang-python div:nth-child(4)").text().trim()).toBe ''
-          expect(preview.find("pre.lang-python div:nth-child(5)").text().trim()).toBe ''
+          expect(element.querySelector("pre.lang-python").children.length).toBe 6
+          expect(element.querySelector("pre.lang-python span:nth-child(2)").innerText.trim()).toBe ''
+          expect(element.querySelector("pre.lang-python span:nth-child(4)").innerText.trim()).toBe ''
+          expect(element.querySelector("pre.lang-python span:nth-child(5)").innerText.trim()).toBe ''
 
       describe "when the code block is nested in a list", ->
         it "detects and styles the block", ->
-          expect(preview.find("pre.lang-javascript")).toHaveClass 'editor-colors'
+          expect(element.querySelector("pre.lang-javascript")).toHaveClass 'editor-colors'
 
   describe "when main::copyHtml() is called directly", ->
     mpp = null
@@ -479,7 +480,7 @@ describe "Markdown preview plus package", ->
       expectPreviewInSplitPane()
 
       runs ->
-        expect($(preview[0]).find("div.update-preview").html()).toBe """
+        expect(preview.find("div.update-preview").innerHTML).toBe """
           <p>hello</p>
 
 
@@ -494,7 +495,7 @@ describe "Markdown preview plus package", ->
       expectPreviewInSplitPane()
 
       runs ->
-        expect($(preview[0]).find("div.update-preview").html()).toBe """
+        expect(preview.find("div.update-preview").innerHTML).toBe """
           <p>content
           &lt;!doctype html&gt;</p>
         """
@@ -505,7 +506,7 @@ describe "Markdown preview plus package", ->
       runs -> atom.commands.dispatch workspaceElement, 'markdown-preview-plus:toggle'
       expectPreviewInSplitPane()
 
-      runs -> expect($(preview[0]).find("div.update-preview").html()).toBe "content"
+      runs -> expect(preview.find("div.update-preview").innerHTML).toBe "content"
 
   describe "when the markdown contains a <pre> tag", ->
     it "does not throw an exception", ->

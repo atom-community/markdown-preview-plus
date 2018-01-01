@@ -42,10 +42,13 @@ describe "the difference algorithm that updates the preview", ->
 
     beforeEach ->
       loadPreviewInSplitPane()
-      runs -> orderedLists = preview.find('ol')
+      waitsFor ->
+        orderedLists = preview.findAll('ol')
+        orderedLists.length isnt 0
 
     expectOrderedListsToStartAt = (startNumbers) ->
       runs ->
+        console.debug(preview.element, orderedLists)
         for i in [0..(startNumbers.length-1)]
           if startNumbers[i] is "1"
           then expect(orderedLists[i].getAttribute('start')).not.toExist()
@@ -108,12 +111,15 @@ describe "the difference algorithm that updates the preview", ->
         MathJax?
 
       waitsFor "preview to update DOM with span.math containers", ->
-        mathBlocks = preview.find('script[type*="math/tex"]').parent()
+        mathBlocks = Array.from(preview.findAll('script[type*="math/tex"]'))
+          .map (x) -> x.parent
         mathBlocks.length is 20
 
       waitsFor "Maths blocks to be processed by MathJax", ->
-        mathBlocks = preview.find('script[type*="math/tex"]').parent()
-        mathBlocks.children('span.MathJax, div.MathJax_Display').not('.MathJax_Processing').length is 20
+        mathBlocks = Array.from(preview.findAll('script[type*="math/tex"]'))
+          .map (x) -> x.parentElement
+        mathBlocks.every (x) ->
+          x.querySelector('span.MathJax:not(.MathJax_Processing), div.MathJax_Display:not(.MathJax_Processing)')
 
     afterEach ->
       mathjaxHelper.resetMathJax()
@@ -127,15 +133,19 @@ describe "the difference algorithm that updates the preview", ->
         mathjaxHelper.mathProcessor.calls.length
 
       runs ->
-        mathBlocks  = preview.find('script[type*="math/tex"]').parent()
-        expect(mathBlocks.length).toBe(20)
+        mathBlocks = Array.from(preview.findAll('script[type*="math/tex"]'))
+          .map (x) -> x.parentElement
+          .filter (x) -> x?
+        mathBlocks.length is 20
 
-        mathHTMLCSS = mathBlocks.children('span.MathJax, div.MathJax_Display')
+        mathHTMLCSS = mathBlocks
+          .map (x) -> x.querySelector('span.MathJax, div.MathJax_Display')
+          .filter (x) -> x?
         expect(mathHTMLCSS.length).toBe(19)
 
-        modMathBlock = mathBlocks.eq(2)
-        expect(modMathBlock.children().length).toBe(1)
-        expect(modMathBlock.children('script').text()).toBe("E=mc^2\n")
+        modMathBlock = mathBlocks[2]
+        expect(modMathBlock.children.length).toBe(1)
+        expect(modMathBlock.querySelector('script').innerText).toBe("E=mc^2\n")
 
     it "subsequently only rerenders the maths block that was modified", ->
       [unprocessedMathBlocks] = []
@@ -159,12 +169,16 @@ describe "the difference algorithm that updates the preview", ->
     it "replaces the entire span.atom-text-editor container element", ->
       loadPreviewInSplitPane()
 
-      runs ->
-        codeBlocks = preview.find('span.atom-text-editor')
-        expect(codeBlocks.length).toBe(5)
-        expect(codeBlocks.children().length).toBe(5)
+      waitsFor ->
+        preview.find('span.atom-text-editor')
 
-        atomTextEditors = codeBlocks.children('atom-text-editor')
+      runs ->
+        codeBlocks = Array.from(preview.findAll('span.atom-text-editor'))
+        expect(codeBlocks.length).toBe(5)
+
+        atomTextEditors = [].concat((codeBlocks
+          .map (x) -> Array.from(x.querySelectorAll('atom-text-editor'))
+          )...)
         expect(atomTextEditors.length).toBe(5)
 
         spyOn(renderer, 'convertCodeBlocksToAtomEditors').andCallFake -> return
@@ -174,13 +188,14 @@ describe "the difference algorithm that updates the preview", ->
         renderer.convertCodeBlocksToAtomEditors.calls.length
 
       runs ->
-        codeBlocks = preview.find('span.atom-text-editor')
+        codeBlocks = Array.from(preview.findAll('span.atom-text-editor'))
         expect(codeBlocks.length).toBe(5)
-        expect(codeBlocks.children().length).toBe(5)
 
-        atomTextEditors = codeBlocks.children('atom-text-editor')
+        atomTextEditors = [].concat((codeBlocks
+          .map (x) -> Array.from(x.querySelectorAll('atom-text-editor'))
+          )...)
         expect(atomTextEditors.length).toBe(4)
 
-        modCodeBlock = codeBlocks.eq(0)
-        expect(modCodeBlock.children().length).toBe(1)
-        expect(modCodeBlock.children().prop('tagName').toLowerCase()).toBe('pre')
+        modCodeBlock = codeBlocks[0]
+        expect(modCodeBlock.children.length).toBe(1)
+        expect(modCodeBlock.children[0].tagName.toLowerCase()).toBe('pre')

@@ -119,8 +119,8 @@ describe "MarkdownPreviewView", ->
       waitsForPromise -> preview.renderMarkdown()
 
       runs ->
-        headlines = preview.find('h2')
-        expect(headlines).toExist()
+        console.debug(preview.element)
+        headlines = preview.element.querySelectorAll('h2')
         expect(headlines.length).toBe(2)
         expect(headlines[0].outerHTML).toBe("<h2>Level two header without space</h2>")
         expect(headlines[1].outerHTML).toBe("<h2>Level two header with space</h2>")
@@ -131,8 +131,7 @@ describe "MarkdownPreviewView", ->
       waitsForPromise -> preview.renderMarkdown()
 
       runs ->
-        headlines = preview.find('h2')
-        expect(headlines).toExist()
+        headlines = preview.element.querySelectorAll('h2')
         expect(headlines.length).toBe(1)
         expect(headlines[0].outerHTML).toBe("<h2>Level two header with space</h2>")
 
@@ -144,7 +143,7 @@ describe "MarkdownPreviewView", ->
 
     it "removes line decorations on rendered code blocks", ->
       editor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
-      decorations = editor[0].getModel().getDecorations(class: 'cursor-line', type: 'line')
+      decorations = editor.getModel().getDecorations(class: 'cursor-line', type: 'line')
       expect(decorations.length).toBe 0
 
     it "removes a trailing newline but preserves remaining leading and trailing whitespace", ->
@@ -158,7 +157,7 @@ describe "MarkdownPreviewView", ->
       runs ->
         editor = newPreview.find("atom-text-editor")
         expect(editor).toExist()
-        expect(editor[0].getModel().getText()).toBe """
+        expect(editor.getModel().getText()).toBe """
 
                a
               b
@@ -176,7 +175,7 @@ describe "MarkdownPreviewView", ->
       it "assigns the grammar on the atom-text-editor", ->
         rubyEditor = preview.find("atom-text-editor[data-grammar='source ruby']")
         expect(rubyEditor).toExist()
-        expect(rubyEditor[0].getModel().getText()).toBe """
+        expect(rubyEditor.getModel().getText()).toBe """
           def func
             x = 1
           end
@@ -185,7 +184,7 @@ describe "MarkdownPreviewView", ->
         # nested in a list item
         jsEditor = preview.find("atom-text-editor[data-grammar='source js']")
         expect(jsEditor).toExist()
-        expect(jsEditor[0].getModel().getText()).toBe """
+        expect(jsEditor.getModel().getText()).toBe """
           if a === 3 {
             b = 5
           }
@@ -195,7 +194,7 @@ describe "MarkdownPreviewView", ->
       it "does not assign a specific grammar", ->
         plainEditor = preview.find("atom-text-editor[data-grammar='text plain null-grammar']")
         expect(plainEditor).toExist()
-        expect(plainEditor[0].getModel().getText()).toBe """
+        expect(plainEditor.getModel().getText()).toBe """
           function f(x) {
             return x++;
           }
@@ -211,13 +210,13 @@ describe "MarkdownPreviewView", ->
       it "resolves to a path relative to the file", ->
         image = preview.find("img[alt=Image1]")
         expect(markdownIt.decode).toHaveBeenCalled()
-        expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('subdir/image1.png')
+        expect(image.getAttribute('src')).toStartWith atom.project.getDirectories()[0].resolve('subdir/image1.png')
 
     describe "when the image uses an absolute path that does not exist", ->
       it "resolves to a path relative to the project root", ->
         image = preview.find("img[alt=Image2]")
         expect(markdownIt.decode).toHaveBeenCalled()
-        expect(image.attr('src')).toStartWith atom.project.getDirectories()[0].resolve('tmp/image2.png')
+        expect(image.getAttribute('src')).toStartWith atom.project.getDirectories()[0].resolve('tmp/image2.png')
 
     describe "when the image uses an absolute path that exists", ->
       it "adds a query to the URL", ->
@@ -233,18 +232,18 @@ describe "MarkdownPreviewView", ->
 
         runs ->
           expect(markdownIt.decode).toHaveBeenCalled()
-          expect(preview.find("img[alt=absolute]").attr('src')).toStartWith "#{filePath}?v="
+          expect(preview.find("img[alt=absolute]").getAttribute('src')).toStartWith "#{filePath}?v="
 
     describe "when the image uses a URL", ->
       it "doesn't change the web URL", ->
         image = preview.find("img[alt=Image3]")
         expect(markdownIt.decode).toHaveBeenCalled()
-        expect(image.attr('src')).toBe 'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png'
+        expect(image.getAttribute('src')).toBe 'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png'
 
       it "doesn't change the data URL", ->
         image = preview.find("img[alt=Image4]")
         expect(markdownIt.decode).toHaveBeenCalled()
-        expect(image.attr('src')).toBe 'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7'
+        expect(image.getAttribute('src')).toBe 'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7'
 
   describe "image modification", ->
     [dirPath, filePath, img1Path, workspaceElement] = []
@@ -277,7 +276,7 @@ describe "MarkdownPreviewView", ->
         expectPreviewInSplitPane()
 
         runs ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           imageVer = getImageVersion(img1Path, imageURL)
           expect(imageVer).not.toEqual('deleted')
 
@@ -290,14 +289,14 @@ describe "MarkdownPreviewView", ->
         expectPreviewInSplitPane()
 
         runs ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           imageVer = getImageVersion(img1Path, imageURL)
           expect(imageVer).not.toEqual('deleted')
 
           fs.writeFileSync img1Path, "still clearly not a png ;D"
 
         waitsFor "image src attribute to update", ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           not imageURL.endsWith imageVer
 
         runs ->
@@ -331,9 +330,9 @@ describe "MarkdownPreviewView", ->
 
         getImageElementsURL = ->
           return [
-            preview.find("img[alt=img1]").attr('src'),
-            preview.find("img[alt=img2]").attr('src'),
-            preview.find("img[alt=img3]").attr('src')
+            preview.find("img[alt=img1]").getAttribute('src'),
+            preview.find("img[alt=img2]").getAttribute('src'),
+            preview.find("img[alt=img3]").getAttribute('src')
           ]
 
         expectQueryValues = (queryValues) ->
@@ -358,7 +357,7 @@ describe "MarkdownPreviewView", ->
           fs.writeFileSync img1Path, "still clearly not a png ;D"
 
         waitsFor "img1 src attribute to update", ->
-          img1URL = preview.find("img[alt=img1]").attr('src')
+          img1URL = preview.find("img[alt=img1]").getAttribute('src')
           not img1URL.endsWith img1Ver
 
         runs ->
@@ -374,7 +373,7 @@ describe "MarkdownPreviewView", ->
           fs.writeFileSync img2Path, "still clearly not a png either ;D"
 
         waitsFor "img2 src attribute to update", ->
-          img2URL = preview.find("img[alt=img2]").attr('src')
+          img2URL = preview.find("img[alt=img2]").getAttribute('src')
           not img2URL.endsWith img2Ver
 
         runs ->
@@ -390,7 +389,7 @@ describe "MarkdownPreviewView", ->
           fs.writeFileSync img3Path, "you better believe i'm not a png ;D"
 
         waitsFor "img3 src attribute to update", ->
-          img3URL = preview.find("img[alt=img3]").attr('src')
+          img3URL = preview.find("img[alt=img3]").getAttribute('src')
           not img3URL.endsWith img3Ver
 
         runs ->
@@ -411,14 +410,14 @@ describe "MarkdownPreviewView", ->
         expectPreviewInSplitPane()
 
         runs ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           imageVer = getImageVersion(img1Path, imageURL)
           expect(imageVer).not.toEqual('deleted')
 
           fs.unlinkSync img1Path
 
         waitsFor "image src attribute to update", ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           not imageURL.endsWith imageVer
 
         runs ->
@@ -427,7 +426,7 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         waitsFor "image src attribute to update", ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           imageURL isnt img1Path
 
         runs ->
@@ -443,14 +442,14 @@ describe "MarkdownPreviewView", ->
         expectPreviewInSplitPane()
 
         runs ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           imageVer = getImageVersion(img1Path, imageURL)
           expect(imageVer).not.toEqual('deleted')
 
           fs.renameSync img1Path, img1Path + "trol"
 
         waitsFor "image src attribute to update", ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           not imageURL.endsWith imageVer
 
         runs ->
@@ -459,7 +458,7 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         waitsFor "image src attribute to update", ->
-          imageURL = preview.find("img[alt=img1]").attr('src')
+          imageURL = preview.find("img[alt=img1]").getAttribute('src')
           imageURL isnt img1Path
 
         runs ->
@@ -475,7 +474,7 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         runs ->
-          expect(preview.find("p:last-child br").length).toBe 0
+          expect(preview.element.querySelectorAll("p:last-child br").length).toBe 0
 
     describe "when gfm newlines are enabled", ->
       it "creates a single paragraph with no <br>", ->
@@ -485,7 +484,7 @@ describe "MarkdownPreviewView", ->
           preview.renderMarkdown()
 
         runs ->
-          expect(preview.find("p:last-child br").length).toBe 1
+          expect(preview.element.querySelectorAll("p:last-child br").length).toBe 1
 
   describe "when core:save-as is triggered", ->
     beforeEach ->
