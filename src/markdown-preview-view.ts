@@ -33,7 +33,7 @@ export interface MPVParamsPath {
 export type MPVParams = MPVParamsEditor | MPVParamsPath
 
 export class MarkdownPreviewView {
-  private loading: boolean;
+  private loading: boolean
   private resolve: () => void
   public readonly renderPromise: Promise<void> = new Promise<void>(
     (resolve) => (this.resolve = resolve),
@@ -173,7 +173,7 @@ export class MarkdownPreviewView {
         const zoomLevel = parseFloat(this.element.style.zoom || '1')
         this.element.style.zoom = (zoomLevel - 0.1).toString()
       },
-      'markdown-preview-plus:reset-zoom': () => this.element.style.zoom = '1',
+      'markdown-preview-plus:reset-zoom': () => (this.element.style.zoom = '1'),
       'markdown-preview-plus:sync-source': (event) => {
         // tslint:disable-next-line:no-floating-promises
         this.getMarkdownSource().then((source?: string) => {
@@ -469,7 +469,9 @@ export class MarkdownPreviewView {
 
   showError(result: Error) {
     const error = document.createElement('div')
-    error.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${result.message}</h3>`
+    error.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${
+      result.message
+    }</h3>`
     this.preview.appendChild(error)
   }
 
@@ -859,8 +861,9 @@ export class MarkdownPreviewView {
 
     let element = this.preview
     for (const token of pathToToken) {
-      const candidateElement: HTMLElement | null =
-        element.querySelectorAll(token.tag).item(token.index) as HTMLElement
+      const candidateElement: HTMLElement | null = element
+        .querySelectorAll(token.tag)
+        .item(token.index) as HTMLElement
       if (candidateElement) {
         element = candidateElement
       } else {

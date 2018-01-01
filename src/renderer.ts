@@ -94,7 +94,12 @@ async function render<T>(
   }
 
   if (atom.config.get('markdown-preview-plus.enablePandoc')) {
-    return pandocHelper.renderPandoc(text, filePath, renderLaTeX, callbackFunction)
+    return pandocHelper.renderPandoc(
+      text,
+      filePath,
+      renderLaTeX,
+      callbackFunction,
+    )
   } else {
     return callbackFunction(null, markdownIt.render(text, renderLaTeX))
   }

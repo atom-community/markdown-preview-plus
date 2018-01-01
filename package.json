@@ -3,17 +3,19 @@
   "version": "2.4.16",
   "main": "./lib/main",
   "description": "Markdown Preview + Community Features",
-  "keywords": [
-    "markdown",
-    "maths",
-    "latex",
-    "commonmark",
-    "pandoc"
-  ],
+  "keywords": ["markdown", "maths", "latex", "commonmark", "pandoc"],
   "repository": "https://github.com/atom-community/markdown-preview-plus",
   "license": "MIT",
   "engines": {
     "atom": ">=1.17.0 <2.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "prettier": "prettier --write '**/*.ts'",
+    "prettier-check": "prettier -l '**/*.ts'",
+    "typecheck": "tsc --noEmit -p .",
+    "lint": "tslint --project .",
+    "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
   "dependencies": {
     "atom-space-pen-views": "^2.0.0",
@@ -21,10 +23,12 @@
     "grim": "^2.0.2",
     "atom-highlight": "^0.4.1",
     "lodash": "^4.17.4",
-    "MathJax": "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
+    "MathJax":
+      "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
     "markdown-it": "^8.4.0",
     "markdown-it-lazy-headers": "^0.1.2",
-    "markdown-it-math": "https://github.com/atom-community/markdown-it-math/tarball/fix-table-pipe-parse-no-ascii",
+    "markdown-it-math":
+      "https://github.com/atom-community/markdown-it-math/tarball/fix-table-pipe-parse-no-ascii",
     "season": "^6.0"
   },
   "devDependencies": {
@@ -36,6 +40,7 @@
     "coffeelint": "^1",
     "fs-extra": "^5.0.0",
     "jasmine-tagged": "^1.1.4",
+    "prettier": "^1.9.2",
     "temp": "^0.8.1",
     "tslint": "^5.8.0",
     "typescript": "^2.6.2"
