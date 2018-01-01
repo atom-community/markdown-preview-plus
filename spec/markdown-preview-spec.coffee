@@ -3,7 +3,6 @@ fs = require 'fs-plus'
 temp = require 'temp'
 wrench = require 'fs-extra'
 {MarkdownPreviewView} = require '../lib/markdown-preview-view'
-{$} = require 'atom-space-pen-views'
 
 require './spec-helper'
 

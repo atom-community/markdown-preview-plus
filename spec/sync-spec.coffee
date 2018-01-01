@@ -1,4 +1,3 @@
-{$}           = require 'atom-space-pen-views'
 path          = require 'path'
 temp          = require('temp').track()
 cson          = require 'season'

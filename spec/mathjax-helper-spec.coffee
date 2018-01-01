@@ -1,4 +1,3 @@
-{$}           = require 'atom-space-pen-views'
 path          = require 'path'
 fs            = require 'fs-plus'
 temp          = require('temp').track()

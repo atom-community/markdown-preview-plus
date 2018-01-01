@@ -15,7 +15,6 @@
 // tslint:disable: no-unsafe-any
 
 // tslint:disable-next-line:no-var-requires
-const { $ } = require('atom-space-pen-views')
 import path = require('path')
 // tslint:disable-next-line:no-var-requires
 const CSON = require('season')
@@ -44,7 +43,11 @@ export = {
   //
   resetMathJax() {
     // Detach MathJax from the document
-    $('script[src*="MathJax.js"]').remove()
+    for (const el of Array.from(
+      document.querySelectorAll('script[src*="MathJax.js"]'),
+    )) {
+      el.remove()
+    }
     window.MathJax = undefined
 
     // Reset attach for any subsequent calls

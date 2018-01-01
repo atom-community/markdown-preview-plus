@@ -18,10 +18,9 @@
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
   "dependencies": {
-    "atom-space-pen-views": "^2.0.0",
+    "atom-highlight": "^0.4.1",
     "fs-plus": "^3.0.1",
     "grim": "^2.0.2",
-    "atom-highlight": "^0.4.1",
     "lodash": "^4.17.4",
     "MathJax":
       "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
