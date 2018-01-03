@@ -248,7 +248,10 @@ export function convertCodeBlocksToAtomEditors(
     const grammar = atom.grammars.grammarForScopeName(
       scopeForFenceName(fenceName),
     )
-    if (grammar) editor.setGrammar(grammar)
+    if (grammar) {
+      editor.setGrammar(grammar)
+      editorElement.dataset.grammar = grammar.scopeName.replace(/\./g, ' ')
+    }
   }
 
   return domFragment

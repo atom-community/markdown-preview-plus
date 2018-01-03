@@ -19,7 +19,6 @@ import path = require('path')
 // tslint:disable-next-line:no-var-requires
 const CSON = require('season')
 import fs = require('fs-plus')
-import _ = require('lodash')
 
 export = {
   //
@@ -36,7 +35,12 @@ export = {
   //
   // Attach main MathJax script to the document
   //
-  attachMathJax: _.once(() => attachMathJax()),
+  attachMathJax() {
+    if (!document.querySelector('script[src*="MathJax.js"]')) {
+      return attachMathJax()
+    }
+    throw new Error('Duplicate attachMathJax call')
+  },
 
   //
   // Remove MathJax from the document and reset attach method
@@ -51,7 +55,7 @@ export = {
     window.MathJax = undefined
 
     // Reset attach for any subsequent calls
-    return (this.attachMathJax = _.once(() => attachMathJax()))
+    delete window.MathJax
   },
 
   //

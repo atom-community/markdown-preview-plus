@@ -19,6 +19,7 @@ import renderer = require('./renderer')
 import { UpdatePreview } from './update-preview'
 import markdownIt = require('./markdown-it-helper')
 import imageWatcher = require('./image-watch-helper')
+import { Grammar } from 'atom'
 
 export interface MPVParamsEditor {
   editorId: number
@@ -39,7 +40,7 @@ export class MarkdownPreviewView {
     (resolve) => (this.resolve = resolve),
   )
   // tslint:disable-next-line:no-uninitialized
-  private element: HTMLElement
+  public readonly element: HTMLElement
   private preview: HTMLElement
   private emitter: Emitter<{
     'did-change-title': undefined
@@ -417,7 +418,7 @@ export class MarkdownPreviewView {
     return undefined
   }
 
-  getGrammar() {
+  getGrammar(): Grammar | undefined {
     return this.editor && this.editor.getGrammar()
   }
 
@@ -606,7 +607,8 @@ export class MarkdownPreviewView {
   bubbleToContainerElement(element: HTMLElement): HTMLElement {
     let testElement = element
     while (testElement !== document.body) {
-      const parent = testElement.parentElement!
+      const parent = testElement.parentElement
+      if (!parent) break
       if (parent.classList.contains('MathJax_Display')) {
         return parent.parentElement!
       }

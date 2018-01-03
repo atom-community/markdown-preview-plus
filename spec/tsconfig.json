@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["./**.ts", "./**.d.ts", "decl/**.d.ts"],
+  "exclude": ["../src/", "../node_modules"],
+  "compileOnSave": false,
+  "compilerOptions": {
+    "noEmit": true
+  }
+}
