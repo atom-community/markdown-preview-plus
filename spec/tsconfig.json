@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["./**.ts", "./**.d.ts", "decl/**.d.ts"],
-  "exclude": ["../src/", "../node_modules"],
+  "include": ["./**.ts", "./**.d.ts", "../src/season.d.ts"],
+  "exclude": ["../node_modules"],
   "compileOnSave": false,
   "compilerOptions": {
     "noEmit": true

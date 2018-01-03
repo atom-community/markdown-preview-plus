@@ -70,7 +70,6 @@ export class MarkdownPreviewView {
     this.preview.classList.add('update-preview')
     this.element.appendChild(this.preview)
 
-    // TODO: on attach?
     if (this.editorId !== undefined) {
       this.resolveEditor(this.editorId)
     } else if (this.filePath !== undefined) {

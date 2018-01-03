@@ -11,13 +11,8 @@
 // for calls to MathJax to process LaTeX equations.
 //
 
-// TODO: Fix this
-// tslint:disable: no-unsafe-any
-
-// tslint:disable-next-line:no-var-requires
 import path = require('path')
-// tslint:disable-next-line:no-var-requires
-const CSON = require('season')
+import CSON = require('season')
 import fs = require('fs-plus')
 
 export = {
