@@ -11,6 +11,7 @@ import {
   File,
   StyleManager,
   TextEditor,
+  Grammar,
 } from 'atom'
 import _ = require('lodash')
 import fs = require('fs-plus')
@@ -19,7 +20,6 @@ import renderer = require('./renderer')
 import { UpdatePreview } from './update-preview'
 import markdownIt = require('./markdown-it-helper')
 import imageWatcher = require('./image-watch-helper')
-import { Grammar } from 'atom'
 
 export interface MPVParamsEditor {
   editorId: number

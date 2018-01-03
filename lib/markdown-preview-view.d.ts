@@ -1,7 +1,6 @@
 /// <reference types="markdown-it" />
 import { Token } from 'markdown-it';
-import { Disposable, TextEditor } from 'atom';
-import { Grammar } from 'atom';
+import { Disposable, TextEditor, Grammar } from 'atom';
 export interface MPVParamsEditor {
     editorId: number;
     filePath?: undefined;
