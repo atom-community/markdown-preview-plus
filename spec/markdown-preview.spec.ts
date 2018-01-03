@@ -324,7 +324,7 @@ var x = y;
       if (process.platform !== 'linux') {
         fs.renameSync(filePath, path.join(path.dirname(filePath), 'file2.md'))
       } else {
-        await ted.saveAs('file2.md')
+        await ted.saveAs(path.join(path.dirname(filePath), 'file2.md'))
       }
 
       await waitsFor(() => preview.getTitle() === 'file2.md Preview')
