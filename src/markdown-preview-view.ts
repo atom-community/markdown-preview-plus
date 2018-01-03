@@ -1,8 +1,5 @@
 import { Token } from 'markdown-it'
 import path = require('path')
-
-// TODO: Fixme
-// tslint:disable: no-floating-promises
 import {
   CommandEvent,
   Emitter,
@@ -20,6 +17,7 @@ import renderer = require('./renderer')
 import { UpdatePreview } from './update-preview'
 import markdownIt = require('./markdown-it-helper')
 import imageWatcher = require('./image-watch-helper')
+import { handlePromise } from './util'
 
 export interface MPVParamsEditor {
   editorId: number
@@ -124,7 +122,7 @@ export class MarkdownPreviewView {
     this.file = new File(filePath)
     this.emitter.emit('did-change-title')
     this.handleEvents()
-    this.renderMarkdown()
+    handlePromise(this.renderMarkdown())
   }
 
   resolveEditor(editorId: number) {
@@ -133,7 +131,7 @@ export class MarkdownPreviewView {
     if (this.editor) {
       this.emitter.emit('did-change-title')
       this.handleEvents()
-      this.renderMarkdown()
+      handlePromise(this.renderMarkdown())
     } else {
       // The editor this preview was created for has been closed so close
       // this preview since a preview cannot be rendered without an editor
@@ -155,14 +153,14 @@ export class MarkdownPreviewView {
     this.disposables.add(
       atom.grammars.onDidAddGrammar(() =>
         _.debounce(() => {
-          this.renderMarkdown()
+          handlePromise(this.renderMarkdown())
         }, 250),
       ),
     )
     this.disposables.add(
       atom.grammars.onDidUpdateGrammar(
         _.debounce(() => {
-          this.renderMarkdown()
+          handlePromise(this.renderMarkdown())
         }, 250),
       ),
     )
@@ -199,7 +197,7 @@ export class MarkdownPreviewView {
     })
 
     const changeHandler = () => {
-      this.renderMarkdown()
+      handlePromise(this.renderMarkdown())
 
       const pane = atom.workspace.paneForItem(this)
       if (pane !== undefined && pane !== atom.workspace.getActivePane()) {
@@ -346,10 +344,10 @@ export class MarkdownPreviewView {
   async getHTML(callback: (error: Error | null, htmlBody: string) => void) {
     return this.getMarkdownSource().then((source?: string) => {
       if (source === undefined) {
-        return
+        return undefined
       }
 
-      renderer.toHTML(
+      return renderer.toHTML(
         source,
         this.getPath(),
         this.getGrammar(),

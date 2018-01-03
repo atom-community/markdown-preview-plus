@@ -3,9 +3,6 @@ import _ = require('lodash')
 import { isMarkdownPreviewView } from './cast'
 import { watchPath, FilesystemChangeEvent, PathWatcher } from 'atom'
 
-// TODO: Fixme
-// tslint:disable: no-unsafe-any
-
 interface ImageRegisterRec {
   version: number
   watcher: PathWatcher
