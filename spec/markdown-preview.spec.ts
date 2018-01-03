@@ -303,30 +303,32 @@ var x = y;
     })
   })
 
-  describe("when the editor's path changes on #win32 and #darwin", function() {
-    if (process.platform !== 'linux') {
-      it("updates the preview's title", async function() {
-        const titleChangedCallback = sinon.spy()
+  describe("when the editor's path changes", function() {
+    it("updates the preview's title", async function() {
+      const titleChangedCallback = sinon.spy()
 
-        await atom.workspace.open('subdir/file.markdown')
+      const ted = (await atom.workspace.open(
+        'subdir/file.markdown',
+      )) as TextEditor
 
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
 
-        preview = await expectPreviewInSplitPane()
+      preview = await expectPreviewInSplitPane()
 
-        expect(preview.getTitle()).to.equal('file.markdown Preview')
-        preview.onDidChangeTitle(titleChangedCallback)
-        const filePath = atom.workspace.getActiveTextEditor()!.getPath()!
+      expect(preview.getTitle()).to.equal('file.markdown Preview')
+      preview.onDidChangeTitle(titleChangedCallback)
+      const filePath = atom.workspace.getActiveTextEditor()!.getPath()!
+      if (process.platform !== 'linux') {
         fs.renameSync(filePath, path.join(path.dirname(filePath), 'file2.md'))
+      } else {
+        await ted.saveAs('file2.md')
+      }
 
-        await waitsFor(() => {
-          preview.getTitle() === 'file2.md Preview'
-        })
+      await waitsFor(() => preview.getTitle() === 'file2.md Preview')
 
-        expect(titleChangedCallback).to.be.called
-        preview.destroy()
-      })
-    }
+      expect(titleChangedCallback).to.be.called
+      preview.destroy()
+    })
   })
 
   describe('when the URI opened does not have a markdown-preview-plus protocol', () =>
