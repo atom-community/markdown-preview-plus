@@ -26,7 +26,7 @@ const extraOptions = {
 }
 
 const optionalConfigurationFunction = function(mocha) {
-  mocha.timeout(10000)
+  mocha.timeout(60000)
 }
 
 module.exports = createRunner(extraOptions, optionalConfigurationFunction)

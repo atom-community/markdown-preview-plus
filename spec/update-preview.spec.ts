@@ -68,14 +68,14 @@ describe('the difference algorithm that updates the preview', function() {
       expectOrderedListsToStartAt(['1', '1', '1', '1', '1'])
 
       editor.setTextInBufferRange([[35, 0], [35, 12]], '2. Ordered 1')
-      await waitsFor(
+      await waitsFor.msg(
         '1st ordered list start attribute to update',
         () => orderedLists[0].getAttribute('start') != null,
       )
       expectOrderedListsToStartAt(['2', '1', '1', '1', '1'])
 
       editor.setTextInBufferRange([[148, 0], [148, 14]], '> 2. Ordered 1')
-      await waitsFor(
+      await waitsFor.msg(
         'ordered list nested in blockquote start attribute to update',
         () => orderedLists[2].getAttribute('start') != null,
       )
@@ -83,7 +83,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       editor.setTextInBufferRange([[205, 0], [205, 14]], '  2. Ordered 1')
 
-      await waitsFor(
+      await waitsFor.msg(
         'ordered list nested in unordered list start attribute to update',
         () => orderedLists[3].getAttribute('start') != null,
       )
@@ -94,7 +94,7 @@ describe('the difference algorithm that updates the preview', function() {
       editor.setTextInBufferRange([[35, 0], [35, 12]], '2. Ordered 1')
       editor.setTextInBufferRange([[148, 0], [148, 14]], '> 2. Ordered 1')
       editor.setTextInBufferRange([[205, 0], [205, 14]], '  2. Ordered 1')
-      await waitsFor(
+      await waitsFor.msg(
         'ordered lists start attributes to update',
         () =>
           orderedLists[0].getAttribute('start') != null &&
@@ -105,7 +105,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       editor.setTextInBufferRange([[35, 0], [35, 12]], '1. Ordered 1')
 
-      await waitsFor(
+      await waitsFor.msg(
         '1st ordered list start attribute to be removed',
         () => orderedLists[0].getAttribute('start') == null,
       )
@@ -113,7 +113,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       editor.setTextInBufferRange([[148, 0], [148, 14]], '> 1. Ordered 1')
 
-      await waitsFor(
+      await waitsFor.msg(
         'ordered list nested in blockquote start attribute to be removed',
         () => orderedLists[2].getAttribute('start') == null,
       )
@@ -121,7 +121,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       editor.setTextInBufferRange([[205, 0], [205, 14]], '  1. Ordered 1')
 
-      await waitsFor(
+      await waitsFor.msg(
         'ordered list nested in unordered list start attribute to be removed',
         () => orderedLists[3].getAttribute('start') == null,
       )
@@ -133,7 +133,7 @@ describe('the difference algorithm that updates the preview', function() {
     let mathBlocks: HTMLElement[]
 
     beforeEach(async function() {
-      await waitsFor('LaTeX rendering to be enabled', () =>
+      await waitsFor.msg('LaTeX rendering to be enabled', () =>
         atom.config.set(
           'markdown-preview-plus.enableLatexRenderingByDefault',
           true,
@@ -142,12 +142,12 @@ describe('the difference algorithm that updates the preview', function() {
 
       await loadPreviewInSplitPane()
 
-      await waitsFor(
+      await waitsFor.msg(
         'MathJax to load',
         () => typeof MathJax !== 'undefined' && MathJax !== null,
       )
 
-      await waitsFor(
+      await waitsFor.msg(
         'preview to update DOM with span.math containers',
         function() {
           mathBlocks = Array.from(
@@ -157,7 +157,7 @@ describe('the difference algorithm that updates the preview', function() {
         },
       )
 
-      await waitsFor('Maths blocks to be processed by MathJax', function() {
+      await waitsFor.msg('Maths blocks to be processed by MathJax', function() {
         mathBlocks = Array.from(
           preview.findAll('script[type*="math/tex"]'),
         ).map((x) => x.parentElement!)
@@ -181,7 +181,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
 
-      await waitsFor(
+      await waitsFor.msg(
         'mathjaxHelper.mathProcessor to be called',
         () => stub.called,
       )
@@ -215,7 +215,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
 
-      await waitsFor(
+      await waitsFor.msg(
         'mathjaxHelper.mathProcessor to be called',
         () => stub.called,
       )
@@ -254,7 +254,7 @@ describe('the difference algorithm that updates the preview', function() {
         })
       editor.setTextInBufferRange([[24, 0], [24, 9]], 'This is a modified')
 
-      await waitsFor(
+      await waitsFor.msg(
         'renderer.convertCodeBlocksToAtomEditors to be called',
         () => stub.called,
       )

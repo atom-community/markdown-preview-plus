@@ -50,10 +50,13 @@ describe('Syncronization of source and preview', function() {
 
     preview = await expectPreviewInSplitPane()
 
-    await waitsFor('mathjaxHelper.mathProcessor to be called', () => spy.called)
+    await waitsFor.msg(
+      'mathjaxHelper.mathProcessor to be called',
+      () => spy.called,
+    )
     spy.restore()
 
-    await waitsFor(
+    await waitsFor.msg(
       'MathJax to load',
       () => typeof MathJax !== 'undefined' && MathJax !== null,
     )
@@ -76,7 +79,7 @@ describe('Syncronization of source and preview', function() {
 
     const callback = () => (done = true)
     MathJax.Hub.Queue([callback])
-    await waitsFor('queued MathJax operations to complete', () => done)
+    await waitsFor.msg('queued MathJax operations to complete', () => done)
   }
 
   function findInPreview(token: MyToken) {

@@ -56,7 +56,7 @@ describe('MathJax helper module', () =>
 
       mathjaxHelper.loadMathJax()
 
-      await waitsFor(
+      await waitsFor.msg(
         'MathJax to load',
         // tslint:disable-next-line:strict-type-predicates
         () => typeof MathJax !== 'undefined' && MathJax !== null,
@@ -74,7 +74,7 @@ describe('MathJax helper module', () =>
       div.appendChild(span)
       mathjaxHelper.mathProcessor([span])
 
-      macros = await waitsFor('MathJax macros to be defined', function() {
+      macros = await waitsFor.msg('MathJax macros to be defined', function() {
         try {
           return MathJax.InputJax.TeX.Definitions.macros as typeof macros
         } catch {
@@ -82,7 +82,7 @@ describe('MathJax helper module', () =>
         }
       })
 
-      await waitsFor(
+      await waitsFor.msg(
         'MathJax to process span',
         () => span.childElementCount === 2,
       )

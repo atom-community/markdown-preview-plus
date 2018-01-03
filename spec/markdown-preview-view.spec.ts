@@ -328,7 +328,7 @@ function f(x) {
 
         fs.writeFileSync(img1Path, 'still clearly not a png ;D')
 
-        await waitsFor('image src attribute to update', function() {
+        await waitsFor.msg('image src attribute to update', function() {
           imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
           return !imageURL.endsWith(imageVer)
         })
@@ -394,7 +394,7 @@ function f(x) {
 
         fs.writeFileSync(img1Path, 'still clearly not a png ;D')
 
-        await waitsFor('img1 src attribute to update', function() {
+        await waitsFor.msg('img1 src attribute to update', function() {
           img1URL = preview.find('img[alt=img1]')!.getAttribute('src')!
           return !img1URL.endsWith(img1Ver)
         })
@@ -413,7 +413,7 @@ function f(x) {
 
         fs.writeFileSync(img2Path, 'still clearly not a png either ;D')
 
-        await waitsFor('img2 src attribute to update', function() {
+        await waitsFor.msg('img2 src attribute to update', function() {
           img2URL = preview.find('img[alt=img2]')!.getAttribute('src')!
           return !img2URL.endsWith(img2Ver)
         })
@@ -432,7 +432,7 @@ function f(x) {
 
         fs.writeFileSync(img3Path, "you better believe i'm not a png ;D")
 
-        await waitsFor('img3 src attribute to update', function() {
+        await waitsFor.msg('img3 src attribute to update', function() {
           img3URL = preview.find('img[alt=img3]')!.getAttribute('src')!
           return !img3URL.endsWith(img3Ver)
         })
@@ -464,7 +464,7 @@ function f(x) {
 
         fs.unlinkSync(img1Path)
 
-        await waitsFor('image src attribute to update', function() {
+        await waitsFor.msg('image src attribute to update', function() {
           imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
           return !imageURL.endsWith(imageVer)
         })
@@ -476,7 +476,7 @@ function f(x) {
         )
         await preview.renderMarkdown()
 
-        await waitsFor('image src attribute to update', function() {
+        await waitsFor.msg('image src attribute to update', function() {
           imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
           return imageURL !== img1Path
         })
@@ -502,7 +502,7 @@ function f(x) {
 
         fs.renameSync(img1Path, img1Path + 'trol')
 
-        await waitsFor('image src attribute to update', function() {
+        await waitsFor.msg('image src attribute to update', function() {
           imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
           return !imageURL.endsWith(imageVer)
         })
@@ -511,7 +511,7 @@ function f(x) {
         fs.renameSync(img1Path + 'trol', img1Path)
         await preview.renderMarkdown()
 
-        await waitsFor('image src attribute to update', function() {
+        await waitsFor.msg('image src attribute to update', function() {
           imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
           return imageURL !== img1Path
         })
@@ -689,7 +689,7 @@ function f(x) {
 
       preview = await expectPreviewInSplitPane()
 
-      await waitsFor('notification', () =>
+      await waitsFor.msg('notification', () =>
         workspaceElement.querySelector('atom-notification'),
       )
 

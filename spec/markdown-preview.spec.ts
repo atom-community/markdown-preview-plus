@@ -113,12 +113,12 @@ describe('Markdown preview plus package', function() {
 
       atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
 
-      await waitsFor(
+      await waitsFor.msg(
         'second markdown preview to be created',
         () => previewPane.getItems().length === 2,
       )
 
-      await waitsFor(
+      await waitsFor.msg(
         'second markdown preview to be activated',
         () => previewPane.getActiveItemIndex() === 1,
       )
@@ -137,7 +137,7 @@ describe('Markdown preview plus package', function() {
 
       atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
 
-      await waitsFor(
+      await waitsFor.msg(
         'first preview to be activated',
         () => previewPane.getActiveItemIndex() === 0,
       )
@@ -177,7 +177,7 @@ describe('Markdown preview plus package', function() {
 
         markdownEditor.setText('Hey!')
 
-        await waitsFor(
+        await waitsFor.msg(
           '::onDidChangeMarkdown handler to be called',
           () => listener.callCount > 0,
         )
@@ -245,10 +245,13 @@ describe('Markdown preview plus package', function() {
 var x = y;
 \`\`\`\
 `)
-        await waitsFor('markdown to be rendered after its text changed', () => {
-          const ed = preview.find('atom-text-editor') as HTMLElement
-          return ed && ed.dataset.grammar === 'text plain null-grammar'
-        })
+        await waitsFor.msg(
+          'markdown to be rendered after its text changed',
+          () => {
+            const ed = preview.find('atom-text-editor') as HTMLElement
+            return ed && ed.dataset.grammar === 'text plain null-grammar'
+          },
+        )
 
         let grammarAdded = false
         atom.grammars.onDidAddGrammar(() => (grammarAdded = true))
@@ -258,9 +261,9 @@ var x = y;
         )
         await atom.packages.activatePackage('language-javascript')
 
-        await waitsFor('grammar to be added', () => grammarAdded)
+        await waitsFor.msg('grammar to be added', () => grammarAdded)
 
-        await waitsFor(
+        await waitsFor.msg(
           'markdown to be rendered after grammar was added',
           () => {
             const el = preview.find('atom-text-editor') as TextEditorElement
@@ -281,7 +284,7 @@ var x = y;
       const spy = sinon.spy(preview, 'renderMarkdownText')
       fs.writeFileSync(filePath, fs.readFileSync(filePath).toString('utf8'))
 
-      await waitsFor(
+      await waitsFor.msg(
         'markdown to be re-rendered after file changed',
         () => spy.called,
       )
@@ -354,7 +357,7 @@ var x = y;
         'markdown-preview-plus:copy-html',
       )
 
-      await waitsFor(
+      await waitsFor.msg(
         'atom.clipboard.write to have been called',
         () => spy.callCount === 1,
       )
@@ -374,7 +377,7 @@ var x = y;
         'markdown-preview-plus:copy-html',
       )
 
-      await waitsFor(
+      await waitsFor.msg(
         'atom.clipboard.write to have been called',
         () => spy.callCount === 2,
       )
@@ -400,7 +403,7 @@ var x = y;
           'markdown-preview-plus:copy-html',
         )
 
-        await waitsFor(
+        await waitsFor.msg(
           'atom.clipboard.write to have been called',
           () => spy.callCount === 1,
         )
@@ -477,7 +480,7 @@ var x = y;
       await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
 
       await mpp.copyHtml()
-      await waitsFor(
+      await waitsFor.msg(
         'atom.clipboard.write to have been called',
         () => spy.callCount === 1,
       )
@@ -493,7 +496,7 @@ var x = y;
         [1, 0],
       ])
       await mpp.copyHtml()
-      await waitsFor(
+      await waitsFor.msg(
         'atom.clipboard.write to have been called',
         () => spy.callCount === 2,
       )
@@ -530,7 +533,7 @@ var x = y;
 
     describe('when LaTeX rendering is enabled by default', function() {
       beforeEach(async function() {
-        await waitsFor('LaTeX rendering to be enabled', () =>
+        await waitsFor.msg('LaTeX rendering to be enabled', () =>
           atom.config.set(
             'markdown-preview-plus.enableLatexRenderingByDefault',
             true,
@@ -545,7 +548,7 @@ var x = y;
       it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
         await mpp.copyHtml()
 
-        await waitsFor(
+        await waitsFor.msg(
           'atom.clipboard.write to have been called',
           () => spy.callCount === 1,
         )
@@ -558,7 +561,7 @@ var x = y;
       it("scales the svg's if the scaleMath parameter is passed", async function() {
         await mpp.copyHtml(undefined, 200)
 
-        await waitsFor(
+        await waitsFor.msg(
           'atom.clipboard.write to have been called',
           () => spy.callCount === 1,
         )
@@ -571,7 +574,7 @@ var x = y;
         let html: string
         await mpp.copyHtml((proHTML) => (html = proHTML))
 
-        await waitsFor(
+        await waitsFor.msg(
           'markdown to be parsed and processed by MathJax',
           () => html,
         )

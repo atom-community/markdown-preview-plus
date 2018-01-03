@@ -29,55 +29,54 @@ use(function(chai: any) {
   chai.Assertion.addChainableMethod('startWith', startsWithMethodWrapper)
 })
 
-export async function waitsFor<T>(
-  msg: string,
-  f: () => T | undefined,
-  delay?: number,
-): Promise<T>
-export async function waitsFor<T>(
-  f: () => T | undefined,
-  delay?: number,
-): Promise<T>
-export async function waitsFor<T>(
-  fOrMsg: string | (() => T | undefined),
-  delayOrF?: (() => T | undefined) | number,
-  delayM: number = 100,
-) {
-  const msg = typeof fOrMsg === 'string' ? fOrMsg : ''
-  const fM =
-    typeof fOrMsg === 'function'
-      ? fOrMsg
-      : typeof delayOrF === 'function' ? delayOrF : undefined
-  const delay = typeof delayOrF !== 'function' ? delayOrF : delayM
-  if (!fM) throw new Error('f is not defined')
-  const f = fM
-  return new Promise<T>(function(resolve, reject) {
-    let numTries = 0
-    function test() {
+export interface WaitsFor {
+  <T>(
+    func: () => T | undefined,
+    timeout?: number,
+    intervalTime?: number,
+    msg?: string,
+  ): Promise<T>
+  msg<T>(
+    msg: string,
+    func: () => T | undefined,
+    timeout?: number,
+    intervalTime?: number,
+  ): Promise<T>
+}
+
+export const waitsFor = async function<T>(
+  func: () => T | undefined,
+  timeout = 8000,
+  intervalTime = 10,
+  msg: string = func.toString(),
+): Promise<T> {
+  return new Promise<T>(function(fufill, reject) {
+    const interval = setInterval(function() {
       try {
-        numTries += 1
-        if (numTries > 300) {
-          return reject(new Error(`Timed out while waiting for ${msg}`))
+        const res = func()
+        if (res) {
+          clearTimeout(timeout)
+          clearInterval(interval)
+          fufill(res)
         }
-        const res = f()
-        if (res) resolve(res)
-        else setTimeout(test, delay)
       } catch (e) {
         reject(e)
       }
-    }
-    try {
-      test()
-    } catch (e) {
-      reject(e)
-    }
+    }, intervalTime)
+
+    setTimeout(function() {
+      clearInterval(interval)
+      reject(new Error('Waits for condition never met: ' + msg))
+    }, timeout)
   })
-}
+} as WaitsFor
+
+waitsFor.msg = async (msg, f, t, i) => waitsFor(f, t, i, msg)
 
 export async function expectPreviewInSplitPane() {
   await waitsFor(() => atom.workspace.getCenter().getPanes().length === 2)
 
-  const preview = await waitsFor('markdown preview to be created', () => {
+  const preview = await waitsFor.msg('markdown preview to be created', () => {
     const pv = atom.workspace
       .getCenter()
       .getPanes()[1]
