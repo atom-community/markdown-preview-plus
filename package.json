@@ -19,12 +19,12 @@
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
   "dependencies": {
+    "MathJax":
+      "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
     "atom-highlight": "^0.4.1",
     "fs-plus": "^3.0.1",
     "grim": "^2.0.2",
     "lodash": "^4.17.4",
-    "MathJax":
-      "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
     "markdown-it": "^8.4.0",
     "markdown-it-lazy-headers": "^0.1.2",
     "markdown-it-math":
@@ -32,7 +32,7 @@
     "season": "^6.0"
   },
   "devDependencies": {
-    "@types/atom": "^1.23.0",
+    "@types/atom": "~1.23.0",
     "@types/chai": "^4.0.10",
     "@types/fs-extra": "^5.0.0",
     "@types/fs-plus": "^3.0.0",
@@ -40,6 +40,7 @@
     "@types/markdown-it": "0.0.4",
     "@types/mathjax": "0.0.32",
     "@types/mocha": "^2.2.45",
+    "@types/node": "^7.0.0",
     "@types/pathwatcher": "^8.0.4",
     "@types/sinon-chai": "^2.7.29",
     "@types/temp": "^0.8.31",
