@@ -44,9 +44,8 @@ const refreshImages = _.debounce(async function(src: string) {
 
 function srcClosure(src: string) {
   // return function(events: FilesystemChangeEvent) {
-  return function(event: TEvent, path: string) {
+  return function(event: TEvent) {
     // for (const event of events) {
-    console.log(event, path)
     const i = imageRegister[src]
     if (!i) return
     if (event === 'change' && fs.isFileSync(src)) {

@@ -190,7 +190,7 @@ export class WrappedDomTree {
           }
         }
       } else {
-        console.log(operations)
+        console.debug(operations)
         throw new Error('invalid operations')
       }
     }

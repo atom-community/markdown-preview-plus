@@ -154,7 +154,7 @@ function loadUserMacros() {
   if (fs.isFileSync(userMacrosPath)) {
     return loadMacrosFile(userMacrosPath)
   } else {
-    console.log(
+    console.debug(
       'Creating markdown-preview-plus.cson, this is a one-time operation.',
     )
     createMacrosTemplate(userMacrosPath)
