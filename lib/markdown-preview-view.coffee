@@ -26,6 +26,10 @@ class MarkdownPreviewView extends ScrollView
     @emitter = new Emitter
     @disposables = new CompositeDisposable
     @loaded = true # Do not show the loading spinnor on initial load
+    @scrollMap = null
+    @killScrollHandler =
+      preview: Date.now()
+      editor: Date.now()
 
   attached: ->
     return if @isAttached
@@ -48,6 +52,7 @@ class MarkdownPreviewView extends ScrollView
   destroy: ->
     imageWatcher ?= require './image-watch-helper'
     imageWatcher.removeFile(@getPath())
+    @[0].removeEventListener 'scroll', @onPreviewScroll
     @disposables.dispose()
 
   onDidChangeTitle: (callback) ->
@@ -72,6 +77,7 @@ class MarkdownPreviewView extends ScrollView
 
       if @editor?
         @emitter.emit 'did-change-title' if @editor?
+        @editorView = atom.views.getView(@editor)
         @handleEvents()
         @renderMarkdown()
       else
@@ -156,6 +162,9 @@ class MarkdownPreviewView extends ScrollView
       else
         @element.removeAttribute('data-use-github-style')
 
+    @disposables.add @editorView.onDidChangeScrollTop @onEditorScroll
+    @[0].addEventListener 'scroll', @onPreviewScroll
+
   renderMarkdown: ->
     @showLoading() unless @loaded
     @getMarkdownSource().then (source) => @renderMarkdownText(source) if source?
@@ -204,6 +213,7 @@ class MarkdownPreviewView extends ScrollView
         @updatePreview.update(domFragment, @renderLaTeX)
         @emitter.emit 'did-change-markdown'
         @originalTrigger('markdown-preview-plus:markdown-changed')
+        @getScrollMap(text) if @editor?
 
   getTitle: ->
     if @file?
@@ -572,6 +582,207 @@ class MarkdownPreviewView extends ScrollView
     setTimeout ( -> element.removeClass('flash') ), 1000
 
     return element[0]
+
+  #
+  # Generate a map of the editors scroll percentage to the equivalent preview
+  # scroll percentage with respect to the parsed markdown.
+  #
+  # @param {string} Source markdown of the associated editor.
+  # @return {null}
+  #
+  getScrollMap: (text) ->
+    markdownIt  ?= require './markdown-it-helper'
+    tokens      = markdownIt.getTokens text, @renderLaTeX
+
+    level     = 0
+    path      = []
+    pathToks  = []
+    tagIdxLev = []
+
+    scrollMapDirty = tokens.map (e) ->
+        tag = if (e.tag is 'math' or e.tag is 'code') then 'span' else e.tag
+        if e.nesting > -1
+          level++
+          tagIdxLev[level] ?= []
+          if tagIdxLev[level][tag]?
+          then tagIdxLev[level][tag]++
+          else tagIdxLev[level][tag] = 0
+          path.push "#{tag}[#{tagIdxLev[level][tag]}]"
+          pathToks.push
+            tag: tag
+            idx: tagIdxLev[level][tag]
+        else
+          level--
+          tagIdxLev[level+2] = []
+          path.pop()
+          pathToks.pop()
+
+        tok =
+          nesting : e.nesting
+          level : level
+          tag: tag
+          line: e.map?[0]
+          path: path.join('/')
+          pathToks: pathToks.map (e) -> e
+
+        if e.nesting is 0
+          level--
+          path.pop()
+          pathToks.pop()
+
+        tok
+      .filter (e) ->
+        (e.nesting is 1 or
+        e.tag is 'span') and
+        e.line isnt null and not
+        e.path.match(/table.*?\//)
+
+    # Prepare editor anchors/nodes
+    scrollMap = []
+    lineCount = @editor.getLineCount()
+    for block, i in scrollMapDirty
+      if block.line is scrollMapDirty[i-1]?.line
+        scrollMap.pop()
+      block.linePct = 100*block.line/lineCount
+      scrollMap.push(block)
+
+    # Prepare preview anchors/nodes
+    scrollHeight = @[0].scrollHeight
+    for block in scrollMap
+      element = @find('.update-preview').eq(0)
+      for tok in block.pathToks
+        candidateElement = element.children(tok.tag).eq(tok.idx)
+        if candidateElement.length isnt 0
+        then element = candidateElement
+        else break
+      block.offsetTop     = element[0].offsetTop
+      block.offsetTopPct  = 100*element[0].offsetTop/scrollHeight
+
+    # Prepare start anchors
+    scrollMap[0].linePct      = 0
+    scrollMap[0].offsetTopPct = 0
+
+    # Prepare minimal end anchors
+    scrollMap.push
+      linePct: 100
+      offsetTopPct: 100
+
+    @scrollMap = scrollMap
+
+    return
+
+  #
+  # Editor scroll change event handler
+  #
+  # @param {int} The offset of the top of the editor (top of scrollHeight) with
+  #   respect to the top of the offsetHeight in pixels
+  # @return {undefined}
+  #
+  onEditorScroll: (scrollTop) =>
+    if @killScrollHandler.editor > Date.now()
+      return
+
+    scrollHeight    = @editorView.getScrollHeight()
+    viewportHeight  = @editorView.getHeight()
+
+    if scrollHeight != viewportHeight
+      pctDirty = scrollTop / (scrollHeight - viewportHeight) * 100
+      pct = null
+
+      if isNaN(pctDirty)
+        pct = 100
+      else if pctDirty > 100
+        pct = 100
+      else if pctDirty < 0
+        pct = 0
+      else
+        pct = pctDirty
+
+    # Perform interval bisection to find bounding editor linePct nodes
+    left  = 0
+    mid   = Math.round @scrollMap.length/2
+    right = @scrollMap.length-1
+
+    for i in [0..31]
+      # Perform interval bisection
+      if pct < @scrollMap[mid].linePct
+      then right = mid
+      else left = mid
+
+      # Check if bisection has converged
+      if right-left <= 1
+      then break
+      else mid = Math.round (left+right)/2
+
+    # Set preview scroll position
+    leftLinePct   = @scrollMap[left].linePct
+    rightLinePct  = @scrollMap[left+1].linePct
+    leftOffPct    = @scrollMap[left].offsetTopPct
+    rightOffPct   = @scrollMap[left+1].offsetTopPct
+
+    remainderFrac = (pct - leftLinePct)/(rightLinePct - leftLinePct)
+    previewPct    = leftOffPct + remainderFrac*(rightOffPct - leftOffPct)
+
+    @killScrollHandler.preview = Date.now() + 500
+    @[0].scrollTop = previewPct*(@[0].scrollHeight-@[0].offsetHeight)/100
+
+
+  #
+  # Preview scroll change event handler
+  #
+  # @return {undefined}
+  #
+  onPreviewScroll: () =>
+    if @killScrollHandler.preview > Date.now()
+      return
+
+    scrollTop       = @[0].scrollTop
+    scrollHeight    = @[0].scrollHeight
+    viewportHeight  = @[0].offsetHeight
+
+    if scrollHeight != viewportHeight
+      pctDirty = scrollTop / (scrollHeight - viewportHeight) * 100
+      pct = null
+
+      if isNaN(pctDirty)
+        pct = 100
+      else if pctDirty > 100
+        pct = 100
+      else if pctDirty < 0
+        pct = 0
+      else
+        pct = pctDirty
+
+    # Perform interval bisection to find bounding editor linePct nodes
+    left  = 0
+    mid   = Math.round @scrollMap.length/2
+    right = @scrollMap.length-1
+
+    for i in [0..31]
+      # Perform interval bisection
+      if pct < @scrollMap[mid].offsetTopPct
+      then right = mid
+      else left = mid
+
+      # Check if bisection has converged
+      if right-left <= 1
+      then break
+      else mid = Math.round (left+right)/2
+
+    # Set preview scroll position
+    leftLinePct   = @scrollMap[left].linePct
+    rightLinePct  = @scrollMap[left+1].linePct
+    leftOffPct    = @scrollMap[left].offsetTopPct
+    rightOffPct   = @scrollMap[left+1].offsetTopPct
+
+    remainderFrac = (pct - leftOffPct)/(rightOffPct - leftOffPct)
+    editorPct     = leftLinePct + remainderFrac*(rightLinePct - leftLinePct)
+
+    targetScrollHeight    = @editorView.getScrollHeight()
+    targetOffsetHeight    = @editorView.getHeight()
+
+    @killScrollHandler.editor = Date.now() + 500
+    @editorView.setScrollTop(editorPct*(targetScrollHeight - targetOffsetHeight)/100)
 
 if Grim.includeDeprecatedAPIs
   MarkdownPreviewView::on = (eventName) ->
