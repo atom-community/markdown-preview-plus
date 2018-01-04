@@ -11,8 +11,6 @@ import * as temp from 'temp'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as markdownIt from '../lib/markdown-it-helper'
 import mathjaxHelper = require('../lib/mathjax-helper')
-import * as url from 'url'
-import * as queryString from 'querystring'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as wrench from 'fs-extra'
@@ -296,9 +294,7 @@ function f(x) {
       imageURL: string,
     ): string {
       expect(imageURL).to.startWith(`${imagePath}?v=`)
-      const urlQueryStr = url.parse(imageURL).query as string
-      const urlQuery = queryString.parse(urlQueryStr!)
-      return urlQuery.v as string
+      return imageURL.split('?v=')[1]
     }
 
     describe('when a local image is previewed', () =>
