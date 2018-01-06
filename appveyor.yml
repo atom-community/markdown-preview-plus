@@ -10,8 +10,6 @@ environment:
 ### Generic setup follows ###
 build_script:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/atom/ci/master/build-package.ps1'))
-  - ps: npm run build
-  - ps: npm run test
 
 branches:
   only:
