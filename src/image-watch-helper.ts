@@ -1,29 +1,11 @@
 import fs = require('fs-plus')
 import _ = require('lodash')
 import { isMarkdownPreviewView } from './cast'
-// import { watchPath, FilesystemChangeEvent, PathWatcher } from 'atom'
-
-declare module 'pathwatcher' {
-  export function watch(
-    filename: string,
-    listener?: (event: TEvent, path: string) => void,
-  ): PathWatcher
-  export type TEvent = 'rename' | 'delete' | 'change'
-}
-import path = require('path')
-const pathWatcherPath = path.join(
-  atom.packages.resourcePath,
-  '/node_modules/pathwatcher/lib/main',
-)
-import _unused = require('pathwatcher')
-// tslint:disable-next-line:no-var-requires
-const { watch } = require(pathWatcherPath) as typeof _unused
-import PathWatcher = _unused.PathWatcher
-import TEvent = _unused.TEvent
+import { CompositeDisposable, File } from 'atom'
 
 interface ImageRegisterRec {
   version: number
-  watcher: PathWatcher
+  watcher: CompositeDisposable
   files: string[]
   watched: boolean
   path: string
@@ -42,17 +24,16 @@ const refreshImages = _.debounce(async function(src: string) {
   }
 }, 250)
 
-function srcClosure(src: string) {
+function srcClosure(src: string, event: 'change' | 'delete' | 'rename') {
   // return function(events: FilesystemChangeEvent) {
-  return function(event: TEvent) {
+  return function() {
     // for (const event of events) {
     const i = imageRegister[src]
     if (!i) return
     if (event === 'change' && fs.isFileSync(src)) {
       i.version = Date.now()
     } else {
-      // i.watcher.dispose()
-      i.watcher.close()
+      i.watcher.dispose()
       delete imageRegister[src]
     }
     // tslint:disable-next-line: no-floating-promises
@@ -68,8 +49,7 @@ export function removeFile(file: string) {
     image.files = _.filter(image.files, fs.isFileSync)
     if (_.isEmpty(image.files)) {
       image.watched = false
-      // image.watcher.dispose()
-      image.watcher.close()
+      image.watcher.dispose()
     }
     return image
   })
@@ -81,13 +61,20 @@ export async function getVersion(image: string, file?: string) {
   if (!i) {
     if (fs.isFileSync(image)) {
       version = Date.now()
+      const watcher = new CompositeDisposable()
+      const af = new File(image)
+      watcher.add(
+        af.onDidChange(srcClosure(image, 'change')),
+        af.onDidDelete(srcClosure(image, 'delete')),
+        af.onDidRename(srcClosure(image, 'rename')),
+      )
       imageRegister[image] = {
         path: image,
         watched: true,
         files: file ? [file] : [],
         version,
         // watcher: await watchPath(image, {}, srcClosure(image)),
-        watcher: watch(image, srcClosure(image)),
+        watcher,
       }
       return version
     } else {

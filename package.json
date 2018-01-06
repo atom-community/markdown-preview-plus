@@ -7,7 +7,7 @@
   "repository": "https://github.com/atom-community/markdown-preview-plus",
   "license": "MIT",
   "engines": {
-    "atom": ">=1.17.0 <2.0.0"
+    "atom": ">=1.23.0 <2.0.0"
   },
   "atomTestRunner": "./spec/runner.js",
   "scripts": {
@@ -40,7 +40,6 @@
     "@types/mathjax": "0.0.32",
     "@types/mocha": "^2.2.45",
     "@types/node": "^7.0.0",
-    "@types/pathwatcher": "^8.0.4",
     "@types/sinon-chai": "^2.7.29",
     "@types/temp": "^0.8.31",
     "atom-haskell-tslint-rules": "^0.1.1",
