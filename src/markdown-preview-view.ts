@@ -32,12 +32,12 @@ export interface MPVParamsPath {
 export type MPVParams = MPVParamsEditor | MPVParamsPath
 
 export class MarkdownPreviewView {
-  private loading: boolean
+  private loading: boolean = true
+  // tslint:disable-next-line:no-uninitialized
   private resolve: () => void
   public readonly renderPromise: Promise<void> = new Promise<void>(
     (resolve) => (this.resolve = resolve),
   )
-  // tslint:disable-next-line:no-uninitialized
   public readonly element: HTMLElement
   private preview: HTMLElement
   private emitter: Emitter<{
@@ -53,7 +53,6 @@ export class MarkdownPreviewView {
   private editorId?: number
   private filePath?: string
   private file?: File
-  // tslint:disable-next-line:no-uninitialized
   private editor?: TextEditor
 
   constructor({ editorId, filePath }: MPVParams) {
@@ -169,8 +168,7 @@ export class MarkdownPreviewView {
       'core:move-down': () => this.element.scrollBy({ top: 10 }),
       'core:save-as': (event) => {
         event.stopPropagation()
-        // tslint:disable-next-line:no-floating-promises
-        this.saveAs()
+        handlePromise(this.saveAs())
       },
       'core:copy': (event: CommandEvent) => {
         if (this.copyToClipboard()) event.stopPropagation()
@@ -185,13 +183,14 @@ export class MarkdownPreviewView {
       },
       'markdown-preview-plus:reset-zoom': () => (this.element.style.zoom = '1'),
       'markdown-preview-plus:sync-source': (event) => {
-        // tslint:disable-next-line:no-floating-promises
-        this.getMarkdownSource().then((source?: string) => {
-          if (source === undefined) {
-            return
-          }
-          this.syncSource(source, event.target as HTMLElement)
-        })
+        handlePromise(
+          this.getMarkdownSource().then((source?: string) => {
+            if (source === undefined) {
+              return
+            }
+            this.syncSource(source, event.target as HTMLElement)
+          }),
+        )
       },
     })
 
@@ -512,14 +511,15 @@ export class MarkdownPreviewView {
       return false
     }
 
-    // tslint:disable-next-line:no-floating-promises
-    this.getHTML(function(error, html) {
-      if (error !== null) {
-        console.warn('Copying Markdown as HTML failed', error)
-      } else {
-        atom.clipboard.write(html)
-      }
-    })
+    handlePromise(
+      this.getHTML(function(error, html) {
+        if (error !== null) {
+          console.warn('Copying Markdown as HTML failed', error)
+        } else {
+          atom.clipboard.write(html)
+        }
+      }),
+    )
 
     return true
   }
@@ -581,8 +581,7 @@ export class MarkdownPreviewView {
 </html>` + '\n' // Ensure trailing newline
 
           fs.writeFileSync(htmlFilePath, html)
-          // tslint:disable-next-line:no-floating-promises
-          atom.workspace.open(htmlFilePath)
+          handlePromise(atom.workspace.open(htmlFilePath))
         }
       })
     }
@@ -753,7 +752,7 @@ export class MarkdownPreviewView {
       if (token.tag === pathToElement[0].tag && token.level === level) {
         if (token.nesting === 1) {
           if (pathToElement[0].index === 0) {
-            // tslint:disable-next-line:strict-type-predicates
+            // tslint:disable-next-line:strict-type-predicates // TODO: complain on DT
             if (token.map != null) {
               finalToken = token
             }
@@ -823,8 +822,8 @@ export class MarkdownPreviewView {
       token.tag = tag
 
       if (
-        // tslint:disable-next-line:strict-type-predicates
-        token.map != null && // token.map *can* be null // TODO: complain on DT
+        // tslint:disable-next-line:strict-type-predicates // TODO: complain on DT
+        token.map != null && // token.map *can* be null
         line >= token.map[0] &&
         line <= token.map[1] - 1
       ) {

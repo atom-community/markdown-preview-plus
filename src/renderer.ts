@@ -273,7 +273,7 @@ function tokenizeCodeBlocks(html: string, defaultLanguage: string = 'text') {
     const fenceName =
       codeBlock.className.replace(/^(lang-|sourceCode )/, '') || defaultLanguage
 
-    // tslint:disable-next-line:no-unsafe-any
+    // tslint:disable-next-line:no-unsafe-any // TODO: tslint bug?
     const highlightedHtml: string = highlight({
       fileContents: codeBlock.innerText,
       scopeName: scopeForFenceName(fenceName),

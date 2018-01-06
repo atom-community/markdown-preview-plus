@@ -33,9 +33,8 @@ const scopesByFenceName = {
   xml: 'text.xml',
   yaml: 'source.yaml',
   yml: 'source.yaml',
-}
+} as { [fenceName: string]: string | undefined }
 
 export function scopeForFenceName(fenceName: string): string {
-  // tslint:disable-next-line:no-unsafe-any
   return scopesByFenceName[fenceName] || `source.${fenceName}`
 }

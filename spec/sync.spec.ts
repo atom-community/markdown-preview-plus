@@ -19,7 +19,7 @@ import { Token } from 'markdown-it'
 
 temp.track()
 
-type MyToken = {
+interface MyToken {
   path: Array<{ tag: string; index: number }>
   line: number
 }

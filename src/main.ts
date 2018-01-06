@@ -6,6 +6,7 @@ import renderer = require('./renderer')
 import mathjaxHelper = require('./mathjax-helper')
 import { isMarkdownPreviewView } from './cast'
 import { TextEditor, WorkspaceOpenOptions, CommandEvent } from 'atom'
+import { handlePromise } from './util'
 
 export { config } from './config'
 
@@ -132,8 +133,7 @@ export function removePreviewForEditor(editor: TextEditor) {
       previewPane.activateItem(preview)
       return false
     }
-    // tslint:disable-next-line:no-floating-promises
-    previewPane.destroyItem(preview)
+    handlePromise(previewPane.destroyItem(preview))
     return true
   } else {
     return false
@@ -149,12 +149,13 @@ export function addPreviewForEditor(editor: TextEditor) {
       'markdown-preview-plus.previewSplitPaneDir',
     )!
   }
-  // tslint:disable-next-line:no-floating-promises
-  atom.workspace.open(uri, options).then(function(markdownPreviewView) {
-    if (isMarkdownPreviewView(markdownPreviewView)) {
-      previousActivePane.activate()
-    }
-  })
+  handlePromise(
+    atom.workspace.open(uri, options).then(function(markdownPreviewView) {
+      if (isMarkdownPreviewView(markdownPreviewView)) {
+        previousActivePane.activate()
+      }
+    }),
+  )
 }
 
 export function previewFile({ currentTarget }: CommandEvent) {
@@ -170,10 +171,11 @@ export function previewFile({ currentTarget }: CommandEvent) {
     }
   }
 
-  // tslint:disable-next-line:no-floating-promises
-  atom.workspace.open(`markdown-preview-plus://${encodeURI(filePath)}`, {
-    searchAllPanes: true,
-  })
+  handlePromise(
+    atom.workspace.open(`markdown-preview-plus://${encodeURI(filePath)}`, {
+      searchAllPanes: true,
+    }),
+  )
 }
 
 const clipboardCopy = (text: string) => {

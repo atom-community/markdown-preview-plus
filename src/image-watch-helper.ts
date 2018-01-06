@@ -2,6 +2,7 @@ import fs = require('fs-plus')
 import _ = require('lodash')
 import { isMarkdownPreviewView } from './cast'
 import { CompositeDisposable, File } from 'atom'
+import { handlePromise } from './util'
 
 interface ImageRegisterRec {
   version: number
@@ -25,9 +26,7 @@ const refreshImages = _.debounce(async function(src: string) {
 }, 250)
 
 function srcClosure(src: string, event: 'change' | 'delete' | 'rename') {
-  // return function(events: FilesystemChangeEvent) {
   return function() {
-    // for (const event of events) {
     const i = imageRegister[src]
     if (!i) return
     if (event === 'change' && fs.isFileSync(src)) {
@@ -36,9 +35,7 @@ function srcClosure(src: string, event: 'change' | 'delete' | 'rename') {
       i.watcher.dispose()
       delete imageRegister[src]
     }
-    // tslint:disable-next-line: no-floating-promises
-    refreshImages(src)
-    // }
+    handlePromise(refreshImages(src))
   }
 }
 
@@ -73,7 +70,6 @@ export async function getVersion(image: string, file?: string) {
         watched: true,
         files: file ? [file] : [],
         version,
-        // watcher: await watchPath(image, {}, srcClosure(image)),
         watcher,
       }
       return version
