@@ -16,8 +16,8 @@ Is rather simple. Here are 10 steps to get you running:
 1.  Fork the repo
 2.  Clone your fork
 3.  Run `npm install --only=dev` in addition to `apm install` in the
-    root of the working copy. Optionally `apm link` if you want to
-    test your changes in Atom.
+    root of the working copy. Optionally `apm link` if you want to test
+    your changes in Atom.
 4.  Hack on it using your favorite TypeScript package. There are a
     couple packages in Atom to select from:
     -   <https://atom.io/packages/atom-typescript>
@@ -30,3 +30,9 @@ Is rather simple. Here are 10 steps to get you running:
 9.  Commit your changes. Don't forget to commit transpiled source in
     `lib/`. Repeat steps 4-9 until satisfied.
 10. Create a pull request.
+
+**Note**: feel free to create pull requests at any stage of the process.
+Earlier is usually better. For one, creating PRs early is a good way of
+letting people know you're working on something, which helps avoid
+effort duplication. Also it will allow maintainers to chime in early and
+help you avoid pitfalls and common mistakes.

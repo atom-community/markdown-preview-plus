@@ -1,3 +1,1 @@
-- [ ] `npm run test` passes locally
-- [ ] `apm test` passes locally
-- [ ] All compiled assets are included (atom packages are git tags and hence the built files need to be a part of the source control)
+- [ ] I have looked over the [contribution guide](https://github.com/atom-community/markdown-preview-plus/blob/master/CONTRIBUTING.md), which contains some crucial technical information.
