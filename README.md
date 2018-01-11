@@ -48,6 +48,12 @@ basic usage:
 -   Toggle Preview: `ctrl-shift-m`
 -   Toggle Math Rendering: `ctrl-shift-x`
 
+## Contributing
+
+See [CONTRIBUTING.md](https://github.com/atom-community/markdown-preview-plus/blob/master/CONTRIBUTING.md).
+
+Also of interest might be [issues marked as "help wanted"](https://github.com/atom-community/markdown-preview-plus/labels/help%20wanted)
+
 ## License
 
 Markdown Preview Plus (MPP) is released under the [MIT
