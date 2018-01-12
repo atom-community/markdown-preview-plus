@@ -56,6 +56,13 @@ export const config = {
     default: true,
     order: 46,
   },
+  useEmoji: {
+    title: 'Use Emoji',
+    description: 'Emoji rendering',
+    type: 'boolean',
+    default: true,
+    order: 47,
+  },
   useGitHubStyle: {
     title: 'Use GitHub.com style',
     type: 'boolean',
@@ -180,6 +187,7 @@ declare module 'atom' {
     'markdown-preview-plus.enableLatexRenderingByDefault': boolean
     'markdown-preview-plus.useLazyHeaders': boolean
     'markdown-preview-plus.useCheckBoxes': boolean
+    'markdown-preview-plus.useEmoji': boolean
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.enablePandoc': boolean
     'markdown-preview-plus.useNativePandocCodeStyles': boolean
@@ -202,6 +210,7 @@ declare module 'atom' {
       enableLatexRenderingByDefault: boolean
       useLazyHeaders: boolean
       useCheckBoxes: boolean
+      useEmoji: boolean
       useGitHubStyle: boolean
       enablePandoc: boolean
       useNativePandocCodeStyles: boolean
