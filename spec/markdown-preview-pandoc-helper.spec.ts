@@ -1,8 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import * as path from 'path'
 import * as fs from 'fs-plus'
 import * as temp from 'temp'
@@ -101,7 +96,7 @@ describe('Markdown preview plus pandoc helper', function() {
     })
   })
 
-  return describe('PandocHelper::setPandocOptions', function() {
+  describe('PandocHelper::setPandocOptions', function() {
     const fallBackBib = '/foo/fallback.bib'
     const fallBackCsl = '/foo/fallback.csl'
     const { setPandocOptions } = pandocHelper
@@ -115,7 +110,7 @@ describe('Markdown preview plus pandoc helper', function() {
         fallBackBib,
       )
       atom.config.set('markdown-preview-plus.pandocCSLFile', cslFile)
-      return atom.config.set(
+      atom.config.set(
         'markdown-preview-plus.pandocCSLFileFallback',
         fallBackCsl,
       )

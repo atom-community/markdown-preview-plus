@@ -1,7 +1,6 @@
 /*
  * decaffeinate suggestions:
- * DS101: Remove unnecessary use of
- * DS102: Remove unnecessary code created because of implicit returns
+  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -88,7 +87,7 @@ describe('MarkdownPreviewView', function() {
       expect(newPreview).to.not.exist
     })
 
-    return it('serializes the editor id when opened for an editor', async function() {
+    it('serializes the editor id when opened for an editor', async function() {
       preview.destroy()
 
       await atom.workspace.open('new.markdown')
@@ -122,7 +121,7 @@ describe('MarkdownPreviewView', function() {
       )
     })
 
-    return it('should render headings with and without space', async function() {
+    it('should render headings with and without space', async function() {
       atom.config.set('markdown-preview-plus.useLazyHeaders', false)
 
       await preview.renderMarkdown()
@@ -195,7 +194,7 @@ if a === 3 {
 `)
       }))
 
-    return describe("when the code block's fence name doesn't have a matching grammar", function() {
+    describe("when the code block's fence name doesn't have a matching grammar", function() {
       it('does not assign a specific grammar', function() {
         const plainEditor = preview.find(
           "atom-text-editor[data-grammar='text plain null-grammar']",
@@ -252,7 +251,7 @@ function f(x) {
         ).to.startWith(`${filePath}?v=`)
       }))
 
-    return describe('when the image uses a URL', function() {
+    describe('when the image uses a URL', function() {
       it("doesn't change the web URL", function() {
         const image = preview.find('img[alt=Image3]')
         expect(markdownIt.decode).to.be.called
@@ -261,7 +260,7 @@ function f(x) {
         )
       })
 
-      return it("doesn't change the data URL", function() {
+      it("doesn't change the data URL", function() {
         const image = preview.find('img[alt=Image4]')
         expect(markdownIt.decode).to.be.called
         expect(image!.getAttribute('src')).to.equal(
@@ -483,7 +482,7 @@ function f(x) {
         )
       }))
 
-    return describe('when a previewed image is renamed and then restored with its original name', () =>
+    describe('when a previewed image is renamed and then restored with its original name', () =>
       it('removes the query timestamp and restores the timestamp after a rerender', async function() {
         let imageURL: string
         let imageVer: string
@@ -529,7 +528,7 @@ function f(x) {
         expect(preview.findAll('p:last-child br').length).to.equal(0)
       }))
 
-    return describe('when gfm newlines are enabled', () =>
+    describe('when gfm newlines are enabled', () =>
       it('creates a single paragraph with no <br>', async function() {
         atom.config.set('markdown-preview-plus.breakOnSingleNewline', true)
 
@@ -580,8 +579,9 @@ function f(x) {
 
       let textEditor: TextEditor
       const openedPromise = new Promise(function(resolve) {
-        return atom.workspace.onDidAddTextEditor(function(event) {
+        const disp = atom.workspace.onDidAddTextEditor(function(event) {
           textEditor = event.textEditor
+          disp.dispose()
           resolve()
         })
       })
@@ -610,7 +610,7 @@ function f(x) {
     })
     // fs.writeFileSync(expectedFilePath, savedHTML, encoding: 'utf8')
 
-    return describe('text editor style extraction', function() {
+    describe('text editor style extraction', function() {
       let extractedStyles: string[]
 
       const textEditorStyle = '.editor-style .extraction-test { color: blue; }'
@@ -631,7 +631,7 @@ function f(x) {
         expect(extractedStyles.indexOf(textEditorStyle)).to.be.greaterThan(-1)
       })
 
-      return it('does not return other styles', function() {
+      it('does not return other styles', function() {
         expect(extractedStyles.indexOf(unrelatedStyle)).to.equal(-1)
       })
     })

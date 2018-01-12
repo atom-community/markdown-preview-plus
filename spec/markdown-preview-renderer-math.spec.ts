@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import markdownIt = require('../lib/markdown-it-helper')
 import { expect } from 'chai'
 let renderMath = false
@@ -49,7 +43,7 @@ _math $x^2$ in emphasis_
 <p><s>math <span class='math'><script type='math/tex'>x^2</script></span> in strikethrough</s></p>\
 `
 
-    return compareHTML(content, result)
+    compareHTML(content, result)
   })
 
   describe('Interference with markdown syntax (from issue-18)', function() {
@@ -59,7 +53,7 @@ _math $x^2$ in emphasis_
       const result =
         "<p>This <span class='math'><script type='math/tex'>(f*g*h)(x)</script></span> is no conflict</p>"
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
 
     it('should not interfere with _', function() {
@@ -68,16 +62,16 @@ _math $x^2$ in emphasis_
       const result =
         "<p>This <span class='math'><script type='math/tex'>x_1, x_2, \\dots, x_N</script></span> is no conflict</p>"
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
 
-    return it('should not interfere with link syntax', function() {
+    it('should not interfere with link syntax', function() {
       content = 'This $[a+b](c+d)$ is no conflict'
 
       const result =
         "<p>This <span class='math'><script type='math/tex'>[a+b](c+d)</script></span> is no conflict</p>"
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
   })
 
@@ -112,7 +106,7 @@ mc^2\\ &= E
 </script></span>\
 `
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
 
     describe('Escaped Math environments', function() {
@@ -128,7 +122,7 @@ $$\
 
         const result = '<p>$$</p><p>should be escaped</p><p>$$</p>'
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
 
       it('Inline Math without proper opening and closing', function() {
@@ -136,7 +130,7 @@ $$\
 
         const result = '<p>a $5, a $10 and a $100 Bill.</p>'
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
 
       it('Double escaped \\[ and \\(', function() {
@@ -151,20 +145,20 @@ $$\
 
         const result = '<p>\\[x+y]</p><p>\\(x+y)</p>'
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
 
-      return it('In inline code examples', function() {
+      it('In inline code examples', function() {
         content = '`\\$`, `\\[ \\]`, `$x$`'
 
         const result =
           '<p><code>\\$</code>, <code>\\[ \\]</code>, <code>$x$</code></p>'
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
     })
 
-    return describe('Math Blocks', function() {
+    describe('Math Blocks', function() {
       it('$$ should work multiline', function() {
         content = `\
 $$
@@ -175,7 +169,7 @@ $$\
         const result =
           "<span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
 
       it('$$ should work singeline', function() {
@@ -184,7 +178,7 @@ $$\
         const result =
           "<span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
 
       it('$$ should work directly after paragraph', function() {
@@ -198,7 +192,7 @@ $$\
         const result =
           "<p>Test</p><span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
 
       it('\\[ should work multiline', function() {
@@ -211,7 +205,7 @@ a+b
         const result =
           "<span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
 
       it('\\[ should work singeline', function() {
@@ -220,10 +214,10 @@ a+b
         const result =
           "<span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
 
-      return it('\\[ should work directly after paragraph', function() {
+      it('\\[ should work directly after paragraph', function() {
         content = `\
 Test
 \\[
@@ -234,12 +228,12 @@ a+b
         const result =
           "<p>Test</p><span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
 
-        return compareHTML(content, result)
+        compareHTML(content, result)
       })
     })
   })
 
-  return describe('Examples from issues', function() {
+  describe('Examples from issues', function() {
     it('should respect escaped dollar inside code (issue-3)', function() {
       content = `\
 \`\`\`
@@ -249,7 +243,7 @@ a+b
 
       const result = '<pre><code>\\$</code></pre>'
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
 
     it('should respect escaped dollar inside code (mp-issue-116)', function() {
@@ -275,7 +269,7 @@ $x$\
 </p>\
 `
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
 
     it('should render inline math with \\( (issue-7)', function() {
@@ -289,7 +283,7 @@ $x$\
 </p>\
 `
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
 
     it('should render inline math with N\\times N (issue-17)', function() {
@@ -303,10 +297,10 @@ $x$\
 </p>\
 `
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
 
-    return it('should respect inline code (issue-20)', function() {
+    it('should respect inline code (issue-20)', function() {
       content = `\
 This is broken \`$$\`
 
@@ -324,7 +318,7 @@ $$\
 </span>\
 `
 
-      return compareHTML(content, result)
+      compareHTML(content, result)
     })
   })
 })
