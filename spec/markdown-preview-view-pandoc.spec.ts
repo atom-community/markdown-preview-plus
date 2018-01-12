@@ -23,7 +23,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
     await atom.packages.activatePackage(path.join(__dirname, '..'))
     atom.config.set('markdown-preview-plus.enablePandoc', true)
-    stub && stub.restore()
     stub = sinon
       .stub(pandocHelper, 'renderPandoc')
       .callsFake(
@@ -43,9 +42,10 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
     for (const item of atom.workspace.getPaneItems()) {
       await atom.workspace.paneForItem(item)!.destroyItem(item, true)
     }
+    stub.restore()
   })
 
-  return describe('image resolving', function() {
+  describe('image resolving', function() {
     let spy: sinon.SinonSpy
     beforeEach(async function() {
       spy && spy.restore()
@@ -81,18 +81,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
         fs.writeFileSync(filePath, `![absolute](${filePath})`)
 
-        //         sinon
-        //           .stub(pandocHelper, 'renderPandoc')
-        //           .callsFake((_text, filePath, _renderMath, cb) =>
-        //             cb(
-        //               null,
-        //               `\
-        // <div class="figure">
-        // <img src="${filePath}" alt="absolute"><p class="caption">absolute</p>
-        // </div>\
-        // `,
-        //             ),
-        //           )
         html = `\
         <div class="figure">
         <img src="${filePath}" alt="absolute"><p class="caption">absolute</p>
@@ -112,7 +100,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         ).to.equal(true)
       }))
 
-    return describe('when the image uses an URL', function() {
+    describe('when the image uses an URL', function() {
       it("doesn't change the http(s) URL", async function() {
         const image = await waitsFor(() => preview.find('img[alt=Image3]')!)
         expect(markdownIt.decode).not.to.be.called
@@ -121,7 +109,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         )
       })
 
-      return it("doesn't change the data URL", function() {
+      it("doesn't change the data URL", function() {
         const image = preview.find('img[alt=Image4]')
         expect(image).to.exist
         expect(markdownIt.decode).not.to.be.called

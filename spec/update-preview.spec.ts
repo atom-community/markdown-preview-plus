@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import * as path from 'path'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import mathjaxHelper = require('../lib/mathjax-helper')
@@ -231,7 +223,7 @@ describe('the difference algorithm that updates the preview', function() {
     })
   })
 
-  return describe('when a code block is modified', () =>
+  describe('when a code block is modified', () =>
     it('replaces the entire span.atom-text-editor container element', async function() {
       await loadPreviewInSplitPane()
 

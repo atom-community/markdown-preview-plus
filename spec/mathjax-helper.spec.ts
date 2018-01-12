@@ -1,11 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import * as path from 'path'
 import * as fs from 'fs-plus'
 import * as temp from 'temp'
@@ -92,7 +84,7 @@ describe('MathJax helper module', () =>
       beforeEach(function() {
         const fixturesPath = path.join(__dirname, 'fixtures/macros.cson')
         const fixturesFile = fs.readFileSync(fixturesPath, 'utf8')
-        return fs.writeFileSync(macrosPath, fixturesFile)
+        fs.writeFileSync(macrosPath, fixturesFile)
       })
 
       it('loads valid macros', async function() {
