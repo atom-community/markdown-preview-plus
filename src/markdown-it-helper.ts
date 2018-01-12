@@ -4,6 +4,7 @@ let markdownItOptions: markdownItModule.Options | null = null
 let renderLaTeX: boolean | null = null
 let math: any = null
 let lazyHeaders: any = null
+let checkBoxes: any = null
 
 const mathInline = (text: string) =>
   `<span class='math'><script type='math/tex'>${text}</script></span>`
@@ -57,6 +58,12 @@ const init = function(rL: boolean) {
   if (lazyHeaders) {
     markdownIt.use(require('markdown-it-lazy-headers'))
   }
+
+  checkBoxes = atom.config.get('markdown-preview-plus.useCheckBoxes')
+
+  if (checkBoxes) {
+    markdownIt.use(require('markdown-it-task-lists'))
+  }
 }
 
 const needsInit = (rL: boolean) =>
@@ -65,6 +72,7 @@ const needsInit = (rL: boolean) =>
   markdownItOptions.breaks !==
     atom.config.get('markdown-preview-plus.breakOnSingleNewline') ||
   lazyHeaders !== atom.config.get('markdown-preview-plus.useLazyHeaders') ||
+  checkBoxes !== atom.config.get('markdown-preview-plus.useCheckBoxes') ||
   rL !== renderLaTeX
 
 export function render(text: string, rL: boolean) {
