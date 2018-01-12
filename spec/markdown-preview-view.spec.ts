@@ -273,7 +273,6 @@ function f(x) {
   describe('image modification', function() {
     let dirPath: string
     let img1Path: string
-    let workspaceElement: HTMLElement
 
     beforeEach(function() {
       preview.destroy()
@@ -284,8 +283,6 @@ function f(x) {
 
       fs.writeFileSync(filePath, `![img1](${img1Path})`)
       fs.writeFileSync(img1Path, 'clearly not a png but good enough for tests')
-
-      workspaceElement = atom.views.getView(atom.workspace)
     })
 
     const getImageVersion = function(
@@ -298,8 +295,11 @@ function f(x) {
 
     describe('when a local image is previewed', () =>
       it('adds a timestamp query to the URL', async function() {
-        await atom.workspace.open(filePath)
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        const editor = await atom.workspace.open(filePath)
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
 
         const imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
@@ -312,8 +312,11 @@ function f(x) {
         let imageURL: string
         let imageVer: string
 
-        await atom.workspace.open(filePath)
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        const editor = await atom.workspace.open(filePath)
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
 
         imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
@@ -353,8 +356,11 @@ function f(x) {
 `,
         )
 
-        await atom.workspace.open(filePath)
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        const editor = await atom.workspace.open(filePath)
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
 
         const getImageElementsURL = () => [
@@ -449,8 +455,11 @@ function f(x) {
         let imageURL: string
         let imageVer: string
 
-        await atom.workspace.open(filePath)
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        const editor = await atom.workspace.open(filePath)
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
 
         imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
@@ -487,8 +496,11 @@ function f(x) {
         let imageURL: string
         let imageVer: string
 
-        await atom.workspace.open(filePath)
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        const editor = await atom.workspace.open(filePath)
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
 
         imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
@@ -666,24 +678,25 @@ function f(x) {
 
   describe('when maths rendering is enabled by default', function() {
     it('notifies the user MathJax is loading when first preview is opened', async function() {
-      let workspaceElement: HTMLElement
-
       preview.destroy()
 
       await atom.packages.activatePackage('notifications')
 
-      workspaceElement = atom.views.getView(atom.workspace)
-
-      await atom.workspace.open(filePath)
+      const editor = await atom.workspace.open(filePath)
 
       mathjaxHelper.resetMathJax()
       atom.config.set(
         'markdown-preview-plus.enableLatexRenderingByDefault',
         true,
       )
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
 
       preview = await expectPreviewInSplitPane()
+
+      const workspaceElement = atom.views.getView(atom.workspace)
 
       await waitsFor.msg('notification', () =>
         workspaceElement.querySelector('atom-notification'),

@@ -1,4 +1,5 @@
 export {}
+import { MarkdownPreviewViewElement } from '../markdown-preview-view'
 declare module 'atom' {
   interface Workspace {
     destroyActivePaneItem: () => void
@@ -11,5 +12,8 @@ declare module 'atom' {
   }
   interface AtomEnvironment {
     showSaveDialogSync(path: string): string | undefined
+  }
+  interface CommandRegistryTargetMap {
+    '.markdown-preview': MarkdownPreviewViewElement
   }
 }

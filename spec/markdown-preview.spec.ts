@@ -11,7 +11,6 @@ import * as sinon from 'sinon'
 import { TextEditor, TextEditorElement } from 'atom'
 
 describe('Markdown preview plus package', function() {
-  let workspaceElement: HTMLElement
   let preview: MarkdownPreviewView
   let tempPath: string
 
@@ -20,8 +19,6 @@ describe('Markdown preview plus package', function() {
     tempPath = temp.mkdirSync('atom')
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
-
-    workspaceElement = atom.views.getView(atom.workspace)
 
     await atom.packages.activatePackage(path.join(__dirname, '..'))
 
@@ -37,8 +34,13 @@ describe('Markdown preview plus package', function() {
 
   describe('when a preview has not been created for the file', function() {
     it('displays a markdown preview in a split pane', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/file.markdown'))
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/file.markdown'),
+      )
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
 
       const [editorPane] = atom.workspace.getPanes()
@@ -48,25 +50,34 @@ describe('Markdown preview plus package', function() {
 
     describe("when the editor's path does not exist", () =>
       it('splits the current pane to the right with a markdown preview for the file', async function() {
-        await atom.workspace.open('new.markdown')
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        const editor = await atom.workspace.open('new.markdown')
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
       }))
 
     describe('when the editor does not have a path', () =>
       it('splits the current pane to the right with a markdown preview for the file', async function() {
-        await atom.workspace.open('')
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        const editor = await atom.workspace.open('')
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
       }))
 
     // https://github.com/atom/markdown-preview/issues/28
     describe('when the path contains a space', function() {
       it('renders the preview', async function() {
-        await atom.workspace.open(
+        const editor = await atom.workspace.open(
           path.join(tempPath, 'subdir/file with space.md'),
         )
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
       })
     })
@@ -74,8 +85,13 @@ describe('Markdown preview plus package', function() {
     // https://github.com/atom/markdown-preview/issues/29
     describe('when the path contains accented characters', function() {
       it('renders the preview', async function() {
-        await atom.workspace.open(path.join(tempPath, 'subdir/áccéntéd.md'))
-        atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+        const editor = await atom.workspace.open(
+          path.join(tempPath, 'subdir/áccéntéd.md'),
+        )
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
         preview = await expectPreviewInSplitPane()
       })
     })
@@ -83,14 +99,22 @@ describe('Markdown preview plus package', function() {
 
   describe('when a preview has been created for the file', function() {
     beforeEach(async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/file.markdown'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/file.markdown'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
     })
 
     it('closes the existing preview when toggle is triggered a second time on the editor and when the preview is its panes active item', function() {
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(atom.workspace.getActivePaneItem()),
+        'markdown-preview-plus:toggle',
+      )
 
       const [editorPane, previewPane] = atom.workspace.getPanes()
       expect(editorPane.isActive()).to.equal(true)
@@ -101,9 +125,14 @@ describe('Markdown preview plus package', function() {
       const [editorPane, previewPane] = atom.workspace.getPanes()
 
       editorPane.activate()
-      await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/simple.md'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
 
       await waitsFor.msg(
         'second markdown preview to be created',
@@ -127,7 +156,10 @@ describe('Markdown preview plus package', function() {
       editorPane.activate()
       editorPane.activateItemAtIndex(0)
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editorPane.getActiveItem()),
+        'markdown-preview-plus:toggle',
+      )
 
       await waitsFor.msg(
         'first preview to be activated',
@@ -143,11 +175,16 @@ describe('Markdown preview plus package', function() {
       preview2.destroy()
     })
 
-    it('closes the existing preview when toggle is triggered on it and it has focus', function() {
+    it('closes the existing preview when toggle is triggered on it and it has focus', async function() {
       const [, previewPane] = atom.workspace.getPanes()
       previewPane.activate()
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(previewPane.getActiveItem()),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.true
       expect(previewPane.getActiveItem()).to.be.undefined
     })
 
@@ -290,10 +327,15 @@ var x = y;
       atom.config.unset('markdown-preview-plus.grammars')
     })
     it('does not open the markdown preview', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/file.markdown'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/file.markdown'),
+      )
 
       const spy = sinon.spy(atom.workspace, 'open')
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       expect(spy).not.to.be.called
     })
   })
@@ -306,7 +348,10 @@ var x = y;
         'subdir/file.markdown',
       )) as TextEditor
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(ted),
+        'markdown-preview-plus:toggle',
+      )
 
       preview = await expectPreviewInSplitPane()
 
@@ -342,10 +387,12 @@ var x = y;
     })
 
     it('copies the HTML to the clipboard', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/simple.md'),
+      )
 
       atom.commands.dispatch(
-        workspaceElement,
+        atom.views.getView(editor),
         'markdown-preview-plus:copy-html',
       )
 
@@ -365,7 +412,7 @@ var x = y;
         [1, 0],
       ])
       atom.commands.dispatch(
-        workspaceElement,
+        atom.views.getView(editor),
         'markdown-preview-plus:copy-html',
       )
 
@@ -387,13 +434,12 @@ var x = y;
 
         await atom.packages.activatePackage('markdown-preview-plus')
 
-        await atom.workspace.open(path.join(tempPath, 'subdir/file.markdown'))
-
-        workspaceElement = atom.views.getView(atom.workspace)
-        atom.commands.dispatch(
-          workspaceElement,
-          'markdown-preview-plus:copy-html',
+        const editor = await atom.workspace.open(
+          path.join(tempPath, 'subdir/file.markdown'),
         )
+
+        const ev = atom.views.getView(editor)
+        atom.commands.dispatch(ev, 'markdown-preview-plus:copy-html')
 
         await waitsFor.msg(
           'atom.clipboard.write to have been called',
@@ -471,7 +517,7 @@ var x = y;
     it('copies the HTML to the clipboard by default', async function() {
       await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
 
-      await mpp.copyHtml()
+      await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
       await waitsFor.msg(
         'atom.clipboard.write to have been called',
         () => spy.callCount === 1,
@@ -487,7 +533,7 @@ var x = y;
         [0, 0],
         [1, 0],
       ])
-      await mpp.copyHtml()
+      await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
       await waitsFor.msg(
         'atom.clipboard.write to have been called',
         () => spy.callCount === 2,
@@ -502,7 +548,10 @@ var x = y;
       await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
 
       let savedHtml: string | undefined
-      await mpp.copyHtml((html) => (savedHtml = html))
+      await mpp.copyHtml(
+        atom.workspace.getActiveTextEditor()!,
+        (html) => (savedHtml = html),
+      )
       await waitsFor(() => savedHtml)
 
       expect(savedHtml!).to.equal(`\
@@ -515,7 +564,10 @@ var x = y;
         [0, 0],
         [1, 0],
       ])
-      await mpp.copyHtml((html) => (savedHtml = html))
+      await mpp.copyHtml(
+        atom.workspace.getActiveTextEditor()!,
+        (html) => (savedHtml = html),
+      )
       await waitsFor(() => savedHtml)
 
       expect(savedHtml).to.equal(`\
@@ -538,7 +590,7 @@ var x = y;
       })
 
       it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
-        await mpp.copyHtml()
+        await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
 
         await waitsFor.msg(
           'atom.clipboard.write to have been called',
@@ -551,7 +603,11 @@ var x = y;
       })
 
       it("scales the svg's if the scaleMath parameter is passed", async function() {
-        await mpp.copyHtml(undefined, 200)
+        await mpp.copyHtml(
+          atom.workspace.getActiveTextEditor()!,
+          undefined,
+          200,
+        )
 
         await waitsFor.msg(
           'atom.clipboard.write to have been called',
@@ -564,7 +620,10 @@ var x = y;
 
       it('passes the HTML to a callback if supplied as the first argument', async function() {
         let html: string
-        await mpp.copyHtml((proHTML) => (html = proHTML))
+        await mpp.copyHtml(
+          atom.workspace.getActiveTextEditor()!,
+          (proHTML) => (html = proHTML),
+        )
 
         await waitsFor.msg(
           'markdown to be parsed and processed by MathJax',
@@ -579,9 +638,14 @@ var x = y;
 
   describe('sanitization', function() {
     it('removes script tags and attributes that commonly contain inline scripts', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/evil.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/evil.md'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
 
       expect(preview.find('div.update-preview')!.innerHTML).to.equal(`\
@@ -595,9 +659,14 @@ world</p>\
     })
 
     it('remove the first <!doctype> tag at the beginning of the file', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/doctype-tag.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/doctype-tag.md'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
 
       expect(preview.find('div.update-preview')!.innerHTML).to.equal(`\
@@ -609,9 +678,14 @@ world</p>\
 
   describe('when the markdown contains an <html> tag', () =>
     it('does not throw an exception', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/html-tag.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/html-tag.md'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
 
       expect(preview.find('div.update-preview')!.innerHTML).to.equal('content')
@@ -619,9 +693,14 @@ world</p>\
 
   describe('when the markdown contains a <pre> tag', () =>
     it('does not throw an exception', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/pre-tag.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/pre-tag.md'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
 
       expect(preview.find('atom-text-editor')).to.exist
@@ -635,9 +714,14 @@ world</p>\
     )
 
     it('renders markdown using the default style when GitHub styling is disabled', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/simple.md'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
 
       expect(preview.element.getAttribute('data-use-github-style')).not.to.exist
@@ -646,18 +730,28 @@ world</p>\
     it('renders markdown using the GitHub styling when enabled', async function() {
       atom.config.set('markdown-preview-plus.useGitHubStyle', true)
 
-      await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/simple.md'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
 
       expect(preview.element.getAttribute('data-use-github-style')).to.equal('')
     })
 
     it('updates the rendering style immediately when the configuration is changed', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/simple.md'),
+      )
 
-      atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
       preview = await expectPreviewInSplitPane()
 
       expect(preview.element.getAttribute('data-use-github-style')).not.to.exist

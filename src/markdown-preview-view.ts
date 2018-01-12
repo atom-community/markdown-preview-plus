@@ -31,6 +31,10 @@ export interface MPVParamsPath {
 
 export type MPVParams = MPVParamsEditor | MPVParamsPath
 
+export type MarkdownPreviewViewElement = HTMLElement & {
+  getModel(): MarkdownPreviewView
+}
+
 export class MarkdownPreviewView {
   private loading: boolean = true
   // tslint:disable-next-line:no-uninitialized
@@ -38,7 +42,7 @@ export class MarkdownPreviewView {
   public readonly renderPromise: Promise<void> = new Promise<void>(
     (resolve) => (this.resolve = resolve),
   )
-  public readonly element: HTMLElement
+  public readonly element: MarkdownPreviewViewElement
   private preview: HTMLElement
   private emitter: Emitter<{
     'did-change-title': undefined
@@ -62,7 +66,8 @@ export class MarkdownPreviewView {
     this.syncPreview = this.syncPreview.bind(this)
     this.editorId = editorId
     this.filePath = filePath
-    this.element = document.createElement('div')
+    this.element = document.createElement('div') as any
+    this.element.getModel = () => this
     this.element.classList.add('markdown-preview', 'native-key-bindings')
     this.element.tabIndex = -1
     this.preview = document.createElement('div')

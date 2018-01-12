@@ -25,14 +25,11 @@ interface MyToken {
 
 describe('Syncronization of source and preview', function() {
   let preview: MarkdownPreviewView
-  let workspaceElement: HTMLElement
   let fixturesPath: string
   let stub: sinon.SinonStub
 
   beforeEach(async function() {
     fixturesPath = path.join(__dirname, 'fixtures')
-
-    workspaceElement = atom.views.getView(atom.workspace)
 
     // Redirect atom to a temp config directory
     const configDirPath = temp.mkdirSync('atom-config-dir-')
@@ -43,9 +40,12 @@ describe('Syncronization of source and preview', function() {
     await atom.packages.activatePackage(path.join(__dirname, '..'))
 
     atom.config.set('markdown-preview-plus.enableLatexRenderingByDefault', true)
-    await atom.workspace.open(path.join(fixturesPath, 'sync.md'))
+    const editor = await atom.workspace.open(path.join(fixturesPath, 'sync.md'))
     const spy = sinon.spy(mathjaxHelper, 'mathProcessor')
-    atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+    atom.commands.dispatch(
+      atom.views.getView(editor),
+      'markdown-preview-plus:toggle',
+    )
 
     preview = await expectPreviewInSplitPane()
 
