@@ -98,11 +98,11 @@ export function activate() {
       }
 
       if (host === 'editor') {
-        return createMarkdownPreviewView({
+        return new MarkdownPreviewView({
           editorId: parseInt(pathname.substring(1), 10),
         })
       } else {
-        return createMarkdownPreviewView({ filePath: pathname })
+        return new MarkdownPreviewView({ filePath: pathname })
       }
     }),
   )
@@ -117,7 +117,7 @@ export function createMarkdownPreviewView(state: MPVParams) {
     state.editorId !== undefined ||
     (state.filePath && fs.isFileSync(state.filePath))
   ) {
-    return new MarkdownPreviewView(state)
+    return new MarkdownPreviewView(state, true)
   }
   return undefined
 }

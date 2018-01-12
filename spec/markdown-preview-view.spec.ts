@@ -66,11 +66,12 @@ describe('MarkdownPreviewView', function() {
       if (newPreview) newPreview.destroy()
     })
 
-    it('recreates the preview when serialized/deserialized', function() {
+    it('recreates the preview when serialized/deserialized', async function() {
       newPreview = atom.deserializers.deserialize(
         preview.serialize(),
       ) as MarkdownPreviewView
-      expect(newPreview.getPath()).to.equal(preview.getPath())
+      newPreview.element.focus()
+      await waitsFor(() => newPreview.getPath() === preview.getPath())
     })
 
     it('does not recreate a preview when the file no longer exists', function() {
@@ -103,7 +104,7 @@ describe('MarkdownPreviewView', function() {
       newPreview = atom.deserializers.deserialize(
         preview.serialize(),
       ) as MarkdownPreviewView
-      expect(newPreview.getPath()).to.equal(preview.getPath())
+      await waitsFor(() => newPreview.getPath() === preview.getPath())
     })
   })
 

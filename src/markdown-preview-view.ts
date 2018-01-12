@@ -59,7 +59,7 @@ export class MarkdownPreviewView {
   private file?: File
   private editor?: TextEditor
 
-  constructor({ editorId, filePath }: MPVParams) {
+  constructor({ editorId, filePath }: MPVParams, deserialization = false) {
     this.getPathToElement = this.getPathToElement.bind(this)
     this.syncSource = this.syncSource.bind(this)
     this.getPathToToken = this.getPathToToken.bind(this)
@@ -73,11 +73,19 @@ export class MarkdownPreviewView {
     this.preview = document.createElement('div')
     this.preview.classList.add('update-preview')
     this.element.appendChild(this.preview)
-
-    if (this.editorId !== undefined) {
-      this.resolveEditor(this.editorId)
-    } else if (this.filePath !== undefined) {
-      this.subscribeToFilePath(this.filePath)
+    const didAttach = () => {
+      if (this.editorId !== undefined) {
+        this.resolveEditor(this.editorId)
+      } else if (this.filePath !== undefined) {
+        this.subscribeToFilePath(this.filePath)
+      }
+    }
+    if (deserialization && this.editorId !== undefined) {
+      // need to defer on deserialization since
+      // editor might not be deserialized at this point
+      setImmediate(didAttach)
+    } else {
+      didAttach()
     }
   }
 
