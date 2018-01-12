@@ -1,6 +1,6 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["./**.ts", "./**.d.ts", "../src/season.d.ts"],
+  "include": ["./**.ts", "./**.d.ts", "../src/types/season.d.ts"],
   "exclude": ["../node_modules"],
   "compileOnSave": false,
   "compilerOptions": {
