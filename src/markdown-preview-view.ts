@@ -31,7 +31,7 @@ export interface MPVParamsPath {
 
 export type MPVParams = MPVParamsEditor | MPVParamsPath
 
-export type MarkdownPreviewViewElement = HTMLElement & {
+export type MarkdownPreviewViewElement = HTMLIFrameElement & {
   getModel(): MarkdownPreviewView
 }
 
@@ -43,6 +43,7 @@ export class MarkdownPreviewView {
     (resolve) => (this.resolve = resolve),
   )
   public readonly element: MarkdownPreviewViewElement
+  public readonly div: HTMLDivElement
   private preview: HTMLElement
   private emitter: Emitter<{
     'did-change-title': undefined
@@ -58,6 +59,7 @@ export class MarkdownPreviewView {
   private filePath?: string
   private file?: File
   private editor?: TextEditor
+  private lastTarget?: HTMLElement
 
   constructor({ editorId, filePath }: MPVParams) {
     this.getPathToElement = this.getPathToElement.bind(this)
@@ -66,13 +68,30 @@ export class MarkdownPreviewView {
     this.syncPreview = this.syncPreview.bind(this)
     this.editorId = editorId
     this.filePath = filePath
-    this.element = document.createElement('div') as any
+    this.element = document.createElement('iframe') as any
     this.element.getModel = () => this
     this.element.classList.add('markdown-preview', 'native-key-bindings')
-    this.element.tabIndex = -1
+    this.element.src = 'about:blank'
+    this.element.style.width = '100%'
+    this.element.style.height = '100%'
+    this.div = document.createElement('div')
+    this.div.classList.add('markdown-preview', 'native-key-bindings')
+    this.div.tabIndex = -1
     this.preview = document.createElement('div')
     this.preview.classList.add('update-preview')
-    this.element.appendChild(this.preview)
+    this.div.appendChild(this.preview)
+    this.element.onload = () => {
+      for (const se of atom.styles.getStyleElements()) {
+        this.element.contentDocument.head.appendChild(se)
+      }
+      this.element.contentDocument.body.appendChild(this.div)
+      this.div.oncontextmenu = (e) => {
+        this.lastTarget = e.target as HTMLElement
+        atom.contextMenu.showForEvent(
+          Object.assign({}, e, { target: this.element }),
+        )
+      }
+    }
 
     if (this.editorId !== undefined) {
       this.resolveEditor(this.editorId)
@@ -82,15 +101,19 @@ export class MarkdownPreviewView {
   }
 
   text() {
-    return this.element.innerText
+    return this.div.innerText
   }
 
   find(what: string) {
-    return this.element.querySelector(what)
+    return this.div.querySelector(what)
   }
 
   findAll(what: string) {
-    return this.element.querySelectorAll(what)
+    return this.div.querySelectorAll(what)
+  }
+
+  getRoot() {
+    return this.div
   }
 
   serialize() {
@@ -169,8 +192,8 @@ export class MarkdownPreviewView {
     )
 
     atom.commands.add(this.element, {
-      'core:move-up': () => this.element.scrollBy({ top: -10 }),
-      'core:move-down': () => this.element.scrollBy({ top: 10 }),
+      'core:move-up': () => this.div.scrollBy({ top: -10 }),
+      'core:move-down': () => this.div.scrollBy({ top: 10 }),
       'core:save-as': (event) => {
         event.stopPropagation()
         handlePromise(this.saveAs())
@@ -179,21 +202,23 @@ export class MarkdownPreviewView {
         if (this.copyToClipboard()) event.stopPropagation()
       },
       'markdown-preview-plus:zoom-in': () => {
-        const zoomLevel = parseFloat(this.element.style.zoom || '1')
-        this.element.style.zoom = (zoomLevel + 0.1).toString()
+        const zoomLevel = parseFloat(this.div.style.zoom || '1')
+        this.div.style.zoom = (zoomLevel + 0.1).toString()
       },
       'markdown-preview-plus:zoom-out': () => {
-        const zoomLevel = parseFloat(this.element.style.zoom || '1')
-        this.element.style.zoom = (zoomLevel - 0.1).toString()
+        const zoomLevel = parseFloat(this.div.style.zoom || '1')
+        this.div.style.zoom = (zoomLevel - 0.1).toString()
       },
-      'markdown-preview-plus:reset-zoom': () => (this.element.style.zoom = '1'),
-      'markdown-preview-plus:sync-source': (event) => {
+      'markdown-preview-plus:reset-zoom': () => (this.div.style.zoom = '1'),
+      'markdown-preview-plus:sync-source': (_event) => {
+        const lastTarget = this.lastTarget
+        if (!lastTarget) return
         handlePromise(
           this.getMarkdownSource().then((source?: string) => {
             if (source === undefined) {
               return
             }
-            this.syncSource(source, event.target as HTMLElement)
+            this.syncSource(source, lastTarget)
           }),
         )
       },
@@ -278,9 +303,9 @@ export class MarkdownPreviewView {
         'markdown-preview-plus.useGitHubStyle',
         (useGitHubStyle) => {
           if (useGitHubStyle) {
-            this.element.setAttribute('data-use-github-style', '')
+            this.div.setAttribute('data-use-github-style', '')
           } else {
-            this.element.removeAttribute('data-use-github-style')
+            this.div.removeAttribute('data-use-github-style')
           }
         },
       ),
@@ -301,9 +326,7 @@ export class MarkdownPreviewView {
   }
 
   async refreshImages(oldsrc: string) {
-    const imgs = this.element.querySelectorAll('img[src]') as NodeListOf<
-      HTMLImageElement
-    >
+    const imgs = this.findAll('img[src]') as NodeListOf<HTMLImageElement>
     const result = []
     for (const img of Array.from(imgs)) {
       let ovs: string | undefined
@@ -511,7 +534,7 @@ export class MarkdownPreviewView {
       selectedText &&
       // tslint:disable-next-line:strict-type-predicates //TODO: complain on TS
       selectedNode != null &&
-      (this.element === selectedNode || this.element.contains(selectedNode))
+      (this.preview === selectedNode || this.preview.contains(selectedNode))
     ) {
       return false
     }
@@ -893,9 +916,9 @@ export class MarkdownPreviewView {
     if (!element.classList.contains('update-preview')) {
       element.scrollIntoView()
     }
-    const maxScrollTop = this.element.scrollHeight - this.element.clientHeight
-    if (!(this.element.scrollTop >= maxScrollTop)) {
-      this.element.scrollTop -= this.element.clientHeight / 4
+    const maxScrollTop = this.div.scrollHeight - this.div.clientHeight
+    if (!(this.div.scrollTop >= maxScrollTop)) {
+      this.div.scrollTop -= this.div.clientHeight / 4
     }
 
     element.classList.add('flash')

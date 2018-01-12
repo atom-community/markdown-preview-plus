@@ -724,7 +724,8 @@ world</p>\
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.element.getAttribute('data-use-github-style')).not.to.exist
+      expect(preview.getRoot().getAttribute('data-use-github-style')).not.to
+        .exist
     })
 
     it('renders markdown using the GitHub styling when enabled', async function() {
@@ -740,7 +741,9 @@ world</p>\
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.element.getAttribute('data-use-github-style')).to.equal('')
+      expect(preview.getRoot().getAttribute('data-use-github-style')).to.equal(
+        '',
+      )
     })
 
     it('updates the rendering style immediately when the configuration is changed', async function() {
@@ -754,13 +757,15 @@ world</p>\
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.element.getAttribute('data-use-github-style')).not.to.exist
+      expect(preview.getRoot().getAttribute('data-use-github-style')).not.to
+        .exist
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', true)
-      expect(preview.element.getAttribute('data-use-github-style')).to.exist
+      expect(preview.getRoot().getAttribute('data-use-github-style')).to.exist
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', false)
-      expect(preview.element.getAttribute('data-use-github-style')).not.to.exist
+      expect(preview.getRoot().getAttribute('data-use-github-style')).not.to
+        .exist
     })
   })
 })

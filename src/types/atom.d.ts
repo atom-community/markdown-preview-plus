@@ -16,4 +16,7 @@ declare module 'atom' {
   interface CommandRegistryTargetMap {
     '.markdown-preview': MarkdownPreviewViewElement
   }
+  interface ContextMenuManager {
+    showForEvent(e: PointerEvent): void
+  }
 }
