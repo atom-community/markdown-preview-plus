@@ -726,4 +726,19 @@ function f(x) {
       expect(lastItem.querySelector('input[type=checkbox]')).to.be.null
     })
   })
+
+  describe('emoji', function() {
+    it('renders checkbox lists', function() {
+      const emojis = Array.from(
+        preview.findAll('img.emoji'),
+      ) as HTMLImageElement[]
+      expect(emojis).to.have.lengthOf(11)
+      for (const i of emojis) {
+        expect(i.src).includes('file:///')
+        expect(i.src).includes('/twemoji/')
+        expect(i.src).includes('/svg/')
+        expect(i.src).includes('.svg')
+      }
+    })
+  })
 })
