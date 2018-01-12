@@ -695,4 +695,21 @@ function f(x) {
       expect(notification).to.exist
     })
   })
+
+  describe('checkbox lists', function() {
+    it('renders checkbox lists', function() {
+      const checkBoxes = Array.from(
+        preview.findAll('input[type=checkbox]'),
+      ) as HTMLInputElement[]
+      expect(checkBoxes).to.have.lengthOf(3)
+      expect(checkBoxes[0].checked).to.be.false
+      expect(checkBoxes[1].checked).to.be.true
+      expect(checkBoxes[2].checked).to.be.false
+      const list = checkBoxes[0].closest('ul')! as HTMLUListElement
+      expect(list.childElementCount).to.be.equal(4)
+      const lastItem = list.lastElementChild! as HTMLLIElement
+      expect(lastItem.tagName.toLowerCase()).to.be.equal('li')
+      expect(lastItem.querySelector('input[type=checkbox]')).to.be.null
+    })
+  })
 })
