@@ -10,11 +10,8 @@ import * as sinon from 'sinon'
 describe('the difference algorithm that updates the preview', function() {
   let editor: TextEditor
   let preview: MarkdownPreviewView
-  let workspaceElement: HTMLElement
 
   beforeEach(async function() {
-    workspaceElement = atom.views.getView(atom.workspace)
-
     await atom.packages.activatePackage(path.join(__dirname, '..'))
     await atom.workspace.open(path.join(__dirname, 'fixtures', 'sync.md'))
 
@@ -29,7 +26,10 @@ describe('the difference algorithm that updates the preview', function() {
   })
 
   async function loadPreviewInSplitPane() {
-    atom.commands.dispatch(workspaceElement, 'markdown-preview-plus:toggle')
+    atom.commands.dispatch(
+      atom.views.getView(editor),
+      'markdown-preview-plus:toggle',
+    )
     preview = await expectPreviewInSplitPane()
   }
 
