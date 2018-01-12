@@ -4,6 +4,13 @@
 
 ## Level two header with space
 
+# Checkbox Lists
+
+- [ ] This is unchecked
+- [X] This is checked
+- [ ] This is unchecked again
+- [] This is not a checkbox
+
 :cool:
 
 ```ruby
