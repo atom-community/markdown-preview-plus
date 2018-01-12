@@ -1,22 +1,29 @@
 # Markdown Preview Plus (MPP)
 
-[![appveyor][ab]][a] [![travis][tb]][t] ![apm version][av] ![apm downloads][ad]
+[![appveyor](https://img.shields.io/appveyor/ci/lierdakil/markdown-preview-plus/master.svg?label=appveyor)](https://ci.appveyor.com/project/lierdakil/markdown-preview-plus/branch/master)
+[![travis](https://img.shields.io/travis/atom-community/markdown-preview-plus/master.svg?label=travis)](https://travis-ci.org/atom-community/markdown-preview-plus)
+![apm version](https://img.shields.io/apm/v/markdown-preview-plus.svg)
+![apm
+downloads](https://img.shields.io/apm/dm/markdown-preview-plus.svg)
 
-Markdown Preview Plus (MPP) is a fork of
-[Markdown Preview](https://github.com/atom/markdown-preview) that provides a
+Markdown Preview Plus (MPP) is a fork of [Markdown
+Preview](https://github.com/atom/markdown-preview) that provides a
 real-time preview of markdown documents.
 
-Should you have any problems while installing or using MPP please open up a
-[new issue][issue].
+Should you have any problems while installing or using MPP please open
+up a [new
+issue](https://github.com/atom-community/markdown-preview-plus/issues).
 
-![MPP][preview]
+![MPP](https://raw.githubusercontent.com/atom-community/markdown-preview-plus/master/imgs/mpp-full-res-invert.png)
 
 ## Features
 
-We also have a more detailed description of [features][features].
+We also have a more detailed description of
+[features](docs/features.md).
 
 -   Fastly open a preview of any markdown with `ctrl-shift-m`
--   Math rendering with persistent macro support, toggled with `ctrl-shift-x`
+-   Math rendering with persistent macro support, toggled with
+    `ctrl-shift-x`
 -   Optionally use pandoc with citation support
 -   Live reload while editing
 -   On demand synchronization
@@ -24,38 +31,30 @@ We also have a more detailed description of [features][features].
 
 ## Installation
 
-Long instructions can be found [here][installation]. In short steps:
+Long instructions can be found [here](docs/installation.md). In short
+steps:
 
-1.  Search for and install `markdown-preview-plus` in Atom's Settings view.
+1.  Search for and install `markdown-preview-plus` in Atom's Settings
+    view.
 2.  Search for and disable the built-in package `markdown-preview`.
-3.  (Optional) Install and enable [Pandoc][pandoc].
+3.  (Optional) Install and enable [Pandoc](https://pandoc.org).
 
 ## Usage
 
-Please see [options][options] for further details on configuring MPP and
-[math][math] for more details on math rendering. For basic usage:
+Please see [options](docs/options.md) for further details on configuring
+MPP and [math](docs/math.md) for more details on math rendering. For
+basic usage:
 
 -   Toggle Preview: `ctrl-shift-m`
 -   Toggle Math Rendering: `ctrl-shift-x`
 
+## Contributing
+
+See [CONTRIBUTING.md](https://github.com/atom-community/markdown-preview-plus/blob/master/CONTRIBUTING.md).
+
+Also of interest might be [issues marked as "help wanted"](https://github.com/atom-community/markdown-preview-plus/labels/help%20wanted)
+
 ## License
 
-Markdown Preview Plus (MPP) is released under the [MIT license][license].
-
-[preview]: https://raw.githubusercontent.com/atom-community/markdown-preview-plus/master/imgs/mpp-full-res-invert.png
-[changelog]: https://github.com/atom-community/markdown-preview-plus/blob/master/CHANGELOG.md
-[issue]: https://github.com/atom-community/markdown-preview-plus/issues
-[installation]: docs/installation.md
-[license]: LICENSE.md
-[math]: docs/math.md
-[features]: docs/features.md
-[node-gyp]: https://github.com/TooTallNate/node-gyp#installation
-[options]: docs/options.md
-[pandoc]: https://pandoc.org
-
-[ad]: https://img.shields.io/apm/dm/markdown-preview-plus.svg
-[av]: https://img.shields.io/apm/v/markdown-preview-plus.svg
-[ab]: https://img.shields.io/appveyor/ci/lierdakil/markdown-preview-plus/master.svg?label=appveyor
-[a]: https://ci.appveyor.com/project/lierdakil/markdown-preview-plus/branch/master
-[tb]: https://img.shields.io/travis/atom-community/markdown-preview-plus/master.svg?label=travis
-[t]: https://travis-ci.org/atom-community/markdown-preview-plus
+Markdown Preview Plus (MPP) is released under the [MIT
+license](LICENSE.md).

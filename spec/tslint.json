@@ -1,0 +1,16 @@
+{
+  "extends": "atom-haskell-tslint-rules",
+  "rules": {
+    "member-ordering": false,
+    "member-access": false,
+    "align": false,
+    "semicolon": false,
+    "no-null-keyword": false,
+    "no-non-null-assertion": false,
+    "ter-no-sparse-arrays": false,
+    "space-before-function-paren": false,
+    "no-unsafe-any": true,
+    "no-unused-expression": false,
+    "strict-type-predicates": false
+  }
+}
