@@ -28,6 +28,7 @@
     "markdown-it-lazy-headers": "^0.1.2",
     "markdown-it-math":
       "https://github.com/atom-community/markdown-it-math/tarball/fix-table-pipe-parse-no-ascii",
+    "markdown-it-task-lists": "^2.1.0",
     "season": "^6.0"
   },
   "devDependencies": {

@@ -49,6 +49,13 @@ export const config = {
     default: true,
     order: 45,
   },
+  useCheckBoxes: {
+    title: 'Enable CheckBox lists',
+    description: 'CheckBox lists, like on GitHub',
+    type: 'boolean',
+    default: true,
+    order: 46,
+  },
   useGitHubStyle: {
     title: 'Use GitHub.com style',
     type: 'boolean',
@@ -172,6 +179,7 @@ declare module 'atom' {
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.enableLatexRenderingByDefault': boolean
     'markdown-preview-plus.useLazyHeaders': boolean
+    'markdown-preview-plus.useCheckBoxes': boolean
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.enablePandoc': boolean
     'markdown-preview-plus.useNativePandocCodeStyles': boolean
@@ -193,6 +201,7 @@ declare module 'atom' {
       grammars: string[]
       enableLatexRenderingByDefault: boolean
       useLazyHeaders: boolean
+      useCheckBoxes: boolean
       useGitHubStyle: boolean
       enablePandoc: boolean
       useNativePandocCodeStyles: boolean
