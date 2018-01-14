@@ -734,4 +734,49 @@ world</p>\
       expect(preview.element.getAttribute('data-use-github-style')).not.to.exist
     })
   })
+
+  describe('Binding and unbinding based on config', function() {
+    let spy: sinon.SinonSpy
+    before(async function() {
+      await atom.packages.activatePackage('language-javascript')
+      spy = sinon.spy(atom.commands, 'add')
+    })
+    after(async function() {
+      atom.packages.deactivatePackage('language-javascript')
+      spy.restore()
+    })
+    beforeEach(function() {
+      spy.reset()
+    })
+    it('Binds to new scopes when config is changed', async function() {
+      atom.config.set('markdown-preview-plus.grammars', ['source.js'])
+
+      await waitsFor(() => spy.called)
+
+      const editor = await atom.workspace.open('source.js')
+
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.true
+      await expectPreviewInSplitPane()
+    })
+    it('Unbinds from scopes when config is changed', async function() {
+      atom.config.set('markdown-preview-plus.grammars', ['no-such-grammar'])
+
+      await waitsFor(() => spy.called)
+
+      const editor = await atom.workspace.open()
+      editor.setGrammar(atom.grammars.grammarForScopeName('source.gfm')!)
+
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.false
+    })
+  })
 })
