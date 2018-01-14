@@ -3,7 +3,6 @@ import * as fs from 'fs-plus'
 import * as temp from 'temp'
 import * as wrench from 'fs-extra'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
-import * as Main from '../lib/main'
 
 import { waitsFor, expectPreviewInSplitPane } from './util'
 import { expect } from 'chai'
@@ -378,12 +377,18 @@ var x = y;
     }))
 
   describe('when markdown-preview-plus:copy-html is triggered', function() {
-    let spy: sinon.SinonSpy
+    let stub: sinon.SinonStub
+    let clipboardContents: string = ''
     beforeEach(function() {
-      spy = sinon.spy(atom.clipboard, 'write')
+      stub = sinon
+        .stub(atom.clipboard, 'write')
+        .callsFake(function(arg: string) {
+          clipboardContents = arg
+        })
     })
     afterEach(function() {
-      spy.restore()
+      stub.restore()
+      clipboardContents = ''
     })
 
     it('copies the HTML to the clipboard', async function() {
@@ -398,10 +403,10 @@ var x = y;
 
       await waitsFor.msg(
         'atom.clipboard.write to have been called',
-        () => spy.callCount === 1,
+        () => stub.callCount === 1,
       )
 
-      expect(atom.clipboard.read()).to.equal(`\
+      expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>
 <p><strong>bold</strong></p>
 <p>encoding \u2192 issue</p>\
@@ -418,10 +423,10 @@ var x = y;
 
       await waitsFor.msg(
         'atom.clipboard.write to have been called',
-        () => spy.callCount === 2,
+        () => stub.callCount === 2,
       )
 
-      expect(atom.clipboard.read()).to.equal(`\
+      expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>\
 `)
     })
@@ -443,10 +448,10 @@ var x = y;
 
         await waitsFor.msg(
           'atom.clipboard.write to have been called',
-          () => spy.callCount === 1,
+          () => stub.callCount === 1,
         )
 
-        element.innerHTML = atom.clipboard.read()
+        element.innerHTML = clipboardContents
       })
 
       describe("when the code block's fence name has a matching grammar", function() {
@@ -501,29 +506,40 @@ var x = y;
   })
 
   describe('when main::copyHtml() is called directly', function() {
-    let mpp: typeof Main
-    let spy: sinon.SinonSpy
+    let stub: sinon.SinonStub
+    let clipboardContents: string = ''
 
     beforeEach(function() {
-      mpp = (atom.packages.getActivePackage('markdown-preview-plus') as any)
-        .mainModule as typeof Main
-      spy = sinon.spy(atom.clipboard, 'write')
+      stub = sinon
+        .stub(atom.clipboard, 'write')
+        .callsFake(function(arg: string) {
+          clipboardContents = arg
+        })
     })
 
     afterEach(function() {
-      spy.restore()
+      stub.restore()
+      clipboardContents = ''
     })
+
+    async function copyHtml() {
+      stub.resetHistory()
+      atom.commands.dispatch(
+        atom.views.getView(atom.workspace.getActiveTextEditor()!),
+        'markdown-preview-plus:copy-html',
+      )
+      await waitsFor.msg(
+        'atom.clipboard.write to have been called',
+        () => stub.called,
+      )
+    }
 
     it('copies the HTML to the clipboard by default', async function() {
       await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
 
-      await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
-      await waitsFor.msg(
-        'atom.clipboard.write to have been called',
-        () => spy.callCount === 1,
-      )
+      await copyHtml()
 
-      expect(atom.clipboard.read()).to.equal(`\
+      expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>
 <p><strong>bold</strong></p>
 <p>encoding \u2192 issue</p>\
@@ -533,44 +549,9 @@ var x = y;
         [0, 0],
         [1, 0],
       ])
-      await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
-      await waitsFor.msg(
-        'atom.clipboard.write to have been called',
-        () => spy.callCount === 2,
-      )
+      await copyHtml()
 
-      expect(atom.clipboard.read()).to.equal(`\
-<p><em>italic</em></p>\
-`)
-    })
-
-    it('passes the HTML to a callback if supplied as the first argument', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
-
-      let savedHtml: string | undefined
-      await mpp.copyHtml(
-        atom.workspace.getActiveTextEditor()!,
-        (html) => (savedHtml = html),
-      )
-      await waitsFor(() => savedHtml)
-
-      expect(savedHtml!).to.equal(`\
-<p><em>italic</em></p>
-<p><strong>bold</strong></p>
-<p>encoding \u2192 issue</p>\
-`)
-      savedHtml = undefined
-      atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
-        [0, 0],
-        [1, 0],
-      ])
-      await mpp.copyHtml(
-        atom.workspace.getActiveTextEditor()!,
-        (html) => (savedHtml = html),
-      )
-      await waitsFor(() => savedHtml)
-
-      expect(savedHtml).to.equal(`\
+      expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>\
 `)
     })
@@ -590,45 +571,35 @@ var x = y;
       })
 
       it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
-        await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
+        await copyHtml()
 
-        await waitsFor.msg(
-          'atom.clipboard.write to have been called',
-          () => spy.callCount === 1,
-        )
-
-        const clipboard = atom.clipboard.read()
+        const clipboard = clipboardContents
         expect(clipboard.match(/MathJax\_SVG\_Hidden/)!.length).to.equal(1)
         expect(clipboard.match(/class\=\"MathJax\_SVG\"/)!.length).to.equal(1)
       })
 
-      it("scales the svg's if the scaleMath parameter is passed", async function() {
-        await mpp.copyHtml(
-          atom.workspace.getActiveTextEditor()!,
-          undefined,
-          200,
-        )
-
-        await waitsFor.msg(
-          'atom.clipboard.write to have been called',
-          () => spy.callCount === 1,
-        )
-
-        const clipboard = atom.clipboard.read()
-        expect(clipboard.match(/font\-size\: 200%/)!.length).to.equal(1)
-      })
+      // TODO: This parameter was removed in a course of refactor.
+      // Probably should be a config option?
+      // it("scales the svg's if the scaleMath parameter is passed", async function() {
+      //   await mpp.copyHtml(
+      //     atom.workspace.getActiveTextEditor()!,
+      //     undefined,
+      //     200,
+      //   )
+      //
+      //   await waitsFor.msg(
+      //     'atom.clipboard.write to have been called',
+      //     () => stub.callCount === 1,
+      //   )
+      //
+      //   const clipboard = clipboardContents
+      //   expect(clipboard.match(/font\-size\: 200%/)!.length).to.equal(1)
+      // })
 
       it('passes the HTML to a callback if supplied as the first argument', async function() {
-        let html: string
-        await mpp.copyHtml(
-          atom.workspace.getActiveTextEditor()!,
-          (proHTML) => (html = proHTML),
-        )
+        await copyHtml()
 
-        await waitsFor.msg(
-          'markdown to be parsed and processed by MathJax',
-          () => html,
-        )
+        const html = clipboardContents
 
         expect(html!.match(/MathJax\_SVG\_Hidden/)!.length).to.equal(1)
         expect(html!.match(/class\=\"MathJax\_SVG\"/)!.length).to.equal(1)

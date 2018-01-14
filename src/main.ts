@@ -14,6 +14,7 @@ import {
   WorkspaceOpenOptions,
   CommandEvent,
   CompositeDisposable,
+  ContextMenuOptions,
 } from 'atom'
 import { handlePromise } from './util'
 
@@ -25,86 +26,23 @@ export function activate() {
   disposables = new CompositeDisposable()
   disposables.add(
     atom.commands.add('atom-workspace', {
-      'markdown-preview-plus:toggle-break-on-single-newline'() {
+      'markdown-preview-plus:toggle-break-on-single-newline': function() {
         const keyPath = 'markdown-preview-plus.breakOnSingleNewline'
         atom.config.set(keyPath, !atom.config.get(keyPath))
-      },
-    }),
-
-    atom.commands.add('atom-text-editor', {
-      'markdown-preview-plus:toggle': (e) => {
-        toggle(e.currentTarget.getModel())
-      },
-      'markdown-preview-plus:copy-html': (e) => {
-        handlePromise(copyHtml(e.currentTarget.getModel()))
       },
     }),
     atom.commands.add('.markdown-preview', {
       'markdown-preview-plus:toggle': close,
     }),
-    atom.commands.add(
-      '.tree-view .file .name[data-name$=\\.markdown]',
-      'markdown-preview-plus:preview-file',
-      previewFile,
+    atom.workspace.addOpener(opener),
+    atom.config.observe(
+      'markdown-preview-plus.grammars',
+      configObserver(registerGrammars),
     ),
-    atom.commands.add(
-      '.tree-view .file .name[data-name$=\\.md]',
-      'markdown-preview-plus:preview-file',
-      previewFile,
+    atom.config.observe(
+      'markdown-preview-plus.extensions',
+      configObserver(registerExtensions),
     ),
-    atom.commands.add(
-      '.tree-view .file .name[data-name$=\\.mdown]',
-      'markdown-preview-plus:preview-file',
-      previewFile,
-    ),
-    atom.commands.add(
-      '.tree-view .file .name[data-name$=\\.mkd]',
-      'markdown-preview-plus:preview-file',
-      previewFile,
-    ),
-    atom.commands.add(
-      '.tree-view .file .name[data-name$=\\.mkdown]',
-      'markdown-preview-plus:preview-file',
-      previewFile,
-    ),
-    atom.commands.add(
-      '.tree-view .file .name[data-name$=\\.ron]',
-      'markdown-preview-plus:preview-file',
-      previewFile,
-    ),
-    atom.commands.add(
-      '.tree-view .file .name[data-name$=\\.txt]',
-      'markdown-preview-plus:preview-file',
-      previewFile,
-    ),
-
-    atom.workspace.addOpener((uriToOpen) => {
-      try {
-        // tslint:disable-next-line:no-var-keyword prefer-const
-        var { protocol, host, pathname } = url.parse(uriToOpen)
-      } catch (e) {
-        console.error(e)
-        return undefined
-      }
-
-      if (protocol !== 'markdown-preview-plus:') return undefined
-      if (pathname === undefined) return undefined
-
-      try {
-        pathname = decodeURI(pathname)
-      } catch (e) {
-        console.error(e)
-        return undefined
-      }
-
-      if (host === 'editor') {
-        return new MarkdownPreviewView({
-          editorId: parseInt(pathname.substring(1), 10),
-        })
-      } else {
-        return new MarkdownPreviewView({ filePath: pathname })
-      }
-    }),
   )
 }
 
@@ -122,30 +60,26 @@ export function createMarkdownPreviewView(state: MPVParams) {
   return undefined
 }
 
-async function close(event: CommandEvent<MarkdownPreviewViewElement>) {
+/// private
+
+function close(event: CommandEvent<MarkdownPreviewViewElement>) {
   const item = event.currentTarget.getModel()
   const pane = atom.workspace.paneForItem(item)
   if (!pane) return undefined
   return pane.destroyItem(item)
 }
 
-export function toggle(editor: TextEditor) {
-  const grammars = atom.config.get('markdown-preview-plus.grammars') || []
-  const scope = editor.getGrammar().scopeName
-  if (!grammars.includes(scope)) {
-    return
-  }
-
+function toggle(editor: TextEditor) {
   if (!removePreviewForEditor(editor)) {
     addPreviewForEditor(editor)
   }
 }
 
-export function uriForEditor(editor: TextEditor) {
+function uriForEditor(editor: TextEditor) {
   return `markdown-preview-plus://editor/${editor.id}`
 }
 
-export function removePreviewForEditor(editor: TextEditor) {
+function removePreviewForEditor(editor: TextEditor) {
   const uri = uriForEditor(editor)
   const previewPane = atom.workspace.paneForURI(uri)
   if (previewPane !== undefined) {
@@ -162,7 +96,7 @@ export function removePreviewForEditor(editor: TextEditor) {
   }
 }
 
-export function addPreviewForEditor(editor: TextEditor) {
+function addPreviewForEditor(editor: TextEditor) {
   const uri = uriForEditor(editor)
   const previousActivePane = atom.workspace.getActivePane()
   const options: WorkspaceOpenOptions = { searchAllPanes: true }
@@ -180,7 +114,7 @@ export function addPreviewForEditor(editor: TextEditor) {
   )
 }
 
-export function previewFile({ currentTarget }: CommandEvent) {
+function previewFile({ currentTarget }: CommandEvent) {
   const filePath = (currentTarget as HTMLElement).dataset.path
   if (!filePath) {
     return
@@ -200,19 +134,12 @@ export function previewFile({ currentTarget }: CommandEvent) {
   )
 }
 
-const clipboardCopy = (text: string) => {
-  atom.clipboard.write(text)
-}
-
-export async function copyHtml(
-  editor: TextEditor,
-  callback: (text: string) => any = clipboardCopy,
-  scaleMath = 100,
-): Promise<void> {
+async function copyHtml(editor: TextEditor): Promise<void> {
   const text = editor.getSelectedText() || editor.getText()
   const renderLaTeX = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
+  const scaleMath = 100
   return renderer.toHTML(
     text,
     editor.getPath(),
@@ -229,11 +156,113 @@ export async function copyHtml(
             (match) =>
               match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
           )
-          callback(proHTML)
+          atom.clipboard.write(proHTML)
         })
       } else {
-        callback(html)
+        atom.clipboard.write(html)
       }
     },
   )
+}
+
+type ContextMenu = { [key: string]: ContextMenuOptions[] }
+
+function configObserver<T>(
+  f: (
+    value: T,
+    disposables: CompositeDisposable,
+    contextMenu: ContextMenu,
+  ) => void,
+) {
+  let configDisposables: CompositeDisposable
+  return function(value: T) {
+    if (!disposables) return
+    if (configDisposables) {
+      configDisposables.dispose()
+      disposables.remove(configDisposables)
+    }
+    configDisposables = new CompositeDisposable()
+    const contextMenu: ContextMenu = {}
+    f(value, configDisposables, contextMenu)
+    configDisposables.add(atom.contextMenu.add(contextMenu))
+    disposables.add(configDisposables)
+  }
+}
+
+function registerExtensions(
+  extensions: string[],
+  disp: CompositeDisposable,
+  cm: ContextMenu,
+) {
+  for (const ext of extensions) {
+    const selector = `.tree-view .file .name[data-name$=".${ext}"]`
+    disp.add(
+      atom.commands.add(
+        selector,
+        'markdown-preview-plus:preview-file',
+        previewFile,
+      ),
+    )
+    cm[selector] = [
+      {
+        label: 'Markdown Preview',
+        command: 'markdown-preview-plus:preview-file',
+      },
+    ]
+  }
+}
+
+function registerGrammars(
+  grammars: string[],
+  disp: CompositeDisposable,
+  cm: ContextMenu,
+) {
+  for (const gr of grammars) {
+    const grs = gr.replace(/\./g, ' ')
+    const selector = `atom-text-editor[data-grammar="${grs}"]`
+    disp.add(
+      atom.commands.add(selector as 'atom-text-editor', {
+        'markdown-preview-plus:toggle': (e) => {
+          toggle(e.currentTarget.getModel())
+        },
+        'markdown-preview-plus:copy-html': (e) => {
+          handlePromise(copyHtml(e.currentTarget.getModel()))
+        },
+      }),
+    )
+    cm[selector] = [
+      {
+        label: 'Sync Preview',
+        command: 'markdown-preview-plus:sync-preview',
+      },
+    ]
+  }
+}
+
+function opener(uriToOpen: string) {
+  try {
+    // tslint:disable-next-line:no-var-keyword prefer-const
+    var { protocol, host, pathname } = url.parse(uriToOpen)
+  } catch (e) {
+    console.error(e)
+    return undefined
+  }
+
+  if (protocol !== 'markdown-preview-plus:') return undefined
+  if (pathname === undefined) return undefined
+
+  try {
+    pathname = decodeURI(pathname)
+  } catch (e) {
+    console.error(e)
+    return undefined
+  }
+
+  if (host === 'editor') {
+    return new MarkdownPreviewView({
+      editorId: parseInt(pathname.substring(1), 10),
+    })
+  } else {
+    return new MarkdownPreviewView({ filePath: pathname })
+  }
 }
