@@ -1,10 +1,13 @@
 import markdownItModule = require('markdown-it')
+import twemoji = require('twemoji')
+import * as path from 'path'
 let markdownIt: markdownItModule.MarkdownIt | null = null
 let markdownItOptions: markdownItModule.Options | null = null
 let renderLaTeX: boolean | null = null
 let math: any = null
 let lazyHeaders: any = null
 let checkBoxes: any = null
+let emoji: any = null
 
 const mathInline = (text: string) =>
   `<span class='math'><script type='math/tex'>${text}</script></span>`
@@ -64,6 +67,19 @@ const init = function(rL: boolean) {
   if (checkBoxes) {
     markdownIt.use(require('markdown-it-task-lists'))
   }
+
+  emoji = atom.config.get('markdown-preview-plus.useEmoji')
+
+  if (emoji) {
+    markdownIt.use(require('markdown-it-emoji'))
+    markdownIt.renderer.rules.emoji = function(token, idx) {
+      return twemoji.parse(token[idx].content, {
+        folder: 'svg',
+        ext: '.svg',
+        base: path.dirname(require.resolve('twemoji')) + path.sep,
+      })
+    }
+  }
 }
 
 const needsInit = (rL: boolean) =>
@@ -73,6 +89,7 @@ const needsInit = (rL: boolean) =>
     atom.config.get('markdown-preview-plus.breakOnSingleNewline') ||
   lazyHeaders !== atom.config.get('markdown-preview-plus.useLazyHeaders') ||
   checkBoxes !== atom.config.get('markdown-preview-plus.useCheckBoxes') ||
+  emoji !== atom.config.get('markdown-preview-plus.emoji') ||
   rL !== renderLaTeX
 
 export function render(text: string, rL: boolean) {

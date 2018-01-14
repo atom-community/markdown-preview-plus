@@ -11,6 +11,10 @@
 - [ ] This is unchecked again
 - [] This is not a checkbox
 
+# Emoji
+
+:tada: :stuck_out_tongue_winking_eye: :dancing_women: :beers: :balloon: :microphone: :video_game: :rocket: :bridge_at_night: :sparkles:
+
 :cool:
 
 ```ruby

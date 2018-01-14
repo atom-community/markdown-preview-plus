@@ -25,11 +25,13 @@
     "fs-plus": "^3.0.1",
     "lodash": "^4.17.4",
     "markdown-it": "^8.4.0",
+    "markdown-it-emoji": "^1.4.0",
     "markdown-it-lazy-headers": "^0.1.2",
     "markdown-it-math":
       "https://github.com/atom-community/markdown-it-math/tarball/fix-table-pipe-parse-no-ascii",
     "markdown-it-task-lists": "^2.1.0",
-    "season": "^6.0"
+    "season": "^6.0",
+    "twemoji": "^2.5.0"
   },
   "devDependencies": {
     "@types/atom": "~1.23.0",
