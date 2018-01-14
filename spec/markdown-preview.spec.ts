@@ -13,15 +13,21 @@ describe('Markdown preview plus package', function() {
   let preview: MarkdownPreviewView
   let tempPath: string
 
-  beforeEach(async function() {
+  before(async function() {
+    await atom.packages.activatePackage(path.join(__dirname, '..'))
+    await atom.packages.activatePackage('language-gfm')
+  })
+
+  after(function() {
+    atom.packages.deactivatePackage('markdown-preview-plus')
+    atom.packages.deactivatePackage('language-gfm')
+  })
+
+  beforeEach(function() {
     const fixturesPath = path.join(__dirname, 'fixtures')
     tempPath = temp.mkdirSync('atom')
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
-
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
-
-    await atom.packages.activatePackage('language-gfm')
   })
 
   afterEach(async function() {
@@ -282,7 +288,7 @@ var x = y;
         )
 
         let grammarAdded = false
-        atom.grammars.onDidAddGrammar(() => (grammarAdded = true))
+        const disp = atom.grammars.onDidAddGrammar(() => (grammarAdded = true))
 
         expect(atom.packages.isPackageActive('language-javascript')).to.equal(
           false,
@@ -298,6 +304,9 @@ var x = y;
             return el && el.dataset.grammar !== 'text plain null-grammar'
           },
         )
+
+        atom.packages.deactivatePackage('language-javascript')
+        disp.dispose()
       }))
   })
 

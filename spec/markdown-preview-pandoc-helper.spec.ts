@@ -14,13 +14,19 @@ let tempPath: string
 let file: string
 
 describe('Markdown preview plus pandoc helper', function() {
+  before(async function() {
+    await atom.packages.activatePackage(path.join(__dirname, '..'))
+  })
+
+  after(function() {
+    atom.packages.deactivatePackage('markdown-preview-plus')
+  })
+
   beforeEach(async function() {
     const fixturesPath = path.join(__dirname, 'fixtures')
     tempPath = temp.mkdirSync('atom')
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
-
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
   })
 
   describe('PandocHelper::findFileRecursive', function() {
