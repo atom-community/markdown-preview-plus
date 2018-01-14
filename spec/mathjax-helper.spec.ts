@@ -1,5 +1,5 @@
 import * as path from 'path'
-import * as fs from 'fs-plus'
+import * as fs from 'fs'
 import * as temp from 'temp'
 import mathjaxHelper = require('../lib/mathjax-helper')
 import * as sinon from 'sinon'
@@ -104,8 +104,8 @@ describe('MathJax helper module', () =>
 
     describe("when a macros file doesn't exist", () =>
       it('creates a template macros file', async function() {
-        expect(fs.isFileSync(macrosPath)).to.be.false
+        expect(fs.existsSync(macrosPath)).to.be.false
         await waitsForMacrosToLoad()
-        expect(fs.isFileSync(macrosPath)).to.be.true
+        expect(fs.existsSync(macrosPath)).to.be.true
       }))
   }))

@@ -22,7 +22,6 @@
     "MathJax":
       "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
     "atom-highlight": "^0.4.1",
-    "fs-plus": "^3.0.1",
     "lodash": "^4.17.4",
     "markdown-it": "^8.4.0",
     "markdown-it-emoji": "^1.4.0",
@@ -37,7 +36,6 @@
     "@types/atom": "~1.23.0",
     "@types/chai": "^4.0.10",
     "@types/fs-extra": "^5.0.0",
-    "@types/fs-plus": "^3.0.0",
     "@types/lodash": "^4.14.88",
     "@types/markdown-it": "0.0.4",
     "@types/mathjax": "0.0.32",

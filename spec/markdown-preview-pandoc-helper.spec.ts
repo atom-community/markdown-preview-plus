@@ -1,5 +1,5 @@
 import * as path from 'path'
-import * as fs from 'fs-plus'
+import * as fs from 'fs'
 import * as temp from 'temp'
 import * as wrench from 'fs-extra'
 import pandocHelper = require('../lib/pandoc-helper')

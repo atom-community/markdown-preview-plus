@@ -1,6 +1,4 @@
 import url = require('url')
-import fs = require('fs-plus')
-
 import {
   MarkdownPreviewView,
   MPVParams,
@@ -16,7 +14,7 @@ import {
   CompositeDisposable,
   ContextMenuOptions,
 } from 'atom'
-import { handlePromise } from './util'
+import { handlePromise, isFileSync } from './util'
 
 export { config } from './config'
 
@@ -53,7 +51,7 @@ export function deactivate() {
 export function createMarkdownPreviewView(state: MPVParams) {
   if (
     state.editorId !== undefined ||
-    (state.filePath && fs.isFileSync(state.filePath))
+    (state.filePath && isFileSync(state.filePath))
   ) {
     return new MarkdownPreviewView(state, true)
   }

@@ -13,7 +13,8 @@
 
 import path = require('path')
 import CSON = require('season')
-import fs = require('fs-plus')
+import fs = require('fs')
+import { isFileSync } from './util'
 
 export = {
   //
@@ -151,7 +152,7 @@ function loadMacrosFile(filePath: string): object {
 
 function loadUserMacros() {
   const userMacrosPath = getUserMacrosPath()
-  if (fs.isFileSync(userMacrosPath)) {
+  if (isFileSync(userMacrosPath)) {
     return loadMacrosFile(userMacrosPath)
   } else {
     console.debug(

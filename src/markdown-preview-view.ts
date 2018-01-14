@@ -11,7 +11,7 @@ import {
   Grammar,
 } from 'atom'
 import _ = require('lodash')
-import fs = require('fs-plus')
+import fs = require('fs')
 
 import renderer = require('./renderer')
 import { UpdatePreview } from './update-preview'

@@ -5,7 +5,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import * as path from 'path'
-import * as fs from 'fs-plus'
+import * as fs from 'fs'
 import * as temp from 'temp'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as markdownIt from '../lib/markdown-it-helper'
@@ -80,7 +80,7 @@ describe('MarkdownPreviewView', function() {
 
       newPreview = new MarkdownPreviewView({ filePath })
       const serialized = newPreview.serialize()
-      fs.removeSync(filePath)
+      fs.unlinkSync(filePath)
 
       newPreview = atom.deserializers.deserialize(
         serialized,
@@ -586,7 +586,7 @@ function f(x) {
         'atom-text-editor .hr { background: url(atom://markdown-preview-plus/assets/hr.png); }',
       ]
 
-      expect(fs.isFileSync(outputPath)).to.equal(false)
+      expect(fs.existsSync(outputPath)).to.be.false
 
       await preview.renderMarkdown()
 
@@ -608,7 +608,7 @@ function f(x) {
 
       await openedPromise
 
-      expect(fs.isFileSync(outputPath)).to.equal(true)
+      expect(fs.existsSync(outputPath)).to.be.true
       expect(fs.realpathSync(textEditor!.getPath()!)).to.equal(
         fs.realpathSync(outputPath),
       )

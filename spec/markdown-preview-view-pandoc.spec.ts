@@ -1,6 +1,6 @@
 // tslint:disable:no-unused-expression
 import * as path from 'path'
-import * as fs from 'fs-plus'
+import * as fs from 'fs'
 import * as temp from 'temp'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import markdownIt = require('../lib/markdown-it-helper')
