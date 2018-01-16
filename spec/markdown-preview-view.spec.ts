@@ -685,7 +685,7 @@ function f(x) {
 
       const editor = await atom.workspace.open(filePath)
 
-      mathjaxHelper.resetMathJax()
+      mathjaxHelper.testing.resetMathJax()
       atom.config.set(
         'markdown-preview-plus.enableLatexRenderingByDefault',
         true,

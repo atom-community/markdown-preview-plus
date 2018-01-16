@@ -8,6 +8,7 @@ import { waitsFor, expectPreviewInSplitPane } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { TextEditor, TextEditorElement } from 'atom'
+import mathjaxHelper = require('../lib/mathjax-helper')
 
 describe('Markdown preview plus package', function() {
   let preview: MarkdownPreviewView
@@ -786,6 +787,118 @@ world</p>\
           'markdown-preview-plus:toggle',
         ),
       ).to.be.false
+    })
+  })
+
+  describe('Math separators configuration', function() {
+    beforeEach(function() {
+      atom.config.set(
+        'markdown-preview-plus.enableLatexRenderingByDefault',
+        true,
+      )
+    })
+    describe('Uses new math separators', async function() {
+      let preview: MarkdownPreviewView
+
+      before(function() {
+        mathjaxHelper.testing.disableMathJax(true)
+      })
+      after(function() {
+        mathjaxHelper.testing.disableMathJax(false)
+      })
+
+      beforeEach(async function() {
+        atom.config.set('markdown-preview-plus.inlineMathSeparators', [
+          '$$',
+          '$$',
+        ])
+        atom.config.set('markdown-preview-plus.blockMathSeparators', [
+          '$$\n',
+          '\n$$',
+        ])
+
+        const editor = await atom.workspace.open(
+          path.join(tempPath, 'subdir/kramdown-math.md'),
+        )
+
+        expect(
+          atom.commands.dispatch(
+            atom.views.getView(editor),
+            'markdown-preview-plus:toggle',
+          ),
+        ).to.be.true
+        preview = await expectPreviewInSplitPane()
+      })
+
+      it('works for inline math', function() {
+        const inline = preview.findAll(
+          'span.math > script[type="math/tex"]',
+        ) as NodeListOf<HTMLElement>
+        expect(inline.length).to.equal(1)
+        expect(inline[0].innerText).to.equal('inlineMath')
+      })
+      it('works for block math', function() {
+        const block = preview.findAll(
+          'span.math > script[type="math/tex; mode=display"]',
+        ) as NodeListOf<HTMLElement>
+        expect(block.length).to.be.greaterThan(0)
+        expect(block[0].innerText).to.equal('displayMath\n')
+      })
+      it('respects newline in block math closing tag', function() {
+        const block = preview.findAll(
+          'span.math > script[type="math/tex; mode=display"]',
+        ) as NodeListOf<HTMLElement>
+        expect(block.length).to.be.greaterThan(1)
+        expect(block[1].innerText).to.equal('displayMath$$\n')
+      })
+    })
+    it('Shows warnings on odd number of math separators', async function() {
+      await atom.packages.activatePackage('notifications')
+
+      atom.config.set('markdown-preview-plus.inlineMathSeparators', [
+        '$$',
+        '$$',
+        '$',
+      ])
+      atom.config.set('markdown-preview-plus.blockMathSeparators', [
+        '$$\n',
+        '\n$$',
+        '$$$',
+      ])
+
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/kramdown-math.md'),
+      )
+
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.true
+      await expectPreviewInSplitPane()
+
+      const workspaceElement = atom.views.getView(atom.workspace)
+
+      await waitsFor.msg(
+        'notification',
+        () =>
+          workspaceElement.querySelectorAll('atom-notification.warning')
+            .length === 2,
+      )
+
+      const notifications = Array.from(workspaceElement.querySelectorAll(
+        'atom-notification.warning',
+      ) as NodeListOf<HTMLElement>)
+      expect(notifications.length).to.equal(2)
+      expect(notifications).to.satisfy((x: HTMLElement[]) =>
+        x.some((y) => y.innerText.includes('inlineMathSeparators')),
+      )
+      expect(notifications).to.satisfy((x: HTMLElement[]) =>
+        x.some((y) => y.innerText.includes('blockMathSeparators')),
+      )
+
+      atom.packages.deactivatePackage('notifications')
     })
   })
 })

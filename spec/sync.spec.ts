@@ -35,7 +35,7 @@ describe('Syncronization of source and preview', function() {
     const configDirPath = temp.mkdirSync('atom-config-dir-')
     stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
 
-    mathjaxHelper.resetMathJax()
+    mathjaxHelper.testing.resetMathJax()
 
     await atom.packages.activatePackage(path.join(__dirname, '..'))
 
@@ -65,7 +65,7 @@ describe('Syncronization of source and preview', function() {
 
   afterEach(async function() {
     stub.restore()
-    mathjaxHelper.resetMathJax()
+    mathjaxHelper.testing.resetMathJax()
 
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {

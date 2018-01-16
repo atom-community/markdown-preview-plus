@@ -49,7 +49,7 @@ export class MarkdownPreviewView {
     'did-change-markdown': undefined
   }> = new Emitter()
   private updatePreview?: UpdatePreview
-  private renderLaTeX: boolean = !!atom.config.get(
+  private renderLaTeX: boolean = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
   private disposables = new CompositeDisposable()
