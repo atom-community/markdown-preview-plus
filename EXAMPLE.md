@@ -78,7 +78,7 @@ $x
 
 ----
 
-**Testing \newcommand**
+**Testing `\newcommand`**
 
 For all $x$ and $y$ in $\mathbb{R}^k$ it is true that
 $$
@@ -107,7 +107,7 @@ e^{-\vec{\beta}\cdot\vec{m}(\mu)}
 
 ----
 
-Notice below that the `\[`-separated display math doesn't have a blank line before and after (i.e. in an actual $\LaTeX$ document it woulnd't be placed in a separate paragraph):
+Notice below that the `\[`-separated display math doesn't have a blank line before and after (i.e. in an actual $\LaTeX$ document it wouldn't be placed in a separate paragraph):
 
 The _characteristic polynomial_ $\chi(\lambda)$ of the
 $3 \times 3$ matrix
@@ -127,13 +127,13 @@ This is a long line: $\chi(\lambda) = a e i-a e \lambda -a f h-a i \lambda +a \l
 
 **Does it work in different MD elements?**
 
-#Math $x^2$ in heading 1
+# Math $x^2$ in heading 1
 
-##Math $x^2$ in heading 2
+## Math $x^2$ in heading 2
 
-###Math $x^2$ in heading 3
+### Math $x^2$ in heading 3
 
-####Math $x^2$ in heading 4
+#### Math $x^2$ in heading 4
 
 $x_1, x_2, \dots, x_N$ should not conflict with `_` _italics_?
 
@@ -153,6 +153,8 @@ _math $x^2$ in emphasis_
 
 **In Tables**
 
+(only works with Pandoc)
+
 | Left-Aligned  | Center Aligned  | Right Aligned |
 | :------------ |:---------------:| -----:|
 | $a+b$         | some wordy text | $1600 |
@@ -166,6 +168,10 @@ a_{m1} & a_{m2} & \cdots & a_{mn}\\
 $$                                |   $12 |
 |               |                 |    $1 |
 
+<!-- $$
+<!-- hack to save markdown-it from runaway block math
+-->
+
 **In Image Captions**
 
-![$$a^2+b^2=c^2$$](https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/imgs/mpp-full-res-invert.png)
+![$$a^2+b^2=c^2$$](https://raw.githubusercontent.com/atom-community/markdown-preview-plus/master/imgs/mpp-full-res-invert.png)
