@@ -1,6 +1,8 @@
 import markdownItModule = require('markdown-it')
 import twemoji = require('twemoji')
 import * as path from 'path'
+import { pairUp } from './util'
+import * as _ from 'lodash'
 let markdownIt: markdownItModule.MarkdownIt | null = null
 let markdownItOptions: markdownItModule.Options | null = null
 let renderLaTeX: boolean | null = null
@@ -8,29 +10,13 @@ let math: any = null
 let lazyHeaders: any = null
 let checkBoxes: any = null
 let emoji: any = null
+let inlineMathSeparators: any = null
+let blockMathSeparators: any = null
 
 const mathInline = (text: string) =>
   `<span class='math'><script type='math/tex'>${text}</script></span>`
 const mathBlock = (text: string) =>
   `<span class='math'><script type='math/tex; mode=display'>${text}</script></span>`
-
-const mathDollars = {
-  inlineOpen: '$',
-  inlineClose: '$',
-  blockOpen: '$$',
-  blockClose: '$$',
-  inlineRenderer: mathInline,
-  blockRenderer: mathBlock,
-}
-
-const mathBrackets = {
-  inlineOpen: '\\(',
-  inlineClose: '\\)',
-  blockOpen: '\\[',
-  blockClose: '\\]',
-  inlineRenderer: mathInline,
-  blockRenderer: mathBlock,
-}
 
 const getOptions = () => ({
   html: true,
@@ -41,7 +27,7 @@ const getOptions = () => ({
   typographer: true,
 })
 
-const init = function(rL: boolean) {
+function init(rL: boolean) {
   renderLaTeX = rL
 
   markdownItOptions = getOptions()
@@ -52,8 +38,24 @@ const init = function(rL: boolean) {
     if (math == null) {
       math = require('markdown-it-math')
     }
-    markdownIt.use(math, mathDollars)
-    markdownIt.use(math, mathBrackets)
+    const inlineDelim = pairUp(
+      (inlineMathSeparators = atom.config.get(
+        'markdown-preview-plus.inlineMathSeparators',
+      )),
+      'inlineMathSeparators',
+    )
+    const blockDelim = pairUp(
+      (blockMathSeparators = atom.config.get(
+        'markdown-preview-plus.blockMathSeparators',
+      )),
+      'blockMathSeparators',
+    )
+    markdownIt.use(math, {
+      inlineDelim,
+      blockDelim,
+      inlineRenderer: mathInline,
+      blockRenderer: mathBlock,
+    })
   }
 
   lazyHeaders = atom.config.get('markdown-preview-plus.useLazyHeaders')
@@ -90,7 +92,15 @@ const needsInit = (rL: boolean) =>
   lazyHeaders !== atom.config.get('markdown-preview-plus.useLazyHeaders') ||
   checkBoxes !== atom.config.get('markdown-preview-plus.useCheckBoxes') ||
   emoji !== atom.config.get('markdown-preview-plus.emoji') ||
-  rL !== renderLaTeX
+  rL !== renderLaTeX ||
+  !_.isEqual(
+    inlineMathSeparators,
+    atom.config.get('markdown-preview-plus.inlineMathSeparators'),
+  ) ||
+  !_.isEqual(
+    blockMathSeparators,
+    atom.config.get('markdown-preview-plus.blockMathSeparators'),
+  )
 
 export function render(text: string, rL: boolean) {
   if (needsInit(rL)) {

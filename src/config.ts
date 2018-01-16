@@ -73,6 +73,28 @@ export const config = {
     default: true,
     order: 47,
   },
+  inlineMathSeparators: {
+    title: 'Inline math separators',
+    description:
+      'List of inline math separators in pairs -- first opening, then closing',
+    type: 'array',
+    default: ['$', '$', '\\(', '\\)'],
+    order: 48,
+    items: {
+      type: 'string',
+    },
+  },
+  blockMathSeparators: {
+    title: 'Block math separators',
+    description:
+      'List of block math separators in pairs -- first opening, then closing',
+    type: 'array',
+    default: ['$$', '$$', '\\[', '\\]'],
+    order: 48.1,
+    items: {
+      type: 'string',
+    },
+  },
   useGitHubStyle: {
     title: 'Use GitHub.com style',
     type: 'boolean',
@@ -200,6 +222,8 @@ declare module 'atom' {
     'markdown-preview-plus.useLazyHeaders': boolean
     'markdown-preview-plus.useCheckBoxes': boolean
     'markdown-preview-plus.useEmoji': boolean
+    'markdown-preview-plus.inlineMathSeparators': string[]
+    'markdown-preview-plus.blockMathSeparators': string[]
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.enablePandoc': boolean
     'markdown-preview-plus.useNativePandocCodeStyles': boolean
@@ -224,6 +248,8 @@ declare module 'atom' {
       useLazyHeaders: boolean
       useCheckBoxes: boolean
       useEmoji: boolean
+      inlineMathSeparators: string[]
+      blockMathSeparators: string[]
       useGitHubStyle: boolean
       enablePandoc: boolean
       useNativePandocCodeStyles: boolean
