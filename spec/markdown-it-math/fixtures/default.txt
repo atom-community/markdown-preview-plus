@@ -1,0 +1,272 @@
+
+Simple inline math
+.
+$$1+1 = 2$$
+
+.
+<p><span class="math inline">1+1 = 2</span></p>
+.
+
+
+Simple block math
+.
+$$$
+1+1 = 2
+$$$
+.
+<div class="math block">1+1 = 2
+</div>
+.
+
+
+Like other inline markup, whitespace immediately after opening is not allowed
+.
+foo$$ 1+1 = 2$$ bar
+.
+<p>foo$$ 1+1 = 2$$ bar</p>
+.
+
+
+Neither is whitespace immediately before closing
+.
+foo $$1+1 = 2 $$bar
+.
+<p>foo $$1+1 = 2 $$bar</p>
+.
+
+
+No whitespace before and after is fine though
+.
+foo$$1+1 = 2$$bar
+.
+<p>foo<span class="math inline">1+1 = 2</span>bar</p>
+.
+
+
+Paragraph breaks are unnecessary before and after display math
+.
+foo
+$$$
+x + y
+$$$
+bar
+.
+<p>foo</p>
+<div class="math block">x + y
+</div>
+<p>bar</p>
+.
+
+
+Paragraph break in inline math is not allowed
+.
+foo $$1+1
+
+= 2$$ bar
+.
+<p>foo $$1+1</p>
+<p>= 2$$ bar</p>
+.
+
+
+Neither is an end of document
+.
+foo $$1+1 = 2
+.
+<p>foo $$1+1 = 2</p>
+.
+
+
+Inline math with apparent markup
+.
+foo $$1 *i* 1$$ bar
+.
+<p>foo <span class="math inline">1 *i* 1</span> bar</p>
+.
+
+
+Display math with apparent markup
+.
+foo
+
+$$$
+1 *i* 1
+$$$
+
+bar
+.
+<p>foo</p>
+<div class="math block">1 *i* 1
+</div>
+<p>bar</p>
+.
+
+
+Block math can be indented up to 3 spaces
+.
+   $$$
+   1+1 = 2
+   $$$
+.
+<div class="math block">1+1 = 2
+</div>
+.
+
+
+But 4 means a code block
+.
+    $$$
+    1+1 = 2
+    $$$
+.
+<pre><code>$$$
+1+1 = 2
+$$$
+</code></pre>
+.
+
+
+Multiline inline math
+.
+foo $$1 + 1
+= 2$$ bar
+.
+<p>foo <span class="math inline">1 + 1
+= 2</span> bar</p>
+.
+
+
+Multiline display math
+.
+$$$
+
+  1
++ 1
+
+= 2
+
+$$$
+.
+<div class="math block">
+  1
++ 1
+
+= 2
+
+</div>
+.
+
+
+Multiline display math that might look like an unordered list
+.
+$$$
+  1
+
++ 1
++ 1
+
+= 3
+$$$
+.
+<div class="math block">  1
+
++ 1
++ 1
+
+= 3
+</div>
+.
+
+
+Text can immediately follow inline math
+.
+$$n$$-th order
+.
+<p><span class="math inline">n</span>-th order</p>
+.
+
+
+Display math self-closes at the end of document
+.
+$$$
+1+1 = 2
+.
+<div class="math block">1+1 = 2
+</div>
+.
+
+
+Display and inline math can appear in lists
+.
+* $$1+1 = 2$$
+* $$$
+  1+1 = 2
+  $$$
+.
+<ul>
+<li><span class="math inline">1+1 = 2</span></li>
+<li>
+<div class="math block">1+1 = 2
+</div>
+</li>
+</ul>
+.
+
+
+Display math can be written in one line
+.
+$$$1+1 = 2$$$
+.
+<div class="math block">1+1 = 2
+</div>
+.
+
+
+Or on multiple lines with expression starting and ending on delimited lines
+.
+$$$[
+[1, 2]
+[3, 4]
+]$$$
+.
+<div class="math block">[
+[1, 2]
+[3, 4]
+]</div>
+.
+
+
+Escaped delimiters should not render math
+.
+Foo \$$1$$ bar
+\$\$$
+1
+\$\$$
+.
+<p>Foo $$1$$ bar
+$$$
+1
+$$$</p>
+.
+
+Display math must start on newline
+.
+Foo $$$
+1+1=2
+.
+<p>Foo $$$
+1+1=2</p>
+.
+
+Display math must end on newline
+.
+Foo
+$$$
+1+1=2
+$$$ bar
+.
+<p>Foo</p>
+<div class="math block">1+1=2
+$$$ bar
+</div>
+.

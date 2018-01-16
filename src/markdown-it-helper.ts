@@ -36,7 +36,8 @@ function init(rL: boolean) {
 
   if (renderLaTeX) {
     if (math == null) {
-      math = require('markdown-it-math')
+      // tslint:disable-next-line:no-unsafe-any
+      math = require('./markdown-it-math').math_plugin
     }
     const inlineDelim = pairUp(
       (inlineMathSeparators = atom.config.get(
