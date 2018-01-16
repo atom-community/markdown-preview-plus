@@ -8,3 +8,8 @@ export function handlePromise(promise: Promise<any>): void {
     })
   })
 }
+import { lstatSync, existsSync } from 'fs'
+export function isFileSync(filePath: string) {
+  if (!existsSync(filePath)) return false
+  return lstatSync(filePath).isFile()
+}
