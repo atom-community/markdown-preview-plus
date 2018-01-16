@@ -5,6 +5,7 @@
 ![apm version](https://img.shields.io/apm/v/markdown-preview-plus.svg)
 ![apm
 downloads](https://img.shields.io/apm/dm/markdown-preview-plus.svg)
+[![dependency status](https://david-dm.org/atom-community/markdown-preview-plus/status.svg)](https://david-dm.org/atom-community/markdown-preview-plus)
 
 Markdown Preview Plus (MPP) is a fork of [Markdown
 Preview](https://github.com/atom/markdown-preview) that provides a
