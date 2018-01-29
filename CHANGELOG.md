@@ -2,7 +2,7 @@
 * Bundle our fork of markdown-it-math
 * Configurable math delimiters (#327)
 * Ignore fence name case (#338)
-* Make file types that are considered Markdown configurable (#335)
+* Make file extensions that are considered Markdown configurable (#335)
 * Get rid of fs-plus
 * Emoji support (#244, #332)
 * Fix deserialization
