@@ -208,6 +208,31 @@ function f(x) {
 `)
       })
     })
+
+    it.only('ignores case of the fence name', async function() {
+      const ed = await atom.workspace.open()
+      ed.setText(`\
+~~~JavaScript
+var x = 0;
+~~~
+`)
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(ed),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.true
+
+      const pv = await expectPreviewInSplitPane()
+
+      // nested in a list item
+      const jsEditor = await waitsFor(
+        () => pv.find('atom-text-editor') as TextEditorElement,
+      )
+      expect(jsEditor).to.exist
+      expect(jsEditor.getModel().getText()).to.equal('var x = 0;')
+      expect(jsEditor.getModel().getGrammar().scopeName).to.equal('source.js')
+    })
   })
 
   describe('image resolving', function() {
