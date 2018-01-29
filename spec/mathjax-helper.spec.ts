@@ -30,7 +30,7 @@ describe('MathJax helper module', () =>
 
       stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
 
-      mathjaxHelper.resetMathJax()
+      mathjaxHelper.testing.resetMathJax()
 
       div = document.createElement('div')
       div.style.visibility = 'hidden'
@@ -38,7 +38,7 @@ describe('MathJax helper module', () =>
     })
 
     afterEach(function() {
-      mathjaxHelper.resetMathJax()
+      mathjaxHelper.testing.resetMathJax()
       stub.restore()
       div.remove()
     })
@@ -46,7 +46,7 @@ describe('MathJax helper module', () =>
     const waitsForMacrosToLoad = async function() {
       await atom.packages.activatePackage(path.join(__dirname, '..'))
 
-      mathjaxHelper.loadMathJax()
+      mathjaxHelper.testing.loadMathJax()
 
       await waitsFor.msg(
         'MathJax to load',

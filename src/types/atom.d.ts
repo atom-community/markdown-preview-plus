@@ -1,12 +1,6 @@
 export {}
 import { MarkdownPreviewViewElement } from '../markdown-preview-view'
 declare module 'atom' {
-  interface Workspace {
-    destroyActivePaneItem: () => void
-  }
-  interface PackageManager {
-    resourcePath: string
-  }
   interface TextEditor {
     cursorLineDecorations: LayerDecoration[] | null | undefined
   }

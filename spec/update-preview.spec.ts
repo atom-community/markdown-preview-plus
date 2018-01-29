@@ -162,7 +162,7 @@ describe('the difference algorithm that updates the preview', function() {
       })
     })
 
-    afterEach(() => mathjaxHelper.resetMathJax())
+    afterEach(() => mathjaxHelper.testing.resetMathJax())
 
     it('replaces the entire span.math container element', async function() {
       const stub = sinon
