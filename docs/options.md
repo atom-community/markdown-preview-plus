@@ -9,6 +9,16 @@ The following settings are considered self-explainatory:
 -   *Use GitHub.com style*
 -   *Enable Pandoc Parser*
 
+### A note on Pandoc and *Break On Single Newline*
+
+This option does not affect Pandoc parser.
+
+You should be able to coerce Pandoc into breaking lines on single newline by setting the appropriate `hard_line_breaks` flag (See the [Formats](http://pandoc.org/MANUAL.html#general-options) and [Non-pandoc extensions](http://pandoc.org/MANUAL.html#non-pandoc-extensions) of the Pandoc manual)
+
+TL;DR: `hard_line_breaks` extension should do it.
+
+![Example of 'Pandoc Options: Markdown Flavor' option value: markdown+hard_line_breaks ](https://cloud.githubusercontent.com/assets/1201875/22458834/2c4f8764-e796-11e6-9411-140ce4b57438.png)
+
 ## Pandoc Options
 
 If *Enable Pandoc Parser* is enabled, you need to specify:
