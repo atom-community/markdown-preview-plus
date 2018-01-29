@@ -209,7 +209,7 @@ function f(x) {
       })
     })
 
-    it.only('ignores case of the fence name', async function() {
+    it('ignores case of the fence name', async function() {
       const ed = await atom.workspace.open()
       ed.setText(`\
 ~~~JavaScript
