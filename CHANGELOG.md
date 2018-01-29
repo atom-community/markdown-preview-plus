@@ -1,89 +1,15 @@
 ## 2.5.0
-* Ignore fence name case
-* Remove unused typings
-* Fix example.md somewhat
-* Remove d.ts files from lib
-* Bring in markdown-it-math
-* mathJaxHelper interface cleanup; math delimiters spec
-* Configurable math delimiters
-* Update README.md
-* Merge pull request #335 from atom-community\/configure-file-types
-* Clean up some specs a bit
-* Tests for command re-\/binding
+* Bundle our fork of markdown-it-math
+* Configurable math delimiters (#327)
+* Ignore fence name case (#338)
+* Make file types that are considered Markdown configurable (#335)
 * Get rid of fs-plus
-* Configurable file extensions, only bind commands on grammar, avoid unneeded exports in main
-* Merge pull request #332 from atom-community\/emoji
-* Minimal emoji spec
-* Emoji support (#244)
+* Emoji support (#244, #332)
 * Fix deserialization
 * Make styles a bit more specific
-* Bind editor-related commands on atom-text-editor
-* LESS formatting
-* Add a simple test for checkboxes
-* Clean up some spec code
+* Bind editor-related commands on text editor instead of workspace
 * CheckBox lists (#186)
-* Move config definiton into config.ts
-* Add minimal typecheck for config
-* Move season typings to 'types'
-* Merge pull request #323 from atom-community\/decaf
-* Rephrase pull request template and contribuitng guide
-* Add a section on contributing to README
-* Pull request template
-* Update contributing guide
-* Code clean-up
-* Second attempt to remove direct dependency on pathwatcher
-* Just run specs on appveyor
-* README format
-* Remove unused packages
-* Update CI scripts
-* Gitignore generated d.ts files
-* Removed generated d.ts files
-* Remove debug log, replace other logs with debug.
-* Simplify test
-* Pin atom and node types,
-* Revert to old pathwatcher code
-* [spec] Fix file2.md path
-* season minimal typings
-* Handle floating promises in markdown-preview-view
-* Fix waitsFor
-* Fix npm scripts
-* Fix editor path change test
-* Lints
-* Convert tests to typescript
-* Fix preview sync
-* Fix most specs broken by space-pen removal
-* Add MathJax typing
-* Remove space-pen completely
-* Prettier; lint on CI
-* Initial work on removing space-pen dependency
-* Prettify
-* Switch to Atom's watchPath
-* More cleanup
-* Formatting
-* Bump Atom types
-* Strict null\/undefined checks
-* Work around possible lack of MathJax global
-* Prettify
-* A little more cleanup
-* Avoid void-typed expressions
-* More lints
-* Even more lints
-* More lints
-* Some lints
-* Fixing test fail
-* Cleanup
-* Separate dir for d.ts files
-* TS finished (hopefully)
-* Changed prettifier settings
-* Slowly moving towards TS
-* Fix spec
-* Prettify
-* Fix extraneous newlines in html export code blocks
-* Started slow move to TS
-* Implement some decaf suggestions
-* Immediate post-decaf fixes
-* Decaffeinate
-* Bump dependencies; get rid of extraneous dependencies
+* Rewrite in TypeScript (#323)
 
 ## 2.4.16
 * Tentative fix for #316
