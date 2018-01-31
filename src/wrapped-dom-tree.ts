@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS202: Simplify dynamic range loops
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 // This file incorporates code from [markmon](https://github.com/yyjhao/markmon)
 // covered by the following terms:
 //

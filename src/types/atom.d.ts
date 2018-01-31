@@ -8,6 +8,6 @@ declare module 'atom' {
     showSaveDialogSync(path: string): string | undefined
   }
   interface CommandRegistryTargetMap {
-    '.markdown-preview': MarkdownPreviewViewElement
+    'markdown-preview-plus-view': MarkdownPreviewViewElement
   }
 }

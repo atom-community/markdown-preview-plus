@@ -1,10 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import * as path from 'path'
 import * as temp from 'temp'
 import * as cson from 'season'
@@ -28,6 +21,9 @@ describe('Syncronization of source and preview', function() {
   let fixturesPath: string
   let stub: sinon.SinonStub
 
+  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
   beforeEach(async function() {
     fixturesPath = path.join(__dirname, 'fixtures')
 
@@ -36,8 +32,6 @@ describe('Syncronization of source and preview', function() {
     stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
 
     mathjaxHelper.testing.resetMathJax()
-
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
 
     atom.config.set('markdown-preview-plus.enableLatexRenderingByDefault', true)
     const editor = await atom.workspace.open(path.join(fixturesPath, 'sync.md'))

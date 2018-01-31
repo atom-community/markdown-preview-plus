@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
-  * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
@@ -22,6 +16,9 @@ describe('MarkdownPreviewView', function() {
   let preview: MarkdownPreviewView
   let tempPath: string
 
+  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
   beforeEach(async function() {
     await Promise.all([
       atom.packages.activatePackage('language-ruby'),
@@ -37,8 +34,6 @@ describe('MarkdownPreviewView', function() {
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
 
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
-
     filePath = path.join(tempPath, 'subdir/file.markdown')
     preview = new MarkdownPreviewView({ filePath })
     await preview.renderPromise
@@ -49,8 +44,8 @@ describe('MarkdownPreviewView', function() {
     for (const item of atom.workspace.getPaneItems()) {
       await atom.workspace.paneForItem(item)!.destroyItem(item, true)
     }
-    atom.packages.deactivatePackage('language-ruby')
-    atom.packages.deactivatePackage('language-javascript')
+    await atom.packages.deactivatePackage('language-ruby')
+    await atom.packages.deactivatePackage('language-javascript')
   })
 
   describe('::constructor', () =>
@@ -71,7 +66,7 @@ describe('MarkdownPreviewView', function() {
         preview.serialize(),
       ) as MarkdownPreviewView
       newPreview.element.focus()
-      await waitsFor(() => newPreview.getPath() === preview.getPath())
+      expect(newPreview.getPath()).to.equal(preview.getPath())
     })
 
     it('does not recreate a preview when the file no longer exists', function() {
@@ -595,12 +590,17 @@ var x = 0;
 
       const markdownPreviewStyles = [
         {
-          rules: [createRule('.markdown-preview', '{ color: orange; }')],
+          rules: [
+            createRule('markdown-preview-plus-view', '{ color: orange; }'),
+          ],
         },
         {
           rules: [
             createRule('.not-included', '{ color: green; }'),
-            createRule('.markdown-preview :host', '{ color: purple; }'),
+            createRule(
+              'markdown-preview-plus-view :host',
+              '{ color: purple; }',
+            ),
           ],
         },
       ]
