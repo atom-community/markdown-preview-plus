@@ -1,4 +1,3 @@
-import _ = require('lodash')
 import CP = require('child_process')
 import fs = require('fs')
 import path = require('path')
@@ -31,7 +30,7 @@ export function findFileRecursive(
     return bibFile
   } else {
     const newPath = path.join(bibFile, '..')
-    if (newPath !== filePath && !_.includes(atom.project.getPaths(), newPath)) {
+    if (newPath !== filePath && !atom.project.getPaths().includes(newPath)) {
       return findFileRecursive(newPath, fileName)
     } else {
       return false
@@ -190,21 +189,23 @@ export async function renderPandoc<T>(
 }
 
 export function getArguments(iargs: Args) {
-  const args = _.reduce(
-    iargs,
-    function(res: string[], val, key) {
-      if (val && !_.isEmpty(val)) {
-        const nval: string[] = _.flatten([val])
-        _.forEach(nval, function(v: string) {
-          if (!_.isEmpty(v)) {
-            res.push(`--${key}=${v}`)
-          }
-        })
-      }
-      return res
-    },
-    [],
-  )
+  const args = Object.entries(iargs).reduce<string[]>(function(
+    res,
+    [key, val],
+  ) {
+    if (val !== undefined) {
+      const nval = Array.isArray(val) ? val : [val]
+      nval.forEach(function(v) {
+        if (v.length > 0) {
+          res.push(`--${key}=${v}`)
+        } else {
+          res.push(`--${key}`)
+        }
+      })
+    }
+    return res
+  },
+  [])
   const res: string[] = []
   for (const val of [
     ...args,
