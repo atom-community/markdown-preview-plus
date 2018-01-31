@@ -14,7 +14,7 @@ const getMathJaxPath = (function() {
       return cached
     }
     try {
-      return (cached = require.resolve('MathJax'))
+      return (cached = require.resolve('mathjax'))
     } catch (e) {
       return ''
     }
