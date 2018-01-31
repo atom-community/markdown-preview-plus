@@ -20,7 +20,14 @@ export { config } from './config'
 
 let disposables: CompositeDisposable | undefined
 
-export function activate() {
+export async function activate() {
+  if (atom.packages.isPackageActive('markdown-preview')) {
+    await atom.packages.deactivatePackage('markdown-preview')
+    atom.notifications.addInfo(
+      'Markdown-preview-plus has deactivated markdown-preview package.' +
+        'You may want to disable it manually to avoid this message.',
+    )
+  }
   disposables = new CompositeDisposable()
   disposables.add(
     atom.commands.add('atom-workspace', {
