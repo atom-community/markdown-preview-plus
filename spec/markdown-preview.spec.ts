@@ -19,9 +19,9 @@ describe('Markdown preview plus package', function() {
     await atom.packages.activatePackage('language-gfm')
   })
 
-  after(function() {
-    atom.packages.deactivatePackage('markdown-preview-plus')
-    atom.packages.deactivatePackage('language-gfm')
+  after(async function() {
+    await atom.packages.deactivatePackage('markdown-preview-plus')
+    await atom.packages.deactivatePackage('language-gfm')
   })
 
   beforeEach(function() {
@@ -306,7 +306,7 @@ var x = y;
           },
         )
 
-        atom.packages.deactivatePackage('language-javascript')
+        await atom.packages.deactivatePackage('language-javascript')
         disp.dispose()
       }))
   })
@@ -752,7 +752,7 @@ world</p>\
       spy = sinon.spy(atom.commands, 'add')
     })
     after(async function() {
-      atom.packages.deactivatePackage('language-javascript')
+      await atom.packages.deactivatePackage('language-javascript')
       spy.restore()
     })
     beforeEach(function() {
@@ -898,7 +898,7 @@ world</p>\
         x.some((y) => y.innerText.includes('blockMathSeparators')),
       )
 
-      atom.packages.deactivatePackage('notifications')
+      await atom.packages.deactivatePackage('notifications')
     })
   })
 })

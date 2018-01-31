@@ -49,8 +49,8 @@ describe('MarkdownPreviewView', function() {
     for (const item of atom.workspace.getPaneItems()) {
       await atom.workspace.paneForItem(item)!.destroyItem(item, true)
     }
-    atom.packages.deactivatePackage('language-ruby')
-    atom.packages.deactivatePackage('language-javascript')
+    await atom.packages.deactivatePackage('language-ruby')
+    await atom.packages.deactivatePackage('language-javascript')
   })
 
   describe('::constructor', () =>

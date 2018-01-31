@@ -18,8 +18,8 @@ describe('Markdown preview plus pandoc helper', function() {
     await atom.packages.activatePackage(path.join(__dirname, '..'))
   })
 
-  after(function() {
-    atom.packages.deactivatePackage('markdown-preview-plus')
+  after(async function() {
+    await atom.packages.deactivatePackage('markdown-preview-plus')
   })
 
   beforeEach(async function() {
