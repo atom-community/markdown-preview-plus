@@ -103,7 +103,7 @@ export class MarkdownPreviewView {
 
   serialize() {
     return {
-      deserializer: 'MarkdownPreviewView',
+      deserializer: 'markdown-preview-plus/MarkdownPreviewView',
       filePath: this.getPath() || this.filePath,
       editorId: this.editorId,
     }

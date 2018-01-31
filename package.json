@@ -61,6 +61,6 @@
     "typescript": "^2.6.2"
   },
   "deserializers": {
-    "MarkdownPreviewView": "createMarkdownPreviewView"
+    "markdown-preview-plus/MarkdownPreviewView": "createMarkdownPreviewView"
   }
 }
