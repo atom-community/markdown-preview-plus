@@ -36,7 +36,7 @@
     "twemoji": "^2.5.0"
   },
   "devDependencies": {
-    "@types/atom": "~1.23.0",
+    "@types/atom": "~1.23.3",
     "@types/chai": "^4.0.10",
     "@types/fs-extra": "^5.0.0",
     "@types/lodash": "^4.14.88",
