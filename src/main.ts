@@ -29,7 +29,7 @@ export function activate() {
         atom.config.set(keyPath, !atom.config.get(keyPath))
       },
     }),
-    atom.commands.add('.markdown-preview', {
+    atom.commands.add('markdown-preview-plus-view', {
       'markdown-preview-plus:toggle': close,
     }),
     atom.workspace.addOpener(opener),

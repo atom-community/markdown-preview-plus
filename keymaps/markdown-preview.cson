@@ -1,15 +1,15 @@
-'atom-text-editor, .markdown-preview':
+'atom-text-editor, markdown-preview-plus-view':
   'ctrl-M': 'markdown-preview-plus:toggle'
   'ctrl-X': 'markdown-preview-plus:toggle-render-latex'
 
-'.platform-darwin .markdown-preview':
+'.platform-darwin markdown-preview-plus-view':
   'cmd-+': 'markdown-preview-plus:zoom-in'
   'cmd-=': 'markdown-preview-plus:zoom-in'
   'cmd--': 'markdown-preview-plus:zoom-out'
   'cmd-_': 'markdown-preview-plus:zoom-out'
   'cmd-0': 'markdown-preview-plus:reset-zoom'
 
-'.platform-win32 .markdown-preview, .platform-linux .markdown-preview':
+'.platform-win32 markdown-preview-plus-view, .platform-linux markdown-preview-plus-view':
   'ctrl-+': 'markdown-preview-plus:zoom-in'
   'ctrl-=': 'markdown-preview-plus:zoom-in'
   'ctrl--': 'markdown-preview-plus:zoom-out'

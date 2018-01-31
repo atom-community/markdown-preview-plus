@@ -66,7 +66,7 @@ export class MarkdownPreviewView {
     this.syncPreview = this.syncPreview.bind(this)
     this.editorId = editorId
     this.filePath = filePath
-    this.element = document.createElement('div') as any
+    this.element = document.createElement('markdown-preview-plus-view') as any
     this.element.getModel = () => this
     this.element.classList.add('markdown-preview', 'native-key-bindings')
     this.element.tabIndex = -1
@@ -452,7 +452,7 @@ export class MarkdownPreviewView {
 
   getMarkdownPreviewCSS() {
     const markdowPreviewRules = []
-    const ruleRegExp = /\.markdown-preview/
+    const ruleRegExp = /markdown-preview-plus-view/
     const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
     for (const stylesheet of Array.from(this.getDocumentStyleSheets())) {
@@ -688,11 +688,11 @@ export class MarkdownPreviewView {
   }
 
   //
-  // Determine path to a target element from a container `.markdown-preview`.
+  // Determine path to a target element from a container `markdown-preview-plus-view`.
   //
   // @param {HTMLElement} element Target HTMLElement.
   // @return {(tag: <tag>, index: <index>)[]} Array of tokens representing a path
-  //   to `element` from `.markdown-preview`. The root `.markdown-preview`
+  //   to `element` from `markdown-preview-plus-view`. The root `markdown-preview-plus-view`
   //   element is the first elements in the array and the target element
   //   `element` at the highest index. Each element consists of a `tag` and
   //   `index` representing its index amongst its sibling elements of the same
@@ -738,14 +738,14 @@ export class MarkdownPreviewView {
   //
   // @param {string} text Source markdown of the associated editor.
   // @param {HTMLElement} element Target element contained within the assoicated
-  //   `.markdown-preview` container. The method will attempt to identify the
+  //   `markdown-preview-plus-view` container. The method will attempt to identify the
   //   line of `text` that represents `element` and set the cursor to that line.
   // @return {number|null} The line of `text` that represents `element`. If no
   //   line is identified `null` is returned.
   //
   syncSource(text: string, element: HTMLElement) {
     const pathToElement = this.getPathToElement(element)
-    pathToElement.shift() // remove div.markdown-preview
+    pathToElement.shift() // remove markdown-preview-plus-view
     pathToElement.shift() // remove div.update-preview
     if (!pathToElement.length) {
       return null
@@ -873,8 +873,8 @@ export class MarkdownPreviewView {
   //
   // @param {string} text Source markdown of the associated editor.
   // @param {number} line Target line of `text`. The method will attempt to
-  //   identify the elment of the associated `.markdown-preview` that represents
-  //   `line` and scroll the `.markdown-preview` to that element.
+  //   identify the elment of the associated `markdown-preview-plus-view` that represents
+  //   `line` and scroll the `markdown-preview-plus-view` to that element.
   // @return {number|null} The element that represents `line`. If no element is
   //   identified `null` is returned.
   //

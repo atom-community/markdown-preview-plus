@@ -595,12 +595,17 @@ var x = 0;
 
       const markdownPreviewStyles = [
         {
-          rules: [createRule('.markdown-preview', '{ color: orange; }')],
+          rules: [
+            createRule('markdown-preview-plus-view', '{ color: orange; }'),
+          ],
         },
         {
           rules: [
             createRule('.not-included', '{ color: green; }'),
-            createRule('.markdown-preview :host', '{ color: purple; }'),
+            createRule(
+              'markdown-preview-plus-view :host',
+              '{ color: purple; }',
+            ),
           ],
         },
       ]
