@@ -55,21 +55,23 @@ async function processHTMLElement(element: HTMLElement) {
     'script[type^="math/tex"]',
   ) as NodeListOf<HTMLScriptElement>
 
-  for (const math of Array.from(maths)) {
-    try {
-      const display = math.type
-        .split(';')
-        .some((x) => x.trim() === 'mode=display')
-      const res = await mjAPI.typeset({
-        svg: true,
-        format: display ? 'TeX' : 'inline-TeX',
-        math: math.text,
-      })
-      if (res.svg) math.outerHTML = res.svg
-    } catch (e) {
-      console.error(e)
-    }
-  }
+  await Promise.all(
+    Array.from(maths).map(async (math) => {
+      try {
+        const display = math.type
+          .split(';')
+          .some((x) => x.trim() === 'mode=display')
+        const res = await mjAPI.typeset({
+          svg: true,
+          format: display ? 'TeX' : 'inline-TeX',
+          math: math.text,
+        })
+        if (res.svg) math.outerHTML = res.svg
+      } catch (e) {
+        console.error(e)
+      }
+    }),
+  )
 }
 
 // For testing
