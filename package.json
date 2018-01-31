@@ -3,13 +3,7 @@
   "version": "2.5.0",
   "main": "./lib/main",
   "description": "Markdown Preview + Community Features",
-  "keywords": [
-    "markdown",
-    "maths",
-    "latex",
-    "commonmark",
-    "pandoc"
-  ],
+  "keywords": ["markdown", "maths", "latex", "commonmark", "pandoc"],
   "repository": "https://github.com/atom-community/markdown-preview-plus",
   "license": "MIT",
   "engines": {
@@ -25,7 +19,8 @@
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
   "dependencies": {
-    "MathJax": "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
+    "MathJax":
+      "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
     "atom-highlight": "^0.4.1",
     "lodash": "^4.17.4",
     "markdown-it": "^8.4.0",
