@@ -20,7 +20,7 @@ issue](https://github.com/atom-community/markdown-preview-plus/issues).
 ## Features
 
 We also have a more detailed description of
-[features](docs/features.md).
+[features](https://github.com/atom-community/markdown-preview-plus/blob/master/docs/features.md).
 
 -   Fastly open a preview of any markdown with `ctrl-shift-m`
 -   Math rendering with persistent macro support, toggled with
@@ -32,7 +32,7 @@ We also have a more detailed description of
 
 ## Installation
 
-Long instructions can be found [here](docs/installation.md). In short
+Long instructions can be found [here](https://github.com/atom-community/markdown-preview-plus/blob/master/docs/installation.md). In short
 steps:
 
 1.  Search for and install `markdown-preview-plus` in Atom's Settings
@@ -42,8 +42,8 @@ steps:
 
 ## Usage
 
-Please see [options](docs/options.md) for further details on configuring
-MPP and [math](docs/math.md) for more details on math rendering. For
+Please see [options](https://github.com/atom-community/markdown-preview-plus/blob/master/docs/options.md) for further details on configuring
+MPP and [math](https://github.com/atom-community/markdown-preview-plus/blob/master/docs/math.md) for more details on math rendering. For
 basic usage:
 
 -   Toggle Preview: `ctrl-shift-m`
@@ -58,4 +58,4 @@ Also of interest might be [issues marked as "help wanted"](https://github.com/at
 ## License
 
 Markdown Preview Plus (MPP) is released under the [MIT
-license](LICENSE.md).
+license](https://github.com/atom-community/markdown-preview-plus/blob/master/LICENSE.md).
