@@ -41,7 +41,7 @@ describe('the difference algorithm that updates the preview', function() {
     beforeEach(async function() {
       await loadPreviewInSplitPane()
       await waitsFor(function() {
-        orderedLists = Array.from(preview.findAll('ol'))
+        orderedLists = Array.from(preview.findAll('ol')) as HTMLOListElement[]
         return orderedLists.length !== 0
       })
     })

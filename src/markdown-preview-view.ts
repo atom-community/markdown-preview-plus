@@ -37,11 +37,8 @@ export type MarkdownPreviewViewElement = HTMLElement & {
 
 export class MarkdownPreviewView {
   private loading: boolean = true
-  // tslint:disable-next-line:no-uninitialized
-  private resolve: () => void
-  public readonly renderPromise: Promise<void> = new Promise<void>(
-    (resolve) => (this.resolve = resolve),
-  )
+  private resolve!: () => void
+  public readonly renderPromise: Promise<void>
   public readonly element: MarkdownPreviewViewElement
   private preview: HTMLElement
   private emitter: Emitter<{
@@ -60,6 +57,9 @@ export class MarkdownPreviewView {
   private editor?: TextEditor
 
   constructor({ editorId, filePath }: MPVParams, deserialization = false) {
+    this.renderPromise = new Promise<void>(
+      (resolve) => (this.resolve = resolve),
+    )
     this.getPathToElement = this.getPathToElement.bind(this)
     this.syncSource = this.syncSource.bind(this)
     this.getPathToToken = this.getPathToToken.bind(this)
