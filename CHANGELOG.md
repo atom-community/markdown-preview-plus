@@ -1,3 +1,8 @@
+## 2.5.1
+* Deactivate `markdown-preview` package on our activation
+* Disambiguate serializer name from `markdown-preview` package
+* Use custom view tag to differentiate ourselves from `markdown-preview`
+
 ## 2.5.0
 * Bundle our fork of markdown-it-math
 * Configurable math delimiters (#327)
