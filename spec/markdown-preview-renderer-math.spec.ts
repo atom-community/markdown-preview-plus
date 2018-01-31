@@ -110,21 +110,6 @@ mc^2\\ &= E
     })
 
     describe('Escaped Math environments', function() {
-      // Disabled as markdown-it-math does not support it
-      xit('Empty lines after $$', function() {
-        content = `\
-$$
-
-should be escaped
-
-$$\
-`
-
-        const result = '<p>$$</p><p>should be escaped</p><p>$$</p>'
-
-        compareHTML(content, result)
-      })
-
       it('Inline Math without proper opening and closing', function() {
         content = 'a $5, a $10 and a \\$100 Bill.'
 

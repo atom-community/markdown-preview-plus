@@ -22,6 +22,9 @@ describe('MarkdownPreviewView', function() {
   let preview: MarkdownPreviewView
   let tempPath: string
 
+  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
   beforeEach(async function() {
     await Promise.all([
       atom.packages.activatePackage('language-ruby'),
@@ -36,8 +39,6 @@ describe('MarkdownPreviewView', function() {
     tempPath = temp.mkdirSync('atom')
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
-
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
 
     filePath = path.join(tempPath, 'subdir/file.markdown')
     preview = new MarkdownPreviewView({ filePath })
@@ -71,7 +72,7 @@ describe('MarkdownPreviewView', function() {
         preview.serialize(),
       ) as MarkdownPreviewView
       newPreview.element.focus()
-      await waitsFor(() => newPreview.getPath() === preview.getPath())
+      expect(newPreview.getPath()).to.equal(preview.getPath())
     })
 
     it('does not recreate a preview when the file no longer exists', function() {

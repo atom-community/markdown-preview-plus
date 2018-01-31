@@ -24,6 +24,11 @@ describe('MathJax helper module', () =>
     let stub: sinon.SinonStub
     let div: HTMLDivElement
 
+    before(async () =>
+      atom.packages.activatePackage(path.join(__dirname, '..')),
+    )
+    after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
     beforeEach(function() {
       configDirPath = temp.mkdirSync('atom-config-dir-')
       macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
@@ -44,8 +49,6 @@ describe('MathJax helper module', () =>
     })
 
     const waitsForMacrosToLoad = async function() {
-      await atom.packages.activatePackage(path.join(__dirname, '..'))
-
       mathjaxHelper.testing.loadMathJax()
 
       await waitsFor.msg(

@@ -28,6 +28,9 @@ describe('Syncronization of source and preview', function() {
   let fixturesPath: string
   let stub: sinon.SinonStub
 
+  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
   beforeEach(async function() {
     fixturesPath = path.join(__dirname, 'fixtures')
 
@@ -36,8 +39,6 @@ describe('Syncronization of source and preview', function() {
     stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
 
     mathjaxHelper.testing.resetMathJax()
-
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
 
     atom.config.set('markdown-preview-plus.enableLatexRenderingByDefault', true)
     const editor = await atom.workspace.open(path.join(fixturesPath, 'sync.md'))
