@@ -1,4 +1,5 @@
-{ "extends": "atom-haskell-tslint-rules",
+{
+  "extends": "atom-haskell-tslint-rules",
   "rules": {
     "member-ordering": false,
     "member-access": false,
@@ -8,6 +9,7 @@
     "no-non-null-assertion": false,
     "ter-no-sparse-arrays": false,
     "space-before-function-paren": false,
-    "no-unsafe-any": true
+    "no-unsafe-any": true,
+    "ter-indent": false
   }
 }

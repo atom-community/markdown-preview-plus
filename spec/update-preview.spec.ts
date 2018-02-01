@@ -11,8 +11,10 @@ describe('the difference algorithm that updates the preview', function() {
   let editor: TextEditor
   let preview: MarkdownPreviewView
 
+  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
   beforeEach(async function() {
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
     await atom.workspace.open(path.join(__dirname, 'fixtures', 'sync.md'))
 
     editor = atom.workspace.getActiveTextEditor()!
@@ -162,7 +164,7 @@ describe('the difference algorithm that updates the preview', function() {
       })
     })
 
-    afterEach(() => mathjaxHelper.resetMathJax())
+    afterEach(() => mathjaxHelper.testing.resetMathJax())
 
     it('replaces the entire span.math container element', async function() {
       const stub = sinon

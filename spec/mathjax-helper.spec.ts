@@ -1,5 +1,5 @@
 import * as path from 'path'
-import * as fs from 'fs-plus'
+import * as fs from 'fs'
 import * as temp from 'temp'
 import mathjaxHelper = require('../lib/mathjax-helper')
 import * as sinon from 'sinon'
@@ -24,13 +24,18 @@ describe('MathJax helper module', () =>
     let stub: sinon.SinonStub
     let div: HTMLDivElement
 
+    before(async () =>
+      atom.packages.activatePackage(path.join(__dirname, '..')),
+    )
+    after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
     beforeEach(function() {
       configDirPath = temp.mkdirSync('atom-config-dir-')
       macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
 
       stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
 
-      mathjaxHelper.resetMathJax()
+      mathjaxHelper.testing.resetMathJax()
 
       div = document.createElement('div')
       div.style.visibility = 'hidden'
@@ -38,15 +43,13 @@ describe('MathJax helper module', () =>
     })
 
     afterEach(function() {
-      mathjaxHelper.resetMathJax()
+      mathjaxHelper.testing.resetMathJax()
       stub.restore()
       div.remove()
     })
 
     const waitsForMacrosToLoad = async function() {
-      await atom.packages.activatePackage(path.join(__dirname, '..'))
-
-      mathjaxHelper.loadMathJax()
+      mathjaxHelper.testing.loadMathJax()
 
       await waitsFor.msg(
         'MathJax to load',
@@ -104,8 +107,8 @@ describe('MathJax helper module', () =>
 
     describe("when a macros file doesn't exist", () =>
       it('creates a template macros file', async function() {
-        expect(fs.isFileSync(macrosPath)).to.be.false
+        expect(fs.existsSync(macrosPath)).to.be.false
         await waitsForMacrosToLoad()
-        expect(fs.isFileSync(macrosPath)).to.be.true
+        expect(fs.existsSync(macrosPath)).to.be.true
       }))
   }))

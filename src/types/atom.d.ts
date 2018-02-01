@@ -1,12 +1,6 @@
 export {}
 import { MarkdownPreviewViewElement } from '../markdown-preview-view'
 declare module 'atom' {
-  interface Workspace {
-    destroyActivePaneItem: () => void
-  }
-  interface PackageManager {
-    resourcePath: string
-  }
   interface TextEditor {
     cursorLineDecorations: LayerDecoration[] | null | undefined
   }
@@ -14,7 +8,7 @@ declare module 'atom' {
     showSaveDialogSync(path: string): string | undefined
   }
   interface CommandRegistryTargetMap {
-    '.markdown-preview': MarkdownPreviewViewElement
+    '.markdown-preview-plus': MarkdownPreviewViewElement
   }
   interface ContextMenuManager {
     showForEvent(e: PointerEvent): void

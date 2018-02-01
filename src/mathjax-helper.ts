@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 //
 // mathjax-helper
 //
@@ -13,99 +7,129 @@
 
 import path = require('path')
 import CSON = require('season')
-import fs = require('fs-plus')
+import fs = require('fs')
+import { isFileSync } from './util'
 
-export = {
-  //
-  // Load MathJax environment
-  //
-  // @param listener method to call when the MathJax script was been
-  //   loaded to the window. The method is passed no arguments.
-  //
-  loadMathJax(listener?: () => any) {
-    const script = this.attachMathJax()
-    if (listener) script.addEventListener('load', () => listener())
-  },
+let isMathJaxDisabled = false
 
-  //
-  // Attach main MathJax script to the document
-  //
-  attachMathJax() {
-    if (!document.querySelector('script[src*="MathJax.js"]')) {
-      return attachMathJax()
-    }
-    throw new Error('Duplicate attachMathJax call')
-  },
-
-  //
-  // Remove MathJax from the document and reset attach method
-  //
-  resetMathJax() {
-    // Detach MathJax from the document
-    for (const el of Array.from(
-      document.querySelectorAll('script[src*="MathJax.js"]'),
-    )) {
-      el.remove()
-    }
-    window.MathJax = undefined
-
-    // Reset attach for any subsequent calls
-    delete window.MathJax
-  },
-
-  //
-  // Process DOM elements for LaTeX equations with MathJax
-  //
-  // @param domElements An array of DOM elements to be processed by MathJax. See
-  //   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
-  //   details on DOM elements.
-  //
-  mathProcessor(domElements: Node[]) {
-    if (window.MathJax) {
-      window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, domElements])
-    } else {
-      this.loadMathJax(() => {
-        MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements])
-      })
-    }
-  },
-
-  //
-  // Process maths in HTML fragment with MathJax
-  //
-  // @param html A HTML fragment string
-  // @param callback A callback method that accepts a single parameter, a HTML
-  //   fragment string that is the result of html processed by MathJax
-  //
-  processHTMLString(html: string, callback: (proHTML: string) => any) {
-    const element = document.createElement('div')
-    element.innerHTML = html
-
-    const compileProcessedHTMLString = function() {
-      const msvgh = document.getElementById('MathJax_SVG_Hidden')
-      const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
-      if (svgGlyphs !== null) {
-        element.insertBefore(svgGlyphs, element.firstChild)
-      }
-      return element.innerHTML
-    }
-
-    const queueProcessHTMLString = () => {
-      MathJax!.Hub.Queue(
-        ['setRenderer', MathJax!.Hub, 'SVG'],
-        ['Typeset', MathJax!.Hub, element],
-        ['setRenderer', MathJax!.Hub, 'HTML-CSS'],
-        [() => callback(compileProcessedHTMLString())],
-      )
-    }
-
-    if (window.MathJax) {
-      queueProcessHTMLString()
-    } else {
-      this.loadMathJax(queueProcessHTMLString)
-    }
-  },
+//
+// Process DOM elements for LaTeX equations with MathJax
+//
+// @param domElements An array of DOM elements to be processed by MathJax. See
+//   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
+//   details on DOM elements.
+//
+export function mathProcessor(domElements: Node[]) {
+  if (isMathJaxDisabled) return
+  if (window.MathJax) {
+    window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, domElements])
+  } else {
+    loadMathJax(() => {
+      MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements])
+    })
+  }
 }
+
+//
+// Process maths in HTML fragment with MathJax
+//
+// @param html A HTML fragment string
+// @param callback A callback method that accepts a single parameter, a HTML
+//   fragment string that is the result of html processed by MathJax
+//
+export function processHTMLString(
+  html: string,
+  callback: (proHTML: string) => any,
+) {
+  if (isMathJaxDisabled) {
+    callback(html)
+    return
+  }
+  const element = document.createElement('div')
+  element.innerHTML = html
+
+  const compileProcessedHTMLString = function() {
+    const msvgh = document.getElementById('MathJax_SVG_Hidden')
+    const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
+    if (svgGlyphs !== null) {
+      element.insertBefore(svgGlyphs, element.firstChild)
+    }
+    return element.innerHTML
+  }
+
+  const queueProcessHTMLString = () => {
+    MathJax!.Hub.Queue(
+      ['setRenderer', MathJax!.Hub, 'SVG'],
+      ['Typeset', MathJax!.Hub, element],
+      ['setRenderer', MathJax!.Hub, 'HTML-CSS'],
+      [
+        () => {
+          callback(compileProcessedHTMLString())
+        },
+      ],
+    )
+  }
+
+  if (window.MathJax) {
+    queueProcessHTMLString()
+  } else {
+    loadMathJax(queueProcessHTMLString)
+  }
+}
+
+// For testing
+function disableMathJax(disable: boolean) {
+  isMathJaxDisabled = disable
+}
+
+//
+// Load MathJax environment
+//
+// @param listener method to call when the MathJax script was been
+//   loaded to the window. The method is passed no arguments.
+//
+function loadMathJax(listener?: () => any) {
+  const script = attachMathJax()
+  if (listener) {
+    script.addEventListener('load', () => {
+      listener()
+    })
+  }
+}
+
+//
+// Attach main MathJax script to the document
+//
+function attachMathJax() {
+  if (!document.querySelector('script[src*="MathJax.js"]')) {
+    return attachMathJaxInternal()
+  }
+  throw new Error('Duplicate attachMathJax call')
+}
+
+//
+// Remove MathJax from the document and reset attach method
+//
+function resetMathJax() {
+  // Detach MathJax from the document
+  for (const el of Array.from(
+    document.querySelectorAll('script[src*="MathJax.js"]'),
+  )) {
+    el.remove()
+  }
+  window.MathJax = undefined
+
+  // Reset attach for any subsequent calls
+  delete window.MathJax
+}
+
+export const testing = {
+  loadMathJax,
+  resetMathJax,
+  disableMathJax,
+}
+
+// private
 
 //
 // Define some functions to help get a hold of the user's Latex
@@ -151,7 +175,7 @@ function loadMacrosFile(filePath: string): object {
 
 function loadUserMacros() {
   const userMacrosPath = getUserMacrosPath()
-  if (fs.isFileSync(userMacrosPath)) {
+  if (isFileSync(userMacrosPath)) {
     return loadMacrosFile(userMacrosPath)
   } else {
     console.debug(
@@ -242,7 +266,7 @@ const configureMathJax = function() {
 //
 // Attach main MathJax script to the document
 //
-function attachMathJax() {
+function attachMathJaxInternal() {
   // Notify user MathJax is loading
   if (atom.inDevMode()) {
     atom.notifications.addInfo('Loading maths rendering engine MathJax')

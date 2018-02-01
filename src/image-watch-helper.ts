@@ -1,8 +1,7 @@
-import fs = require('fs-plus')
 import _ = require('lodash')
 import { isMarkdownPreviewView } from './cast'
 import { CompositeDisposable, File } from 'atom'
-import { handlePromise } from './util'
+import { handlePromise, isFileSync } from './util'
 
 interface ImageRegisterRec {
   version: number
@@ -29,7 +28,7 @@ function srcClosure(src: string, event: 'change' | 'delete' | 'rename') {
   return function() {
     const i = imageRegister[src]
     if (!i) return
-    if (event === 'change' && fs.isFileSync(src)) {
+    if (event === 'change' && isFileSync(src)) {
       i.version = Date.now()
     } else {
       i.watcher.dispose()
@@ -43,7 +42,7 @@ export function removeFile(file: string) {
   imageRegister = _.mapValues(imageRegister, function(image) {
     if (!image) return image
     image.files = _.without(image.files, file)
-    image.files = _.filter(image.files, fs.isFileSync)
+    image.files = _.filter(image.files, isFileSync)
     if (_.isEmpty(image.files)) {
       image.watched = false
       image.watcher.dispose()
@@ -56,7 +55,7 @@ export async function getVersion(image: string, file?: string) {
   let version
   const i = imageRegister[image]
   if (!i) {
-    if (fs.isFileSync(image)) {
+    if (isFileSync(image)) {
       version = Date.now()
       const watcher = new CompositeDisposable()
       const af = new File(image)
@@ -84,7 +83,7 @@ export async function getVersion(image: string, file?: string) {
   }
 
   version = i.version
-  if (!version && fs.isFileSync(image)) {
+  if (!version && isFileSync(image)) {
     version = Date.now()
     i.version = version
   }

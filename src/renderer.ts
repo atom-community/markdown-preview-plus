@@ -1,18 +1,11 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import path = require('path')
-import fs = require('fs-plus')
 import highlight = require('atom-highlight')
 import pandocHelper = require('./pandoc-helper')
 import markdownIt = require('./markdown-it-helper') // Defer until used
 import { scopeForFenceName } from './extension-helper'
 import imageWatcher = require('./image-watch-helper')
 import { Grammar, TextEditorElement } from 'atom'
+import { isFileSync } from './util'
 
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
@@ -175,7 +168,7 @@ async function resolveImagePaths(
         }
 
         if (src[0] === '/') {
-          if (!fs.isFileSync(src)) {
+          if (!isFileSync(src)) {
             try {
               if (rootDirectory !== null) {
                 src = path.join(rootDirectory, src.substring(1))

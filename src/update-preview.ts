@@ -1,9 +1,3 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 // This file incorporates code from [markmon](https://github.com/yyjhao/markmon)
 // covered by the following terms:
 //
@@ -26,8 +20,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-'use strict'
-
 import { WrappedDomTree } from './wrapped-dom-tree'
 import MathJaxHelper = require('./mathjax-helper')
 import renderer = require('./renderer')

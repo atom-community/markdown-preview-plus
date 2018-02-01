@@ -1,28 +1,34 @@
 import * as path from 'path'
-import * as fs from 'fs-plus'
+import * as fs from 'fs'
 import * as temp from 'temp'
 import * as wrench from 'fs-extra'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
-import * as Main from '../lib/main'
 
 import { waitsFor, expectPreviewInSplitPane } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { TextEditor, TextEditorElement } from 'atom'
+import mathjaxHelper = require('../lib/mathjax-helper')
 
 describe('Markdown preview plus package', function() {
   let preview: MarkdownPreviewView
   let tempPath: string
 
-  beforeEach(async function() {
+  before(async function() {
+    await atom.packages.activatePackage(path.join(__dirname, '..'))
+    await atom.packages.activatePackage('language-gfm')
+  })
+
+  after(async function() {
+    await atom.packages.deactivatePackage('markdown-preview-plus')
+    await atom.packages.deactivatePackage('language-gfm')
+  })
+
+  beforeEach(function() {
     const fixturesPath = path.join(__dirname, 'fixtures')
     tempPath = temp.mkdirSync('atom')
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
-
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
-
-    await atom.packages.activatePackage('language-gfm')
   })
 
   afterEach(async function() {
@@ -283,7 +289,7 @@ var x = y;
         )
 
         let grammarAdded = false
-        atom.grammars.onDidAddGrammar(() => (grammarAdded = true))
+        const disp = atom.grammars.onDidAddGrammar(() => (grammarAdded = true))
 
         expect(atom.packages.isPackageActive('language-javascript')).to.equal(
           false,
@@ -299,6 +305,9 @@ var x = y;
             return el && el.dataset.grammar !== 'text plain null-grammar'
           },
         )
+
+        await atom.packages.deactivatePackage('language-javascript')
+        disp.dispose()
       }))
   })
 
@@ -378,12 +387,18 @@ var x = y;
     }))
 
   describe('when markdown-preview-plus:copy-html is triggered', function() {
-    let spy: sinon.SinonSpy
+    let stub: sinon.SinonStub
+    let clipboardContents: string = ''
     beforeEach(function() {
-      spy = sinon.spy(atom.clipboard, 'write')
+      stub = sinon
+        .stub(atom.clipboard, 'write')
+        .callsFake(function(arg: string) {
+          clipboardContents = arg
+        })
     })
     afterEach(function() {
-      spy.restore()
+      stub.restore()
+      clipboardContents = ''
     })
 
     it('copies the HTML to the clipboard', async function() {
@@ -398,10 +413,10 @@ var x = y;
 
       await waitsFor.msg(
         'atom.clipboard.write to have been called',
-        () => spy.callCount === 1,
+        () => stub.callCount === 1,
       )
 
-      expect(atom.clipboard.read()).to.equal(`\
+      expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>
 <p><strong>bold</strong></p>
 <p>encoding \u2192 issue</p>\
@@ -418,10 +433,10 @@ var x = y;
 
       await waitsFor.msg(
         'atom.clipboard.write to have been called',
-        () => spy.callCount === 2,
+        () => stub.callCount === 2,
       )
 
-      expect(atom.clipboard.read()).to.equal(`\
+      expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>\
 `)
     })
@@ -443,10 +458,10 @@ var x = y;
 
         await waitsFor.msg(
           'atom.clipboard.write to have been called',
-          () => spy.callCount === 1,
+          () => stub.callCount === 1,
         )
 
-        element.innerHTML = atom.clipboard.read()
+        element.innerHTML = clipboardContents
       })
 
       describe("when the code block's fence name has a matching grammar", function() {
@@ -501,29 +516,40 @@ var x = y;
   })
 
   describe('when main::copyHtml() is called directly', function() {
-    let mpp: typeof Main
-    let spy: sinon.SinonSpy
+    let stub: sinon.SinonStub
+    let clipboardContents: string = ''
 
     beforeEach(function() {
-      mpp = (atom.packages.getActivePackage('markdown-preview-plus') as any)
-        .mainModule as typeof Main
-      spy = sinon.spy(atom.clipboard, 'write')
+      stub = sinon
+        .stub(atom.clipboard, 'write')
+        .callsFake(function(arg: string) {
+          clipboardContents = arg
+        })
     })
 
     afterEach(function() {
-      spy.restore()
+      stub.restore()
+      clipboardContents = ''
     })
+
+    async function copyHtml() {
+      stub.resetHistory()
+      atom.commands.dispatch(
+        atom.views.getView(atom.workspace.getActiveTextEditor()!),
+        'markdown-preview-plus:copy-html',
+      )
+      await waitsFor.msg(
+        'atom.clipboard.write to have been called',
+        () => stub.called,
+      )
+    }
 
     it('copies the HTML to the clipboard by default', async function() {
       await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
 
-      await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
-      await waitsFor.msg(
-        'atom.clipboard.write to have been called',
-        () => spy.callCount === 1,
-      )
+      await copyHtml()
 
-      expect(atom.clipboard.read()).to.equal(`\
+      expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>
 <p><strong>bold</strong></p>
 <p>encoding \u2192 issue</p>\
@@ -533,44 +559,9 @@ var x = y;
         [0, 0],
         [1, 0],
       ])
-      await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
-      await waitsFor.msg(
-        'atom.clipboard.write to have been called',
-        () => spy.callCount === 2,
-      )
+      await copyHtml()
 
-      expect(atom.clipboard.read()).to.equal(`\
-<p><em>italic</em></p>\
-`)
-    })
-
-    it('passes the HTML to a callback if supplied as the first argument', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
-
-      let savedHtml: string | undefined
-      await mpp.copyHtml(
-        atom.workspace.getActiveTextEditor()!,
-        (html) => (savedHtml = html),
-      )
-      await waitsFor(() => savedHtml)
-
-      expect(savedHtml!).to.equal(`\
-<p><em>italic</em></p>
-<p><strong>bold</strong></p>
-<p>encoding \u2192 issue</p>\
-`)
-      savedHtml = undefined
-      atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
-        [0, 0],
-        [1, 0],
-      ])
-      await mpp.copyHtml(
-        atom.workspace.getActiveTextEditor()!,
-        (html) => (savedHtml = html),
-      )
-      await waitsFor(() => savedHtml)
-
-      expect(savedHtml).to.equal(`\
+      expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>\
 `)
     })
@@ -590,45 +581,35 @@ var x = y;
       })
 
       it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
-        await mpp.copyHtml(atom.workspace.getActiveTextEditor()!)
+        await copyHtml()
 
-        await waitsFor.msg(
-          'atom.clipboard.write to have been called',
-          () => spy.callCount === 1,
-        )
-
-        const clipboard = atom.clipboard.read()
+        const clipboard = clipboardContents
         expect(clipboard.match(/MathJax\_SVG\_Hidden/)!.length).to.equal(1)
         expect(clipboard.match(/class\=\"MathJax\_SVG\"/)!.length).to.equal(1)
       })
 
-      it("scales the svg's if the scaleMath parameter is passed", async function() {
-        await mpp.copyHtml(
-          atom.workspace.getActiveTextEditor()!,
-          undefined,
-          200,
-        )
-
-        await waitsFor.msg(
-          'atom.clipboard.write to have been called',
-          () => spy.callCount === 1,
-        )
-
-        const clipboard = atom.clipboard.read()
-        expect(clipboard.match(/font\-size\: 200%/)!.length).to.equal(1)
-      })
+      // TODO: This parameter was removed in a course of refactor.
+      // Probably should be a config option?
+      // it("scales the svg's if the scaleMath parameter is passed", async function() {
+      //   await mpp.copyHtml(
+      //     atom.workspace.getActiveTextEditor()!,
+      //     undefined,
+      //     200,
+      //   )
+      //
+      //   await waitsFor.msg(
+      //     'atom.clipboard.write to have been called',
+      //     () => stub.callCount === 1,
+      //   )
+      //
+      //   const clipboard = clipboardContents
+      //   expect(clipboard.match(/font\-size\: 200%/)!.length).to.equal(1)
+      // })
 
       it('passes the HTML to a callback if supplied as the first argument', async function() {
-        let html: string
-        await mpp.copyHtml(
-          atom.workspace.getActiveTextEditor()!,
-          (proHTML) => (html = proHTML),
-        )
+        await copyHtml()
 
-        await waitsFor.msg(
-          'markdown to be parsed and processed by MathJax',
-          () => html,
-        )
+        const html = clipboardContents
 
         expect(html!.match(/MathJax\_SVG\_Hidden/)!.length).to.equal(1)
         expect(html!.match(/class\=\"MathJax\_SVG\"/)!.length).to.equal(1)
@@ -766,6 +747,163 @@ world</p>\
       atom.config.set('markdown-preview-plus.useGitHubStyle', false)
       expect(preview.getRoot().getAttribute('data-use-github-style')).not.to
         .exist
+    })
+  })
+
+  describe('Binding and unbinding based on config', function() {
+    let spy: sinon.SinonSpy
+    before(async function() {
+      await atom.packages.activatePackage('language-javascript')
+      spy = sinon.spy(atom.commands, 'add')
+    })
+    after(async function() {
+      await atom.packages.deactivatePackage('language-javascript')
+      spy.restore()
+    })
+    beforeEach(function() {
+      spy.reset()
+    })
+    it('Binds to new scopes when config is changed', async function() {
+      atom.config.set('markdown-preview-plus.grammars', ['source.js'])
+
+      await waitsFor(() => spy.called)
+
+      const editor = await atom.workspace.open('source.js')
+
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.true
+      await expectPreviewInSplitPane()
+    })
+    it('Unbinds from scopes when config is changed', async function() {
+      atom.config.set('markdown-preview-plus.grammars', ['no-such-grammar'])
+
+      await waitsFor(() => spy.called)
+
+      const editor = await atom.workspace.open()
+      editor.setGrammar(atom.grammars.grammarForScopeName('source.gfm')!)
+
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.false
+    })
+  })
+
+  describe('Math separators configuration', function() {
+    beforeEach(function() {
+      atom.config.set(
+        'markdown-preview-plus.enableLatexRenderingByDefault',
+        true,
+      )
+    })
+    describe('Uses new math separators', async function() {
+      let preview: MarkdownPreviewView
+
+      before(function() {
+        mathjaxHelper.testing.disableMathJax(true)
+      })
+      after(function() {
+        mathjaxHelper.testing.disableMathJax(false)
+      })
+
+      beforeEach(async function() {
+        atom.config.set('markdown-preview-plus.inlineMathSeparators', [
+          '$$',
+          '$$',
+        ])
+        atom.config.set('markdown-preview-plus.blockMathSeparators', [
+          '$$\n',
+          '\n$$',
+        ])
+
+        const editor = await atom.workspace.open(
+          path.join(tempPath, 'subdir/kramdown-math.md'),
+        )
+
+        expect(
+          atom.commands.dispatch(
+            atom.views.getView(editor),
+            'markdown-preview-plus:toggle',
+          ),
+        ).to.be.true
+        preview = await expectPreviewInSplitPane()
+      })
+
+      it('works for inline math', function() {
+        const inline = preview.findAll(
+          'span.math > script[type="math/tex"]',
+        ) as NodeListOf<HTMLElement>
+        expect(inline.length).to.equal(1)
+        expect(inline[0].innerText).to.equal('inlineMath')
+      })
+      it('works for block math', function() {
+        const block = preview.findAll(
+          'span.math > script[type="math/tex; mode=display"]',
+        ) as NodeListOf<HTMLElement>
+        expect(block.length).to.be.greaterThan(0)
+        expect(block[0].innerText).to.equal('displayMath\n')
+      })
+      it('respects newline in block math closing tag', function() {
+        const block = preview.findAll(
+          'span.math > script[type="math/tex; mode=display"]',
+        ) as NodeListOf<HTMLElement>
+        expect(block.length).to.be.greaterThan(1)
+        expect(block[1].innerText).to.equal('displayMath$$\n')
+      })
+    })
+    it('Shows warnings on odd number of math separators', async function() {
+      await atom.packages.activatePackage('notifications')
+
+      atom.config.set('markdown-preview-plus.inlineMathSeparators', [
+        '$$',
+        '$$',
+        '$',
+      ])
+      atom.config.set('markdown-preview-plus.blockMathSeparators', [
+        '$$\n',
+        '\n$$',
+        '$$$',
+      ])
+
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/kramdown-math.md'),
+      )
+
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.true
+      await expectPreviewInSplitPane()
+
+      const workspaceElement = atom.views.getView(atom.workspace)
+
+      await waitsFor.msg(
+        'notification',
+        () =>
+          workspaceElement.querySelectorAll('atom-notification.warning')
+            .length === 2,
+      )
+
+      const notifications = Array.from(workspaceElement.querySelectorAll(
+        'atom-notification.warning',
+      ) as NodeListOf<HTMLElement>)
+      expect(notifications.length).to.equal(2)
+      expect(notifications).to.satisfy((x: HTMLElement[]) =>
+        x.some((y) => y.innerText.includes('inlineMathSeparators')),
+      )
+      expect(notifications).to.satisfy((x: HTMLElement[]) =>
+        x.some((y) => y.innerText.includes('blockMathSeparators')),
+      )
+
+      await atom.packages.deactivatePackage('notifications')
     })
   })
 })

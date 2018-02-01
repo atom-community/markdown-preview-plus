@@ -36,5 +36,6 @@ const scopesByFenceName = {
 } as { [fenceName: string]: string | undefined }
 
 export function scopeForFenceName(fenceName: string): string {
-  return scopesByFenceName[fenceName] || `source.${fenceName}`
+  const lcfn = fenceName.toLowerCase()
+  return scopesByFenceName[lcfn] || `source.${lcfn}`
 }

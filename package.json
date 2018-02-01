@@ -1,9 +1,15 @@
 {
   "name": "markdown-preview-plus",
-  "version": "2.4.16",
+  "version": "2.5.1",
   "main": "./lib/main",
   "description": "Markdown Preview + Community Features",
-  "keywords": ["markdown", "maths", "latex", "commonmark", "pandoc"],
+  "keywords": [
+    "markdown",
+    "maths",
+    "latex",
+    "commonmark",
+    "pandoc"
+  ],
   "repository": "https://github.com/atom-community/markdown-preview-plus",
   "license": "MIT",
   "engines": {
@@ -19,23 +25,20 @@
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
   "dependencies": {
-    "MathJax":
-      "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
+    "MathJax": "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
     "atom-highlight": "^0.4.1",
-    "fs-plus": "^3.0.1",
     "lodash": "^4.17.4",
     "markdown-it": "^8.4.0",
+    "markdown-it-emoji": "^1.4.0",
     "markdown-it-lazy-headers": "^0.1.2",
-    "markdown-it-math":
-      "https://github.com/atom-community/markdown-it-math/tarball/fix-table-pipe-parse-no-ascii",
     "markdown-it-task-lists": "^2.1.0",
-    "season": "^6.0"
+    "season": "^6.0",
+    "twemoji": "^2.5.0"
   },
   "devDependencies": {
-    "@types/atom": "~1.23.0",
+    "@types/atom": "~1.23.3",
     "@types/chai": "^4.0.10",
     "@types/fs-extra": "^5.0.0",
-    "@types/fs-plus": "^3.0.0",
     "@types/lodash": "^4.14.88",
     "@types/markdown-it": "0.0.4",
     "@types/mathjax": "0.0.32",
@@ -48,15 +51,16 @@
     "chai": "^4.1.2",
     "fs-extra": "^5.0.0",
     "jasmine-tagged": "^1.1.4",
+    "markdown-it-testgen": "^0.1.4",
     "prettier": "^1.9.2",
     "sinon": "^4.1.3",
     "sinon-chai": "^2.14.0",
     "temp": "^0.8.1",
     "ts-node": "^4.1.0",
     "tslint": "^5.8.0",
-    "typescript": "^2.6.2"
+    "typescript": "~2.6.2"
   },
   "deserializers": {
-    "MarkdownPreviewView": "createMarkdownPreviewView"
+    "markdown-preview-plus/MarkdownPreviewView": "createMarkdownPreviewView"
   }
 }

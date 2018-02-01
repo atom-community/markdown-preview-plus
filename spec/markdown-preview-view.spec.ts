@@ -1,11 +1,5 @@
-/*
- * decaffeinate suggestions:
-  * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import * as path from 'path'
-import * as fs from 'fs-plus'
+import * as fs from 'fs'
 import * as temp from 'temp'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as markdownIt from '../lib/markdown-it-helper'
@@ -22,6 +16,9 @@ describe('MarkdownPreviewView', function() {
   let preview: MarkdownPreviewView
   let tempPath: string
 
+  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
   beforeEach(async function() {
     await Promise.all([
       atom.packages.activatePackage('language-ruby'),
@@ -37,8 +34,6 @@ describe('MarkdownPreviewView', function() {
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
 
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
-
     filePath = path.join(tempPath, 'subdir/file.markdown')
     preview = new MarkdownPreviewView({ filePath })
     await preview.renderPromise
@@ -49,8 +44,8 @@ describe('MarkdownPreviewView', function() {
     for (const item of atom.workspace.getPaneItems()) {
       await atom.workspace.paneForItem(item)!.destroyItem(item, true)
     }
-    atom.packages.deactivatePackage('language-ruby')
-    atom.packages.deactivatePackage('language-javascript')
+    await atom.packages.deactivatePackage('language-ruby')
+    await atom.packages.deactivatePackage('language-javascript')
   })
 
   describe('::constructor', () =>
@@ -66,10 +61,11 @@ describe('MarkdownPreviewView', function() {
       if (newPreview) newPreview.destroy()
     })
 
-    it('recreates the preview when serialized/deserialized', function() {
+    it('recreates the preview when serialized/deserialized', async function() {
       newPreview = atom.deserializers.deserialize(
         preview.serialize(),
       ) as MarkdownPreviewView
+      newPreview.element.focus()
       expect(newPreview.getPath()).to.equal(preview.getPath())
     })
 
@@ -79,7 +75,7 @@ describe('MarkdownPreviewView', function() {
 
       newPreview = new MarkdownPreviewView({ filePath })
       const serialized = newPreview.serialize()
-      fs.removeSync(filePath)
+      fs.unlinkSync(filePath)
 
       newPreview = atom.deserializers.deserialize(
         serialized,
@@ -103,7 +99,7 @@ describe('MarkdownPreviewView', function() {
       newPreview = atom.deserializers.deserialize(
         preview.serialize(),
       ) as MarkdownPreviewView
-      expect(newPreview.getPath()).to.equal(preview.getPath())
+      await waitsFor(() => newPreview.getPath() === preview.getPath())
     })
   })
 
@@ -206,6 +202,31 @@ function f(x) {
 }\
 `)
       })
+    })
+
+    it('ignores case of the fence name', async function() {
+      const ed = await atom.workspace.open()
+      ed.setText(`\
+~~~JavaScript
+var x = 0;
+~~~
+`)
+      expect(
+        atom.commands.dispatch(
+          atom.views.getView(ed),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.true
+
+      const pv = await expectPreviewInSplitPane()
+
+      // nested in a list item
+      const jsEditor = await waitsFor(
+        () => pv.find('atom-text-editor') as TextEditorElement,
+      )
+      expect(jsEditor).to.exist
+      expect(jsEditor.getModel().getText()).to.equal('var x = 0;')
+      expect(jsEditor.getModel().getGrammar().scopeName).to.equal('source.js')
     })
   })
 
@@ -569,12 +590,17 @@ function f(x) {
 
       const markdownPreviewStyles = [
         {
-          rules: [createRule('.markdown-preview', '{ color: orange; }')],
+          rules: [
+            createRule('markdown-preview-plus-view', '{ color: orange; }'),
+          ],
         },
         {
           rules: [
             createRule('.not-included', '{ color: green; }'),
-            createRule('.markdown-preview :host', '{ color: purple; }'),
+            createRule(
+              'markdown-preview-plus-view :host',
+              '{ color: purple; }',
+            ),
           ],
         },
       ]
@@ -585,7 +611,7 @@ function f(x) {
         'atom-text-editor .hr { background: url(atom://markdown-preview-plus/assets/hr.png); }',
       ]
 
-      expect(fs.isFileSync(outputPath)).to.equal(false)
+      expect(fs.existsSync(outputPath)).to.be.false
 
       await preview.renderMarkdown()
 
@@ -607,7 +633,7 @@ function f(x) {
 
       await openedPromise
 
-      expect(fs.isFileSync(outputPath)).to.equal(true)
+      expect(fs.existsSync(outputPath)).to.be.true
       expect(fs.realpathSync(textEditor!.getPath()!)).to.equal(
         fs.realpathSync(outputPath),
       )
@@ -684,7 +710,7 @@ function f(x) {
 
       const editor = await atom.workspace.open(filePath)
 
-      mathjaxHelper.resetMathJax()
+      mathjaxHelper.testing.resetMathJax()
       atom.config.set(
         'markdown-preview-plus.enableLatexRenderingByDefault',
         true,
@@ -723,6 +749,21 @@ function f(x) {
       const lastItem = list.lastElementChild! as HTMLLIElement
       expect(lastItem.tagName.toLowerCase()).to.be.equal('li')
       expect(lastItem.querySelector('input[type=checkbox]')).to.be.null
+    })
+  })
+
+  describe('emoji', function() {
+    it('renders checkbox lists', function() {
+      const emojis = Array.from(
+        preview.findAll('img.emoji'),
+      ) as HTMLImageElement[]
+      expect(emojis).to.have.lengthOf(11)
+      for (const i of emojis) {
+        expect(i.src).includes('file:///')
+        expect(i.src).includes('/twemoji/')
+        expect(i.src).includes('/svg/')
+        expect(i.src).includes('.svg')
+      }
     })
   })
 })

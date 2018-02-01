@@ -1,3 +1,21 @@
+## 2.5.1
+* Deactivate `markdown-preview` package on our activation
+* Disambiguate serializer name from `markdown-preview` package
+* Use custom view tag to differentiate ourselves from `markdown-preview`
+
+## 2.5.0
+* Bundle our fork of markdown-it-math
+* Configurable math delimiters (#327)
+* Ignore fence name case (#338)
+* Make file extensions that are considered Markdown configurable (#335)
+* Get rid of fs-plus
+* Emoji support (#244, #332)
+* Fix deserialization
+* Make styles a bit more specific
+* Bind editor-related commands on text editor instead of workspace
+* CheckBox lists (#186)
+* Rewrite in TypeScript (#323)
+
 ## 2.4.16
 * Tentative fix for #316
 

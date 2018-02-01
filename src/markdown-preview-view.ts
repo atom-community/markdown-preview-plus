@@ -11,7 +11,7 @@ import {
   Grammar,
 } from 'atom'
 import _ = require('lodash')
-import fs = require('fs-plus')
+import fs = require('fs')
 
 import renderer = require('./renderer')
 import { UpdatePreview } from './update-preview'
@@ -43,14 +43,14 @@ export class MarkdownPreviewView {
     (resolve) => (this.resolve = resolve),
   )
   public readonly element: MarkdownPreviewViewElement
-  public readonly div: HTMLDivElement
+  public readonly rootElement: HTMLDivElement
   private preview: HTMLElement
   private emitter: Emitter<{
     'did-change-title': undefined
     'did-change-markdown': undefined
   }> = new Emitter()
   private updatePreview?: UpdatePreview
-  private renderLaTeX: boolean = !!atom.config.get(
+  private renderLaTeX: boolean = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
   private disposables = new CompositeDisposable()
@@ -61,7 +61,7 @@ export class MarkdownPreviewView {
   private editor?: TextEditor
   private lastTarget?: HTMLElement
 
-  constructor({ editorId, filePath }: MPVParams) {
+  constructor({ editorId, filePath }: MPVParams, deserialization = false) {
     this.getPathToElement = this.getPathToElement.bind(this)
     this.syncSource = this.syncSource.bind(this)
     this.getPathToToken = this.getPathToToken.bind(this)
@@ -70,55 +70,65 @@ export class MarkdownPreviewView {
     this.filePath = filePath
     this.element = document.createElement('iframe') as any
     this.element.getModel = () => this
-    this.element.classList.add('markdown-preview', 'native-key-bindings')
+    this.element.classList.add('markdown-preview-plus', 'native-key-bindings')
     this.element.src = 'about:blank'
     this.element.style.width = '100%'
     this.element.style.height = '100%'
-    this.div = document.createElement('div')
-    this.div.classList.add('markdown-preview', 'native-key-bindings')
-    this.div.tabIndex = -1
-    this.preview = document.createElement('div')
-    this.preview.classList.add('update-preview')
-    this.div.appendChild(this.preview)
     this.element.onload = () => {
       for (const se of atom.styles.getStyleElements()) {
         this.element.contentDocument.head.appendChild(se)
       }
-      this.element.contentDocument.body.appendChild(this.div)
-      this.div.oncontextmenu = (e) => {
+      this.element.contentDocument.body.appendChild(this.rootElement)
+      this.rootElement.oncontextmenu = (e) => {
         this.lastTarget = e.target as HTMLElement
         atom.contextMenu.showForEvent(
           Object.assign({}, e, { target: this.element }),
         )
       }
     }
-
-    if (this.editorId !== undefined) {
-      this.resolveEditor(this.editorId)
-    } else if (this.filePath !== undefined) {
-      this.subscribeToFilePath(this.filePath)
+    this.rootElement = document.createElement(
+      'markdown-preview-plus-view',
+    ) as any
+    this.rootElement.classList.add('native-key-bindings')
+    this.rootElement.tabIndex = -1
+    this.preview = document.createElement('div')
+    this.preview.classList.add('update-preview')
+    this.rootElement.appendChild(this.preview)
+    const didAttach = () => {
+      if (this.editorId !== undefined) {
+        this.resolveEditor(this.editorId)
+      } else if (this.filePath !== undefined) {
+        this.subscribeToFilePath(this.filePath)
+      }
+    }
+    if (deserialization && this.editorId !== undefined) {
+      // need to defer on deserialization since
+      // editor might not be deserialized at this point
+      setImmediate(didAttach)
+    } else {
+      didAttach()
     }
   }
 
   text() {
-    return this.div.innerText
+    return this.rootElement.innerText
   }
 
   find(what: string) {
-    return this.div.querySelector(what)
+    return this.rootElement.querySelector(what)
   }
 
   findAll(what: string) {
-    return this.div.querySelectorAll(what)
+    return this.rootElement.querySelectorAll(what)
   }
 
   getRoot() {
-    return this.div
+    return this.rootElement
   }
 
   serialize() {
     return {
-      deserializer: 'MarkdownPreviewView',
+      deserializer: 'markdown-preview-plus/MarkdownPreviewView',
       filePath: this.getPath() || this.filePath,
       editorId: this.editorId,
     }
@@ -192,8 +202,8 @@ export class MarkdownPreviewView {
     )
 
     atom.commands.add(this.element, {
-      'core:move-up': () => this.div.scrollBy({ top: -10 }),
-      'core:move-down': () => this.div.scrollBy({ top: 10 }),
+      'core:move-up': () => this.rootElement.scrollBy({ top: -10 }),
+      'core:move-down': () => this.rootElement.scrollBy({ top: 10 }),
       'core:save-as': (event) => {
         event.stopPropagation()
         handlePromise(this.saveAs())
@@ -202,14 +212,15 @@ export class MarkdownPreviewView {
         if (this.copyToClipboard()) event.stopPropagation()
       },
       'markdown-preview-plus:zoom-in': () => {
-        const zoomLevel = parseFloat(this.div.style.zoom || '1')
-        this.div.style.zoom = (zoomLevel + 0.1).toString()
+        const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
+        this.rootElement.style.zoom = (zoomLevel + 0.1).toString()
       },
       'markdown-preview-plus:zoom-out': () => {
-        const zoomLevel = parseFloat(this.div.style.zoom || '1')
-        this.div.style.zoom = (zoomLevel - 0.1).toString()
+        const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
+        this.rootElement.style.zoom = (zoomLevel - 0.1).toString()
       },
-      'markdown-preview-plus:reset-zoom': () => (this.div.style.zoom = '1'),
+      'markdown-preview-plus:reset-zoom': () =>
+        (this.rootElement.style.zoom = '1'),
       'markdown-preview-plus:sync-source': (_event) => {
         const lastTarget = this.lastTarget
         if (!lastTarget) return
@@ -303,9 +314,9 @@ export class MarkdownPreviewView {
         'markdown-preview-plus.useGitHubStyle',
         (useGitHubStyle) => {
           if (useGitHubStyle) {
-            this.div.setAttribute('data-use-github-style', '')
+            this.rootElement.setAttribute('data-use-github-style', '')
           } else {
-            this.div.removeAttribute('data-use-github-style')
+            this.rootElement.removeAttribute('data-use-github-style')
           }
         },
       ),
@@ -466,8 +477,8 @@ export class MarkdownPreviewView {
   }
 
   getMarkdownPreviewCSS() {
-    const markdowPreviewRules = []
-    const ruleRegExp = /\.markdown-preview/
+    const markdowPreviewRules = ['body { padding: 0; margin: 0; }']
+    const ruleRegExp = /markdown-preview-plus-view/
     const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
     for (const stylesheet of Array.from(this.getDocumentStyleSheets())) {
@@ -596,6 +607,11 @@ export class MarkdownPreviewView {
           } else {
             mathjaxScript = ''
           }
+          const githubStyle = atom.config.get(
+            'markdown-preview-plus.useGitHubStyle',
+          )
+            ? ' data-use-github-style'
+            : ''
           const html =
             `\
 <!DOCTYPE html>
@@ -605,7 +621,11 @@ export class MarkdownPreviewView {
       <title>${title}</title>${mathjaxScript}
       <style>${this.getMarkdownPreviewCSS()}</style>
   </head>
-  <body class='markdown-preview'>${htmlBody}</body>
+  <body>
+    <markdown-preview-plus-view${githubStyle}>
+      ${htmlBody}
+    </markdown-preview-plus-view>
+  </body>
 </html>` + '\n' // Ensure trailing newline
 
           fs.writeFileSync(htmlFilePath, html)
@@ -703,11 +723,11 @@ export class MarkdownPreviewView {
   }
 
   //
-  // Determine path to a target element from a container `.markdown-preview`.
+  // Determine path to a target element from a container `markdown-preview-plus-view`.
   //
   // @param {HTMLElement} element Target HTMLElement.
   // @return {(tag: <tag>, index: <index>)[]} Array of tokens representing a path
-  //   to `element` from `.markdown-preview`. The root `.markdown-preview`
+  //   to `element` from `markdown-preview-plus-view`. The root `markdown-preview-plus-view`
   //   element is the first elements in the array and the target element
   //   `element` at the highest index. Each element consists of a `tag` and
   //   `index` representing its index amongst its sibling elements of the same
@@ -716,7 +736,7 @@ export class MarkdownPreviewView {
   getPathToElement(
     element: HTMLElement,
   ): Array<{ tag: string; index: number }> {
-    if (element.classList.contains('markdown-preview')) {
+    if (element.tagName.toLowerCase() === 'markdown-preview-plus-view') {
       return [
         {
           tag: 'div',
@@ -753,14 +773,14 @@ export class MarkdownPreviewView {
   //
   // @param {string} text Source markdown of the associated editor.
   // @param {HTMLElement} element Target element contained within the assoicated
-  //   `.markdown-preview` container. The method will attempt to identify the
+  //   `markdown-preview-plus-view` container. The method will attempt to identify the
   //   line of `text` that represents `element` and set the cursor to that line.
   // @return {number|null} The line of `text` that represents `element`. If no
   //   line is identified `null` is returned.
   //
   syncSource(text: string, element: HTMLElement) {
     const pathToElement = this.getPathToElement(element)
-    pathToElement.shift() // remove div.markdown-preview
+    pathToElement.shift() // remove markdown-preview-plus-view
     pathToElement.shift() // remove div.update-preview
     if (!pathToElement.length) {
       return null
@@ -888,8 +908,8 @@ export class MarkdownPreviewView {
   //
   // @param {string} text Source markdown of the associated editor.
   // @param {number} line Target line of `text`. The method will attempt to
-  //   identify the elment of the associated `.markdown-preview` that represents
-  //   `line` and scroll the `.markdown-preview` to that element.
+  //   identify the elment of the associated `markdown-preview-plus-view` that represents
+  //   `line` and scroll the `markdown-preview-plus-view` to that element.
   // @return {number|null} The element that represents `line`. If no element is
   //   identified `null` is returned.
   //
@@ -916,9 +936,10 @@ export class MarkdownPreviewView {
     if (!element.classList.contains('update-preview')) {
       element.scrollIntoView()
     }
-    const maxScrollTop = this.div.scrollHeight - this.div.clientHeight
-    if (!(this.div.scrollTop >= maxScrollTop)) {
-      this.div.scrollTop -= this.div.clientHeight / 4
+    const maxScrollTop =
+      this.rootElement.scrollHeight - this.rootElement.clientHeight
+    if (!(this.rootElement.scrollTop >= maxScrollTop)) {
+      this.rootElement.scrollTop -= this.rootElement.clientHeight / 4
     }
 
     element.classList.add('flash')

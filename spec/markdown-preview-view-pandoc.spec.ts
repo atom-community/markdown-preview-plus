@@ -1,6 +1,6 @@
 // tslint:disable:no-unused-expression
 import * as path from 'path'
-import * as fs from 'fs-plus'
+import * as fs from 'fs'
 import * as temp from 'temp'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import markdownIt = require('../lib/markdown-it-helper')
@@ -16,12 +16,14 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
   let filePath: string
   let stub: sinon.SinonStub
 
+  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+
   beforeEach(async function() {
     filePath = path.join(__dirname, 'fixtures/subdir/file.markdown')
     const htmlPath = path.join(__dirname, 'fixtures/subdir/file-pandoc.html')
     html = fs.readFileSync(htmlPath, { encoding: 'utf-8' })
 
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
     atom.config.set('markdown-preview-plus.enablePandoc', true)
     stub = sinon
       .stub(pandocHelper, 'renderPandoc')
