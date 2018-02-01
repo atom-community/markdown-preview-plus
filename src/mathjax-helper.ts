@@ -19,13 +19,13 @@ let isMathJaxDisabled = false
 //   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
 //   details on DOM elements.
 //
-export function mathProcessor(domElements: Node[]) {
+export function mathProcessor(frame: HTMLIFrameElement, domElements: Node[]) {
   if (isMathJaxDisabled) return
-  if (window.MathJax) {
-    window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, domElements])
+  if (frame.contentWindow.queueTypeset) {
+    frame.contentWindow.queueTypeset(domElements)
   } else {
-    loadMathJax(() => {
-      MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements])
+    loadMathJax(frame, () => {
+      frame.contentWindow.queueTypeset(domElements)
     })
   }
 }
@@ -38,6 +38,7 @@ export function mathProcessor(domElements: Node[]) {
 //   fragment string that is the result of html processed by MathJax
 //
 export function processHTMLString(
+  frame: HTMLIFrameElement,
   html: string,
   callback: (proHTML: string) => any,
 ) {
@@ -57,11 +58,11 @@ export function processHTMLString(
     return element.innerHTML
   }
 
-  const queueProcessHTMLString = () => {
-    MathJax!.Hub.Queue(
-      ['setRenderer', MathJax!.Hub, 'SVG'],
-      ['Typeset', MathJax!.Hub, element],
-      ['setRenderer', MathJax!.Hub, 'HTML-CSS'],
+  const queueProcessHTMLString = (jax: typeof MathJax) => {
+    jax.Hub.Queue(
+      ['setRenderer', jax.Hub, 'SVG'],
+      ['Typeset', jax.Hub, element],
+      ['setRenderer', jax.Hub, 'HTML-CSS'],
       [
         () => {
           callback(compileProcessedHTMLString())
@@ -70,10 +71,10 @@ export function processHTMLString(
     )
   }
 
-  if (window.MathJax) {
-    queueProcessHTMLString()
+  if (frame.contentWindow.MathJax) {
+    queueProcessHTMLString(frame.contentWindow.MathJax)
   } else {
-    loadMathJax(queueProcessHTMLString)
+    loadMathJax(frame, queueProcessHTMLString)
   }
 }
 
@@ -88,21 +89,32 @@ function disableMathJax(disable: boolean) {
 // @param listener method to call when the MathJax script was been
 //   loaded to the window. The method is passed no arguments.
 //
-function loadMathJax(listener?: () => any) {
-  const script = attachMathJax()
-  if (listener) {
-    script.addEventListener('load', () => {
-      listener()
-    })
+function loadMathJax(
+  frame: HTMLIFrameElement,
+  listener?: (jax: typeof MathJax) => any,
+) {
+  if (frame.contentDocument.querySelector('head')) {
+    const script = attachMathJax(frame)
+    if (listener) {
+      script.addEventListener('load', () => {
+        listener(frame.contentWindow.MathJax!)
+      })
+    }
+  } else {
+    const onload = () => {
+      frame.removeEventListener('load', onload)
+      loadMathJax(frame, listener)
+    }
+    frame.addEventListener('load', onload)
   }
 }
 
 //
 // Attach main MathJax script to the document
 //
-function attachMathJax() {
-  if (!document.querySelector('script[src*="MathJax.js"]')) {
-    return attachMathJaxInternal()
+function attachMathJax(frame: HTMLIFrameElement) {
+  if (!frame.contentDocument.querySelector('script[src*="MathJax.js"]')) {
+    return attachMathJaxInternal(frame)
   }
   throw new Error('Duplicate attachMathJax call')
 }
@@ -226,7 +238,7 @@ function valueMatchesPattern(value: any) {
 // Configure MathJax environment. Similar to the TeX-AMS_HTML configuration with
 // a few unnecessary features stripped away
 //
-const configureMathJax = function() {
+const configureMathJax = function(jax: any) {
   let userMacros = loadUserMacros()
   if (userMacros) {
     userMacros = checkMacros(userMacros)
@@ -234,28 +246,7 @@ const configureMathJax = function() {
     userMacros = {}
   }
 
-  // Now Configure MathJax
-  MathJax!.Hub.Config({
-    jax: ['input/TeX', 'output/HTML-CSS'],
-    extensions: [],
-    TeX: {
-      extensions: [
-        'AMSmath.js',
-        'AMSsymbols.js',
-        'noErrors.js',
-        'noUndefined.js',
-      ],
-      Macros: userMacros,
-    },
-    'HTML-CSS': {
-      availableFonts: [],
-      webFont: 'TeX',
-    },
-    messageStyle: 'none',
-    showMathMenu: false,
-    skipStartupTypeset: true,
-  })
-  MathJax!.Hub.Configured()
+  jax.jaxConfigure(userMacros)
 
   // Notify user MathJax has loaded
   if (atom.inDevMode()) {
@@ -266,20 +257,37 @@ const configureMathJax = function() {
 //
 // Attach main MathJax script to the document
 //
-function attachMathJaxInternal() {
+function attachMathJaxInternal(frame: HTMLIFrameElement) {
   // Notify user MathJax is loading
   if (atom.inDevMode()) {
     atom.notifications.addInfo('Loading maths rendering engine MathJax')
   }
 
   // Attach MathJax script
-  const script = document.createElement('script')
-  script.src = `${require.resolve('MathJax')}?delayStartupUntil=configured`
-  script.type = 'text/javascript'
-  script.addEventListener('load', () => {
-    configureMathJax()
-  })
-  document.getElementsByTagName('head')[0].appendChild(script)
+  const jaxScript = injectScript(
+    frame.contentDocument,
+    `${require.resolve('MathJax')}?delayStartupUntil=configured`,
+  )
+  const myScript = injectScript(
+    frame.contentDocument,
+    require.resolve('./mathjax-stub'),
+    () => {
+      configureMathJax(frame.contentWindow)
+    },
+  )
 
+  return myScript
+}
+
+function injectScript(
+  doc: HTMLDocument,
+  scriptSrc: string,
+  callback?: () => void,
+) {
+  const script = doc.createElement('script')
+  script.src = scriptSrc
+  script.type = 'text/javascript'
+  if (callback) script.addEventListener('load', callback)
+  doc.querySelector('head')!.appendChild(script)
   return script
 }

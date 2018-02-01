@@ -74,7 +74,8 @@ export class MarkdownPreviewView {
     this.element.src = 'about:blank'
     this.element.style.width = '100%'
     this.element.style.height = '100%'
-    this.element.onload = () => {
+    const onload = () => {
+      this.element.removeEventListener('load', onload)
       for (const se of atom.styles.getStyleElements()) {
         this.element.contentDocument.head.appendChild(se)
       }
@@ -86,6 +87,7 @@ export class MarkdownPreviewView {
         )
       }
     }
+    this.element.addEventListener('load', onload)
     this.rootElement = document.createElement(
       'markdown-preview-plus-view',
     ) as any
@@ -414,7 +416,11 @@ export class MarkdownPreviewView {
           }
           this.updatePreview &&
             domFragment &&
-            this.updatePreview.update(domFragment as Element, this.renderLaTeX)
+            this.updatePreview.update(
+              this.element,
+              domFragment as Element,
+              this.renderLaTeX,
+            )
           this.emitter.emit('did-change-markdown')
         }
       },

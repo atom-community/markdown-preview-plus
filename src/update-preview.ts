@@ -33,8 +33,12 @@ export class UpdatePreview {
     this.tree = new WrappedDomTree(dom, true)
   }
 
-  public update(domFragment: Element, renderLaTeX: boolean) {
-    prepareCodeBlocksForAtomEditors(domFragment)
+  public update(
+    frame: HTMLIFrameElement,
+    domFragment: Element,
+    renderLaTeX: boolean,
+  ) {
+    prepareCodeBlocksForAtomEditors(frame.contentDocument, domFragment)
 
     if (this.domFragment && domFragment.isEqualNode(this.domFragment)) {
       return undefined
@@ -43,7 +47,7 @@ export class UpdatePreview {
     const firstTime = this.domFragment === undefined
     this.domFragment = domFragment.cloneNode(true) as Element
 
-    const newDom = document.createElement('div')
+    const newDom = frame.contentDocument.createElement('div')
     newDom.className = 'update-preview'
     newDom.appendChild(domFragment)
     const newTree = new WrappedDomTree(newDom, false)
@@ -64,7 +68,7 @@ export class UpdatePreview {
         return elm
       })
       r.inserted = r.inserted.filter((elm) => !!elm)
-      MathJaxHelper.mathProcessor(r.inserted)
+      MathJaxHelper.mathProcessor(frame, r.inserted)
     }
 
     if (
@@ -106,7 +110,10 @@ export class UpdatePreview {
   }
 }
 
-function prepareCodeBlocksForAtomEditors(domFragment: Element) {
+function prepareCodeBlocksForAtomEditors(
+  document: HTMLDocument,
+  domFragment: Element,
+) {
   for (const preElement of Array.from(domFragment.querySelectorAll('pre'))) {
     const preWrapper = document.createElement('span')
     preWrapper.className = 'atom-text-editor'

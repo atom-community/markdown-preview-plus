@@ -155,14 +155,19 @@ async function copyHtml(editor: TextEditor): Promise<void> {
       if (error) {
         console.warn('Copying Markdown as HTML failed', error)
       } else if (renderLaTeX) {
-        mathjaxHelper.processHTMLString(html, function(proHTML: string) {
-          proHTML = proHTML.replace(
-            /MathJax\_SVG.*?font\-size\: 100%/g,
-            (match) =>
-              match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
-          )
-          atom.clipboard.write(proHTML)
-        })
+        const frame = document.createElement('iframe')
+        frame.src = 'about:blank'
+        frame.onload = () =>
+          mathjaxHelper.processHTMLString(frame, html, function(
+            proHTML: string,
+          ) {
+            proHTML = proHTML.replace(
+              /MathJax\_SVG.*?font\-size\: 100%/g,
+              (match) =>
+                match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
+            )
+            atom.clipboard.write(proHTML)
+          })
       } else {
         atom.clipboard.write(html)
       }
