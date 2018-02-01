@@ -284,7 +284,7 @@ var x = y;
           'markdown to be rendered after its text changed',
           () => {
             const ed = preview.find('atom-text-editor') as HTMLElement
-            return ed && ed.dataset.grammar === 'text plain null-grammar'
+            return ed && ed.className === 'lang-javascript'
           },
         )
 
@@ -584,35 +584,10 @@ var x = y;
         await copyHtml()
 
         const clipboard = clipboardContents
-        expect(clipboard.match(/MathJax\_SVG\_Hidden/)!.length).to.equal(1)
-        expect(clipboard.match(/class\=\"MathJax\_SVG\"/)!.length).to.equal(1)
-      })
-
-      // TODO: This parameter was removed in a course of refactor.
-      // Probably should be a config option?
-      // it("scales the svg's if the scaleMath parameter is passed", async function() {
-      //   await mpp.copyHtml(
-      //     atom.workspace.getActiveTextEditor()!,
-      //     undefined,
-      //     200,
-      //   )
-      //
-      //   await waitsFor.msg(
-      //     'atom.clipboard.write to have been called',
-      //     () => stub.callCount === 1,
-      //   )
-      //
-      //   const clipboard = clipboardContents
-      //   expect(clipboard.match(/font\-size\: 200%/)!.length).to.equal(1)
-      // })
-
-      it('passes the HTML to a callback if supplied as the first argument', async function() {
-        await copyHtml()
-
-        const html = clipboardContents
-
-        expect(html!.match(/MathJax\_SVG\_Hidden/)!.length).to.equal(1)
-        expect(html!.match(/class\=\"MathJax\_SVG\"/)!.length).to.equal(1)
+        expect(
+          clipboard.match(/class="MathJax_SVG_Display"/g)!.length,
+        ).to.equal(1)
+        expect(clipboard.match(/class="MathJax_SVG"/g)!.length).to.equal(1)
       })
     })
   })

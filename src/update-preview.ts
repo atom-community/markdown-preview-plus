@@ -23,6 +23,7 @@
 import { WrappedDomTree } from './wrapped-dom-tree'
 import MathJaxHelper = require('./mathjax-helper')
 import renderer = require('./renderer')
+import { handlePromise } from './util'
 
 export class UpdatePreview {
   private domFragment?: Element
@@ -68,7 +69,7 @@ export class UpdatePreview {
         return elm
       })
       r.inserted = r.inserted.filter((elm) => !!elm)
-      MathJaxHelper.mathProcessor(frame, r.inserted)
+      handlePromise(MathJaxHelper.mathProcessor(frame, r.inserted))
     }
 
     if (
@@ -76,8 +77,8 @@ export class UpdatePreview {
       !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
     ) {
       for (const elm of r.inserted) {
-        if (elm instanceof Element) {
-          renderer.convertCodeBlocksToAtomEditors(elm)
+        if (typeof (elm as any).querySelectorAll === 'function') {
+          renderer.highlightCodeBlocks(elm as Element)
         }
       }
     }

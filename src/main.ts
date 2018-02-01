@@ -157,17 +157,18 @@ async function copyHtml(editor: TextEditor): Promise<void> {
       } else if (renderLaTeX) {
         const frame = document.createElement('iframe')
         frame.src = 'about:blank'
-        frame.onload = () =>
-          mathjaxHelper.processHTMLString(frame, html, function(
-            proHTML: string,
-          ) {
-            proHTML = proHTML.replace(
-              /MathJax\_SVG.*?font\-size\: 100%/g,
-              (match) =>
-                match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
-            )
-            atom.clipboard.write(proHTML)
-          })
+        frame.style.display = 'none'
+        frame.addEventListener('load', async () => {
+          let proHTML = await mathjaxHelper.processHTMLString(frame, html)
+          proHTML = proHTML.replace(
+            /MathJax\_SVG.*?font\-size\: 100%/g,
+            (match) =>
+              match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
+          )
+          frame.remove()
+          atom.clipboard.write(proHTML)
+        })
+        document.body.appendChild(frame)
       } else {
         atom.clipboard.write(html)
       }

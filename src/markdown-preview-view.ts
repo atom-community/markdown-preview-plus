@@ -60,6 +60,7 @@ export class MarkdownPreviewView {
   private file?: File
   private editor?: TextEditor
   private lastTarget?: HTMLElement
+  private destroyed = false
 
   constructor({ editorId, filePath }: MPVParams, deserialization = false) {
     this.getPathToElement = this.getPathToElement.bind(this)
@@ -76,15 +77,33 @@ export class MarkdownPreviewView {
     this.element.style.height = '100%'
     const onload = () => {
       this.element.removeEventListener('load', onload)
-      for (const se of atom.styles.getStyleElements()) {
-        this.element.contentDocument.head.appendChild(se)
-      }
+      if (this.destroyed) return
+      this.disposables.add(
+        atom.styles.observeStyleElements((se) => {
+          this.element.contentDocument.head.appendChild(se)
+        }),
+      )
       this.element.contentDocument.body.appendChild(this.rootElement)
       this.rootElement.oncontextmenu = (e) => {
         this.lastTarget = e.target as HTMLElement
         atom.contextMenu.showForEvent(
           Object.assign({}, e, { target: this.element }),
         )
+      }
+      const didAttach = () => {
+        if (this.destroyed) return
+        if (this.editorId !== undefined) {
+          this.resolveEditor(this.editorId)
+        } else if (this.filePath !== undefined) {
+          this.subscribeToFilePath(this.filePath)
+        }
+      }
+      if (deserialization && this.editorId !== undefined) {
+        // need to defer on deserialization since
+        // editor might not be deserialized at this point
+        setImmediate(didAttach)
+      } else {
+        didAttach()
       }
     }
     this.element.addEventListener('load', onload)
@@ -96,24 +115,10 @@ export class MarkdownPreviewView {
     this.preview = document.createElement('div')
     this.preview.classList.add('update-preview')
     this.rootElement.appendChild(this.preview)
-    const didAttach = () => {
-      if (this.editorId !== undefined) {
-        this.resolveEditor(this.editorId)
-      } else if (this.filePath !== undefined) {
-        this.subscribeToFilePath(this.filePath)
-      }
-    }
-    if (deserialization && this.editorId !== undefined) {
-      // need to defer on deserialization since
-      // editor might not be deserialized at this point
-      setImmediate(didAttach)
-    } else {
-      didAttach()
-    }
   }
 
   text() {
-    return this.rootElement.innerText
+    return this.rootElement.textContent || ''
   }
 
   find(what: string) {
@@ -137,6 +142,8 @@ export class MarkdownPreviewView {
   }
 
   destroy() {
+    if (this.destroyed) return
+    this.destroyed = true
     const path = this.getPath()
     path && imageWatcher.removeFile(path)
     this.disposables.dispose()
@@ -194,8 +201,6 @@ export class MarkdownPreviewView {
           handlePromise(this.renderMarkdown())
         }, 250),
       ),
-    )
-    this.disposables.add(
       atom.grammars.onDidUpdateGrammar(
         _.debounce(() => {
           handlePromise(this.renderMarkdown())
@@ -203,39 +208,41 @@ export class MarkdownPreviewView {
       ),
     )
 
-    atom.commands.add(this.element, {
-      'core:move-up': () => this.rootElement.scrollBy({ top: -10 }),
-      'core:move-down': () => this.rootElement.scrollBy({ top: 10 }),
-      'core:save-as': (event) => {
-        event.stopPropagation()
-        handlePromise(this.saveAs())
-      },
-      'core:copy': (event: CommandEvent) => {
-        if (this.copyToClipboard()) event.stopPropagation()
-      },
-      'markdown-preview-plus:zoom-in': () => {
-        const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
-        this.rootElement.style.zoom = (zoomLevel + 0.1).toString()
-      },
-      'markdown-preview-plus:zoom-out': () => {
-        const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
-        this.rootElement.style.zoom = (zoomLevel - 0.1).toString()
-      },
-      'markdown-preview-plus:reset-zoom': () =>
-        (this.rootElement.style.zoom = '1'),
-      'markdown-preview-plus:sync-source': (_event) => {
-        const lastTarget = this.lastTarget
-        if (!lastTarget) return
-        handlePromise(
-          this.getMarkdownSource().then((source?: string) => {
-            if (source === undefined) {
-              return
-            }
-            this.syncSource(source, lastTarget)
-          }),
-        )
-      },
-    })
+    this.disposables.add(
+      atom.commands.add(this.element, {
+        'core:move-up': () => this.rootElement.scrollBy({ top: -10 }),
+        'core:move-down': () => this.rootElement.scrollBy({ top: 10 }),
+        'core:save-as': (event) => {
+          event.stopPropagation()
+          handlePromise(this.saveAs())
+        },
+        'core:copy': (event: CommandEvent) => {
+          if (this.copyToClipboard()) event.stopPropagation()
+        },
+        'markdown-preview-plus:zoom-in': () => {
+          const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
+          this.rootElement.style.zoom = (zoomLevel + 0.1).toString()
+        },
+        'markdown-preview-plus:zoom-out': () => {
+          const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
+          this.rootElement.style.zoom = (zoomLevel - 0.1).toString()
+        },
+        'markdown-preview-plus:reset-zoom': () =>
+          (this.rootElement.style.zoom = '1'),
+        'markdown-preview-plus:sync-source': (_event) => {
+          const lastTarget = this.lastTarget
+          if (!lastTarget) return
+          handlePromise(
+            this.getMarkdownSource().then((source?: string) => {
+              if (source === undefined) {
+                return
+              }
+              this.syncSource(source, lastTarget)
+            }),
+          )
+        },
+      }),
+    )
 
     const changeHandler = () => {
       handlePromise(this.renderMarkdown())
@@ -255,27 +262,19 @@ export class MarkdownPreviewView {
             changeHandler()
           }
         }),
-      )
-      this.disposables.add(
         this.editor.onDidChangePath(() => {
           this.emitter.emit('did-change-title')
         }),
-      )
-      this.disposables.add(
         this.editor.getBuffer().onDidSave(function() {
           if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
             changeHandler()
           }
         }),
-      )
-      this.disposables.add(
         this.editor.getBuffer().onDidReload(function() {
           if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
             changeHandler()
           }
         }),
-      )
-      this.disposables.add(
         atom.commands.add(atom.views.getView(this.editor), {
           'markdown-preview-plus:sync-preview': async (_event) => {
             const source = await this.getMarkdownSource()

@@ -1,9 +1,8 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
-import { MarkdownPreviewView } from '../lib/markdown-preview-view'
+import { MarkdownPreviewView, MPVParams } from '../lib/markdown-preview-view'
 import * as markdownIt from '../lib/markdown-it-helper'
-import mathjaxHelper = require('../lib/mathjax-helper')
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as wrench from 'fs-extra'
@@ -15,6 +14,15 @@ describe('MarkdownPreviewView', function() {
   let filePath: string
   let preview: MarkdownPreviewView
   let tempPath: string
+  const previews: Set<MarkdownPreviewView> = new Set()
+
+  const createMarkdownPreviewView = async function(params: MPVParams) {
+    const mpv = new MarkdownPreviewView(params)
+    window.workspaceDiv.appendChild(mpv.element)
+    previews.add(mpv)
+    await mpv.renderPromise
+    return mpv
+  }
 
   before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
@@ -35,11 +43,13 @@ describe('MarkdownPreviewView', function() {
     atom.project.setPaths([tempPath])
 
     filePath = path.join(tempPath, 'subdir/file.markdown')
-    preview = new MarkdownPreviewView({ filePath })
+    preview = await createMarkdownPreviewView({ filePath })
     await preview.renderPromise
   })
 
   afterEach(async function() {
+    previews.forEach((pv) => pv.destroy())
+    previews.clear()
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
       await atom.workspace.paneForItem(item)!.destroyItem(item, true)
@@ -58,29 +68,30 @@ describe('MarkdownPreviewView', function() {
     let newPreview: MarkdownPreviewView
 
     afterEach(function() {
-      if (newPreview) newPreview.destroy()
+      newPreview.destroy()
     })
 
     it('recreates the preview when serialized/deserialized', async function() {
       newPreview = atom.deserializers.deserialize(
         preview.serialize(),
       ) as MarkdownPreviewView
-      newPreview.element.focus()
+      window.workspaceDiv.appendChild(newPreview.element)
       expect(newPreview.getPath()).to.equal(preview.getPath())
+      await newPreview.renderPromise
     })
 
-    it('does not recreate a preview when the file no longer exists', function() {
+    it('does not recreate a preview when the file no longer exists', async function() {
       filePath = path.join(temp.mkdirSync('markdown-preview-'), 'foo.md')
       fs.writeFileSync(filePath, '# Hi')
 
-      newPreview = new MarkdownPreviewView({ filePath })
+      newPreview = await createMarkdownPreviewView({ filePath })
       const serialized = newPreview.serialize()
       fs.unlinkSync(filePath)
 
-      newPreview = atom.deserializers.deserialize(
+      const nonExistentPreview = atom.deserializers.deserialize(
         serialized,
       ) as MarkdownPreviewView
-      expect(newPreview).to.not.exist
+      expect(nonExistentPreview).to.not.exist
     })
 
     it('serializes the editor id when opened for an editor', async function() {
@@ -88,7 +99,7 @@ describe('MarkdownPreviewView', function() {
 
       await atom.workspace.open('new.markdown')
 
-      preview = new MarkdownPreviewView({
+      preview = await createMarkdownPreviewView({
         editorId: atom.workspace.getActiveTextEditor()!.id,
       })
 
@@ -99,7 +110,9 @@ describe('MarkdownPreviewView', function() {
       newPreview = atom.deserializers.deserialize(
         preview.serialize(),
       ) as MarkdownPreviewView
+      window.workspaceDiv.appendChild(newPreview.element)
       await waitsFor(() => newPreview.getPath() === preview.getPath())
+      await newPreview.renderPromise
     })
   })
 
@@ -131,25 +144,17 @@ describe('MarkdownPreviewView', function() {
   })
 
   describe('code block conversion to atom-text-editor tags', function() {
-    it('removes line decorations on rendered code blocks', function() {
-      const editor = preview.find(
-        "atom-text-editor[data-grammar='text plain null-grammar']",
-      ) as TextEditorElement
-      const decorations = editor
-        .getModel()
-        .getDecorations({ class: 'cursor-line', type: 'line' })
-      expect(decorations.length).to.equal(0)
-    })
-
     it('removes a trailing newline but preserves remaining leading and trailing whitespace', async function() {
       const newFilePath = path.join(tempPath, 'subdir/trim-nl.md')
-      const newPreview = new MarkdownPreviewView({ filePath: newFilePath })
+      const newPreview = await createMarkdownPreviewView({
+        filePath: newFilePath,
+      })
 
       await newPreview.renderMarkdown()
 
       const editor = newPreview.find('atom-text-editor') as TextEditorElement
       expect(editor).to.exist
-      expect(editor.getModel().getText()).to.equal(`\
+      expect(editor.textContent).to.equal(`\
 
      a
     b
@@ -166,40 +171,37 @@ f
     describe("when the code block's fence name has a matching grammar", () =>
       it('assigns the grammar on the atom-text-editor', async function() {
         const rubyEditor = await waitsFor(
-          () =>
-            preview.find(
-              "atom-text-editor[data-grammar='source ruby']",
-            ) as TextEditorElement,
+          () => preview.find('atom-text-editor.lang-ruby') as TextEditorElement,
         )
         expect(rubyEditor).to.exist
-        expect(rubyEditor.getModel().getText()).to.equal(`\
+        expect(rubyEditor.textContent).to.equal(`\
 def func
   x = 1
-end\
+end
 `)
 
         // nested in a list item
         const jsEditor = preview.find(
-          "atom-text-editor[data-grammar='source js']",
+          'atom-text-editor.lang-javascript',
         ) as TextEditorElement
         expect(jsEditor).to.exist
-        expect(jsEditor.getModel().getText()).to.equal(`\
+        expect(jsEditor.textContent).to.equal(`\
 if a === 3 {
   b = 5
-}\
+}
 `)
       }))
 
     describe("when the code block's fence name doesn't have a matching grammar", function() {
       it('does not assign a specific grammar', function() {
         const plainEditor = preview.find(
-          "atom-text-editor[data-grammar='text plain null-grammar']",
+          'atom-text-editor.lang-text',
         ) as TextEditorElement
         expect(plainEditor).to.exist
-        expect(plainEditor.getModel().getText()).to.equal(`\
+        expect(plainEditor.textContent).to.equal(`\
 function f(x) {
   return x++;
-}\
+}
 `)
       })
     })
@@ -225,8 +227,10 @@ var x = 0;
         () => pv.find('atom-text-editor') as TextEditorElement,
       )
       expect(jsEditor).to.exist
-      expect(jsEditor.getModel().getText()).to.equal('var x = 0;')
-      expect(jsEditor.getModel().getGrammar().scopeName).to.equal('source.js')
+      expect(jsEditor.textContent).to.equal('var x = 0;\n')
+      expect(jsEditor.firstElementChild!.className).to.equal(
+        'syntax--source syntax--js',
+      )
     })
   })
 
@@ -262,7 +266,7 @@ var x = 0;
 
         filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
         fs.writeFileSync(filePath, `![absolute](${filePath})`)
-        preview = new MarkdownPreviewView({ filePath })
+        preview = await createMarkdownPreviewView({ filePath })
 
         await preview.renderMarkdown()
 
@@ -572,10 +576,9 @@ var x = 0;
   })
 
   describe('when core:save-as is triggered', function() {
-    beforeEach(function() {
-      preview.destroy()
+    beforeEach(async function() {
       filePath = path.join(tempPath, 'subdir/code-block.md')
-      preview = new MarkdownPreviewView({ filePath })
+      preview = await createMarkdownPreviewView({ filePath })
     })
 
     it('saves the rendered HTML and opens it', async function() {
@@ -680,7 +683,7 @@ var x = 0;
       preview.destroy()
 
       filePath = path.join(tempPath, 'subdir/code-block.md')
-      preview = new MarkdownPreviewView({ filePath })
+      preview = await createMarkdownPreviewView({ filePath })
 
       await preview.renderMarkdown()
 
@@ -710,7 +713,6 @@ var x = 0;
 
       const editor = await atom.workspace.open(filePath)
 
-      mathjaxHelper.testing.resetMathJax()
       atom.config.set(
         'markdown-preview-plus.enableLatexRenderingByDefault',
         true,

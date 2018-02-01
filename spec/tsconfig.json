@@ -1,6 +1,11 @@
 {
   "extends": "../tsconfig.json",
-  "include": ["./**.ts", "./**.d.ts", "../src/types/season.d.ts"],
+  "include": [
+    "./**.ts",
+    "./**.d.ts",
+    "../src/types/season.d.ts",
+    "../lib/mathjax-stub.d.ts"
+  ],
   "exclude": ["../node_modules"],
   "compileOnSave": false,
   "compilerOptions": {

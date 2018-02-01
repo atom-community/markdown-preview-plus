@@ -22,56 +22,52 @@ describe('MathJax helper module', () =>
     let macrosPath: string
     let macros: { [key: string]: any }
     let stub: sinon.SinonStub
-    let div: HTMLDivElement
+    let jaxFrame: HTMLIFrameElement
 
-    before(async () =>
-      atom.packages.activatePackage(path.join(__dirname, '..')),
-    )
-    after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
+    before(async () => {
+      await atom.packages.activatePackage(path.join(__dirname, '..'))
+    })
+    after(async () => {
+      await atom.packages.deactivatePackage('markdown-preview-plus')
+    })
 
-    beforeEach(function() {
+    beforeEach(async function() {
+      const jf = (jaxFrame = document.createElement('iframe'))
+      jaxFrame.src = 'about:blank'
+      const fp = new Promise((resolve) => (jf.onload = resolve))
+      window.workspaceDiv.appendChild(jaxFrame)
+      await fp
+
       configDirPath = temp.mkdirSync('atom-config-dir-')
       macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
 
       stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
-
-      mathjaxHelper.testing.resetMathJax()
-
-      div = document.createElement('div')
-      div.style.visibility = 'hidden'
-      document.body.appendChild(div)
     })
 
     afterEach(function() {
-      mathjaxHelper.testing.resetMathJax()
+      if (jaxFrame) jaxFrame.remove()
       stub.restore()
-      div.remove()
     })
 
     const waitsForMacrosToLoad = async function() {
-      mathjaxHelper.testing.loadMathJax()
-
-      await waitsFor.msg(
-        'MathJax to load',
-        // tslint:disable-next-line:strict-type-predicates
-        () => typeof MathJax !== 'undefined' && MathJax !== null,
-      )
+      await mathjaxHelper.testing.loadMathJax(jaxFrame)
 
       expect(stub).to.be.called
 
       // Trigger MathJax TeX extension to load
 
-      const span = document.createElement('span')
-      const equation = document.createElement('script')
+      const span = jaxFrame.contentDocument.createElement('span')
+      const equation = jaxFrame.contentDocument.createElement('script')
       equation.type = 'math/tex; mode=display'
       equation.textContent = '\\int_1^2'
       span.appendChild(equation)
-      div.appendChild(span)
-      mathjaxHelper.mathProcessor([span])
+      await mathjaxHelper.mathProcessor(jaxFrame, [span])
 
       macros = await waitsFor.msg('MathJax macros to be defined', function() {
         try {
-          return MathJax.InputJax.TeX.Definitions.macros as typeof macros
+          // tslint:disable-next-line:no-unsafe-any
+          return (jaxFrame.contentWindow as any)
+            .MathJax.InputJax.TeX.Definitions.macros as typeof macros
         } catch {
           return undefined
         }

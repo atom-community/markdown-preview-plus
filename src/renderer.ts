@@ -4,7 +4,7 @@ import pandocHelper = require('./pandoc-helper')
 import markdownIt = require('./markdown-it-helper') // Defer until used
 import { scopeForFenceName } from './extension-helper'
 import imageWatcher = require('./image-watch-helper')
-import { Grammar, TextEditorElement } from 'atom'
+import { Grammar } from 'atom'
 import { isFileSync } from './util'
 
 const { resourcePath } = atom.getLoadSettings()
@@ -198,7 +198,7 @@ async function resolveImagePaths(
   return doc.innerHTML
 }
 
-export function convertCodeBlocksToAtomEditors(
+export function highlightCodeBlocks(
   domFragment: Element,
   defaultLanguage: string = 'text',
 ) {
@@ -221,30 +221,17 @@ export function convertCodeBlocksToAtomEditors(
       ? cbClass.replace(/^(lang-|sourceCode )/, '')
       : defaultLanguage
 
-    const editorElement = document.createElement(
-      'atom-text-editor',
-    ) as TextEditorElement
-    editorElement.setAttributeNode(document.createAttribute('gutter-hidden'))
-    editorElement.removeAttribute('tabindex') // make read-only
-
-    preElement.parentElement!.replaceChild(editorElement, preElement)
-
-    const editor = editorElement.getModel()
-    // remove the default selection of a line in each editor
-    if (editor.cursorLineDecorations != null) {
-      for (const cursorLineDecoration of editor.cursorLineDecorations) {
-        cursorLineDecoration.destroy()
-      }
-    }
-
-    editor.setText(codeBlock.textContent!.replace(/\n$/, ''))
-    const grammar = atom.grammars.grammarForScopeName(
-      scopeForFenceName(fenceName),
-    )
-    if (grammar) {
-      editor.setGrammar(grammar)
-      editorElement.dataset.grammar = grammar.scopeName.replace(/\./g, ' ')
-    }
+    // tslint:disable-next-line:no-unsafe-any
+    preElement.outerHTML = highlight({
+      fileContents: codeBlock.textContent!.replace(/\n$/, ''),
+      scopeName: scopeForFenceName(fenceName),
+      nbsp: false,
+      lineDivs: false,
+      editorDiv: true,
+      editorDivTag: 'atom-text-editor',
+      // The `editor` class messes things up as `.editor` has absolutely positioned lines
+      editorDivClass: fenceName ? `lang-${fenceName}` : '',
+    })
   }
 
   return domFragment

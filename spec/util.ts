@@ -76,15 +76,11 @@ waitsFor.msg = async (msg, f, t, i) => waitsFor(f, t, i, msg)
 export async function expectPreviewInSplitPane() {
   await waitsFor(() => atom.workspace.getCenter().getPanes().length === 2)
 
-  const preview = await waitsFor.msg('markdown preview to be created', () => {
-    const pv = atom.workspace
-      .getCenter()
-      .getPanes()[1]
-      .getActiveItem() as MarkdownPreviewView
-    if (pv.getPath() === atom.workspace.getActiveTextEditor()!.getPath()) {
-      return pv
-    } else return undefined
-  })
+  const preview = atom.workspace
+    .getCenter()
+    .getPanes()[1]
+    .getActiveItem() as MarkdownPreviewView
+  await preview.renderPromise
 
   expect(preview.constructor.name).to.be.equal('MarkdownPreviewView')
   expect(preview.getPath()).to.equal(

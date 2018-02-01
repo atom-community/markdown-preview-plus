@@ -19,15 +19,13 @@ let isMathJaxDisabled = false
 //   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
 //   details on DOM elements.
 //
-export function mathProcessor(frame: HTMLIFrameElement, domElements: Node[]) {
+export async function mathProcessor(
+  frame: HTMLIFrameElement,
+  domElements: Node[],
+) {
   if (isMathJaxDisabled) return
-  if (frame.contentWindow.queueTypeset) {
-    frame.contentWindow.queueTypeset(domElements)
-  } else {
-    loadMathJax(frame, () => {
-      frame.contentWindow.queueTypeset(domElements)
-    })
-  }
+  const jax = await loadMathJax(frame)
+  jax.queueTypeset(domElements)
 }
 
 //
@@ -37,45 +35,28 @@ export function mathProcessor(frame: HTMLIFrameElement, domElements: Node[]) {
 // @param callback A callback method that accepts a single parameter, a HTML
 //   fragment string that is the result of html processed by MathJax
 //
-export function processHTMLString(
+export async function processHTMLString(
   frame: HTMLIFrameElement,
   html: string,
-  callback: (proHTML: string) => any,
 ) {
   if (isMathJaxDisabled) {
-    callback(html)
-    return
+    return html
   }
   const element = document.createElement('div')
   element.innerHTML = html
 
-  const compileProcessedHTMLString = function() {
-    const msvgh = document.getElementById('MathJax_SVG_Hidden')
-    const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
-    if (svgGlyphs !== null) {
-      element.insertBefore(svgGlyphs, element.firstChild)
-    }
-    return element.innerHTML
-  }
+  const jax = await loadMathJax(frame)
 
-  const queueProcessHTMLString = (jax: typeof MathJax) => {
-    jax.Hub.Queue(
-      ['setRenderer', jax.Hub, 'SVG'],
-      ['Typeset', jax.Hub, element],
-      ['setRenderer', jax.Hub, 'HTML-CSS'],
-      [
-        () => {
-          callback(compileProcessedHTMLString())
-        },
-      ],
-    )
-  }
+  await new Promise((resolve) => {
+    jax.queueProcessHTMLString(element, resolve)
+  })
 
-  if (frame.contentWindow.MathJax) {
-    queueProcessHTMLString(frame.contentWindow.MathJax)
-  } else {
-    loadMathJax(frame, queueProcessHTMLString)
+  const msvgh = document.getElementById('MathJax_SVG_Hidden')
+  const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
+  if (svgGlyphs !== null) {
+    element.insertBefore(svgGlyphs, element.firstChild)
   }
+  return element.innerHTML
 }
 
 // For testing
@@ -89,55 +70,33 @@ function disableMathJax(disable: boolean) {
 // @param listener method to call when the MathJax script was been
 //   loaded to the window. The method is passed no arguments.
 //
-function loadMathJax(
-  frame: HTMLIFrameElement,
-  listener?: (jax: typeof MathJax) => any,
-) {
+async function loadMathJax(frame: HTMLIFrameElement): Promise<MathJaxStub> {
+  if (frame.contentWindow.mathJaxStub) return frame.contentWindow.mathJaxStub
   if (frame.contentDocument.querySelector('head')) {
-    const script = attachMathJax(frame)
-    if (listener) {
-      script.addEventListener('load', () => {
-        listener(frame.contentWindow.MathJax!)
-      })
-    }
+    return attachMathJax(frame)
   } else {
-    const onload = () => {
-      frame.removeEventListener('load', onload)
-      loadMathJax(frame, listener)
-    }
-    frame.addEventListener('load', onload)
+    return new Promise<MathJaxStub>((resolve) => {
+      const onload = () => {
+        frame.removeEventListener('load', onload)
+        resolve(loadMathJax(frame))
+      }
+      frame.addEventListener('load', onload)
+    })
   }
 }
 
 //
 // Attach main MathJax script to the document
 //
-function attachMathJax(frame: HTMLIFrameElement) {
+async function attachMathJax(frame: HTMLIFrameElement): Promise<MathJaxStub> {
   if (!frame.contentDocument.querySelector('script[src*="MathJax.js"]')) {
     return attachMathJaxInternal(frame)
   }
   throw new Error('Duplicate attachMathJax call')
 }
 
-//
-// Remove MathJax from the document and reset attach method
-//
-function resetMathJax() {
-  // Detach MathJax from the document
-  for (const el of Array.from(
-    document.querySelectorAll('script[src*="MathJax.js"]'),
-  )) {
-    el.remove()
-  }
-  window.MathJax = undefined
-
-  // Reset attach for any subsequent calls
-  delete window.MathJax
-}
-
 export const testing = {
   loadMathJax,
-  resetMathJax,
   disableMathJax,
 }
 
@@ -238,7 +197,7 @@ function valueMatchesPattern(value: any) {
 // Configure MathJax environment. Similar to the TeX-AMS_HTML configuration with
 // a few unnecessary features stripped away
 //
-const configureMathJax = function(jax: any) {
+const configureMathJax = function(jax: MathJaxStub) {
   let userMacros = loadUserMacros()
   if (userMacros) {
     userMacros = checkMacros(userMacros)
@@ -257,37 +216,32 @@ const configureMathJax = function(jax: any) {
 //
 // Attach main MathJax script to the document
 //
-function attachMathJaxInternal(frame: HTMLIFrameElement) {
+async function attachMathJaxInternal(
+  frame: HTMLIFrameElement,
+): Promise<MathJaxStub> {
   // Notify user MathJax is loading
   if (atom.inDevMode()) {
     atom.notifications.addInfo('Loading maths rendering engine MathJax')
   }
 
   // Attach MathJax script
-  const jaxScript = injectScript(
-    frame.contentDocument,
-    `${require.resolve('MathJax')}?delayStartupUntil=configured`,
-  )
-  const myScript = injectScript(
-    frame.contentDocument,
-    require.resolve('./mathjax-stub'),
-    () => {
-      configureMathJax(frame.contentWindow)
-    },
-  )
-
-  return myScript
+  await Promise.all([
+    injectScript(
+      frame.contentDocument,
+      `${require.resolve('MathJax')}?delayStartupUntil=configured`,
+    ),
+    injectScript(frame.contentDocument, require.resolve('./mathjax-stub')),
+  ])
+  configureMathJax(frame.contentWindow.mathJaxStub)
+  return frame.contentWindow.mathJaxStub
 }
 
-function injectScript(
-  doc: HTMLDocument,
-  scriptSrc: string,
-  callback?: () => void,
-) {
+async function injectScript(doc: HTMLDocument, scriptSrc: string) {
   const script = doc.createElement('script')
   script.src = scriptSrc
   script.type = 'text/javascript'
-  if (callback) script.addEventListener('load', callback)
   doc.querySelector('head')!.appendChild(script)
-  return script
+  return new Promise<void>((resolve) => {
+    script.addEventListener('load', () => resolve())
+  })
 }

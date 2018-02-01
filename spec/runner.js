@@ -26,7 +26,15 @@ const extraOptions = {
 }
 
 const optionalConfigurationFunction = function(mocha) {
-  mocha.timeout(60000)
+  mocha.timeout(10000)
+
+  const wspcDiv = document.createElement('div')
+  wspcDiv.style.height = '30vh'
+  wspcDiv.style.width = '100vh'
+  wspcDiv.style.overflow = 'hidden'
+  document.body.appendChild(wspcDiv)
+  window.workspaceDiv = wspcDiv
+  wspcDiv.appendChild(atom.views.getView(atom.workspace))
 }
 
 module.exports = createRunner(extraOptions, optionalConfigurationFunction)

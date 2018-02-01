@@ -137,11 +137,6 @@ describe('the difference algorithm that updates the preview', function() {
       await loadPreviewInSplitPane()
 
       await waitsFor.msg(
-        'MathJax to load',
-        () => typeof MathJax !== 'undefined' && MathJax !== null,
-      )
-
-      await waitsFor.msg(
         'preview to update DOM with span.math containers',
         function() {
           mathBlocks = Array.from(
@@ -156,15 +151,10 @@ describe('the difference algorithm that updates the preview', function() {
           preview.findAll('script[type*="math/tex"]'),
         ).map((x) => x.parentElement!)
         return mathBlocks.every(
-          (x) =>
-            !!x.querySelector(
-              'span.MathJax:not(.MathJax_Processing), div.MathJax_Display:not(.MathJax_Processing)',
-            ),
+          (x) => !!x.querySelector('.MathJax, .MathJax_Display'),
         )
       })
     })
-
-    afterEach(() => mathjaxHelper.testing.resetMathJax())
 
     it('replaces the entire span.math container element', async function() {
       const stub = sinon
@@ -203,7 +193,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       const stub = sinon
         .stub(mathjaxHelper, 'mathProcessor')
-        .callsFake((domElements: HTMLElement[]) => {
+        .callsFake((_iframe: any, domElements: HTMLElement[]) => {
           unprocessedMathBlocks = domElements
         })
 
@@ -227,9 +217,15 @@ describe('the difference algorithm that updates the preview', function() {
 
   describe('when a code block is modified', () =>
     it('replaces the entire span.atom-text-editor container element', async function() {
+      const spy = sinon.spy(renderer, 'highlightCodeBlocks')
+
       await loadPreviewInSplitPane()
 
-      await waitsFor(() => preview.find('span.atom-text-editor'))
+      await waitsFor.msg(
+        'renderer.highlightCodeBlocks to be called',
+        () => spy.called,
+      )
+      spy.restore()
 
       const codeBlocks = Array.from(preview.findAll('span.atom-text-editor'))
       expect(codeBlocks.length).to.equal(5)
@@ -239,17 +235,17 @@ describe('the difference algorithm that updates the preview', function() {
           Array.from(x.querySelectorAll('atom-text-editor')),
         ),
       )
-      expect(atomTextEditors.length).to.equal(5)
+      expect(atomTextEditors).to.have.lengthOf(5)
 
       const stub = sinon
-        .stub(renderer, 'convertCodeBlocksToAtomEditors')
+        .stub(renderer, 'highlightCodeBlocks')
         .callsFake(function() {
           /* noop */
         })
       editor.setTextInBufferRange([[24, 0], [24, 9]], 'This is a modified')
 
       await waitsFor.msg(
-        'renderer.convertCodeBlocksToAtomEditors to be called',
+        'renderer.highlightCodeBlocks to be called',
         () => stub.called,
       )
       stub.restore()

@@ -31,8 +31,6 @@ describe('Syncronization of source and preview', function() {
     const configDirPath = temp.mkdirSync('atom-config-dir-')
     stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
 
-    mathjaxHelper.testing.resetMathJax()
-
     atom.config.set('markdown-preview-plus.enableLatexRenderingByDefault', true)
     const editor = await atom.workspace.open(path.join(fixturesPath, 'sync.md'))
     const spy = sinon.spy(mathjaxHelper, 'mathProcessor')
@@ -51,7 +49,7 @@ describe('Syncronization of source and preview', function() {
 
     await waitsFor.msg(
       'MathJax to load',
-      () => typeof MathJax !== 'undefined' && MathJax !== null,
+      () => preview.element.contentWindow.MathJax != null,
     )
 
     await waitsForQueuedMathJax()
@@ -59,8 +57,6 @@ describe('Syncronization of source and preview', function() {
 
   afterEach(async function() {
     stub.restore()
-    mathjaxHelper.testing.resetMathJax()
-
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
       await atom.workspace.paneForItem(item)!.destroyItem(item, true)
@@ -68,11 +64,7 @@ describe('Syncronization of source and preview', function() {
   })
 
   async function waitsForQueuedMathJax() {
-    let done: boolean = false
-
-    const callback = () => (done = true)
-    MathJax.Hub.Queue([callback])
-    await waitsFor.msg('queued MathJax operations to complete', () => done)
+    await preview.element.contentWindow.mathJaxStub.waitForQueue()
   }
 
   function findInPreview(token: MyToken) {

@@ -2,7 +2,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
-import { MarkdownPreviewView } from '../lib/markdown-preview-view'
+import { MarkdownPreviewView, MPVParams } from '../lib/markdown-preview-view'
 import markdownIt = require('../lib/markdown-it-helper')
 import pandocHelper = require('../lib/pandoc-helper')
 import { expect } from 'chai'
@@ -15,6 +15,14 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
   let preview: MarkdownPreviewView
   let filePath: string
   let stub: sinon.SinonStub
+  const previews: Set<MarkdownPreviewView> = new Set()
+
+  const createMarkdownPreviewView = function(params: MPVParams) {
+    const mpv = new MarkdownPreviewView(params)
+    window.workspaceDiv.appendChild(mpv.element)
+    previews.add(mpv)
+    return mpv
+  }
 
   before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
@@ -36,10 +44,13 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         ) => cb(null, html),
       )
 
-    preview = new MarkdownPreviewView({ filePath })
+    preview = createMarkdownPreviewView({ filePath })
   })
 
   afterEach(async function() {
+    previews.forEach((x) => x.destroy())
+    previews.clear()
+
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
       await atom.workspace.paneForItem(item)!.destroyItem(item, true)
@@ -78,8 +89,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
     describe('when the image uses an absolute path that exists', () =>
       it('adds a query to the URL', async function() {
-        preview.destroy()
-
         filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
         fs.writeFileSync(filePath, `![absolute](${filePath})`)
 
@@ -88,7 +97,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         <img src="${filePath}" alt="absolute"><p class="caption">absolute</p>
         </div>\
         `
-        preview = new MarkdownPreviewView({ filePath })
+        preview = createMarkdownPreviewView({ filePath })
 
         await preview.renderMarkdown()
 

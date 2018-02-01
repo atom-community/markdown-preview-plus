@@ -1,6 +1,7 @@
 export function handlePromise(promise: Promise<any>): void {
   if (!promise) return
   promise.catch((error: Error) => {
+    console.error(error)
     atom.notifications.addFatalError(error.toString(), {
       detail: error.message,
       stack: error.stack,
