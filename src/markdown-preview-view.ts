@@ -68,7 +68,7 @@ export class MarkdownPreviewView {
     this.filePath = filePath
     this.element = document.createElement('markdown-preview-plus-view') as any
     this.element.getModel = () => this
-    this.element.classList.add('markdown-preview', 'native-key-bindings')
+    this.element.classList.add('native-key-bindings')
     this.element.tabIndex = -1
     this.preview = document.createElement('div')
     this.preview.classList.add('update-preview')
@@ -451,7 +451,7 @@ export class MarkdownPreviewView {
   }
 
   getMarkdownPreviewCSS() {
-    const markdowPreviewRules = []
+    const markdowPreviewRules = ['body { padding: 0; margin: 0; }']
     const ruleRegExp = /markdown-preview-plus-view/
     const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
@@ -581,6 +581,11 @@ export class MarkdownPreviewView {
           } else {
             mathjaxScript = ''
           }
+          const githubStyle = atom.config.get(
+            'markdown-preview-plus.useGitHubStyle',
+          )
+            ? ' data-use-github-style'
+            : ''
           const html =
             `\
 <!DOCTYPE html>
@@ -590,7 +595,11 @@ export class MarkdownPreviewView {
       <title>${title}</title>${mathjaxScript}
       <style>${this.getMarkdownPreviewCSS()}</style>
   </head>
-  <body class='markdown-preview'>${htmlBody}</body>
+  <body>
+    <markdown-preview-plus-view${githubStyle}>
+      ${htmlBody}
+    </markdown-preview-plus-view>
+  </body>
 </html>` + '\n' // Ensure trailing newline
 
           fs.writeFileSync(htmlFilePath, html)
@@ -701,7 +710,7 @@ export class MarkdownPreviewView {
   getPathToElement(
     element: HTMLElement,
   ): Array<{ tag: string; index: number }> {
-    if (element.classList.contains('markdown-preview')) {
+    if (element.tagName.toLowerCase() === 'markdown-preview-plus-view') {
       return [
         {
           tag: 'div',
