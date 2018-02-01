@@ -51,7 +51,7 @@ export async function processHTMLString(
     jax.queueProcessHTMLString(element, resolve)
   })
 
-  const msvgh = document.getElementById('MathJax_SVG_Hidden')
+  const msvgh = frame.contentDocument.getElementById('MathJax_SVG_Hidden')
   const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
   if (svgGlyphs !== null) {
     element.insertBefore(svgGlyphs, element.firstChild)

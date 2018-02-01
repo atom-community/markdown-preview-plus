@@ -584,6 +584,7 @@ var x = y;
         await copyHtml()
 
         const clipboard = clipboardContents
+        expect(clipboard.match(/MathJax_SVG_Hidden/g)!.length).to.equal(1)
         expect(
           clipboard.match(/class="MathJax_SVG_Display"/g)!.length,
         ).to.equal(1)
