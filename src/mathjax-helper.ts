@@ -85,16 +85,6 @@ async function loadMathJax(frame: HTMLIFrameElement): Promise<MathJaxStub> {
   }
 }
 
-//
-// Attach main MathJax script to the document
-//
-async function attachMathJax(frame: HTMLIFrameElement): Promise<MathJaxStub> {
-  if (!frame.contentDocument.querySelector('script[src*="MathJax.js"]')) {
-    return attachMathJaxInternal(frame)
-  }
-  throw new Error('Duplicate attachMathJax call')
-}
-
 export const testing = {
   loadMathJax,
   disableMathJax,
@@ -205,7 +195,10 @@ const configureMathJax = function(jax: MathJaxStub) {
     userMacros = {}
   }
 
-  jax.jaxConfigure(userMacros)
+  jax.jaxConfigure(
+    userMacros,
+    atom.config.get('markdown-preview-plus.latexRenderer'),
+  )
 
   // Notify user MathJax has loaded
   if (atom.inDevMode()) {
@@ -216,9 +209,7 @@ const configureMathJax = function(jax: MathJaxStub) {
 //
 // Attach main MathJax script to the document
 //
-async function attachMathJaxInternal(
-  frame: HTMLIFrameElement,
-): Promise<MathJaxStub> {
+async function attachMathJax(frame: HTMLIFrameElement): Promise<MathJaxStub> {
   // Notify user MathJax is loading
   if (atom.inDevMode()) {
     atom.notifications.addInfo('Loading maths rendering engine MathJax')

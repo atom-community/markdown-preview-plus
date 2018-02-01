@@ -1,7 +1,7 @@
 const mathJaxStub = {
-  jaxConfigure(userMacros: object) {
+  jaxConfigure(userMacros: object, renderer: 'HTML-CSS' | 'SVG') {
     MathJax.Hub.Config({
-      jax: ['input/TeX', 'output/HTML-CSS'],
+      jax: ['input/TeX', `output/${renderer}`],
       extensions: [],
       TeX: {
         extensions: [

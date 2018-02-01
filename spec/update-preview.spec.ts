@@ -151,7 +151,7 @@ describe('the difference algorithm that updates the preview', function() {
           preview.findAll('script[type*="math/tex"]'),
         ).map((x) => x.parentElement!)
         return mathBlocks.every(
-          (x) => !!x.querySelector('.MathJax, .MathJax_Display'),
+          (x) => !!x.querySelector('.MathJax_SVG, .MathJax, .MathJax_Display'),
         )
       })
     })
@@ -177,7 +177,7 @@ describe('the difference algorithm that updates the preview', function() {
       expect(mathBlocks.length).to.equal(20)
 
       const mathHTMLCSS = mathBlocks
-        .map((x) => x.querySelector('span.MathJax, div.MathJax_Display'))
+        .map((x) => x.querySelector('.MathJax_SVG, .MathJax, .MathJax_Display'))
         .filter((x) => x !== null)
       expect(mathHTMLCSS.length).to.equal(19)
 

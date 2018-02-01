@@ -52,6 +52,15 @@ export const config = {
     default: false,
     order: 40,
   },
+  latexRenderer: {
+    title: 'Math Renderer',
+    description:
+      'SVG is noticeably faster, but might look worse on some systems',
+    type: 'string',
+    enum: ['HTML-CSS', 'SVG'],
+    default: 'SVG',
+    order: 41,
+  },
   useLazyHeaders: {
     title: 'Use Lazy Headers',
     description: 'Require no space after headings #',
@@ -219,6 +228,7 @@ declare module 'atom' {
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.enableLatexRenderingByDefault': boolean
+    'markdown-preview-plus.latexRenderer': 'HTML-CSS' | 'SVG'
     'markdown-preview-plus.useLazyHeaders': boolean
     'markdown-preview-plus.useCheckBoxes': boolean
     'markdown-preview-plus.useEmoji': boolean
@@ -245,6 +255,7 @@ declare module 'atom' {
       grammars: string[]
       extensions: string[]
       enableLatexRenderingByDefault: boolean
+      latexRenderer: 'HTML-CSS' | 'SVG'
       useLazyHeaders: boolean
       useCheckBoxes: boolean
       useEmoji: boolean
