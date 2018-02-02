@@ -58,7 +58,7 @@ export const config = {
       'SVG is noticeably faster, but might look worse on some systems',
     type: 'string',
     enum: ['HTML-CSS', 'SVG'],
-    default: 'SVG',
+    default: 'SVG' as 'HTML-CSS' | 'SVG',
     order: 41,
   },
   useLazyHeaders: {
