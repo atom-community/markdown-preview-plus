@@ -1,6 +1,12 @@
 ## 2.5.2
 
 -   Return support for markdown-pdf... kinda
+
+    You need to enable "Force Fallback Mode" in markdown-pdf settings and
+    you might have to run convert command twice. This is deprecated, and
+    hardly used by anyone, but until there's a native PDF conversion, this
+    should work.
+
 -   Merge pull request #344 from atom-community\/fix-html-export-and-no-markdown-preview-class
 -   Fix HTML export, avoid markdown-preview class
 -   Pin typescript version for now
