@@ -214,11 +214,12 @@ var x = 0;
 ~~~
 `)
       expect(
-        atom.commands.dispatch(
+        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
+        await atom.commands.dispatch(
           atom.views.getView(ed),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.true
+      ).to.be.ok
 
       const pv = await expectPreviewInSplitPane()
 

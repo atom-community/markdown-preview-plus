@@ -186,11 +186,12 @@ describe('Markdown preview plus package', function() {
       previewPane.activate()
 
       expect(
-        atom.commands.dispatch(
+        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
+        await atom.commands.dispatch(
           atom.views.getView(previewPane.getActiveItem()),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.true
+      ).to.be.ok
       expect(previewPane.getActiveItem()).to.be.undefined
     })
 
@@ -747,11 +748,12 @@ world</p>\
       const editor = await atom.workspace.open('source.js')
 
       expect(
-        atom.commands.dispatch(
+        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
+        await atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.true
+      ).to.be.ok
       await expectPreviewInSplitPane()
     })
     it('Unbinds from scopes when config is changed', async function() {
@@ -764,11 +766,12 @@ world</p>\
       atom.grammars.assignLanguageMode(buffer, 'source.gfm')
 
       expect(
-        atom.commands.dispatch(
+        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
+        await atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.false
+      ).not.to.be.ok
     })
   })
 
@@ -804,11 +807,12 @@ world</p>\
         )
 
         expect(
-          atom.commands.dispatch(
+          // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
+          await atom.commands.dispatch(
             atom.views.getView(editor),
             'markdown-preview-plus:toggle',
           ),
-        ).to.be.true
+        ).to.be.ok
         preview = await expectPreviewInSplitPane()
       })
 
@@ -853,11 +857,12 @@ world</p>\
       )
 
       expect(
-        atom.commands.dispatch(
+        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
+        await atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.true
+      ).to.be.ok
       await expectPreviewInSplitPane()
 
       const workspaceElement = atom.views.getView(atom.workspace)
