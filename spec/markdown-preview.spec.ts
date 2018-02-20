@@ -760,7 +760,8 @@ world</p>\
       await waitsFor(() => spy.called)
 
       const editor = await atom.workspace.open()
-      editor.setGrammar(atom.grammars.grammarForScopeName('source.gfm')!)
+      const buffer = editor.getBuffer()
+      atom.grammars.assignLanguageMode(buffer, 'source.gfm')
 
       expect(
         atom.commands.dispatch(
