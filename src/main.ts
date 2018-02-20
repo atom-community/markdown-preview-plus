@@ -65,6 +65,13 @@ export function createMarkdownPreviewView(state: MPVParams) {
   return undefined
 }
 
+/// used by markdown-pdf
+export async function copyHtml(_callback: any, _scale: number) {
+  const editor = atom.workspace.getActiveTextEditor()
+  if (!editor) return
+  await copyHtmlInternal(editor)
+}
+
 /// private
 
 function close(event: CommandEvent<MarkdownPreviewViewElement>) {
@@ -139,12 +146,11 @@ function previewFile({ currentTarget }: CommandEvent) {
   )
 }
 
-async function copyHtml(editor: TextEditor): Promise<void> {
+async function copyHtmlInternal(editor: TextEditor): Promise<void> {
   const text = editor.getSelectedText() || editor.getText()
   const renderLaTeX = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
-  const scaleMath = 100
   return renderer.toHTML(
     text,
     editor.getPath(),
@@ -159,12 +165,7 @@ async function copyHtml(editor: TextEditor): Promise<void> {
         frame.src = 'about:blank'
         frame.style.display = 'none'
         frame.addEventListener('load', async () => {
-          let proHTML = await mathjaxHelper.processHTMLString(frame, html)
-          proHTML = proHTML.replace(
-            /MathJax\_SVG.*?font\-size\: 100%/g,
-            (match) =>
-              match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
-          )
+          const proHTML = await mathjaxHelper.processHTMLString(frame, html)
           frame.remove()
           atom.clipboard.write(proHTML)
         })
@@ -237,7 +238,7 @@ function registerGrammars(
           toggle(e.currentTarget.getModel())
         },
         'markdown-preview-plus:copy-html': (e) => {
-          handlePromise(copyHtml(e.currentTarget.getModel()))
+          handlePromise(copyHtmlInternal(e.currentTarget.getModel()))
         },
       }),
     )
