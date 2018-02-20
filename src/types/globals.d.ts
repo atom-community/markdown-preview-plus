@@ -5,6 +5,9 @@ interface Function {
 interface ObjectConstructor {
   keys<K extends string>(o: { [Key in K]: any }): K[]
   entries<K extends string, T>(o: { [Key in K]: T }): [K, T][]
+  entries<O extends object>(
+    o: { [K in keyof O]: O[K] },
+  ): [keyof O, O[keyof O]][]
 }
 
 interface String {

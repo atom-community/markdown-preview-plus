@@ -9,8 +9,11 @@ import path = require('path')
 import CSON = require('season')
 import fs = require('fs')
 import { isFileSync } from './util'
+// tslint:disable-next-line:no-var-requires
+import mjAPI = require('mathjax-node')
 
 let isMathJaxDisabled = false
+let isMathJaxLoaded = false
 
 //
 // Process DOM elements for LaTeX equations with MathJax
@@ -19,14 +22,11 @@ let isMathJaxDisabled = false
 //   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
 //   details on DOM elements.
 //
-export function mathProcessor(domElements: Node[]) {
+export async function mathProcessor(domElements: Node[]) {
   if (isMathJaxDisabled) return
-  if (window.MathJax) {
-    window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, domElements])
-  } else {
-    loadMathJax(() => {
-      MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements])
-    })
+  loadMathJax()
+  for (const elem of domElements as HTMLElement[]) {
+    await processHTMLElement(elem)
   }
 }
 
@@ -37,44 +37,41 @@ export function mathProcessor(domElements: Node[]) {
 // @param callback A callback method that accepts a single parameter, a HTML
 //   fragment string that is the result of html processed by MathJax
 //
-export function processHTMLString(
-  html: string,
-  callback: (proHTML: string) => any,
-) {
+export async function processHTMLString(html: string): Promise<string> {
   if (isMathJaxDisabled) {
-    callback(html)
-    return
+    return html
   }
+  loadMathJax()
   const element = document.createElement('div')
   element.innerHTML = html
 
-  const compileProcessedHTMLString = function() {
-    const msvgh = document.getElementById('MathJax_SVG_Hidden')
-    const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
-    if (svgGlyphs !== null) {
-      element.insertBefore(svgGlyphs, element.firstChild)
-    }
-    return element.innerHTML
-  }
+  await processHTMLElement(element)
 
-  const queueProcessHTMLString = () => {
-    MathJax!.Hub.Queue(
-      ['setRenderer', MathJax!.Hub, 'SVG'],
-      ['Typeset', MathJax!.Hub, element],
-      ['setRenderer', MathJax!.Hub, 'HTML-CSS'],
-      [
-        () => {
-          callback(compileProcessedHTMLString())
-        },
-      ],
-    )
-  }
+  return element.innerHTML
+}
 
-  if (window.MathJax) {
-    queueProcessHTMLString()
-  } else {
-    loadMathJax(queueProcessHTMLString)
-  }
+async function processHTMLElement(element: HTMLElement) {
+  const maths = element.querySelectorAll(
+    'script[type^="math/tex"]',
+  ) as NodeListOf<HTMLScriptElement>
+
+  await Promise.all(
+    Array.from(maths).map(async (math) => {
+      try {
+        const display = math.type
+          .split(';')
+          .some((x) => x.trim() === 'mode=display')
+        const res = await mjAPI.typeset({
+          svg: true,
+          format: display ? 'TeX' : 'inline-TeX',
+          math: math.text,
+        })
+        if (res.svg) math.outerHTML = res.svg
+      } catch (e) {
+        console.error(e)
+      }
+    }),
+  )
 }
 
 // For testing
@@ -89,11 +86,12 @@ function disableMathJax(disable: boolean) {
 //   loaded to the window. The method is passed no arguments.
 //
 function loadMathJax(listener?: () => any) {
-  const script = attachMathJax()
+  if (!isMathJaxLoaded) {
+    isMathJaxLoaded = true
+    attachMathJax()
+  }
   if (listener) {
-    script.addEventListener('load', () => {
-      listener()
-    })
+    listener()
   }
 }
 
@@ -101,26 +99,20 @@ function loadMathJax(listener?: () => any) {
 // Attach main MathJax script to the document
 //
 function attachMathJax() {
-  if (!document.querySelector('script[src*="MathJax.js"]')) {
-    return attachMathJaxInternal()
+  // Notify user MathJax is loading
+  if (atom.inDevMode()) {
+    atom.notifications.addInfo('Loading maths rendering engine MathJax')
   }
-  throw new Error('Duplicate attachMathJax call')
+
+  // Attach MathJax script
+  configureMathJax()
 }
 
 //
 // Remove MathJax from the document and reset attach method
 //
 function resetMathJax() {
-  // Detach MathJax from the document
-  for (const el of Array.from(
-    document.querySelectorAll('script[src*="MathJax.js"]'),
-  )) {
-    el.remove()
-  }
-  window.MathJax = undefined
-
-  // Reset attach for any subsequent calls
-  delete window.MathJax
+  mjAPI.start()
 }
 
 export const testing = {
@@ -235,51 +227,27 @@ const configureMathJax = function() {
   }
 
   // Now Configure MathJax
-  MathJax!.Hub.Config({
-    jax: ['input/TeX', 'output/HTML-CSS'],
-    extensions: [],
-    TeX: {
-      extensions: [
-        'AMSmath.js',
-        'AMSsymbols.js',
-        'noErrors.js',
-        'noUndefined.js',
-      ],
-      Macros: userMacros,
+  mjAPI.config({
+    MathJax: {
+      jax: ['input/TeX', 'output/SVG'],
+      extensions: [],
+      TeX: {
+        extensions: [
+          'AMSmath.js',
+          'AMSsymbols.js',
+          'noErrors.js',
+          'noUndefined.js',
+        ],
+        Macros: userMacros,
+      },
+      messageStyle: 'none',
+      showMathMenu: false,
+      // skipStartupTypeset: true,
     },
-    'HTML-CSS': {
-      availableFonts: [],
-      webFont: 'TeX',
-    },
-    messageStyle: 'none',
-    showMathMenu: false,
-    skipStartupTypeset: true,
   })
-  MathJax!.Hub.Configured()
 
   // Notify user MathJax has loaded
   if (atom.inDevMode()) {
     atom.notifications.addSuccess('Loaded maths rendering engine MathJax')
   }
-}
-
-//
-// Attach main MathJax script to the document
-//
-function attachMathJaxInternal() {
-  // Notify user MathJax is loading
-  if (atom.inDevMode()) {
-    atom.notifications.addInfo('Loading maths rendering engine MathJax')
-  }
-
-  // Attach MathJax script
-  const script = document.createElement('script')
-  script.src = `${require.resolve('MathJax')}?delayStartupUntil=configured`
-  script.type = 'text/javascript'
-  script.addEventListener('load', () => {
-    configureMathJax()
-  })
-  document.getElementsByTagName('head')[0].appendChild(script)
-
-  return script
 }

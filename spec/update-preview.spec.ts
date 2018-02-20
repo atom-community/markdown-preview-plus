@@ -137,16 +137,11 @@ describe('the difference algorithm that updates the preview', function() {
       await loadPreviewInSplitPane()
 
       await waitsFor.msg(
-        'MathJax to load',
-        () => typeof MathJax !== 'undefined' && MathJax !== null,
-      )
-
-      await waitsFor.msg(
         'preview to update DOM with span.math containers',
         function() {
-          mathBlocks = Array.from(
-            preview.findAll('script[type*="math/tex"]'),
-          ).map((x) => x.parentElement!)
+          mathBlocks = Array.from(preview.findAll('span.math')).map(
+            (x) => x.parentElement!,
+          )
           return mathBlocks.length === 20
         },
       )
@@ -181,14 +176,16 @@ describe('the difference algorithm that updates the preview', function() {
       )
       stub.restore()
 
-      mathBlocks = Array.from(preview.findAll('script[type*="math/tex"]'))
-        .map((x) => x.parentElement!)
-        .filter((x) => x !== null)
+      mathBlocks = Array.from(preview.findAll('span.math'))
       expect(mathBlocks.length).to.equal(20)
 
-      const mathHTMLCSS = mathBlocks
-        .map((x) => x.querySelector('span.MathJax, div.MathJax_Display'))
-        .filter((x) => x !== null)
+      const unprocessedMathBlocks = Array.from(
+        preview.findAll('span.math > script[type^="math/tex"]'),
+      )
+      expect(unprocessedMathBlocks.length).to.equal(1)
+      expect(unprocessedMathBlocks[0].textContent).to.equal('E=mc^2\n')
+
+      const mathHTMLCSS = preview.findAll('span.math > svg')
       expect(mathHTMLCSS.length).to.equal(19)
 
       const modMathBlock = mathBlocks[2]

@@ -151,18 +151,16 @@ async function copyHtml(editor: TextEditor): Promise<void> {
     editor.getGrammar(),
     !!renderLaTeX,
     true,
-    function(error: Error | null, html: string) {
+    async function(error: Error | null, html: string) {
       if (error) {
         console.warn('Copying Markdown as HTML failed', error)
       } else if (renderLaTeX) {
-        mathjaxHelper.processHTMLString(html, function(proHTML: string) {
-          proHTML = proHTML.replace(
-            /MathJax\_SVG.*?font\-size\: 100%/g,
-            (match) =>
-              match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
-          )
-          atom.clipboard.write(proHTML)
-        })
+        const proHTML = await mathjaxHelper.processHTMLString(html)
+        atom.clipboard.write(
+          proHTML.replace(/MathJax\_SVG.*?font\-size\: 100%/g, (match) =>
+            match.replace(/font\-size\: 100%/, `font-size: ${scaleMath}%`),
+          ),
+        )
       } else {
         atom.clipboard.write(html)
       }

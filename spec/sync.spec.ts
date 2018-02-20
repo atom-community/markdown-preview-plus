@@ -48,13 +48,6 @@ describe('Syncronization of source and preview', function() {
       () => spy.called,
     )
     spy.restore()
-
-    await waitsFor.msg(
-      'MathJax to load',
-      () => typeof MathJax !== 'undefined' && MathJax !== null,
-    )
-
-    await waitsForQueuedMathJax()
   })
 
   afterEach(async function() {
@@ -66,14 +59,6 @@ describe('Syncronization of source and preview', function() {
       await atom.workspace.paneForItem(item)!.destroyItem(item, true)
     }
   })
-
-  async function waitsForQueuedMathJax() {
-    let done: boolean = false
-
-    const callback = () => (done = true)
-    MathJax.Hub.Queue([callback])
-    await waitsFor.msg('queued MathJax operations to complete', () => done)
-  }
 
   function findInPreview(token: MyToken) {
     let el = preview.element.querySelector('.update-preview')

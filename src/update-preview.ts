@@ -23,6 +23,7 @@
 import { WrappedDomTree } from './wrapped-dom-tree'
 import MathJaxHelper = require('./mathjax-helper')
 import renderer = require('./renderer')
+import { handlePromise } from './util'
 
 export class UpdatePreview {
   private domFragment?: Element
@@ -64,7 +65,7 @@ export class UpdatePreview {
         return elm
       })
       r.inserted = r.inserted.filter((elm) => !!elm)
-      MathJaxHelper.mathProcessor(r.inserted)
+      handlePromise(MathJaxHelper.mathProcessor(r.inserted))
     }
 
     if (
