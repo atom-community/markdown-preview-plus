@@ -1,3 +1,11 @@
+## 2.5.2
+
+-   Return support for markdown-pdf... kinda
+-   Merge pull request #344 from atom-community\/fix-html-export-and-no-markdown-preview-class
+-   Fix HTML export, avoid markdown-preview class
+-   Pin typescript version for now
+-   Fix README links
+
 ## 2.5.1
 * Deactivate `markdown-preview` package on our activation
 * Disambiguate serializer name from `markdown-preview` package
