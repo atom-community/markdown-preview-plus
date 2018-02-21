@@ -585,7 +585,7 @@ var x = 0;
     })
 
     it('saves the rendered HTML and opens it', async function() {
-      const outputPath = temp.path({ suffix: '.html' })
+      const outputPath = path.join(tempPath, 'subdir/code-block.html')
       const expectedFilePath = path.join(tempPath, 'saved-html.html')
       const expectedOutput = fs.readFileSync(expectedFilePath).toString()
       const expectedOutputArr = expectedOutput.split('\n')
@@ -635,7 +635,10 @@ var x = 0;
       stubs.push(
         sinon
           .stub((atom as any).applicationDelegate, 'showSaveDialog')
-          .returns(outputPath),
+          .callsFake((_options, callback: Function) => {
+            if (callback) callback(outputPath)
+            return outputPath
+          }),
         sinon
           .stub(preview, 'getDocumentStyleSheets')
           .returns(markdownPreviewStyles),
@@ -651,9 +654,7 @@ var x = 0;
       expect(fs.realpathSync(textEditor!.getPath()!)).to.equal(
         fs.realpathSync(outputPath),
       )
-      const savedHTML: string = textEditor!
-        .getText()
-        .replace(/<title>[^<]*<\/title>/, '<title>code-block</title>')
+      const savedHTML: string = textEditor!.getText()
       savedHTML.split('\n').forEach((s, i) => {
         expect(s).to.equal(expectedOutputArr[i])
       })
