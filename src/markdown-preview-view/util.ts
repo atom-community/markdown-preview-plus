@@ -272,7 +272,7 @@ showMathMenu: false
 
 export function mkHtml(
   title: string,
-  body: string,
+  html: { head: string; body: string },
   renderLaTeX: boolean,
   useGithubStyle: boolean,
 ) {
@@ -290,10 +290,11 @@ export function mkHtml(
     <meta charset="utf-8" />
     <title>${title}</title>${maybeMathJaxScript}
     <style>${getMarkdownPreviewCSS()}</style>
+${html.head}
   </head>
   <body>
     <markdown-preview-plus-view${githubStyle}>
-      ${body}
+      ${html.body}
     </markdown-preview-plus-view>
   </body>
 </html>

@@ -377,7 +377,7 @@ export class MarkdownPreviewView {
     }
   }
 
-  async getHTML(): Promise<string> {
+  async getHTML() {
     const source = await this.getMarkdownSource()
     if (source === undefined) throw new Error("Couldn't get Markdown source")
     return renderer.toHTML(
@@ -516,7 +516,7 @@ export class MarkdownPreviewView {
 
     handlePromise(
       this.getHTML().then(function(html) {
-        atom.clipboard.write(html)
+        atom.clipboard.write(html.body)
       }),
     )
 
@@ -544,15 +544,15 @@ export class MarkdownPreviewView {
     const title = path.parse(htmlFilePath).name
 
     handlePromise(
-      this.getHTML().then(async (htmlBody) => {
-        const html = util.mkHtml(
+      this.getHTML().then(async (html) => {
+        const fullHtml = util.mkHtml(
           title,
-          htmlBody,
+          html,
           this.renderLaTeX,
           atom.config.get('markdown-preview-plus.useGitHubStyle'),
         )
 
-        fs.writeFileSync(htmlFilePath, html)
+        fs.writeFileSync(htmlFilePath, fullHtml)
         return atom.workspace.open(htmlFilePath)
       }),
     )

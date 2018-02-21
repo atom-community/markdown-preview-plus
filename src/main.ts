@@ -163,13 +163,13 @@ async function copyHtmlInternal(editor: TextEditor): Promise<void> {
     frame.src = 'about:blank'
     frame.style.display = 'none'
     frame.addEventListener('load', async () => {
-      const proHTML = await mathjaxHelper.processHTMLString(frame, html)
+      const proHTML = await mathjaxHelper.processHTMLString(frame, html.body)
       frame.remove()
       atom.clipboard.write(proHTML)
     })
     document.body.appendChild(frame)
   } else {
-    atom.clipboard.write(html)
+    atom.clipboard.write(html.body)
   }
 }
 

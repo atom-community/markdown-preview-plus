@@ -16,7 +16,7 @@ export async function toHTML(
   grammar: Grammar | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
-): Promise<string> {
+) {
   if (text === null) {
     text = ''
   }
@@ -32,7 +32,10 @@ export async function toHTML(
   ) {
     tokenizeCodeBlocks(doc, defaultCodeLanguage)
   }
-  return doc.documentElement.outerHTML
+  return {
+    head: doc.head.innerHTML,
+    body: doc.body.innerHTML,
+  }
 }
 
 export async function render(
@@ -51,10 +54,11 @@ export async function render(
     try {
       html = await pandocHelper.renderPandoc(text, filePath, renderLaTeX)
     } catch (err) {
-      // tslint:disable-next-line:no-unsafe-any
+      // tslint:disable:no-unsafe-any
+      if (err.html === undefined) throw err
       error = err.message as string
-      // tslint:disable-next-line:no-unsafe-any
       html = err.html as string
+      // tslint:enable:no-unsafe-any
     }
   } else {
     html = markdownIt.render(text, renderLaTeX)
