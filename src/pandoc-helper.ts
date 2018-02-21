@@ -88,9 +88,10 @@ export function setPandocOptions(
  * @param {string} Returned HTML
  * @return {array} with Arguments for callbackFunction (error set to null)
  */
-function handleError(error: string, html: string, renderMath: boolean) {
-  html = `<h1>Pandoc Error:</h1><pre>${error}</pre><hr>${html}`
-  return handleSuccess(html, renderMath)
+function handleError(error: string, html: string, renderMath: boolean): never {
+  const err = new Error(error) as Error & { html: string }
+  err.html = handleSuccess(html, renderMath)
+  throw err
 }
 
 /**
@@ -179,8 +180,12 @@ export async function renderPandoc(
           })
           reject(error)
         }
-        const result = handleResponse(stderr || '', stdout || '', renderMath)
-        resolve(result)
+        try {
+          const result = handleResponse(stderr || '', stdout || '', renderMath)
+          resolve(result)
+        } catch (e) {
+          reject(e)
+        }
       },
     )
     cp.stdin.write(text)

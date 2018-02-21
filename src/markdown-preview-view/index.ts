@@ -391,27 +391,38 @@ export class MarkdownPreviewView {
 
   async renderMarkdownText(text: string): Promise<void> {
     try {
-      const domFragment = await renderer.toDOMFragment(
+      const domDocument = await renderer.render(
         text,
         this.getPath(),
-        this.getGrammar(),
         this.renderLaTeX,
+        false,
       )
       if (this.destroyed) return
       this.loading = false
       this.loaded = true
       // div.update-preview created after constructor st UpdatePreview cannot
       // be instanced in the constructor
-      if (!this.updatePreview && this.preview) {
+      if (!this.preview) return
+      if (!this.updatePreview) {
         this.updatePreview = new UpdatePreview(this.preview)
       }
-      this.updatePreview &&
-        domFragment &&
-        this.updatePreview.update(
-          this.element,
-          domFragment as Element,
-          this.renderLaTeX,
-        )
+      const domFragment = document.createDocumentFragment()
+      for (const elem of Array.from(domDocument.body.childNodes)) {
+        domFragment.appendChild(elem)
+      }
+      this.updatePreview.update(this.element, domFragment, this.renderLaTeX)
+      const doc = this.element.contentDocument
+      if (doc && domDocument.head.hasChildNodes) {
+        let container = doc.head.querySelector('original-elements')
+        if (!container) {
+          container = doc.createElement('original-elements')
+          doc.head.appendChild(container)
+        }
+        container.innerHTML = ''
+        for (const headElement of Array.from(domDocument.head.childNodes)) {
+          container.appendChild(headElement.cloneNode(true))
+        }
+      }
       this.emitter.emit('did-change-markdown')
     } catch (error) {
       console.error(error)

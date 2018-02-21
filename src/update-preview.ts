@@ -26,7 +26,7 @@ import renderer = require('./renderer')
 import { handlePromise } from './util'
 
 export class UpdatePreview {
-  private domFragment?: Element
+  private domFragment?: DocumentFragment
   private tree: WrappedDomTree
   // @param dom A DOM element object
   //    https://developer.mozilla.org/en-US/docs/Web/API/element
@@ -36,7 +36,7 @@ export class UpdatePreview {
 
   public update(
     frame: HTMLIFrameElement,
-    domFragment: Element,
+    domFragment: DocumentFragment,
     renderLaTeX: boolean,
   ) {
     prepareCodeBlocksForAtomEditors(frame.contentDocument, domFragment)
@@ -46,7 +46,7 @@ export class UpdatePreview {
     }
 
     const firstTime = this.domFragment === undefined
-    this.domFragment = domFragment.cloneNode(true) as Element
+    this.domFragment = domFragment.cloneNode(true) as DocumentFragment
 
     const newDom = frame.contentDocument.createElement('div')
     newDom.className = 'update-preview'
@@ -88,7 +88,7 @@ export class UpdatePreview {
     return r
   }
 
-  private updateOrderedListsStart(fragment: Element) {
+  private updateOrderedListsStart(fragment: DocumentFragment) {
     if (this.tree.shownTree === undefined) {
       throw new Error('shownTree undefined in updateOrderedListsStart')
     }
@@ -113,7 +113,7 @@ export class UpdatePreview {
 
 function prepareCodeBlocksForAtomEditors(
   document: HTMLDocument,
-  domFragment: Element,
+  domFragment: DocumentFragment,
 ) {
   for (const preElement of Array.from(domFragment.querySelectorAll('pre'))) {
     const preWrapper = document.createElement('span')
