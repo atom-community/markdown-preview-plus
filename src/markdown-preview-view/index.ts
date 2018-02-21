@@ -13,11 +13,12 @@ import {
 import _ = require('lodash')
 import fs = require('fs')
 
-import renderer = require('./renderer')
-import { UpdatePreview } from './update-preview'
-import markdownIt = require('./markdown-it-helper')
-import imageWatcher = require('./image-watch-helper')
-import { handlePromise } from './util'
+import renderer = require('../renderer')
+import { UpdatePreview } from '../update-preview'
+import markdownIt = require('../markdown-it-helper')
+import imageWatcher = require('../image-watch-helper')
+import { handlePromise } from '../util'
+import * as util from './util'
 
 export interface MPVParamsEditor {
   editorId: number
@@ -43,7 +44,7 @@ export class MarkdownPreviewView {
     (resolve) => (this.resolve = resolve),
   )
   public readonly element: MarkdownPreviewViewElement
-  public rootElement?: HTMLElement
+  private rootElement?: HTMLElement
   private preview?: HTMLElement
   private emitter: Emitter<{
     'did-change-title': undefined
@@ -146,7 +147,6 @@ export class MarkdownPreviewView {
   }
 
   destroy() {
-    console.debug('destroyed')
     if (this.destroyed) return
     this.destroyed = true
     const path = this.getPath()
@@ -155,16 +155,11 @@ export class MarkdownPreviewView {
     this.element.remove()
   }
 
-  onDidChangeTitle(callback: () => void) {
+  onDidChangeTitle(callback: () => void): Disposable {
     return this.emitter.on('did-change-title', callback)
   }
 
-  onDidChangeModified(_callback: any) {
-    // No op to suppress deprecation warning
-    return new Disposable()
-  }
-
-  onDidChangeMarkdown(callback: () => void) {
+  onDidChangeMarkdown(callback: () => void): Disposable {
     return this.emitter.on('did-change-markdown', callback)
   }
 
@@ -176,7 +171,7 @@ export class MarkdownPreviewView {
   }
 
   resolveEditor(editorId: number) {
-    this.editor = this.editorForId(editorId)
+    this.editor = util.editorForId(editorId)
 
     if (this.editor) {
       this.emitter.emit('did-change-title')
@@ -188,15 +183,6 @@ export class MarkdownPreviewView {
       const pane = atom.workspace.paneForItem(this)
       pane && pane.destroyItem(this)
     }
-  }
-
-  editorForId(editorId: number) {
-    for (const editor of atom.workspace.getTextEditors()) {
-      if (editor.id === editorId) {
-        return editor
-      }
-    }
-    return undefined
   }
 
   handleEvents() {
