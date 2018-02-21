@@ -71,21 +71,21 @@ export class MarkdownPreviewView {
     this.element.style.width = '100%'
     this.element.style.height = '100%'
     const onload = () => {
-      const document = this.element.contentDocument
+      const doc = this.element.contentDocument
       if (this.updatePreview) this.updatePreview = undefined
       if (this.destroyed) return
       this.disposables.add(
         atom.styles.observeStyleElements((se) => {
-          document.head.appendChild(se.cloneNode(true))
+          doc.head.appendChild(se.cloneNode(true))
         }),
       )
-      this.rootElement = document.createElement('markdown-preview-plus-view')
+      this.rootElement = doc.createElement('markdown-preview-plus-view')
       this.rootElement.classList.add('native-key-bindings')
       this.rootElement.tabIndex = -1
-      this.preview = document.createElement('div')
+      this.preview = doc.createElement('div')
       this.preview.classList.add('update-preview')
       this.rootElement.appendChild(this.preview)
-      document.body.appendChild(this.rootElement)
+      doc.body.appendChild(this.rootElement)
       this.rootElement.oncontextmenu = (e) => {
         this.lastTarget = e.target as HTMLElement
         const pane = atom.workspace.paneForItem(this)
