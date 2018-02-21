@@ -578,14 +578,14 @@ var x = 0;
 
   describe('when core:save-as is triggered', function() {
     beforeEach(async function() {
-      filePath = path.join(tempPath, 'subdir/code-block.md')
+      filePath = path.join(tempPath, 'subdir', 'code-block.md')
       preview = (await atom.workspace.open(
         `markdown-preview-plus:///${filePath}`,
       )) as MarkdownPreviewView
     })
 
     it('saves the rendered HTML and opens it', async function() {
-      const outputPath = path.join(tempPath, 'subdir/code-block.html')
+      const outputPath = path.join(tempPath, 'subdir', 'code-block.html')
       const expectedFilePath = path.join(tempPath, 'saved-html.html')
       const expectedOutput = fs.readFileSync(expectedFilePath).toString()
       const expectedOutputArr = expectedOutput.split('\n')
