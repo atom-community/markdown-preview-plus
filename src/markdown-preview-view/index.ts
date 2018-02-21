@@ -312,8 +312,8 @@ export class MarkdownPreviewView {
     this.disposables.add(
       atom.config.onDidChange(
         'markdown-preview-plus.useGitHubStyle',
-        (useGitHubStyle) => {
-          if (useGitHubStyle) {
+        ({ newValue }) => {
+          if (newValue) {
             this.rootElement &&
               this.rootElement.setAttribute('data-use-github-style', '')
           } else {
