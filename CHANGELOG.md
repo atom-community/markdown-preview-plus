@@ -1,3 +1,7 @@
+## 2.5.3
+
+-   [Workaround] Work around for Atom bug #16801
+
 ## 2.5.2
 
 -   Return support for markdown-pdf... kinda

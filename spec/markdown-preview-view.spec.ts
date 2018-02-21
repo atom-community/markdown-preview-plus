@@ -628,11 +628,15 @@ var x = 0;
         })
       })
 
-      sinon.stub(atom as any, 'showSaveDialogSync').returns(outputPath)
-      sinon
+      const stub1 = sinon
+        .stub(atom as any, 'showSaveDialogSync')
+        .returns(outputPath)
+      const stub2 = sinon
         .stub(preview, 'getDocumentStyleSheets')
         .returns(markdownPreviewStyles)
-      sinon.stub(preview, 'getTextEditorStyles').returns(atomTextEditorStyles)
+      const stub3 = sinon
+        .stub(preview, 'getTextEditorStyles')
+        .returns(atomTextEditorStyles)
       atom.commands.dispatch(preview.element, 'core:save-as')
 
       await openedPromise
@@ -649,6 +653,9 @@ var x = 0;
         )
         .replace(/\n<\/div><\/body>/, '</body>')
       expect(savedHTML).to.equal(expectedOutput.replace(/\r\n/g, '\n'))
+      stub1.restore()
+      stub2.restore()
+      stub3.restore()
     })
     // fs.writeFileSync(expectedFilePath, savedHTML, encoding: 'utf8')
 
