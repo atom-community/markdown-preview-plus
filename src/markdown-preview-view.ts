@@ -64,7 +64,6 @@ export class MarkdownPreviewView {
 
   constructor({ editorId, filePath }: MPVParams, deserialization = false) {
     this.getPathToElement = this.getPathToElement.bind(this)
-    this.syncSource = this.syncSource.bind(this)
     this.getPathToToken = this.getPathToToken.bind(this)
     this.syncPreview = this.syncPreview.bind(this)
     this.editorId = editorId
@@ -86,6 +85,8 @@ export class MarkdownPreviewView {
       this.element.contentDocument.body.appendChild(this.rootElement)
       this.rootElement.oncontextmenu = (e) => {
         this.lastTarget = e.target as HTMLElement
+        const pane = atom.workspace.paneForItem(this)
+        if (pane) pane.activate()
         atom.contextMenu.showForEvent(
           Object.assign({}, e, { target: this.element }),
         )
@@ -212,10 +213,6 @@ export class MarkdownPreviewView {
       atom.commands.add(this.element, {
         'core:move-up': () => this.rootElement.scrollBy({ top: -10 }),
         'core:move-down': () => this.rootElement.scrollBy({ top: 10 }),
-        'core:save-as': (event) => {
-          event.stopPropagation()
-          handlePromise(this.saveAs())
-        },
         'core:copy': (event: CommandEvent) => {
           if (this.copyToClipboard()) event.stopPropagation()
         },
@@ -568,29 +565,29 @@ export class MarkdownPreviewView {
     return true
   }
 
-  async saveAs() {
+  getSaveDialogOptions() {
+    let defaultPath = this.getPath()
+    if (defaultPath) {
+      defaultPath += '.html'
+    } else {
+      const projectPath = atom.project.getPaths()[0]
+      defaultPath = 'untitled.md.html'
+      if (projectPath) {
+        defaultPath = path.join(projectPath, defaultPath)
+      }
+    }
+    return { defaultPath }
+  }
+
+  async saveAs(htmlFilePath: string) {
     if (this.loading) {
       return
     }
+    const pane = atom.workspace.paneForItem(this)
+    if (!pane) return
 
-    let filePath = this.getPath()
-    let title = 'Markdown to HTML'
-    if (filePath) {
-      title = path.parse(filePath).name
-      filePath += '.html'
-    } else {
-      const projectPath = atom.project.getPaths()[0]
-      filePath = 'untitled.md.html'
-      if (projectPath) {
-        filePath = path.join(projectPath, filePath)
-      }
-    }
+    const title = path.parse(htmlFilePath).name
 
-    const htmlFilePath =
-      atom.getVersion() === '1.24.0'
-        ? // tslint:disable-next-line:no-unsafe-any // TODO: remove this once Atom is fixed
-          ((atom as any).applicationDelegate.showSaveDialog(filePath) as string)
-        : atom.showSaveDialogSync(filePath)
     if (htmlFilePath) {
       return this.getHTML((error: Error | null, htmlBody: string) => {
         if (error !== null) {
@@ -836,7 +833,11 @@ export class MarkdownPreviewView {
     }
 
     if (finalToken !== null && this.editor) {
-      this.editor.setCursorBufferPosition([finalToken.map[0], 0])
+      // tslint:disable-next-line:no-floating-promises
+      atom.workspace.open(this.editor, {
+        initialLine: finalToken.map[0],
+        searchAllPanes: true,
+      })
       return finalToken.map[0]
     } else {
       return null

@@ -1,6 +1,6 @@
 ## 2.5.3
 
--   [Workaround] Work around for Atom bug #16801
+-   \[Workaround\] Work around for Atom bug \#16801
 
 ## 2.5.2
 

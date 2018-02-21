@@ -578,14 +578,17 @@ var x = 0;
 
   describe('when core:save-as is triggered', function() {
     beforeEach(async function() {
-      filePath = path.join(tempPath, 'subdir/code-block.md')
-      preview = await createMarkdownPreviewView({ filePath })
+      filePath = path.join(tempPath, 'subdir', 'code-block.md')
+      preview = (await atom.workspace.open(
+        `markdown-preview-plus://${filePath}`,
+      )) as MarkdownPreviewView
     })
 
     it('saves the rendered HTML and opens it', async function() {
-      const outputPath = temp.path({ suffix: '.html' })
+      const outputPath = path.join(tempPath, 'subdir', 'code-block.html')
       const expectedFilePath = path.join(tempPath, 'saved-html.html')
       const expectedOutput = fs.readFileSync(expectedFilePath).toString()
+      const expectedOutputArr = expectedOutput.split('\n')
 
       const createRule = (selector: string, css: string) => ({
         selectorText: selector,
@@ -628,15 +631,21 @@ var x = 0;
         })
       })
 
-      const stub1 = sinon
-        .stub(atom as any, 'showSaveDialogSync')
-        .returns(outputPath)
-      const stub2 = sinon
-        .stub(preview, 'getDocumentStyleSheets')
-        .returns(markdownPreviewStyles)
-      const stub3 = sinon
-        .stub(preview, 'getTextEditorStyles')
-        .returns(atomTextEditorStyles)
+      const stubs = []
+      stubs.push(
+        sinon
+          .stub((atom as any).applicationDelegate, 'showSaveDialog')
+          .callsFake((_options, callback: Function) => {
+            if (callback) callback(outputPath)
+            return outputPath
+          }),
+        sinon
+          .stub(preview, 'getDocumentStyleSheets')
+          .returns(markdownPreviewStyles),
+        sinon
+          .stub(preview, 'getTextEditorStyles')
+          .returns(atomTextEditorStyles),
+      )
       atom.commands.dispatch(preview.element, 'core:save-as')
 
       await openedPromise
@@ -645,17 +654,12 @@ var x = 0;
       expect(fs.realpathSync(textEditor!.getPath()!)).to.equal(
         fs.realpathSync(outputPath),
       )
-      const savedHTML: string = textEditor!
-        .getText()
-        .replace(
-          /<body class='markdown-preview'><div>/,
-          "<body class='markdown-preview'>",
-        )
-        .replace(/\n<\/div><\/body>/, '</body>')
-      expect(savedHTML).to.equal(expectedOutput.replace(/\r\n/g, '\n'))
-      stub1.restore()
-      stub2.restore()
-      stub3.restore()
+      const savedHTML: string = textEditor!.getText()
+      savedHTML.split('\n').forEach((s, i) => {
+        expect(s).to.equal(expectedOutputArr[i])
+      })
+      expect(savedHTML).to.equal(expectedOutput)
+      stubs.forEach((stub) => stub.restore())
     })
     // fs.writeFileSync(expectedFilePath, savedHTML, encoding: 'utf8')
 
