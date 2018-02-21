@@ -483,13 +483,9 @@ export class MarkdownPreviewView {
     }
 
     handlePromise(
-      this.getHTML()
-        .then(function(html) {
-          atom.clipboard.write(html)
-        })
-        .catch(function(error) {
-          console.warn('Copying Markdown as HTML failed', error)
-        }),
+      this.getHTML().then(function(html) {
+        atom.clipboard.write(html)
+      }),
     )
 
     return true
@@ -509,26 +505,25 @@ export class MarkdownPreviewView {
     return { defaultPath }
   }
 
-  async saveAs(htmlFilePath: string | undefined) {
+  saveAs(htmlFilePath: string | undefined) {
     if (htmlFilePath === undefined) return
     if (this.loading) return
 
     const title = path.parse(htmlFilePath).name
 
-    try {
-      const htmlBody = await this.getHTML()
-      const html = util.mkHtml(
-        title,
-        htmlBody,
-        this.renderLaTeX,
-        atom.config.get('markdown-preview-plus.useGitHubStyle'),
-      )
+    handlePromise(
+      this.getHTML().then(async (htmlBody) => {
+        const html = util.mkHtml(
+          title,
+          htmlBody,
+          this.renderLaTeX,
+          atom.config.get('markdown-preview-plus.useGitHubStyle'),
+        )
 
-      fs.writeFileSync(htmlFilePath, html)
-      handlePromise(atom.workspace.open(htmlFilePath))
-    } catch (error) {
-      console.warn('Saving Markdown as HTML failed', error)
-    }
+        fs.writeFileSync(htmlFilePath, html)
+        return atom.workspace.open(htmlFilePath)
+      }),
+    )
   }
 
   //
