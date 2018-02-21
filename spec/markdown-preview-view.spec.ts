@@ -580,7 +580,7 @@ var x = 0;
     beforeEach(async function() {
       filePath = path.join(tempPath, 'subdir', 'code-block.md')
       preview = (await atom.workspace.open(
-        `markdown-preview-plus:///${filePath}`,
+        `markdown-preview-plus://${filePath}`,
       )) as MarkdownPreviewView
     })
 
