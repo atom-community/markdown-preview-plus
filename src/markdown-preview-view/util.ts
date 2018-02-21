@@ -2,6 +2,7 @@ import { TextEditor, StyleManager } from 'atom'
 import * as path from 'path'
 import * as fs from 'fs'
 import { Token } from 'markdown-it'
+import { handlePromise } from '../util'
 
 export function editorForId(editorId: number): TextEditor | undefined {
   for (const editor of atom.workspace.getTextEditors()) {
@@ -297,4 +298,9 @@ export function mkHtml(
   </body>
 </html>
 ` // Ensure trailing newline
+}
+
+export function destroy(item: object) {
+  const pane = atom.workspace.paneForItem(item)
+  if (pane) handlePromise(pane.destroyItem(item))
 }

@@ -184,8 +184,7 @@ export class MarkdownPreviewView {
     } else {
       // The editor this preview was created for has been closed so close
       // this preview since a preview cannot be rendered without an editor
-      const pane = atom.workspace.paneForItem(this)
-      pane && pane.destroyItem(this)
+      util.destroy(this)
     }
   }
 
@@ -261,6 +260,9 @@ export class MarkdownPreviewView {
         }),
         this.editor.onDidChangePath(() => {
           this.emitter.emit('did-change-title')
+        }),
+        this.editor.onDidDestroy(() => {
+          util.destroy(this)
         }),
         this.editor.getBuffer().onDidSave(function() {
           if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
