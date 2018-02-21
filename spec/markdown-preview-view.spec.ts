@@ -590,31 +590,12 @@ var x = 0;
       const expectedOutput = fs.readFileSync(expectedFilePath).toString()
       const expectedOutputArr = expectedOutput.split('\n')
 
-      const createRule = (selector: string, css: string) => ({
-        selectorText: selector,
-        cssText: `${selector} ${css}`,
-      })
-
       const markdownPreviewStyles = [
-        {
-          rules: [
-            createRule('markdown-preview-plus-view', '{ color: orange; }'),
-          ],
-        },
-        {
-          rules: [
-            createRule('.not-included', '{ color: green; }'),
-            createRule(
-              'markdown-preview-plus-view :host',
-              '{ color: purple; }',
-            ),
-          ],
-        },
+        'markdown-preview-plus-view { color: orange; }',
       ]
 
       const atomTextEditorStyles = [
         'atom-text-editor .line { color: brown; }\natom-text-editor .number { color: cyan; }',
-        'atom-text-editor :host .something { color: black; }',
         'atom-text-editor .hr { background: url(atom://markdown-preview-plus/assets/hr.png); }',
       ]
 
@@ -639,12 +620,11 @@ var x = 0;
             if (callback) callback(outputPath)
             return outputPath
           }),
-        sinon
-          .stub(preview, 'getDocumentStyleSheets')
-          .returns(markdownPreviewStyles),
-        sinon
-          .stub(preview, 'getTextEditorStyles')
-          .returns(atomTextEditorStyles),
+        sinon.stub(preview, 'getStyles').callsFake((context: string) => {
+          if (context === 'markdown-preview-plus') return markdownPreviewStyles
+          else if (context === 'atom-text-editor') return atomTextEditorStyles
+          else throw new Error(`Unknown style context: ${context}`)
+        }),
       )
       atom.commands.dispatch(preview.element, 'core:save-as')
 
@@ -677,7 +657,7 @@ var x = 0;
           context: 'unrelated-context',
         })
 
-        extractedStyles = preview.getTextEditorStyles()
+        extractedStyles = preview.getStyles('atom-text-editor')
       })
 
       it('returns an array containing atom-text-editor css style strings', function() {

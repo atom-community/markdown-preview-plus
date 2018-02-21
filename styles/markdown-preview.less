@@ -4,69 +4,6 @@ iframe.markdown-preview-plus {
   border: none;
 }
 
-markdown-preview-plus-view {
-  height: 100%;
-  display: block;
-
-  .emoji {
-    max-width: 1em !important;
-  }
-
-  atom-text-editor {
-    white-space: pre;
-    display: block;
-    // only show scrollbars on hover
-    .scrollbars-visible-always & {
-      .vertical-scrollbar,
-      .horizontal-scrollbar {
-        visibility: hidden;
-      }
-    }
-    .scrollbars-visible-always &:hover {
-      .vertical-scrollbar,
-      .horizontal-scrollbar {
-        visibility: visible;
-      }
-    }
-  }
-
-  del {
-    text-decoration: none;
-    position: relative;
-  }
-
-  del::after {
-    border-bottom: 1px solid black;
-    content: '';
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 50%;
-  }
-
-  .flash {
-    -webkit-animation: flash 1s ease-out;
-    -webkit-animation-iteration-count: 1;
-    outline: 1px solid rgba(255, 0, 0, 0);
-  }
-
-  .flash:not(li) {
-    display: block;
-  }
-
-  @-webkit-keyframes flash {
-    0% {
-      outline-color: rgba(255, 0, 0, 0);
-    }
-    50% {
-      outline-color: rgba(255, 0, 0, 1);
-    }
-    100% {
-      outline-color: rgba(255, 0, 0, 0);
-    }
-  }
-}
-
 .markdown-spinner {
   margin: auto;
   background-image: url(images/octocat-spinner-128.gif);

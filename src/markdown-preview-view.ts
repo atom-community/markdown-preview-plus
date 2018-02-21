@@ -43,8 +43,8 @@ export class MarkdownPreviewView {
     (resolve) => (this.resolve = resolve),
   )
   public readonly element: MarkdownPreviewViewElement
-  public readonly rootElement: HTMLDivElement
-  private preview: HTMLElement
+  public rootElement?: HTMLElement
+  private preview?: HTMLElement
   private emitter: Emitter<{
     'did-change-title': undefined
     'did-change-markdown': undefined
@@ -75,14 +75,21 @@ export class MarkdownPreviewView {
     this.element.style.width = '100%'
     this.element.style.height = '100%'
     const onload = () => {
-      this.element.removeEventListener('load', onload)
+      const document = this.element.contentDocument
+      if (this.updatePreview) this.updatePreview = undefined
       if (this.destroyed) return
       this.disposables.add(
         atom.styles.observeStyleElements((se) => {
-          this.element.contentDocument.head.appendChild(se)
+          document.head.appendChild(se.cloneNode(true))
         }),
       )
-      this.element.contentDocument.body.appendChild(this.rootElement)
+      this.rootElement = document.createElement('markdown-preview-plus-view')
+      this.rootElement.classList.add('native-key-bindings')
+      this.rootElement.tabIndex = -1
+      this.preview = document.createElement('div')
+      this.preview.classList.add('update-preview')
+      this.rootElement.appendChild(this.preview)
+      document.body.appendChild(this.rootElement)
       this.rootElement.oncontextmenu = (e) => {
         this.lastTarget = e.target as HTMLElement
         const pane = atom.workspace.paneForItem(this)
@@ -103,30 +110,26 @@ export class MarkdownPreviewView {
         // need to defer on deserialization since
         // editor might not be deserialized at this point
         setImmediate(didAttach)
+        deserialization = false
       } else {
         didAttach()
       }
     }
     this.element.addEventListener('load', onload)
-    this.rootElement = document.createElement(
-      'markdown-preview-plus-view',
-    ) as any
-    this.rootElement.classList.add('native-key-bindings')
-    this.rootElement.tabIndex = -1
-    this.preview = document.createElement('div')
-    this.preview.classList.add('update-preview')
-    this.rootElement.appendChild(this.preview)
   }
 
   text() {
+    if (!this.rootElement) return ''
     return this.rootElement.textContent || ''
   }
 
   find(what: string) {
+    if (!this.rootElement) return null
     return this.rootElement.querySelector(what)
   }
 
   findAll(what: string) {
+    if (!this.rootElement) return []
     return this.rootElement.querySelectorAll(what)
   }
 
@@ -143,6 +146,7 @@ export class MarkdownPreviewView {
   }
 
   destroy() {
+    console.debug('destroyed')
     if (this.destroyed) return
     this.destroyed = true
     const path = this.getPath()
@@ -211,21 +215,27 @@ export class MarkdownPreviewView {
 
     this.disposables.add(
       atom.commands.add(this.element, {
-        'core:move-up': () => this.rootElement.scrollBy({ top: -10 }),
-        'core:move-down': () => this.rootElement.scrollBy({ top: 10 }),
+        'core:move-up': () =>
+          this.rootElement && this.rootElement.scrollBy({ top: -10 }),
+        'core:move-down': () =>
+          this.rootElement && this.rootElement.scrollBy({ top: 10 }),
         'core:copy': (event: CommandEvent) => {
           if (this.copyToClipboard()) event.stopPropagation()
         },
         'markdown-preview-plus:zoom-in': () => {
+          if (!this.rootElement) return
           const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
           this.rootElement.style.zoom = (zoomLevel + 0.1).toString()
         },
         'markdown-preview-plus:zoom-out': () => {
+          if (!this.rootElement) return
           const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
           this.rootElement.style.zoom = (zoomLevel - 0.1).toString()
         },
-        'markdown-preview-plus:reset-zoom': () =>
-          (this.rootElement.style.zoom = '1'),
+        'markdown-preview-plus:reset-zoom': () => {
+          if (!this.rootElement) return
+          this.rootElement.style.zoom = '1'
+        },
         'markdown-preview-plus:sync-source': (_event) => {
           const lastTarget = this.lastTarget
           if (!lastTarget) return
@@ -312,9 +322,11 @@ export class MarkdownPreviewView {
         'markdown-preview-plus.useGitHubStyle',
         (useGitHubStyle) => {
           if (useGitHubStyle) {
-            this.rootElement.setAttribute('data-use-github-style', '')
+            this.rootElement &&
+              this.rootElement.setAttribute('data-use-github-style', '')
           } else {
-            this.rootElement.removeAttribute('data-use-github-style')
+            this.rootElement &&
+              this.rootElement.removeAttribute('data-use-github-style')
           }
         },
       ),
@@ -459,50 +471,28 @@ export class MarkdownPreviewView {
     return this.editor && this.editor.getGrammar()
   }
 
-  getDocumentStyleSheets() {
-    // This function exists so we can stub it
-    return document.styleSheets
-  }
-
-  getTextEditorStyles() {
+  getStyles(context: string) {
     const textEditorStyles = document.createElement(
       'atom-styles',
     ) as HTMLElement & { initialize(styles: StyleManager): void }
     textEditorStyles.initialize(atom.styles)
-    textEditorStyles.setAttribute('context', 'atom-text-editor')
-    document.body.appendChild(textEditorStyles)
+    textEditorStyles.setAttribute('context', context)
 
     // Extract style elements content
     return Array.from(textEditorStyles.childNodes).map(
-      (styleElement) => (styleElement as HTMLElement).innerText,
+      (styleElement) => (styleElement as HTMLStyleElement).innerText,
     )
   }
 
   getMarkdownPreviewCSS() {
     const markdowPreviewRules = ['body { padding: 0; margin: 0; }']
-    const ruleRegExp = /markdown-preview-plus-view/
     const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
-    for (const stylesheet of Array.from(this.getDocumentStyleSheets())) {
-      if (stylesheet.rules != null) {
-        for (const rule of Array.from(stylesheet.rules)) {
-          // We only need `.markdown-review` css
-          if (
-            (rule.selectorText != null
-              ? rule.selectorText.match(ruleRegExp)
-              : undefined) != null
-          ) {
-            markdowPreviewRules.push(rule.cssText)
-          }
-        }
-      }
-    }
-
     return markdowPreviewRules
-      .concat(this.getTextEditorStyles())
+      .concat(this.getStyles('markdown-preview-plus'))
+      .concat(this.getStyles('atom-text-editor'))
       .join('\n')
       .replace(/atom-text-editor/g, 'pre.editor-colors')
-      .replace(/:host/g, '.host') // Remove shadow-dom :host selector causing problem on FF
       .replace(cssUrlRefExp, function(
         _match,
         assetsName: string,
@@ -518,7 +508,8 @@ export class MarkdownPreviewView {
   }
 
   showError(result: Error) {
-    const error = document.createElement('div')
+    if (!this.preview) return
+    const error = this.element.contentDocument.createElement('div')
     error.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${
       result.message
     }</h3>`
@@ -526,15 +517,16 @@ export class MarkdownPreviewView {
   }
 
   showLoading() {
+    if (!this.preview) return
     this.loading = true
-    const spinner = document.createElement('div')
+    const spinner = this.element.contentDocument.createElement('div')
     spinner.classList.add('markdown-spinner')
     spinner.innerText = 'Loading Markdown\u2026'
     this.preview.appendChild(spinner)
   }
 
   copyToClipboard() {
-    if (this.loading) {
+    if (this.loading || !this.preview) {
       return false
     }
 
@@ -656,7 +648,7 @@ export class MarkdownPreviewView {
   //
   bubbleToContainerElement(element: HTMLElement): HTMLElement {
     let testElement = element
-    while (testElement !== document.body) {
+    while (testElement !== this.element.contentDocument.body) {
       const parent = testElement.parentElement
       if (!parent) break
       if (parent.classList.contains('MathJax_Display')) {
@@ -924,6 +916,8 @@ export class MarkdownPreviewView {
   //   identified `null` is returned.
   //
   syncPreview(text: string, line: number) {
+    if (!this.preview) return undefined
+    if (!this.rootElement) return undefined
     const tokens = markdownIt.getTokens(text, this.renderLaTeX)
     const pathToToken = this.getPathToToken(tokens, line)
 
