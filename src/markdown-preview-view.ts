@@ -555,7 +555,11 @@ export class MarkdownPreviewView {
       }
     }
 
-    const htmlFilePath = atom.showSaveDialogSync(filePath)
+    const htmlFilePath =
+      atom.getVersion() === '1.24.0'
+        ? // tslint:disable-next-line:no-unsafe-any // TODO: remove this once Atom is fixed
+          ((atom as any).applicationDelegate.showSaveDialog(filePath) as string)
+        : atom.showSaveDialogSync(filePath)
     if (htmlFilePath) {
       return this.getHTML((error: Error | null, htmlBody: string) => {
         if (error !== null) {
