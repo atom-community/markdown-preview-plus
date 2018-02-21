@@ -23,7 +23,8 @@ describe('the difference algorithm that updates the preview', function() {
   afterEach(async function() {
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
-      await atom.workspace.paneForItem(item)!.destroyItem(item, true)
+      const pane = atom.workspace.paneForItem(item)
+      if (pane) await pane.destroyItem(item, true)
     }
   })
 

@@ -6,6 +6,7 @@ import * as markdownIt from '../lib/markdown-it-helper'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as wrench from 'fs-extra'
+import * as previewUtil from '../lib/markdown-preview-view/util'
 
 import { waitsFor, expectPreviewInSplitPane } from './util'
 import { TextEditorElement, TextEditor } from 'atom'
@@ -52,7 +53,8 @@ describe('MarkdownPreviewView', function() {
     previews.clear()
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
-      await atom.workspace.paneForItem(item)!.destroyItem(item, true)
+      const pane = atom.workspace.paneForItem(item)
+      if (pane) await pane.destroyItem(item, true)
     }
     await atom.packages.deactivatePackage('language-ruby')
     await atom.packages.deactivatePackage('language-javascript')
@@ -620,12 +622,12 @@ var x = 0;
             if (callback) callback(outputPath)
             return outputPath
           }),
-        sinon.stub(preview, 'getStyles').callsFake((context: string) => {
-          if (context === 'markdown-preview-plus') return markdownPreviewStyles
-          else if (context === 'atom-text-editor') return atomTextEditorStyles
-          else throw new Error(`Unknown style context: ${context}`)
-        }),
       )
+      previewUtil.__setGetStylesOverride((context: string) => {
+        if (context === 'markdown-preview-plus') return markdownPreviewStyles
+        else if (context === 'atom-text-editor') return atomTextEditorStyles
+        else throw new Error(`Unknown style context: ${context}`)
+      })
       atom.commands.dispatch(preview.element, 'core:save-as')
 
       await openedPromise
@@ -640,6 +642,7 @@ var x = 0;
       })
       expect(savedHTML).to.equal(expectedOutput)
       stubs.forEach((stub) => stub.restore())
+      previewUtil.__setGetStylesOverride()
     })
     // fs.writeFileSync(expectedFilePath, savedHTML, encoding: 'utf8')
 
@@ -657,7 +660,7 @@ var x = 0;
           context: 'unrelated-context',
         })
 
-        extractedStyles = preview.getStyles('atom-text-editor')
+        extractedStyles = previewUtil.getStyles('atom-text-editor')
       })
 
       it('returns an array containing atom-text-editor css style strings', function() {

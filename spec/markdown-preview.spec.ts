@@ -34,7 +34,8 @@ describe('Markdown preview plus package', function() {
   afterEach(async function() {
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
-      await atom.workspace.paneForItem(item)!.destroyItem(item, true)
+      const pane = atom.workspace.paneForItem(item)
+      if (pane) await pane.destroyItem(item, true)
     }
   })
 
@@ -682,7 +683,7 @@ world</p>\
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.getRoot().getAttribute('data-use-github-style')).not.to
+      expect(preview.getRoot()!.getAttribute('data-use-github-style')).not.to
         .exist
     })
 
@@ -699,7 +700,7 @@ world</p>\
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.getRoot().getAttribute('data-use-github-style')).to.equal(
+      expect(preview.getRoot()!.getAttribute('data-use-github-style')).to.equal(
         '',
       )
     })
@@ -715,14 +716,14 @@ world</p>\
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.getRoot().getAttribute('data-use-github-style')).not.to
+      expect(preview.getRoot()!.getAttribute('data-use-github-style')).not.to
         .exist
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', true)
-      expect(preview.getRoot().getAttribute('data-use-github-style')).to.exist
+      expect(preview.getRoot()!.getAttribute('data-use-github-style')).to.exist
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', false)
-      expect(preview.getRoot().getAttribute('data-use-github-style')).not.to
+      expect(preview.getRoot()!.getAttribute('data-use-github-style')).not.to
         .exist
     })
   })

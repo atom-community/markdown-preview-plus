@@ -10,27 +10,19 @@ import { isFileSync } from './util'
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
 
-export async function toDOMFragment<T>(
+export async function toDOMFragment(
   text: string,
   filePath: string | undefined,
   _grammar: any,
   renderLaTeX: boolean,
-  callback: (error: Error | null, domFragment?: Node) => T,
-): Promise<T> {
-  return render(text, filePath, renderLaTeX, false, function(
-    error: Error | null,
-    html?: string,
-  ) {
-    if (error !== null) {
-      return callback(error)
-    }
+): Promise<Node> {
+  const html = await render(text, filePath, renderLaTeX, false)
 
-    const template = document.createElement('template')
-    template.innerHTML = html!
-    const domFragment = template.content.cloneNode(true)
+  const template = document.createElement('template')
+  template.innerHTML = html!
+  const domFragment = template.content.cloneNode(true)
 
-    return callback(null, domFragment)
-  })
+  return domFragment
 }
 
 export async function toHTML(
@@ -39,63 +31,44 @@ export async function toHTML(
   grammar: Grammar | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
-  callback: (error: Error | null, html: string) => void,
-): Promise<void> {
+): Promise<string> {
   if (text === null) {
     text = ''
   }
-  return render(text, filePath, renderLaTeX, copyHTMLFlag, function(
-    error,
-    html,
+  let html = await render(text, filePath, renderLaTeX, copyHTMLFlag)
+  let defaultCodeLanguage: string | undefined
+  // Default code blocks to be coffee in Literate CoffeeScript files
+  if ((grammar && grammar.scopeName) === 'source.litcoffee') {
+    defaultCodeLanguage = 'coffee'
+  }
+  if (
+    !atom.config.get('markdown-preview-plus.enablePandoc') ||
+    !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
   ) {
-    let defaultCodeLanguage: string | undefined
-    if (error !== null) {
-      callback(error, '')
-    }
-    // Default code blocks to be coffee in Literate CoffeeScript files
-    if ((grammar && grammar.scopeName) === 'source.litcoffee') {
-      defaultCodeLanguage = 'coffee'
-    }
-    if (
-      !atom.config.get('markdown-preview-plus.enablePandoc') ||
-      !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
-    ) {
-      html = tokenizeCodeBlocks(html, defaultCodeLanguage)
-    }
-    callback(null, html)
-  })
+    html = tokenizeCodeBlocks(html, defaultCodeLanguage)
+  }
+  return html
 }
 
-async function render<T>(
+async function render(
   text: string,
   filePath: string | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
-  callback: (error: Error | null, html: string) => T,
-): Promise<T> {
+): Promise<string> {
   // Remove the <!doctype> since otherwise marked will escape it
   // https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
-  const callbackFunction = async function(error: Error | null, html: string) {
-    if (error !== null) {
-      callback(error, '')
-    }
-    html = sanitize(html)
-    html = await resolveImagePaths(html, filePath, copyHTMLFlag)
-    return callback(null, html.trim())
-  }
-
+  let html
   if (atom.config.get('markdown-preview-plus.enablePandoc')) {
-    return pandocHelper.renderPandoc(
-      text,
-      filePath,
-      renderLaTeX,
-      callbackFunction,
-    )
+    html = await pandocHelper.renderPandoc(text, filePath, renderLaTeX)
   } else {
-    return callbackFunction(null, markdownIt.render(text, renderLaTeX))
+    html = markdownIt.render(text, renderLaTeX)
   }
+  html = sanitize(html)
+  html = await resolveImagePaths(html, filePath, copyHTMLFlag)
+  return html.trim()
 }
 
 function sanitize(html: string) {
