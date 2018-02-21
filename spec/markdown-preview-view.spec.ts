@@ -231,9 +231,8 @@ var x = 0;
       )
       expect(jsEditor).to.exist
       expect(jsEditor.textContent).to.equal('var x = 0;\n')
-      expect(jsEditor.firstElementChild!.className).to.equal(
-        'syntax--source syntax--js',
-      )
+      expect(jsEditor.querySelector('.syntax--source.syntax--js')!.className).to
+        .be.ok
     })
   })
 
@@ -696,7 +695,7 @@ var x = 0;
 <span class="syntax--source syntax--js"><span>  b </span><span class="syntax--keyword syntax--operator syntax--assignment syntax--js"><span>=</span></span><span> </span><span class="syntax--constant syntax--numeric syntax--decimal syntax--js"><span>5</span></span></span>
 <span class="syntax--source syntax--js"><span class="syntax--meta syntax--brace syntax--curly syntax--js"><span>}</span></span></span>
 </pre>
-<p>encoding → issue</p>\
+<p>encoding → issue</p>
 `)
     }))
 

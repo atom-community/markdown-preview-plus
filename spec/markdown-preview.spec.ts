@@ -421,7 +421,7 @@ var x = y;
       expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>
 <p><strong>bold</strong></p>
-<p>encoding \u2192 issue</p>\
+<p>encoding \u2192 issue</p>
 `)
 
       atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
@@ -439,7 +439,7 @@ var x = y;
       )
 
       expect(clipboardContents).to.equal(`\
-<p><em>italic</em></p>\
+<p><em>italic</em></p>
 `)
     })
 
@@ -554,7 +554,7 @@ var x = y;
       expect(clipboardContents).to.equal(`\
 <p><em>italic</em></p>
 <p><strong>bold</strong></p>
-<p>encoding \u2192 issue</p>\
+<p>encoding \u2192 issue</p>
 `)
 
       atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
@@ -564,7 +564,7 @@ var x = y;
       await copyHtml()
 
       expect(clipboardContents).to.equal(`\
-<p><em>italic</em></p>\
+<p><em>italic</em></p>
 `)
     })
 
@@ -613,7 +613,7 @@ var x = y;
 
 <p>sad
 <img>
-world</p>\
+world</p>
 `)
     })
 
@@ -630,7 +630,7 @@ world</p>\
 
       expect(preview.find('div.update-preview')!.innerHTML).to.equal(`\
 <p>content
-&lt;!doctype html&gt;</p>\
+&lt;!doctype html&gt;</p>
 `)
     })
   })
@@ -647,7 +647,9 @@ world</p>\
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.find('div.update-preview')!.innerHTML).to.equal('content')
+      expect(preview.find('div.update-preview')!.innerHTML).to.equal(
+        'content\n',
+      )
     }))
 
   describe('when the markdown contains a <pre> tag', () =>
