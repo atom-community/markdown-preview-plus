@@ -70,15 +70,22 @@ export class MarkdownPreviewView {
     this.element.src = 'about:blank'
     this.element.style.width = '100%'
     this.element.style.height = '100%'
+    this.disposables.add(
+      atom.styles.onDidAddStyleElement(() => {
+        this.updateStyles()
+      }),
+      atom.styles.onDidRemoveStyleElement(() => {
+        this.updateStyles()
+      }),
+      atom.styles.onDidUpdateStyleElement(() => {
+        this.updateStyles()
+      }),
+    )
     const onload = () => {
-      const doc = this.element.contentDocument
-      if (this.updatePreview) this.updatePreview = undefined
       if (this.destroyed) return
-      this.disposables.add(
-        atom.styles.observeStyleElements((se) => {
-          doc.head.appendChild(se.cloneNode(true))
-        }),
-      )
+      if (this.updatePreview) this.updatePreview = undefined
+      const doc = this.element.contentDocument
+      this.updateStyles()
       this.rootElement = doc.createElement('markdown-preview-plus-view')
       this.rootElement.classList.add('native-key-bindings')
       this.rootElement.tabIndex = -1
@@ -96,11 +103,12 @@ export class MarkdownPreviewView {
       }
       const didAttach = () => {
         if (this.destroyed) return
-        if (this.editorId !== undefined) {
+        if (this.editorId !== undefined && !this.editor) {
           this.resolveEditor(this.editorId)
-        } else if (this.filePath !== undefined) {
+        } else if (this.filePath !== undefined && !this.file) {
           this.subscribeToFilePath(this.filePath)
         }
+        if (this.editor || this.file) handlePromise(this.renderMarkdown())
       }
       if (deserialization && this.editorId !== undefined) {
         // need to defer on deserialization since
@@ -162,7 +170,6 @@ export class MarkdownPreviewView {
     this.file = new File(filePath)
     this.emitter.emit('did-change-title')
     this.handleEvents()
-    handlePromise(this.renderMarkdown())
   }
 
   resolveEditor(editorId: number) {
@@ -171,7 +178,6 @@ export class MarkdownPreviewView {
     if (this.editor) {
       this.emitter.emit('did-change-title')
       this.handleEvents()
-      handlePromise(this.renderMarkdown())
     } else {
       // The editor this preview was created for has been closed so close
       // this preview since a preview cannot be rendered without an editor
@@ -318,12 +324,9 @@ export class MarkdownPreviewView {
     if (!this.loaded) {
       this.showLoading()
     }
-    await this.getMarkdownSource().then(async (source?: string) => {
-      if (source) {
-        return this.renderMarkdownText(source)
-      }
-      return
-    })
+    const source = await this.getMarkdownSource()
+    if (source) await this.renderMarkdownText(source)
+
     this.resolve()
   }
 
@@ -389,6 +392,7 @@ export class MarkdownPreviewView {
         this.getGrammar(),
         this.renderLaTeX,
       )
+      if (this.destroyed) return
       this.loading = false
       this.loaded = true
       // div.update-preview created after constructor st UpdatePreview cannot
@@ -405,6 +409,7 @@ export class MarkdownPreviewView {
         )
       this.emitter.emit('did-change-markdown')
     } catch (error) {
+      console.error(error)
       this.showError(error as Error)
     }
   }
@@ -445,13 +450,24 @@ export class MarkdownPreviewView {
     return this.editor && this.editor.getGrammar()
   }
 
-  showError(result: Error) {
+  showError(error: Error) {
+    console.error(error)
     if (!this.preview) return
-    const error = this.element.contentDocument.createElement('div')
-    error.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${
-      result.message
+    if (this.destroyed) {
+      atom.notifications.addFatalError(
+        'Error reported on a destroyed Markdown Preview Plus view',
+        {
+          dismissable: true,
+          stack: error.stack,
+          detail: error.message,
+        },
+      )
+    }
+    const errorDiv = this.element.contentDocument.createElement('div')
+    errorDiv.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${
+      error.message
     }</h3>`
-    this.preview.appendChild(error)
+    this.preview.appendChild(errorDiv)
   }
 
   showLoading() {
@@ -643,5 +659,19 @@ export class MarkdownPreviewView {
     setTimeout(() => element!.classList.remove('flash'), 1000)
 
     return element
+  }
+
+  private updateStyles() {
+    const doc = this.element.contentDocument
+    if (!doc) return
+    let elem = doc.head.querySelector('atom-styles')
+    if (!elem) {
+      elem = doc.createElement('atom-styles')
+      doc.head.appendChild(elem)
+    }
+    elem.innerHTML = ''
+    for (const se of atom.styles.getStyleElements()) {
+      elem.appendChild(se.cloneNode(true))
+    }
   }
 }
