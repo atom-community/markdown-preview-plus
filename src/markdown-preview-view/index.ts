@@ -89,6 +89,9 @@ export class MarkdownPreviewView {
       this.rootElement = doc.createElement('markdown-preview-plus-view')
       this.rootElement.classList.add('native-key-bindings')
       this.rootElement.tabIndex = -1
+      if (atom.config.get('markdown-preview-plus.useGitHubStyle')) {
+        this.rootElement.setAttribute('data-use-github-style', '')
+      }
       this.preview = doc.createElement('div')
       this.preview.classList.add('update-preview')
       this.rootElement.appendChild(this.preview)
@@ -305,7 +308,7 @@ export class MarkdownPreviewView {
     )
 
     this.disposables.add(
-      atom.config.observe(
+      atom.config.onDidChange(
         'markdown-preview-plus.useGitHubStyle',
         (useGitHubStyle) => {
           if (useGitHubStyle) {
