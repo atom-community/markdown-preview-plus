@@ -64,7 +64,6 @@ export class MarkdownPreviewView {
 
   constructor({ editorId, filePath }: MPVParams, deserialization = false) {
     this.getPathToElement = this.getPathToElement.bind(this)
-    this.syncSource = this.syncSource.bind(this)
     this.getPathToToken = this.getPathToToken.bind(this)
     this.syncPreview = this.syncPreview.bind(this)
     this.editorId = editorId
@@ -834,7 +833,11 @@ export class MarkdownPreviewView {
     }
 
     if (finalToken !== null && this.editor) {
-      this.editor.setCursorBufferPosition([finalToken.map[0], 0])
+      // tslint:disable-next-line:no-floating-promises
+      atom.workspace.open(this.editor, {
+        initialLine: finalToken.map[0],
+        searchAllPanes: true,
+      })
       return finalToken.map[0]
     } else {
       return null
