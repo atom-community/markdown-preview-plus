@@ -473,7 +473,8 @@ export class MarkdownPreviewView {
     return markdowPreviewRules
       .concat(this.getTextEditorStyles())
       .join('\n')
-      .replace(/atom-text-editor/g, 'pre.editor-colors')
+      .replace(/\batom-text-editor\b/g, 'pre.editor-colors')
+      .replace(/\bmarkdown-preview-plus-view\b/g, '.markdown-preview-plus-view')
       .replace(/:host/g, '.host') // Remove shadow-dom :host selector causing problem on FF
       .replace(cssUrlRefExp, function(
         _match,
@@ -599,10 +600,8 @@ export class MarkdownPreviewView {
       <title>${title}</title>${mathjaxScript}
       <style>${this.getMarkdownPreviewCSS()}</style>
   </head>
-  <body>
-    <markdown-preview-plus-view${githubStyle}>
-      ${htmlBody}
-    </markdown-preview-plus-view>
+  <body class="markdown-preview-plus-view"${githubStyle}>
+    ${htmlBody}
   </body>
 </html>` + '\n' // Ensure trailing newline
 
