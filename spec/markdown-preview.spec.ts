@@ -316,7 +316,7 @@ var x = y;
   describe('when the markdown preview view is requested by file URI', () =>
     it('opens a preview editor and watches the file for changes', async function() {
       const filePath = path.join(tempPath, 'subdir/file.markdown')
-      await atom.workspace.open(`markdown-preview-plus://${filePath}`)
+      await atom.workspace.open(`markdown-preview-plus://file/${filePath}`)
 
       preview = atom.workspace.getActivePaneItem() as any
       expect(preview.constructor.name).to.be.equal('MarkdownPreviewView')

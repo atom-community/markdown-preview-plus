@@ -10,6 +10,7 @@ import * as previewUtil from '../lib/markdown-preview-view/util'
 
 import { waitsFor, expectPreviewInSplitPane } from './util'
 import { TextEditorElement, TextEditor } from 'atom'
+import { PlaceholderView } from '../lib/placeholder-view'
 
 describe('MarkdownPreviewView', function() {
   let filePath: string
@@ -18,7 +19,7 @@ describe('MarkdownPreviewView', function() {
   const previews: Set<MarkdownPreviewView> = new Set()
 
   const createMarkdownPreviewView = async function(params: MPVParams) {
-    const mpv = new MarkdownPreviewView(params)
+    const mpv = MarkdownPreviewView.create(params)
     window.workspaceDiv.appendChild(mpv.element)
     previews.add(mpv)
     await mpv.renderPromise
@@ -102,16 +103,18 @@ describe('MarkdownPreviewView', function() {
       await atom.workspace.open('new.markdown')
 
       preview = await createMarkdownPreviewView({
-        editorId: atom.workspace.getActiveTextEditor()!.id,
+        editor: atom.workspace.getActiveTextEditor()!,
       })
 
       expect(preview.getPath()).to.equal(
         atom.workspace.getActiveTextEditor()!.getPath(),
       )
 
-      newPreview = atom.deserializers.deserialize(
+      const newPlaceholder = atom.deserializers.deserialize(
         preview.serialize(),
-      ) as MarkdownPreviewView
+      ) as PlaceholderView
+      newPreview = await waitsFor(() => newPlaceholder.getView())
+
       window.workspaceDiv.appendChild(newPreview.element)
       await waitsFor(() => newPreview.getPath() === preview.getPath())
       await newPreview.renderPromise
@@ -581,7 +584,7 @@ var x = 0;
     beforeEach(async function() {
       filePath = path.join(tempPath, 'subdir', 'code-block.md')
       preview = (await atom.workspace.open(
-        `markdown-preview-plus://${filePath}`,
+        `markdown-preview-plus://file/${filePath}`,
       )) as MarkdownPreviewView
     })
 

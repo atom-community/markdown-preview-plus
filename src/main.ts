@@ -1,8 +1,8 @@
 import url = require('url')
 import {
   MarkdownPreviewView,
-  MPVParams,
   MarkdownPreviewViewElement,
+  SerializedMPV,
 } from './markdown-preview-view'
 import renderer = require('./renderer')
 import mathjaxHelper = require('./mathjax-helper')
@@ -15,6 +15,7 @@ import {
   ContextMenuOptions,
 } from 'atom'
 import { handlePromise, isFileSync } from './util'
+import { PlaceholderView } from './placeholder-view'
 
 export { config } from './config'
 
@@ -55,12 +56,11 @@ export function deactivate() {
   disposables && disposables.dispose()
 }
 
-export function createMarkdownPreviewView(state: MPVParams) {
-  if (
-    state.editorId !== undefined ||
-    (state.filePath && isFileSync(state.filePath))
-  ) {
-    return new MarkdownPreviewView(state, true)
+export function createMarkdownPreviewView(state: SerializedMPV) {
+  if (state.editorId !== undefined) {
+    return new PlaceholderView(state.editorId)
+  } else if (state.filePath && isFileSync(state.filePath)) {
+    return MarkdownPreviewView.create({ filePath: state.filePath })
   }
   return undefined
 }
@@ -87,29 +87,20 @@ function toggle(editor: TextEditor) {
   }
 }
 
-function uriForEditor(editor: TextEditor) {
-  return `markdown-preview-plus://editor/${editor.id}`
-}
-
 function removePreviewForEditor(editor: TextEditor) {
-  const uri = uriForEditor(editor)
-  const previewPane = atom.workspace.paneForURI(uri)
-  if (previewPane !== undefined) {
-    const preview = previewPane.itemForURI(uri)
-    if (preview === undefined) return false
-    if (preview !== previewPane.getActiveItem()) {
-      previewPane.activateItem(preview)
-      return false
-    }
-    handlePromise(previewPane.destroyItem(preview))
-    return true
-  } else {
+  const item = MarkdownPreviewView.viewForEditor(editor)
+  if (!item) return false
+  const previewPane = atom.workspace.paneForItem(item)
+  if (!previewPane) return false
+  if (item !== previewPane.getActiveItem()) {
+    previewPane.activateItem(item)
     return false
   }
+  handlePromise(previewPane.destroyItem(item))
+  return true
 }
 
 function addPreviewForEditor(editor: TextEditor) {
-  const uri = uriForEditor(editor)
   const previousActivePane = atom.workspace.getActivePane()
   const options: WorkspaceOpenOptions = { searchAllPanes: true }
   if (atom.config.get('markdown-preview-plus.openPreviewInSplitPane')) {
@@ -118,11 +109,13 @@ function addPreviewForEditor(editor: TextEditor) {
     )!
   }
   handlePromise(
-    atom.workspace.open(uri, options).then(function(markdownPreviewView) {
-      if (isMarkdownPreviewView(markdownPreviewView)) {
-        previousActivePane.activate()
-      }
-    }),
+    atom.workspace
+      .open(MarkdownPreviewView.create({ editor }), options)
+      .then(function(markdownPreviewView) {
+        if (isMarkdownPreviewView(markdownPreviewView)) {
+          previousActivePane.activate()
+        }
+      }),
   )
 }
 
@@ -140,7 +133,7 @@ function previewFile({ currentTarget }: CommandEvent) {
   }
 
   handlePromise(
-    atom.workspace.open(`markdown-preview-plus://${encodeURI(filePath)}`, {
+    atom.workspace.open(`markdown-preview-plus://file/${encodeURI(filePath)}`, {
       searchAllPanes: true,
     }),
   )
@@ -250,27 +243,27 @@ function registerGrammars(
 function opener(uriToOpen: string) {
   try {
     // tslint:disable-next-line:no-var-keyword prefer-const
-    var { protocol, host, pathname } = url.parse(uriToOpen)
+    var uri = new url.URL(uriToOpen)
   } catch (e) {
     console.error(e)
     return undefined
   }
 
-  if (protocol !== 'markdown-preview-plus:') return undefined
-  if (pathname === undefined) return undefined
+  if (uri.protocol !== 'markdown-preview-plus:') return undefined
 
   try {
-    pathname = decodeURI(pathname)
+    // tslint:disable-next-line:no-var-keyword prefer-const
+    var pathname = decodeURI(uri.pathname)
   } catch (e) {
     console.error(e)
     return undefined
   }
 
-  if (host === 'editor') {
-    return new MarkdownPreviewView({
-      editorId: parseInt(pathname.substring(1), 10),
-    })
+  if (uri.hostname === 'file') {
+    return MarkdownPreviewView.create({ filePath: pathname })
   } else {
-    return new MarkdownPreviewView({ filePath: pathname })
+    throw new Error(
+      `Tried to open markdown-preview-plus with uri ${uriToOpen}. This is not supported. Please report this error.`,
+    )
   }
 }
