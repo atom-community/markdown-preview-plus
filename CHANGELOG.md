@@ -1,3 +1,8 @@
+## 2.5.4
+
+-   Remove extraneous wrapper in exported HTML
+-   Fix spec on Atom 1.24.0
+
 ## 2.5.3
 
 -   [Workaround] Work around for Atom bug #16801
