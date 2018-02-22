@@ -42,7 +42,8 @@ export function getMarkdownPreviewCSS() {
     .concat(getStyles('markdown-preview-plus'))
     .concat(getStyles('atom-text-editor'))
     .join('\n')
-    .replace(/atom-text-editor/g, 'pre.editor-colors')
+    .replace(/\batom-text-editor\b/g, 'pre.editor-colors')
+    .replace(/\bmarkdown-preview-plus-view\b/g, '.markdown-preview-plus-view')
     .replace(cssUrlRefExp, function(
       _match,
       assetsName: string,
@@ -292,10 +293,8 @@ export function mkHtml(
     <style>${getMarkdownPreviewCSS()}</style>
 ${html.head}
   </head>
-  <body>
-    <markdown-preview-plus-view${githubStyle}>
-      ${html.body}
-    </markdown-preview-plus-view>
+  <body class="markdown-preview-plus-view"${githubStyle}>
+    ${html.body}
   </body>
 </html>
 ` // Ensure trailing newline
