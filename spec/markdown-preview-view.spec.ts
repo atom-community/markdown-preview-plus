@@ -624,7 +624,13 @@ var x = 0;
         })
       })
 
-      sinon.stub(atom as any, 'showSaveDialogSync').returns(outputPath)
+      if (atom.getVersion() === '1.24.0') {
+        sinon
+          .stub((atom as any).applicationDelegate, 'showSaveDialog')
+          .returns(outputPath)
+      } else {
+        sinon.stub(atom as any, 'showSaveDialogSync').returns(outputPath)
+      }
       sinon
         .stub(preview, 'getDocumentStyleSheets')
         .returns(markdownPreviewStyles)
