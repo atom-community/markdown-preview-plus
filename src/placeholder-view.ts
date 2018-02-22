@@ -9,6 +9,7 @@ export class PlaceholderView {
     return this._view
   }
   constructor(private editorId: number) {
+    this.element.classList.add('markdown-spinner')
     setImmediate(this.initialize)
   }
   private initialize = () => {
