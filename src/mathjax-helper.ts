@@ -21,13 +21,9 @@ let isMathJaxDisabled = false
 //
 export function mathProcessor(domElements: Node[]) {
   if (isMathJaxDisabled) return
-  if (window.MathJax) {
-    window.MathJax.Hub.Queue(['Typeset', window.MathJax.Hub, domElements])
-  } else {
-    loadMathJax(() => {
-      MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements])
-    })
-  }
+  loadMathJax(() => {
+    MathJax!.Hub.Queue(['Typeset', MathJax!.Hub, domElements])
+  })
 }
 
 //
@@ -70,11 +66,7 @@ export function processHTMLString(
     )
   }
 
-  if (window.MathJax) {
-    queueProcessHTMLString()
-  } else {
-    loadMathJax(queueProcessHTMLString)
-  }
+  loadMathJax(queueProcessHTMLString)
 }
 
 // For testing
@@ -89,6 +81,10 @@ function disableMathJax(disable: boolean) {
 //   loaded to the window. The method is passed no arguments.
 //
 function loadMathJax(listener?: () => any) {
+  if (window.MathJax) {
+    if (listener) listener()
+    return
+  }
   const script = attachMathJax()
   if (listener) {
     script.addEventListener('load', () => {
@@ -100,11 +96,14 @@ function loadMathJax(listener?: () => any) {
 //
 // Attach main MathJax script to the document
 //
-function attachMathJax() {
-  if (!document.querySelector('script[src*="MathJax.js"]')) {
+function attachMathJax(): HTMLScriptElement {
+  const script = document.querySelector(
+    'script[src*="MathJax.js"]',
+  ) as HTMLScriptElement | null
+  if (!script) {
     return attachMathJaxInternal()
   }
-  throw new Error('Duplicate attachMathJax call')
+  return script
 }
 
 //
