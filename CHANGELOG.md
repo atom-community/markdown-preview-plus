@@ -1,3 +1,7 @@
+## 2.5.5
+
+-   Make duplicate attachMathJax calls safe
+
 ## 2.5.4
 
 -   Remove extraneous wrapper in exported HTML
