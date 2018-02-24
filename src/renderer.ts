@@ -32,10 +32,7 @@ export async function toHTML(
   ) {
     tokenizeCodeBlocks(doc, defaultCodeLanguage)
   }
-  return {
-    head: doc.head.innerHTML,
-    body: doc.body.innerHTML,
-  }
+  return doc
 }
 
 export async function render(

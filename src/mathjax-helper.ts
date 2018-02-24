@@ -24,8 +24,11 @@ export async function mathProcessor(
   domElements: Node[],
 ) {
   if (isMathJaxDisabled) return
-  const jax = await loadMathJax(frame)
-  jax.queueTypeset(domElements)
+  const jax = await loadMathJax(
+    frame,
+    atom.config.get('markdown-preview-plus.latexRenderer'),
+  )
+  await jax.queueTypeset(domElements)
 }
 
 //
@@ -37,19 +40,13 @@ export async function mathProcessor(
 //
 export async function processHTMLString(
   frame: HTMLIFrameElement,
-  html: string,
+  element: HTMLElement,
 ) {
   if (isMathJaxDisabled) {
-    return html
+    return element.innerHTML
   }
-  const element = document.createElement('div')
-  element.innerHTML = html
-
-  const jax = await loadMathJax(frame)
-
-  await new Promise((resolve) => {
-    jax.queueProcessHTMLString(element, resolve)
-  })
+  const jax = await loadMathJax(frame, 'SVG')
+  await jax.queueTypeset([element])
 
   const msvgh = frame.contentDocument.getElementById('MathJax_SVG_Hidden')
   const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
@@ -70,15 +67,18 @@ function disableMathJax(disable: boolean) {
 // @param listener method to call when the MathJax script was been
 //   loaded to the window. The method is passed no arguments.
 //
-async function loadMathJax(frame: HTMLIFrameElement): Promise<MathJaxStub> {
+async function loadMathJax(
+  frame: HTMLIFrameElement,
+  renderer: MathJaxRenderer,
+): Promise<MathJaxStub> {
   if (frame.contentWindow.mathJaxStub) return frame.contentWindow.mathJaxStub
   if (frame.contentDocument.querySelector('head')) {
-    return attachMathJax(frame)
+    return attachMathJax(frame, renderer)
   } else {
     return new Promise<MathJaxStub>((resolve) => {
       const onload = () => {
         frame.removeEventListener('load', onload)
-        resolve(loadMathJax(frame))
+        resolve(loadMathJax(frame, renderer))
       }
       frame.addEventListener('load', onload)
     })
@@ -187,7 +187,7 @@ function valueMatchesPattern(value: any) {
 // Configure MathJax environment. Similar to the TeX-AMS_HTML configuration with
 // a few unnecessary features stripped away
 //
-const configureMathJax = function(jax: MathJaxStub) {
+const configureMathJax = function(jax: MathJaxStub, renderer: MathJaxRenderer) {
   let userMacros = loadUserMacros()
   if (userMacros) {
     userMacros = checkMacros(userMacros)
@@ -195,10 +195,7 @@ const configureMathJax = function(jax: MathJaxStub) {
     userMacros = {}
   }
 
-  jax.jaxConfigure(
-    userMacros,
-    atom.config.get('markdown-preview-plus.latexRenderer'),
-  )
+  jax.jaxConfigure(userMacros, renderer)
 
   // Notify user MathJax has loaded
   if (atom.inDevMode()) {
@@ -209,7 +206,10 @@ const configureMathJax = function(jax: MathJaxStub) {
 //
 // Attach main MathJax script to the document
 //
-async function attachMathJax(frame: HTMLIFrameElement): Promise<MathJaxStub> {
+async function attachMathJax(
+  frame: HTMLIFrameElement,
+  renderer: MathJaxRenderer,
+): Promise<MathJaxStub> {
   // Notify user MathJax is loading
   if (atom.inDevMode()) {
     atom.notifications.addInfo('Loading maths rendering engine MathJax')
@@ -223,7 +223,7 @@ async function attachMathJax(frame: HTMLIFrameElement): Promise<MathJaxStub> {
     ),
     injectScript(frame.contentDocument, require.resolve('./mathjax-stub')),
   ])
-  configureMathJax(frame.contentWindow.mathJaxStub)
+  configureMathJax(frame.contentWindow.mathJaxStub, renderer)
   return frame.contentWindow.mathJaxStub
 }
 

@@ -162,7 +162,7 @@ async function copyHtmlInternal(editor: TextEditor): Promise<void> {
     })
     document.body.appendChild(frame)
   } else {
-    atom.clipboard.write(html.body)
+    atom.clipboard.write(html.body.innerHTML)
   }
 }
 

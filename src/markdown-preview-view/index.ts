@@ -513,7 +513,7 @@ export class MarkdownPreviewView {
 
     handlePromise(
       this.getHTML().then(function(html) {
-        atom.clipboard.write(html.body)
+        atom.clipboard.write(html.body.innerHTML)
       }),
     )
 

@@ -1,5 +1,5 @@
 const mathJaxStub = {
-  jaxConfigure(userMacros: object, renderer: 'HTML-CSS' | 'SVG') {
+  jaxConfigure(userMacros: object, renderer: MathJaxRenderer) {
     MathJax.Hub.Config({
       jax: ['input/TeX', `output/${renderer}`],
       extensions: [],
@@ -23,23 +23,11 @@ const mathJaxStub = {
     MathJax.Hub.Configured()
   },
 
-  queueTypeset(domElements: Node[]) {
+  async queueTypeset(domElements: Node[]) {
     domElements.forEach((elem) => {
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, elem])
     })
-  },
-
-  queueProcessHTMLString(element: HTMLElement, callback: () => void) {
-    MathJax.Hub.Queue(
-      ['setRenderer', MathJax.Hub, 'SVG'],
-      ['Typeset', MathJax.Hub, element],
-      ['setRenderer', MathJax.Hub, 'HTML-CSS'],
-      [callback],
-    )
-  },
-
-  async waitForQueue() {
-    await new Promise((resolve) => {
+    return new Promise((resolve) => {
       MathJax.Hub.Queue([resolve])
     })
   },
@@ -48,6 +36,8 @@ const mathJaxStub = {
 interface Window {
   mathJaxStub: MathJaxStub
 }
+
+type MathJaxRenderer = 'SVG' | 'HTML-CSS'
 
 type MathJaxStub = typeof mathJaxStub
 

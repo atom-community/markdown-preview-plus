@@ -50,7 +50,7 @@ describe('MathJax helper module', () =>
     })
 
     const waitsForMacrosToLoad = async function() {
-      await mathjaxHelper.testing.loadMathJax(jaxFrame)
+      await mathjaxHelper.testing.loadMathJax(jaxFrame, 'SVG')
 
       expect(stub).to.be.called
 

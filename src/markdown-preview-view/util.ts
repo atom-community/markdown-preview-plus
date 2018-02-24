@@ -273,7 +273,7 @@ showMathMenu: false
 
 export function mkHtml(
   title: string,
-  html: { head: string; body: string },
+  html: HTMLDocument,
   renderLaTeX: boolean,
   useGithubStyle: boolean,
 ) {
@@ -291,10 +291,10 @@ export function mkHtml(
     <meta charset="utf-8" />
     <title>${title}</title>${maybeMathJaxScript}
     <style>${getMarkdownPreviewCSS()}</style>
-${html.head}
+${html.head.innerHTML}
   </head>
   <body class="markdown-preview-plus-view"${githubStyle}>
-    ${html.body}
+    ${html.body.innerHTML}
   </body>
 </html>
 ` // Ensure trailing newline

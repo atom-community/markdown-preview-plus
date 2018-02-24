@@ -53,7 +53,7 @@ describe('Syncronization of source and preview', function() {
       () => preview.element.contentWindow.MathJax != null,
     )
 
-    await waitsForQueuedMathJax()
+    await preview.element.contentWindow.mathJaxStub.queueTypeset([])
   })
 
   afterEach(async function() {
@@ -64,10 +64,6 @@ describe('Syncronization of source and preview', function() {
       if (pane) await pane.destroyItem(item, true)
     }
   })
-
-  async function waitsForQueuedMathJax() {
-    await preview.element.contentWindow.mathJaxStub.waitForQueue()
-  }
 
   function findInPreview(token: MyToken) {
     let el = preview.element.querySelector('.update-preview')
