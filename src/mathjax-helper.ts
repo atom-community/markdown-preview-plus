@@ -92,16 +92,6 @@ export const testing = {
 
 // private
 
-//
-// Define some functions to help get a hold of the user's Latex
-// Macros.
-//
-const namePattern = new RegExp(`\
-^[^a-zA-Z\\d\\s]$\
-|\
-^[a-zA-Z]*$\
-`) // letters, but no numerals.
-
 function getUserMacrosPath(): string {
   const userMacrosPath: string | undefined | null = CSON.resolve(
     path.join(atom.getConfigDirPath(), 'markdown-preview-plus'),
@@ -154,12 +144,13 @@ function createMacrosTemplate(filePath: string) {
 }
 
 function checkMacros(macrosObject: object) {
+  const namePattern = /^[^a-zA-Z\d\s]$|^[a-zA-Z]*$/ // letters, but no numerals.
   for (const name in macrosObject) {
     const value = macrosObject[name]
     if (!name.match(namePattern) || !valueMatchesPattern(value)) {
       delete macrosObject[name]
       atom.notifications.addError(
-        `Failed to load LaTeX macro named '${name}'. Please see the [LaTeX guide](https://github.com/Galadirith/markdown-preview-plus/blob/master/LATEX.md#macro-names)`,
+        `Failed to load LaTeX macro named '${name}'. Please see the [LaTeX guide](https://github.com/atom-community/markdown-preview-plus/blob/master/docs/math.md#macro-names)`,
         { dismissable: true },
       )
     }
