@@ -260,7 +260,7 @@ function opener(uriToOpen: string) {
   }
 
   if (uri.hostname === 'file') {
-    return MarkdownPreviewView.create({ filePath: pathname })
+    return MarkdownPreviewView.create({ filePath: pathname.slice(1) })
   } else {
     throw new Error(
       `Tried to open markdown-preview-plus with uri ${uriToOpen}. This is not supported. Please report this error.`,
