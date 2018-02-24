@@ -511,7 +511,7 @@
     Sawicki)
 -   Prepare 0.147.0 release (Kevin Sawicki)
 -   Conditionally include deprecated APIs (Kevin Sawicki)
--   Style <code> blocks consistently with GitHub.com Remove nowrap from
+-   Style `<code>` blocks consistently with GitHub.com Remove nowrap from
     the styling (Adam Montgomery)
 -   Prepare 0.146.0 release (Kevin Sawicki)
 -   Merge pull request \#227 from m4b/patch-1 (Kevin Sawicki)

@@ -6,6 +6,7 @@ import * as markdownIt from '../lib/markdown-it-helper'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as wrench from 'fs-extra'
+import * as previewUtil from '../lib/markdown-preview-view/util'
 
 import { waitsFor, expectPreviewInSplitPane } from './util'
 import { TextEditorElement, TextEditor } from 'atom'
@@ -52,7 +53,8 @@ describe('MarkdownPreviewView', function() {
     previews.clear()
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
-      await atom.workspace.paneForItem(item)!.destroyItem(item, true)
+      const pane = atom.workspace.paneForItem(item)
+      if (pane) await pane.destroyItem(item, true)
     }
     await atom.packages.deactivatePackage('language-ruby')
     await atom.packages.deactivatePackage('language-javascript')
@@ -229,9 +231,8 @@ var x = 0;
       )
       expect(jsEditor).to.exist
       expect(jsEditor.textContent).to.equal('var x = 0;\n')
-      expect(jsEditor.firstElementChild!.className).to.equal(
-        'syntax--source syntax--js',
-      )
+      expect(jsEditor.querySelector('.syntax--source.syntax--js')!.className).to
+        .be.ok
     })
   })
 
@@ -590,31 +591,12 @@ var x = 0;
       const expectedOutput = fs.readFileSync(expectedFilePath).toString()
       const expectedOutputArr = expectedOutput.split('\n')
 
-      const createRule = (selector: string, css: string) => ({
-        selectorText: selector,
-        cssText: `${selector} ${css}`,
-      })
-
       const markdownPreviewStyles = [
-        {
-          rules: [
-            createRule('markdown-preview-plus-view', '{ color: orange; }'),
-          ],
-        },
-        {
-          rules: [
-            createRule('.not-included', '{ color: green; }'),
-            createRule(
-              'markdown-preview-plus-view :host',
-              '{ color: purple; }',
-            ),
-          ],
-        },
+        'markdown-preview-plus-view { color: orange; }',
       ]
 
       const atomTextEditorStyles = [
         'atom-text-editor .line { color: brown; }\natom-text-editor .number { color: cyan; }',
-        'atom-text-editor :host .something { color: black; }',
         'atom-text-editor .hr { background: url(atom://markdown-preview-plus/assets/hr.png); }',
       ]
 
@@ -639,13 +621,12 @@ var x = 0;
             if (callback) callback(outputPath)
             return outputPath
           }),
-        sinon
-          .stub(preview, 'getDocumentStyleSheets')
-          .returns(markdownPreviewStyles),
-        sinon
-          .stub(preview, 'getTextEditorStyles')
-          .returns(atomTextEditorStyles),
       )
+      previewUtil.__setGetStylesOverride((context: string) => {
+        if (context === 'markdown-preview-plus') return markdownPreviewStyles
+        else if (context === 'atom-text-editor') return atomTextEditorStyles
+        else throw new Error(`Unknown style context: ${context}`)
+      })
       atom.commands.dispatch(preview.element, 'core:save-as')
 
       await openedPromise
@@ -660,6 +641,7 @@ var x = 0;
       })
       expect(savedHTML).to.equal(expectedOutput)
       stubs.forEach((stub) => stub.restore())
+      previewUtil.__setGetStylesOverride()
     })
     // fs.writeFileSync(expectedFilePath, savedHTML, encoding: 'utf8')
 
@@ -677,7 +659,7 @@ var x = 0;
           context: 'unrelated-context',
         })
 
-        extractedStyles = preview.getTextEditorStyles()
+        extractedStyles = previewUtil.getStyles('atom-text-editor')
       })
 
       it('returns an array containing atom-text-editor css style strings', function() {
@@ -713,7 +695,7 @@ var x = 0;
 <span class="syntax--source syntax--js"><span>  b </span><span class="syntax--keyword syntax--operator syntax--assignment syntax--js"><span>=</span></span><span> </span><span class="syntax--constant syntax--numeric syntax--decimal syntax--js"><span>5</span></span></span>
 <span class="syntax--source syntax--js"><span class="syntax--meta syntax--brace syntax--curly syntax--js"><span>}</span></span></span>
 </pre>
-<p>encoding → issue</p>\
+<p>encoding → issue</p>
 `)
     }))
 

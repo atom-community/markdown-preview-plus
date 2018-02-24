@@ -88,9 +88,10 @@ export function setPandocOptions(
  * @param {string} Returned HTML
  * @return {array} with Arguments for callbackFunction (error set to null)
  */
-function handleError(error: string, html: string, renderMath: boolean) {
-  html = `<h1>Pandoc Error:</h1><pre>${error}</pre><hr>${html}`
-  return handleSuccess(html, renderMath)
+function handleError(error: string, html: string, renderMath: boolean): never {
+  const err = new Error(error) as Error & { html: string }
+  err.html = handleSuccess(html, renderMath)
+  throw err
 }
 
 /**
@@ -160,14 +161,13 @@ function handleResponse(error: string, html: string, renderMath: boolean) {
  * @param {boolean} whether to render the math with mathjax
  * @param {function} callbackFunction
  */
-export async function renderPandoc<T>(
+export async function renderPandoc(
   text: string,
   filePath: string | undefined,
   renderMath: boolean,
-  cb: (err: Error | null, result: string) => T,
-): Promise<T> {
+): Promise<string> {
   const { args, opts } = setPandocOptions(filePath, renderMath)
-  return new Promise<T>((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     const cp = CP.execFile(
       atomConfig().pandocPath,
       getArguments(args),
@@ -180,8 +180,12 @@ export async function renderPandoc<T>(
           })
           reject(error)
         }
-        const result = handleResponse(stderr || '', stdout || '', renderMath)
-        resolve(cb(null, result))
+        try {
+          const result = handleResponse(stderr || '', stdout || '', renderMath)
+          resolve(result)
+        } catch (e) {
+          reject(e)
+        }
       },
     )
     cp.stdin.write(text)

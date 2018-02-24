@@ -231,7 +231,7 @@ async function injectScript(doc: HTMLDocument, scriptSrc: string) {
   const script = doc.createElement('script')
   script.src = scriptSrc
   script.type = 'text/javascript'
-  doc.querySelector('head')!.appendChild(script)
+  doc.head.appendChild(script)
   return new Promise<void>((resolve) => {
     script.addEventListener('load', () => resolve())
   })

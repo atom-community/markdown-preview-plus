@@ -1,0 +1,49 @@
+markdown-preview-plus-view {
+  display: block;
+  overflow: auto;
+  height: 100%;
+
+  .emoji {
+    max-width: 1em !important;
+  }
+
+  del {
+    text-decoration: none;
+    position: relative;
+  }
+
+  del::after {
+    border-bottom: 1px solid black;
+    content: '';
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 50%;
+  }
+
+  .flash {
+    -webkit-animation: flash 1s ease-out;
+    -webkit-animation-iteration-count: 1;
+    outline: 1px solid rgba(255, 0, 0, 0);
+  }
+
+  .flash:not(li) {
+    display: block;
+  }
+
+  @-webkit-keyframes flash {
+    0% {
+      outline-color: rgba(255, 0, 0, 0);
+    }
+    50% {
+      outline-color: rgba(255, 0, 0, 1);
+    }
+    100% {
+      outline-color: rgba(255, 0, 0, 0);
+    }
+  }
+
+  atom-text-editor {
+    flex-direction: column;
+  }
+}

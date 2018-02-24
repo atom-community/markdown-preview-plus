@@ -8,6 +8,7 @@ import * as sinon from 'sinon'
 import { waitsFor, expectPreviewInSplitPane } from './util'
 import { expect } from 'chai'
 import { Token } from 'markdown-it'
+import * as previewUtil from '../lib/markdown-preview-view/util'
 
 temp.track()
 
@@ -59,7 +60,8 @@ describe('Syncronization of source and preview', function() {
     stub.restore()
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
-      await atom.workspace.paneForItem(item)!.destroyItem(item, true)
+      const pane = atom.workspace.paneForItem(item)
+      if (pane) await pane.destroyItem(item, true)
     }
   })
 
@@ -94,7 +96,7 @@ describe('Syncronization of source and preview', function() {
 
     it('identifies the correct HTMLElement path', () => {
       for (const sourceLine of sourceMap) {
-        const elementPath = preview.getPathToToken(tokens, sourceLine.line)
+        const elementPath = previewUtil.getPathToToken(tokens, sourceLine.line)
         elementPath.forEach((_x, i) => {
           expect(elementPath[i].tag).to.equal(sourceLine.path[i].tag)
           expect(elementPath[i].index).to.equal(sourceLine.path[i].index)

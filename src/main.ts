@@ -66,10 +66,10 @@ export function createMarkdownPreviewView(state: MPVParams) {
 }
 
 /// used by markdown-pdf
-export async function copyHtml(_callback: any, _scale: number) {
+export function copyHtml(_callback: any, _scale: number) {
   const editor = atom.workspace.getActiveTextEditor()
   if (!editor) return
-  await copyHtmlInternal(editor)
+  handlePromise(copyHtmlInternal(editor))
 }
 
 /// private
@@ -151,30 +151,26 @@ async function copyHtmlInternal(editor: TextEditor): Promise<void> {
   const renderLaTeX = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
-  return renderer.toHTML(
+  const html = await renderer.toHTML(
     text,
     editor.getPath(),
     editor.getGrammar(),
     !!renderLaTeX,
     true,
-    function(error: Error | null, html: string) {
-      if (error) {
-        console.warn('Copying Markdown as HTML failed', error)
-      } else if (renderLaTeX) {
-        const frame = document.createElement('iframe')
-        frame.src = 'about:blank'
-        frame.style.display = 'none'
-        frame.addEventListener('load', async () => {
-          const proHTML = await mathjaxHelper.processHTMLString(frame, html)
-          frame.remove()
-          atom.clipboard.write(proHTML)
-        })
-        document.body.appendChild(frame)
-      } else {
-        atom.clipboard.write(html)
-      }
-    },
   )
+  if (renderLaTeX) {
+    const frame = document.createElement('iframe')
+    frame.src = 'about:blank'
+    frame.style.display = 'none'
+    frame.addEventListener('load', async () => {
+      const proHTML = await mathjaxHelper.processHTMLString(frame, html.body)
+      frame.remove()
+      atom.clipboard.write(proHTML)
+    })
+    document.body.appendChild(frame)
+  } else {
+    atom.clipboard.write(html.body)
+  }
 }
 
 type ContextMenu = { [key: string]: ContextMenuOptions[] }

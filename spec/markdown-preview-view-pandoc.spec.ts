@@ -35,14 +35,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
     atom.config.set('markdown-preview-plus.enablePandoc', true)
     stub = sinon
       .stub(pandocHelper, 'renderPandoc')
-      .callsFake(
-        (
-          _text,
-          _filePath,
-          _renderMath,
-          cb: (err: Error | null, result: string) => void,
-        ) => cb(null, html),
-      )
+      .callsFake(async (_text, _filePath, _renderMath) => html)
 
     preview = createMarkdownPreviewView({ filePath })
   })

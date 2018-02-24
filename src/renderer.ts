@@ -10,97 +10,74 @@ import { isFileSync } from './util'
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
 
-export async function toDOMFragment<T>(
-  text: string,
-  filePath: string | undefined,
-  _grammar: any,
-  renderLaTeX: boolean,
-  callback: (error: Error | null, domFragment?: Node) => T,
-): Promise<T> {
-  return render(text, filePath, renderLaTeX, false, function(
-    error: Error | null,
-    html?: string,
-  ) {
-    if (error !== null) {
-      return callback(error)
-    }
-
-    const template = document.createElement('template')
-    template.innerHTML = html!
-    const domFragment = template.content.cloneNode(true)
-
-    return callback(null, domFragment)
-  })
-}
-
 export async function toHTML(
   text: string | null,
   filePath: string | undefined,
   grammar: Grammar | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
-  callback: (error: Error | null, html: string) => void,
-): Promise<void> {
+) {
   if (text === null) {
     text = ''
   }
-  return render(text, filePath, renderLaTeX, copyHTMLFlag, function(
-    error,
-    html,
+  const doc = await render(text, filePath, renderLaTeX, copyHTMLFlag)
+  let defaultCodeLanguage: string | undefined
+  // Default code blocks to be coffee in Literate CoffeeScript files
+  if ((grammar && grammar.scopeName) === 'source.litcoffee') {
+    defaultCodeLanguage = 'coffee'
+  }
+  if (
+    !atom.config.get('markdown-preview-plus.enablePandoc') ||
+    !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
   ) {
-    let defaultCodeLanguage: string | undefined
-    if (error !== null) {
-      callback(error, '')
-    }
-    // Default code blocks to be coffee in Literate CoffeeScript files
-    if ((grammar && grammar.scopeName) === 'source.litcoffee') {
-      defaultCodeLanguage = 'coffee'
-    }
-    if (
-      !atom.config.get('markdown-preview-plus.enablePandoc') ||
-      !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
-    ) {
-      html = tokenizeCodeBlocks(html, defaultCodeLanguage)
-    }
-    callback(null, html)
-  })
+    tokenizeCodeBlocks(doc, defaultCodeLanguage)
+  }
+  return {
+    head: doc.head.innerHTML,
+    body: doc.body.innerHTML,
+  }
 }
 
-async function render<T>(
+export async function render(
   text: string,
   filePath: string | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
-  callback: (error: Error | null, html: string) => T,
-): Promise<T> {
+): Promise<HTMLDocument> {
   // Remove the <!doctype> since otherwise marked will escape it
   // https://github.com/chjj/marked/issues/354
   text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
-  const callbackFunction = async function(error: Error | null, html: string) {
-    if (error !== null) {
-      callback(error, '')
-    }
-    html = sanitize(html)
-    html = await resolveImagePaths(html, filePath, copyHTMLFlag)
-    return callback(null, html.trim())
-  }
-
+  let html
+  let error
   if (atom.config.get('markdown-preview-plus.enablePandoc')) {
-    return pandocHelper.renderPandoc(
-      text,
-      filePath,
-      renderLaTeX,
-      callbackFunction,
-    )
+    try {
+      html = await pandocHelper.renderPandoc(text, filePath, renderLaTeX)
+    } catch (err) {
+      // tslint:disable:no-unsafe-any
+      if (err.html === undefined) throw err
+      error = err.message as string
+      html = err.html as string
+      // tslint:enable:no-unsafe-any
+    }
   } else {
-    return callbackFunction(null, markdownIt.render(text, renderLaTeX))
+    html = markdownIt.render(text, renderLaTeX)
   }
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  sanitize(doc)
+  await resolveImagePaths(doc, filePath, copyHTMLFlag)
+  if (error) {
+    const errd = doc.createElement('div')
+    const msgel = doc.createElement('code')
+    msgel.innerText = error
+    errd.innerHTML = `<h1>Pandoc Error:</h1>${msgel.outerHTML}<hr>`
+    doc.body.insertBefore(errd, doc.body.firstElementChild)
+  }
+  return doc
 }
 
-function sanitize(html: string) {
-  const doc = document.createElement('div')
-  doc.innerHTML = html
+function sanitize(doc: HTMLDocument) {
   // Do not remove MathJax script delimited blocks
   doc.querySelectorAll("script:not([type^='math/tex'])").forEach((elem) => {
     elem.remove()
@@ -134,17 +111,14 @@ function sanitize(html: string) {
       elem.removeAttribute(attribute)
     }),
   )
-  return doc.innerHTML
 }
 
 async function resolveImagePaths(
-  html: string,
+  doc: HTMLDocument,
   filePath: string | undefined,
   copyHTMLFlag: boolean,
 ) {
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
-  const doc = document.createElement('div')
-  doc.innerHTML = html
   await Promise.all(
     Array.from(doc.querySelectorAll('img')).map(async function(img) {
       let src = img.getAttribute('src')
@@ -194,8 +168,6 @@ async function resolveImagePaths(
       return
     }),
   )
-
-  return doc.innerHTML
 }
 
 export function highlightCodeBlocks(
@@ -226,7 +198,7 @@ export function highlightCodeBlocks(
       fileContents: codeBlock.textContent!.replace(/\n$/, ''),
       scopeName: scopeForFenceName(fenceName),
       nbsp: false,
-      lineDivs: false,
+      lineDivs: true,
       editorDiv: true,
       editorDivTag: 'atom-text-editor',
       // The `editor` class messes things up as `.editor` has absolutely positioned lines
@@ -237,10 +209,10 @@ export function highlightCodeBlocks(
   return domFragment
 }
 
-function tokenizeCodeBlocks(html: string, defaultLanguage: string = 'text') {
-  const doc = document.createElement('div')
-  doc.innerHTML = html
-
+function tokenizeCodeBlocks(
+  doc: HTMLDocument,
+  defaultLanguage: string = 'text',
+) {
   const fontFamily = atom.config.get('editor.fontFamily')
   if (fontFamily) {
     doc
@@ -269,6 +241,4 @@ function tokenizeCodeBlocks(html: string, defaultLanguage: string = 'text') {
 
     preElement.outerHTML = highlightedHtml
   })
-
-  return doc.innerHTML
 }
