@@ -18,7 +18,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
   const previews: Set<MarkdownPreviewView> = new Set()
 
   const createMarkdownPreviewView = function(params: MPVParams) {
-    const mpv = new MarkdownPreviewView(params)
+    const mpv = MarkdownPreviewView.create(params)
     window.workspaceDiv.appendChild(mpv.element)
     previews.add(mpv)
     return mpv

@@ -18,13 +18,19 @@ import imageWatcher = require('../image-watch-helper')
 import { handlePromise } from '../util'
 import * as util from './util'
 
+export interface SerializedMPV {
+  deserializer: 'markdown-preview-plus/MarkdownPreviewView'
+  editorId?: number
+  filePath?: string
+}
+
 export interface MPVParamsEditor {
-  editorId: number
+  editor: TextEditor
   filePath?: undefined
 }
 
 export interface MPVParamsPath {
-  editorId?: undefined
+  editor?: undefined
   filePath: string
 }
 
@@ -54,16 +60,30 @@ export class MarkdownPreviewView {
   )
   private disposables = new CompositeDisposable()
   private loaded = true // Do not show the loading spinnor on initial load
-  private editorId?: number
-  private filePath?: string
   private file?: File
   private editor?: TextEditor
   private lastTarget?: HTMLElement
   private destroyed = false
 
-  constructor({ editorId, filePath }: MPVParams, deserialization = false) {
-    this.editorId = editorId
-    this.filePath = filePath
+  private static editorMap = new WeakMap<TextEditor, MarkdownPreviewView>()
+  public static create(params: MPVParams) {
+    if (params.editor) {
+      let mppv = MarkdownPreviewView.editorMap.get(params.editor)
+      if (!mppv) {
+        mppv = new MarkdownPreviewView(params)
+        MarkdownPreviewView.editorMap.set(params.editor, mppv)
+      }
+      return mppv
+    } else {
+      return new MarkdownPreviewView(params)
+    }
+  }
+  public static viewForEditor(editor: TextEditor) {
+    return MarkdownPreviewView.editorMap.get(editor)
+  }
+
+  private constructor({ editor, filePath }: MPVParams) {
+    this.editor = editor
     this.element = document.createElement('iframe') as any
     this.element.getModel = () => this
     this.element.classList.add('markdown-preview-plus', 'native-key-bindings')
@@ -81,6 +101,10 @@ export class MarkdownPreviewView {
         this.updateStyles()
       }),
     )
+    if (filePath !== undefined) {
+      this.file = new File(filePath)
+    }
+    this.handleEvents()
     const onload = () => {
       if (this.destroyed) return
       if (this.updatePreview) this.updatePreview = undefined
@@ -104,22 +128,11 @@ export class MarkdownPreviewView {
           Object.assign({}, e, { target: this.element }),
         )
       }
-      const didAttach = () => {
-        if (this.destroyed) return
-        if (this.editorId !== undefined && !this.editor) {
-          this.resolveEditor(this.editorId)
-        } else if (this.filePath !== undefined && !this.file) {
-          this.subscribeToFilePath(this.filePath)
-        }
-        if (this.editor || this.file) handlePromise(this.renderMarkdown())
-      }
-      if (deserialization && this.editorId !== undefined) {
-        // need to defer on deserialization since
-        // editor might not be deserialized at this point
-        setImmediate(didAttach)
-        deserialization = false
-      } else {
-        didAttach()
+
+      if (this.destroyed) return
+      if (this.editor || this.file) {
+        this.emitter.emit('did-change-title')
+        handlePromise(this.renderMarkdown())
       }
     }
     this.element.addEventListener('load', onload)
@@ -144,17 +157,18 @@ export class MarkdownPreviewView {
     return this.rootElement
   }
 
-  serialize() {
+  serialize(): SerializedMPV {
     return {
       deserializer: 'markdown-preview-plus/MarkdownPreviewView',
-      filePath: this.getPath() || this.filePath,
-      editorId: this.editorId,
+      filePath: this.file && this.file.getPath(),
+      editorId: this.editor && this.editor.id,
     }
   }
 
   destroy() {
     if (this.destroyed) return
     this.destroyed = true
+    if (this.editor) MarkdownPreviewView.editorMap.delete(this.editor)
     const path = this.getPath()
     path && imageWatcher.removeFile(path)
     this.disposables.dispose()
@@ -167,25 +181,6 @@ export class MarkdownPreviewView {
 
   onDidChangeMarkdown(callback: () => void): Disposable {
     return this.emitter.on('did-change-markdown', callback)
-  }
-
-  subscribeToFilePath(filePath: string) {
-    this.file = new File(filePath)
-    this.emitter.emit('did-change-title')
-    this.handleEvents()
-  }
-
-  resolveEditor(editorId: number) {
-    this.editor = util.editorForId(editorId)
-
-    if (this.editor) {
-      this.emitter.emit('did-change-title')
-      this.handleEvents()
-    } else {
-      // The editor this preview was created for has been closed so close
-      // this preview since a preview cannot be rendered without an editor
-      util.destroy(this)
-    }
   }
 
   handleEvents() {
@@ -447,9 +442,11 @@ export class MarkdownPreviewView {
 
   getURI() {
     if (this.file) {
-      return `markdown-preview-plus://${this.getPath()}`
+      return `markdown-preview-plus://file/${this.getPath()}`
+    } else if (this.editor) {
+      return `markdown-preview-plus://editor/${this.editor.id}`
     } else {
-      return `markdown-preview-plus://editor/${this.editorId}`
+      return `markdown-preview-plus://unknown`
     }
   }
 
