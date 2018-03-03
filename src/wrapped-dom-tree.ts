@@ -48,7 +48,7 @@ export class WrappedDomTree {
   private isText: boolean
   private hash: number
   private clone: boolean
-  // tslint:disable-next-line:no-uninitialized
+
   // @param dom A DOM element object
   //    https://developer.mozilla.org/en-US/docs/Web/API/element
   // @param clone Boolean flag indicating if this is the DOM tree to modify

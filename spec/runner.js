@@ -15,7 +15,7 @@ if (require.extensions['.ts']) {
 const { register } = require('ts-node')
 
 register({
-  project: __dirname,
+  project: path.join(__dirname, 'tsconfig.json'),
 })
 
 // Configure test runner and export the runner function

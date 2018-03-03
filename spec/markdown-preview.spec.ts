@@ -424,10 +424,9 @@ var x = y;
 <p>encoding \u2192 issue</p>
 `)
 
-      atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
-        [0, 0],
-        [1, 0],
-      ])
+      atom.workspace
+        .getActiveTextEditor()!
+        .setSelectedBufferRange([[0, 0], [1, 0]])
       atom.commands.dispatch(
         atom.views.getView(editor),
         'markdown-preview-plus:copy-html',
@@ -557,10 +556,9 @@ var x = y;
 <p>encoding \u2192 issue</p>
 `)
 
-      atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
-        [0, 0],
-        [1, 0],
-      ])
+      atom.workspace
+        .getActiveTextEditor()!
+        .setSelectedBufferRange([[0, 0], [1, 0]])
       await copyHtml()
 
       expect(clipboardContents).to.equal(`\

@@ -37,7 +37,7 @@ describe('the difference algorithm that updates the preview', function() {
   }
 
   describe('updating ordered lists start number', function() {
-    let orderedLists: HTMLOListElement[]
+    let orderedLists: Element[]
 
     beforeEach(async function() {
       await loadPreviewInSplitPane()

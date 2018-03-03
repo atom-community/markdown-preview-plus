@@ -98,9 +98,10 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
         expect(markdownIt.decode).not.to.be.called
         expect(
-          preview.find('img[alt=absolute]')!.getAttribute('src')!.startsWith(
-            `${filePath}?v=`,
-          ),
+          preview
+            .find('img[alt=absolute]')!
+            .getAttribute('src')!
+            .startsWith(`${filePath}?v=`),
         ).to.equal(true)
       }))
 

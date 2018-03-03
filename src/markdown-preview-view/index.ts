@@ -42,11 +42,7 @@ export type MarkdownPreviewViewElement = HTMLIFrameElement & {
 
 export class MarkdownPreviewView {
   private loading: boolean = true
-  // tslint:disable-next-line:no-uninitialized
-  private resolve: () => void
-  public readonly renderPromise: Promise<void> = new Promise<void>(
-    (resolve) => (this.resolve = resolve),
-  )
+  public readonly renderPromise: Promise<void>
   public readonly element: MarkdownPreviewViewElement
   private rootElement?: HTMLElement
   private preview?: HTMLElement
@@ -105,37 +101,38 @@ export class MarkdownPreviewView {
       this.file = new File(filePath)
     }
     this.handleEvents()
-    const onload = () => {
-      if (this.destroyed) return
-      if (this.updatePreview) this.updatePreview = undefined
-      const doc = this.element.contentDocument
-      this.updateStyles()
-      this.rootElement = doc.createElement('markdown-preview-plus-view')
-      this.rootElement.classList.add('native-key-bindings')
-      this.rootElement.tabIndex = -1
-      if (atom.config.get('markdown-preview-plus.useGitHubStyle')) {
-        this.rootElement.setAttribute('data-use-github-style', '')
-      }
-      this.preview = doc.createElement('div')
-      this.preview.classList.add('update-preview')
-      this.rootElement.appendChild(this.preview)
-      doc.body.appendChild(this.rootElement)
-      this.rootElement.oncontextmenu = (e) => {
-        this.lastTarget = e.target as HTMLElement
-        const pane = atom.workspace.paneForItem(this)
-        if (pane) pane.activate()
-        atom.contextMenu.showForEvent(
-          Object.assign({}, e, { target: this.element }),
-        )
-      }
+    this.renderPromise = new Promise((resolve) => {
+      const onload = () => {
+        if (this.destroyed) return
+        if (this.updatePreview) this.updatePreview = undefined
+        const doc = this.element.contentDocument
+        this.updateStyles()
+        this.rootElement = doc.createElement('markdown-preview-plus-view')
+        this.rootElement.classList.add('native-key-bindings')
+        this.rootElement.tabIndex = -1
+        if (atom.config.get('markdown-preview-plus.useGitHubStyle')) {
+          this.rootElement.setAttribute('data-use-github-style', '')
+        }
+        this.preview = doc.createElement('div')
+        this.preview.classList.add('update-preview')
+        this.rootElement.appendChild(this.preview)
+        doc.body.appendChild(this.rootElement)
+        this.rootElement.oncontextmenu = (e) => {
+          this.lastTarget = e.target as HTMLElement
+          const pane = atom.workspace.paneForItem(this)
+          if (pane) pane.activate()
+          atom.contextMenu.showForEvent(
+            Object.assign({}, e, { target: this.element }),
+          )
+        }
 
-      if (this.destroyed) return
-      if (this.editor || this.file) {
-        this.emitter.emit('did-change-title')
-        handlePromise(this.renderMarkdown())
+        if (this.editor || this.file) {
+          this.emitter.emit('did-change-title')
+          resolve(this.renderMarkdown())
+        }
       }
-    }
-    this.element.addEventListener('load', onload)
+      this.element.addEventListener('load', onload)
+    })
   }
 
   text() {
@@ -326,8 +323,6 @@ export class MarkdownPreviewView {
     }
     const source = await this.getMarkdownSource()
     if (source) await this.renderMarkdownText(source)
-
-    this.resolve()
   }
 
   async refreshImages(oldsrc: string) {

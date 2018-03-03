@@ -51,11 +51,10 @@ export async function render(
     try {
       html = await pandocHelper.renderPandoc(text, filePath, renderLaTeX)
     } catch (err) {
-      // tslint:disable:no-unsafe-any
-      if (err.html === undefined) throw err
-      error = err.message as string
-      html = err.html as string
-      // tslint:enable:no-unsafe-any
+      const e = err as Error & { html?: string }
+      if (e.html === undefined) throw e
+      error = e.message as string
+      html = e.html as string
     }
   } else {
     html = markdownIt.render(text, renderLaTeX)
@@ -190,7 +189,6 @@ export function highlightCodeBlocks(
       ? cbClass.replace(/^(lang-|sourceCode )/, '')
       : defaultLanguage
 
-    // tslint:disable-next-line:no-unsafe-any
     preElement.outerHTML = highlight({
       fileContents: codeBlock.textContent!.replace(/\n$/, ''),
       scopeName: scopeForFenceName(fenceName),
@@ -222,7 +220,6 @@ function tokenizeCodeBlocks(
     const fenceName =
       codeBlock.className.replace(/^(lang-|sourceCode )/, '') || defaultLanguage
 
-    // tslint:disable-next-line:no-unsafe-any // TODO: tslint bug?
     const highlightedHtml: string = highlight({
       fileContents: codeBlock.innerText,
       scopeName: scopeForFenceName(fenceName),
