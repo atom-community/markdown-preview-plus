@@ -7,6 +7,12 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     TextEditor,
     MarkdownPreviewViewEditor
   >()
+
+  private constructor(private editor: TextEditor) {
+    super()
+    this.handleEditorEvents()
+  }
+
   public static create(editor: TextEditor) {
     let mppv = MarkdownPreviewViewEditor.editorMap.get(editor)
     if (!mppv) {
@@ -15,25 +21,41 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     }
     return mppv
   }
+
   public static viewForEditor(editor: TextEditor) {
     return MarkdownPreviewViewEditor.editorMap.get(editor)
   }
 
-  private constructor(private editor: TextEditor) {
-    super()
-    this.handleEditorEvents()
-  }
-
-  destroy() {
+  public destroy() {
     super.destroy()
     MarkdownPreviewViewEditor.editorMap.delete(this.editor)
   }
 
-  serialize(): SerializedMPV {
+  public serialize(): SerializedMPV {
     return {
       deserializer: 'markdown-preview-plus/MarkdownPreviewView',
       editorId: this.editor && this.editor.id,
     }
+  }
+
+  public getTitle() {
+    return `${this.editor.getTitle()} Preview`
+  }
+
+  public getURI() {
+    return `markdown-preview-plus://editor/${this.editor.id}`
+  }
+
+  protected async getMarkdownSource() {
+    return this.editor.getText()
+  }
+
+  protected getPath() {
+    return this.editor.getPath()
+  }
+
+  protected getGrammar(): Grammar {
+    return this.editor.getGrammar()
   }
 
   private handleEditorEvents() {
@@ -67,25 +89,5 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         },
       }),
     )
-  }
-
-  async getMarkdownSource() {
-    return this.editor.getText()
-  }
-
-  getTitle() {
-    return `${this.editor.getTitle()} Preview`
-  }
-
-  getURI() {
-    return `markdown-preview-plus://editor/${this.editor.id}`
-  }
-
-  getPath() {
-    return this.editor.getPath()
-  }
-
-  getGrammar(): Grammar {
-    return this.editor.getGrammar()
   }
 }

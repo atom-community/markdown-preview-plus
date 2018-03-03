@@ -11,31 +11,31 @@ export class MarkdownPreviewViewFile extends MarkdownPreviewView {
     this.disposables.add(this.file.onDidChange(this.changeHandler))
   }
 
-  serialize(): SerializedMPV {
+  public serialize(): SerializedMPV {
     return {
       deserializer: 'markdown-preview-plus/MarkdownPreviewView',
       filePath: this.file.getPath(),
     }
   }
 
-  async getMarkdownSource() {
-    return this.file.read()
-  }
-
-  getTitle() {
+  public getTitle() {
     const p = this.getPath()
     return `${p ? path.basename(p) : 'Markdown File'} Preview`
   }
 
-  getURI() {
+  public getURI() {
     return `markdown-preview-plus://file/${this.getPath()}`
   }
 
-  getPath() {
+  protected getPath() {
     return this.file.getPath()
   }
 
-  getGrammar(): undefined {
+  protected getGrammar(): undefined {
     return
+  }
+
+  protected async getMarkdownSource() {
+    return this.file.read()
   }
 }

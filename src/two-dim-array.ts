@@ -27,26 +27,26 @@ export class TwoDimArray<T> {
     this._arr = new Array(row * col)
   }
 
-  getInd(row: number, col: number) {
+  public getInd(row: number, col: number) {
     return row * this.col + col
   }
 
-  get2DInd(ind: number) {
+  public get2DInd(ind: number) {
     return {
       r: (ind / this.col) | 0,
       c: ind % this.col,
     }
   }
 
-  get(row: number, col: number): T | undefined {
+  public get(row: number, col: number): T | undefined {
     return this._arr[this.getInd(row, col)]
   }
 
-  set(row: number, col: number, val: T) {
+  public set(row: number, col: number, val: T) {
     this._arr[row * this.col + col] = val
   }
 
-  rawGet(ind: number): T | undefined {
+  public rawGet(ind: number): T | undefined {
     return this._arr[ind]
   }
 }

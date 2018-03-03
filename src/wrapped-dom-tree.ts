@@ -33,7 +33,6 @@ type Operation =
 export class WrappedDomTree {
   public readonly shownTree?: WrappedDomTree
   public readonly dom: Element
-  private textData: string
   private children: WrappedDomTree[] = []
   private size: number = 0
   private diffHash: {
@@ -70,7 +69,6 @@ export class WrappedDomTree {
     this.isText = dom.nodeType === 3
     this.tagName = dom.tagName
     this.className = dom.className
-    this.textData = (dom as Element & { data: string }).data
     this.diffHash = {}
 
     if (this.isText) {
@@ -203,7 +201,15 @@ export class WrappedDomTree {
     }
   }
 
-  insert(i: number, tree: WrappedDomTree, rep?: WrappedDomTree) {
+  public removeSelf() {
+    hashTo[this.hash] = undefined
+    this.children &&
+      this.children.forEach((c) => {
+        c.removeSelf()
+      })
+  }
+
+  private insert(i: number, tree: WrappedDomTree, rep?: WrappedDomTree) {
     const dom = tree.dom.cloneNode(true)
     if (i === this.dom.childNodes.length) {
       this.dom.appendChild(dom)
@@ -216,7 +222,7 @@ export class WrappedDomTree {
     return this.dom.childNodes[i]
   }
 
-  remove(i: number) {
+  private remove(i: number) {
     this.dom.removeChild(this.dom.childNodes[i])
     this.children[i].removeSelf()
     this.children.splice(i, 1)
@@ -439,11 +445,11 @@ export class WrappedDomTree {
     return this.diffHash[key]
   }
 
-  equalTo(otherTree: WrappedDomTree) {
+  private equalTo(otherTree: WrappedDomTree) {
     return this.dom.isEqualNode(otherTree.dom)
   }
 
-  cannotReplaceWith(otherTree: WrappedDomTree) {
+  private cannotReplaceWith(otherTree: WrappedDomTree) {
     return (
       this.isText ||
       otherTree.isText ||
@@ -454,21 +460,5 @@ export class WrappedDomTree {
       this.tagName === 'A' ||
       (this.tagName === 'IMG' && !this.dom.isEqualNode(otherTree.dom))
     )
-  }
-
-  getContent() {
-    if (this.dom.outerHTML) {
-      return this.dom.outerHTML
-    } else {
-      return this.textData
-    }
-  }
-
-  removeSelf() {
-    hashTo[this.hash] = undefined
-    this.children &&
-      this.children.forEach((c) => {
-        c.removeSelf()
-      })
   }
 }
