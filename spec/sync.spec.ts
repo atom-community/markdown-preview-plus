@@ -108,7 +108,7 @@ describe('Syncronization of source and preview', function() {
         }
         const editor = atom.workspace.getActiveTextEditor()!
         editor.setCursorBufferPosition([sourceLine.line, 0])
-        const spy = sinon.spy(preview as any, 'syncPreview')
+        const spy = sinon.spy<any>(preview, 'syncPreview')
         atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:sync-preview',
