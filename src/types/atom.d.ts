@@ -13,4 +13,14 @@ declare module 'atom' {
   interface ContextMenuManager {
     showForEvent(e: PointerEvent): void
   }
+  interface File {
+    read(flushCache?: boolean): Promise<string | null>
+  }
+}
+declare global {
+  namespace NodeJS {
+    interface Process {
+      resourcesPath: string
+    }
+  }
 }

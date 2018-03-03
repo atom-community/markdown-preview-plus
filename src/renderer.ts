@@ -126,8 +126,7 @@ async function resolveImagePaths(
         if (src.match(/^(https?|atom|data):/)) {
           return
         }
-        // @ts-ignore
-        if (src.startsWith(process.resourcesPath as string)) {
+        if (src.startsWith(process.resourcesPath)) {
           return
         }
         if (src.startsWith(resourcePath)) {

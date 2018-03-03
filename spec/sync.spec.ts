@@ -106,10 +106,14 @@ describe('Syncronization of source and preview', function() {
         if (element == null) {
           continue
         }
-        const syncElement = preview.syncPreview(
-          atom.workspace.getActiveTextEditor()!.getText(),
-          sourceLine.line,
+        const editor = atom.workspace.getActiveTextEditor()!
+        editor.setCursorBufferPosition([sourceLine.line, 0])
+        const spy = sinon.spy(preview as any, 'syncPreview')
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:sync-preview',
         )
+        const syncElement = spy.lastCall.returnValue
         if (syncElement == null) {
           continue
         }
@@ -129,10 +133,14 @@ describe('Syncronization of source and preview', function() {
         if (!element) {
           continue
         }
-        const syncLine = preview.syncSource(
-          atom.workspace.getActiveTextEditor()!.getText(),
-          element as HTMLElement,
+        atom.commands.dispatch(
+          preview.element,
+          'markdown-preview-plus:sync-source',
         )
+        const syncLine = atom.workspace
+          .getActiveTextEditor()!
+          .getLastCursor()
+          .getBufferRow()
         if (syncLine) {
           expect(syncLine).to.equal(sourceElement.line)
         }

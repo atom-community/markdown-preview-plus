@@ -27,7 +27,7 @@ export class MarkdownPreviewViewFile extends MarkdownPreviewView {
     return `markdown-preview-plus://file/${this.getPath()}`
   }
 
-  protected getPath() {
+  public getPath() {
     return this.file.getPath()
   }
 
@@ -36,6 +36,8 @@ export class MarkdownPreviewViewFile extends MarkdownPreviewView {
   }
 
   protected async getMarkdownSource() {
-    return this.file.read()
+    const res = await this.file.read()
+    if (res !== null) return res
+    else return ''
   }
 }

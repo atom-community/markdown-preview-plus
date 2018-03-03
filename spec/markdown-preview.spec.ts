@@ -198,7 +198,7 @@ describe('Markdown preview plus package', function() {
 
     describe('when the editor is modified', function() {
       it('re-renders the preview', async function() {
-        const spy = sinon.spy(preview, 'showLoading')
+        const spy = sinon.spy(preview as any, 'showLoading')
 
         const markdownEditor = atom.workspace.getActiveTextEditor()!
         markdownEditor.setText('Hey!')
@@ -321,7 +321,7 @@ var x = y;
       preview = atom.workspace.getActivePaneItem() as any
       expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewFile')
 
-      const spy = sinon.spy(preview, 'renderMarkdownText')
+      const spy = sinon.spy(preview as any, 'renderMarkdownText')
       fs.writeFileSync(filePath, fs.readFileSync(filePath).toString('utf8'))
 
       await waitsFor.msg(

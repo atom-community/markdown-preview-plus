@@ -181,6 +181,8 @@ export abstract class MarkdownPreviewView {
 
   public abstract getURI(): string
 
+  public abstract getPath(): string | undefined
+
   public getSaveDialogOptions() {
     let defaultPath = this.getPath()
     if (defaultPath) {
@@ -226,8 +228,6 @@ export abstract class MarkdownPreviewView {
   }
 
   protected abstract async getMarkdownSource(): Promise<string>
-
-  protected abstract getPath(): string | undefined
 
   protected abstract getGrammar(): Grammar | undefined
 
@@ -336,9 +336,10 @@ export abstract class MarkdownPreviewView {
         'markdown-preview-plus.breakOnSingleNewline',
         this.changeHandler,
       ),
-    )
-
-    this.disposables.add(
+      atom.config.onDidChange(
+        'markdown-preview-plus.useLazyHeaders',
+        this.changeHandler,
+      ),
       atom.config.onDidChange(
         'markdown-preview-plus.useGitHubStyle',
         ({ newValue }) => {
@@ -359,7 +360,7 @@ export abstract class MarkdownPreviewView {
       this.showLoading()
     }
     const source = await this.getMarkdownSource()
-    if (source) await this.renderMarkdownText(source)
+    await this.renderMarkdownText(source)
   }
 
   private async getHTML() {
@@ -409,7 +410,6 @@ export abstract class MarkdownPreviewView {
       }
       this.emitter.emit('did-change-markdown')
     } catch (error) {
-      console.error(error)
       this.showError(error as Error)
     }
   }
@@ -426,6 +426,7 @@ export abstract class MarkdownPreviewView {
           detail: error.message,
         },
       )
+      return
     }
     const errorDiv = this.element.contentDocument.createElement('div')
     errorDiv.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${

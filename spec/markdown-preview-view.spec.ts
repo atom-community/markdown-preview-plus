@@ -6,7 +6,6 @@ import {
   MarkdownPreviewViewFile,
   MarkdownPreviewViewEditor,
 } from '../lib/markdown-preview-view'
-import * as markdownIt from '../lib/markdown-it-helper'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as wrench from 'fs-extra'
@@ -57,7 +56,6 @@ describe('MarkdownPreviewView', function() {
 
     filePath = path.join(tempPath, 'subdir/file.markdown')
     preview = await createMarkdownPreviewViewFile(filePath)
-    await preview.renderPromise
   })
 
   afterEach(async function() {
@@ -74,7 +72,8 @@ describe('MarkdownPreviewView', function() {
 
   describe('::constructor', () =>
     it('shows an error message when there is an error', function() {
-      preview.showError(new Error('Not a real file'))
+      // tslint:disable-next-line: no-unsafe-any
+      ;(preview as any).showError(new Error('Not a real file'))
       expect(preview.text()).to.contain('Failed')
     }))
 
@@ -134,8 +133,6 @@ describe('MarkdownPreviewView', function() {
 
   describe('header rendering', function() {
     it('should render headings with and without space', async function() {
-      await preview.renderMarkdown()
-
       const headlines = preview.findAll('h2')
       expect(headlines.length).to.equal(2)
       expect(headlines[0].outerHTML).to.equal(
@@ -149,8 +146,7 @@ describe('MarkdownPreviewView', function() {
     it('should render headings with and without space', async function() {
       atom.config.set('markdown-preview-plus.useLazyHeaders', false)
 
-      await preview.renderMarkdown()
-
+      await waitsFor(() => preview.findAll('h2').length === 1)
       const headlines = preview.findAll('h2')
       expect(headlines.length).to.equal(1)
       expect(headlines[0].outerHTML).to.equal(
@@ -163,8 +159,6 @@ describe('MarkdownPreviewView', function() {
     it('removes a trailing newline but preserves remaining leading and trailing whitespace', async function() {
       const newFilePath = path.join(tempPath, 'subdir/trim-nl.md')
       const newPreview = await createMarkdownPreviewViewFile(newFilePath)
-
-      await newPreview.renderMarkdown()
 
       const editor = newPreview.find('atom-text-editor') as TextEditorElement
       expect(editor).to.exist
@@ -249,17 +243,9 @@ var x = 0;
   })
 
   describe('image resolving', function() {
-    let spy: sinon.SinonSpy
-    beforeEach(async function() {
-      spy && spy.restore()
-      spy = sinon.spy(markdownIt, 'decode')
-      await preview.renderMarkdown()
-    })
-
     describe('when the image uses a relative path', () =>
       it('resolves to a path relative to the file', function() {
         const image = preview.find('img[alt=Image1]')
-        expect(markdownIt.decode).to.be.called
         expect(image!.getAttribute('src')).to.startWith(
           path.join(tempPath, 'subdir/image1.png'),
         )
@@ -268,7 +254,6 @@ var x = 0;
     describe('when the image uses an absolute path that does not exist', () =>
       it('resolves to a path relative to the project root', function() {
         const image = preview.find('img[alt=Image2]')
-        expect(markdownIt.decode).to.be.called
         expect(image!.getAttribute('src')).to.startWith(
           path.join(tempPath, 'tmp/image2.png'),
         )
@@ -282,9 +267,6 @@ var x = 0;
         fs.writeFileSync(filePath, `![absolute](${filePath})`)
         preview = await createMarkdownPreviewViewFile(filePath)
 
-        await preview.renderMarkdown()
-
-        expect(markdownIt.decode).to.be.called
         expect(
           preview.find('img[alt=absolute]')!.getAttribute('src'),
         ).to.startWith(`${filePath}?v=`)
@@ -293,7 +275,6 @@ var x = 0;
     describe('when the image uses a URL', function() {
       it("doesn't change the web URL", function() {
         const image = preview.find('img[alt=Image3]')
-        expect(markdownIt.decode).to.be.called
         expect(image!.getAttribute('src')).to.equal(
           'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
         )
@@ -301,7 +282,6 @@ var x = 0;
 
       it("doesn't change the data URL", function() {
         const image = preview.find('img[alt=Image4]')
-        expect(markdownIt.decode).to.be.called
         expect(image!.getAttribute('src')).to.equal(
           'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7',
         )
@@ -494,7 +474,7 @@ var x = 0;
         let imageURL: string
         let imageVer: string
 
-        const editor = await atom.workspace.open(filePath)
+        const editor = (await atom.workspace.open(filePath)) as TextEditor
         atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
@@ -517,7 +497,8 @@ var x = 0;
           img1Path,
           'clearly not a png but good enough for tests',
         )
-        await preview.renderMarkdown()
+
+        editor.setTextInBufferRange([[0, 0], [0, 0]], '')
 
         await waitsFor.msg('image src attribute to update', function() {
           imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
@@ -535,7 +516,7 @@ var x = 0;
         let imageURL: string
         let imageVer: string
 
-        const editor = await atom.workspace.open(filePath)
+        const editor = (await atom.workspace.open(filePath)) as TextEditor
         atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
@@ -555,7 +536,8 @@ var x = 0;
 
         expect(imageURL).to.equal(img1Path)
         fs.renameSync(img1Path + 'trol', img1Path)
-        await preview.renderMarkdown()
+
+        editor.setTextInBufferRange([[0, 0], [0, 0]], '')
 
         await waitsFor.msg('image src attribute to update', function() {
           imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
@@ -574,7 +556,7 @@ var x = 0;
       it('creates a single paragraph with <br>', async function() {
         atom.config.set('markdown-preview-plus.breakOnSingleNewline', false)
 
-        await preview.renderMarkdown()
+        await waitsFor(() => preview.findAll('p:last-child br').length === 0)
 
         expect(preview.findAll('p:last-child br').length).to.equal(0)
       }))
@@ -583,7 +565,7 @@ var x = 0;
       it('creates a single paragraph with no <br>', async function() {
         atom.config.set('markdown-preview-plus.breakOnSingleNewline', true)
 
-        await preview.renderMarkdown()
+        await waitsFor(() => preview.findAll('p:last-child br').length === 1)
 
         expect(preview.findAll('p:last-child br').length).to.equal(1)
       }))
@@ -614,7 +596,7 @@ var x = 0;
 
       expect(fs.existsSync(outputPath)).to.be.false
 
-      await preview.renderMarkdown()
+      await preview.renderPromise
 
       let textEditor: TextEditor
       const openedPromise = new Promise(function(resolve) {
@@ -690,8 +672,6 @@ var x = 0;
 
       filePath = path.join(tempPath, 'subdir/code-block.md')
       preview = await createMarkdownPreviewViewFile(filePath)
-
-      await preview.renderMarkdown()
 
       atom.clipboard.write('initial clipboard content')
 

@@ -46,12 +46,12 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     return `markdown-preview-plus://editor/${this.editor.id}`
   }
 
-  protected async getMarkdownSource() {
-    return this.editor.getText()
+  public getPath() {
+    return this.editor.getPath()
   }
 
-  protected getPath() {
-    return this.editor.getPath()
+  protected async getMarkdownSource() {
+    return this.editor.getText()
   }
 
   protected getGrammar(): Grammar {

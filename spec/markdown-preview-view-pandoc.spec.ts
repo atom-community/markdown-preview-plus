@@ -59,7 +59,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
     beforeEach(async function() {
       spy && spy.restore()
       spy = sinon.spy(markdownIt, 'decode')
-      await preview.renderMarkdown()
       await preview.renderPromise
     })
 
@@ -95,7 +94,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         `
         preview = createMarkdownPreviewViewFile(filePath)
 
-        await preview.renderMarkdown()
+        await preview.renderPromise
 
         await waitsFor(() => preview.find('img[alt=absolute]'))
 
