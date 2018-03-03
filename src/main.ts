@@ -243,13 +243,14 @@ function registerGrammars(
 function opener(uriToOpen: string) {
   try {
     // tslint:disable-next-line:no-var-keyword prefer-const
-    var uri = new url.URL(uriToOpen)
+    var uri = url.parse(uriToOpen)
   } catch (e) {
-    console.error(e)
+    console.error(e, uriToOpen)
     return undefined
   }
 
   if (uri.protocol !== 'markdown-preview-plus:') return undefined
+  if (!uri.pathname) return undefined
 
   try {
     // tslint:disable-next-line:no-var-keyword prefer-const
