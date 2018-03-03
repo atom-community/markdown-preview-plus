@@ -1,5 +1,5 @@
 import _ = require('lodash')
-import { isMarkdownPreviewView } from './cast'
+import { MarkdownPreviewView } from './markdown-preview-view'
 import { CompositeDisposable, File } from 'atom'
 import { handlePromise, isFileSync } from './util'
 
@@ -17,7 +17,7 @@ let imageRegister: {
 
 const refreshImages = _.debounce(async function(src: string) {
   for (const item of atom.workspace.getPaneItems()) {
-    if (isMarkdownPreviewView(item)) {
+    if (item instanceof MarkdownPreviewView) {
       // TODO: check against imageRegister[src].version.files
       await item.refreshImages(src)
     }

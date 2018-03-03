@@ -152,7 +152,7 @@ describe('Markdown preview plus package', function() {
       )
 
       const preview1 = previewPane.getActiveItem() as MarkdownPreviewView
-      expect(preview1.constructor.name).to.be.equal('MarkdownPreviewView')
+      expect(preview1.constructor.name).to.be.equal('MarkdownPreviewViewEditor')
       expect(preview1.getPath()).to.equal(
         (editorPane.getActiveItem() as TextEditor).getPath(),
       )
@@ -319,7 +319,7 @@ var x = y;
       await atom.workspace.open(`markdown-preview-plus://file/${filePath}`)
 
       preview = atom.workspace.getActivePaneItem() as any
-      expect(preview.constructor.name).to.be.equal('MarkdownPreviewView')
+      expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewFile')
 
       const spy = sinon.spy(preview, 'renderMarkdownText')
       fs.writeFileSync(filePath, fs.readFileSync(filePath).toString('utf8'))

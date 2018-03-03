@@ -82,7 +82,7 @@ export async function expectPreviewInSplitPane() {
     .getActiveItem() as MarkdownPreviewView
   await preview.renderPromise
 
-  expect(preview.constructor.name).to.be.equal('MarkdownPreviewView')
+  expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewEditor')
   expect(preview.getPath()).to.equal(
     atom.workspace.getActiveTextEditor()!.getPath(),
   )

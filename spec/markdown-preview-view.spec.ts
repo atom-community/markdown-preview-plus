@@ -1,7 +1,11 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
-import { MarkdownPreviewView, MPVParams } from '../lib/markdown-preview-view'
+import {
+  MarkdownPreviewView,
+  MarkdownPreviewViewFile,
+  MarkdownPreviewViewEditor,
+} from '../lib/markdown-preview-view'
 import * as markdownIt from '../lib/markdown-it-helper'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -18,8 +22,15 @@ describe('MarkdownPreviewView', function() {
   let tempPath: string
   const previews: Set<MarkdownPreviewView> = new Set()
 
-  const createMarkdownPreviewView = async function(params: MPVParams) {
-    const mpv = MarkdownPreviewView.create(params)
+  const createMarkdownPreviewViewFile = async function(filePath: string) {
+    const mpv = new MarkdownPreviewViewFile(filePath)
+    window.workspaceDiv.appendChild(mpv.element)
+    previews.add(mpv)
+    await mpv.renderPromise
+    return mpv
+  }
+  const createMarkdownPreviewViewEditor = async function(editor: TextEditor) {
+    const mpv = MarkdownPreviewViewEditor.create(editor)
     window.workspaceDiv.appendChild(mpv.element)
     previews.add(mpv)
     await mpv.renderPromise
@@ -45,7 +56,7 @@ describe('MarkdownPreviewView', function() {
     atom.project.setPaths([tempPath])
 
     filePath = path.join(tempPath, 'subdir/file.markdown')
-    preview = await createMarkdownPreviewView({ filePath })
+    preview = await createMarkdownPreviewViewFile(filePath)
     await preview.renderPromise
   })
 
@@ -87,7 +98,7 @@ describe('MarkdownPreviewView', function() {
       filePath = path.join(temp.mkdirSync('markdown-preview-'), 'foo.md')
       fs.writeFileSync(filePath, '# Hi')
 
-      newPreview = await createMarkdownPreviewView({ filePath })
+      newPreview = await createMarkdownPreviewViewFile(filePath)
       const serialized = newPreview.serialize()
       fs.unlinkSync(filePath)
 
@@ -102,9 +113,9 @@ describe('MarkdownPreviewView', function() {
 
       await atom.workspace.open('new.markdown')
 
-      preview = await createMarkdownPreviewView({
-        editor: atom.workspace.getActiveTextEditor()!,
-      })
+      preview = await createMarkdownPreviewViewEditor(
+        atom.workspace.getActiveTextEditor()!,
+      )
 
       expect(preview.getPath()).to.equal(
         atom.workspace.getActiveTextEditor()!.getPath(),
@@ -151,9 +162,7 @@ describe('MarkdownPreviewView', function() {
   describe('code block conversion to atom-text-editor tags', function() {
     it('removes a trailing newline but preserves remaining leading and trailing whitespace', async function() {
       const newFilePath = path.join(tempPath, 'subdir/trim-nl.md')
-      const newPreview = await createMarkdownPreviewView({
-        filePath: newFilePath,
-      })
+      const newPreview = await createMarkdownPreviewViewFile(newFilePath)
 
       await newPreview.renderMarkdown()
 
@@ -271,7 +280,7 @@ var x = 0;
 
         filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
         fs.writeFileSync(filePath, `![absolute](${filePath})`)
-        preview = await createMarkdownPreviewView({ filePath })
+        preview = await createMarkdownPreviewViewFile(filePath)
 
         await preview.renderMarkdown()
 
@@ -680,7 +689,7 @@ var x = 0;
       preview.destroy()
 
       filePath = path.join(tempPath, 'subdir/code-block.md')
-      preview = await createMarkdownPreviewView({ filePath })
+      preview = await createMarkdownPreviewViewFile(filePath)
 
       await preview.renderMarkdown()
 

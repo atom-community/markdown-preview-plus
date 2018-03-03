@@ -2,7 +2,10 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
-import { MarkdownPreviewView, MPVParams } from '../lib/markdown-preview-view'
+import {
+  MarkdownPreviewViewFile,
+  MarkdownPreviewView,
+} from '../lib/markdown-preview-view'
 import markdownIt = require('../lib/markdown-it-helper')
 import pandocHelper = require('../lib/pandoc-helper')
 import { expect } from 'chai'
@@ -17,8 +20,8 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
   let stub: sinon.SinonStub
   const previews: Set<MarkdownPreviewView> = new Set()
 
-  const createMarkdownPreviewView = function(params: MPVParams) {
-    const mpv = MarkdownPreviewView.create(params)
+  const createMarkdownPreviewViewFile = function(filePath: string) {
+    const mpv = new MarkdownPreviewViewFile(filePath)
     window.workspaceDiv.appendChild(mpv.element)
     previews.add(mpv)
     return mpv
@@ -37,7 +40,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
       .stub(pandocHelper, 'renderPandoc')
       .callsFake(async (_text, _filePath, _renderMath) => html)
 
-    preview = createMarkdownPreviewView({ filePath })
+    preview = createMarkdownPreviewViewFile(filePath)
   })
 
   afterEach(async function() {
@@ -90,7 +93,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         <img src="${filePath}" alt="absolute"><p class="caption">absolute</p>
         </div>\
         `
-        preview = createMarkdownPreviewView({ filePath })
+        preview = createMarkdownPreviewViewFile(filePath)
 
         await preview.renderMarkdown()
 
