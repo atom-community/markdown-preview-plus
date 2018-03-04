@@ -781,8 +781,7 @@ var x = 0;
 | zebra stripes |   are neat    |    $1 |
 `)
       await waitsFor(() => spy.called)
-      await waitsFor(() => spy.lastCall.returned)
-      await spy.lastCall.returnValue
+      await (spy.lastCall.returnValue as Promise<void>)
       ths = Array.from(pv.findAll('th')) as HTMLElement[]
       expect(ths.length).to.equal(3)
       expect(ths[0].style.textAlign).to.equal('left')
