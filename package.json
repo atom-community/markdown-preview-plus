@@ -25,7 +25,7 @@
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
   "dependencies": {
-    "MathJax": "https://github.com/atom-community/MathJax/tarball/2.4.0-electron.0.2.0",
+    "mathjax": "https://github.com/atom-community/MathJax/archive/2.7.3-electron.0.1.1.tar.gz",
     "atom-highlight": "^0.4.1",
     "lodash": "^4.17.5",
     "markdown-it": "^8.4.1",

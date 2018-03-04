@@ -210,7 +210,7 @@ async function attachMathJax(
   await Promise.all([
     injectScript(
       frame.contentDocument,
-      `${require.resolve('MathJax')}?delayStartupUntil=configured`,
+      `${require.resolve('mathjax')}?delayStartupUntil=configured`,
     ),
     injectScript(frame.contentDocument, require.resolve('./mathjax-stub')),
   ])
