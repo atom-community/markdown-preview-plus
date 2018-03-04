@@ -13,7 +13,7 @@ import renderer = require('../renderer')
 import { UpdatePreview } from '../update-preview'
 import markdownIt = require('../markdown-it-helper')
 import imageWatcher = require('../image-watch-helper')
-import { handlePromise } from '../util'
+import { handlePromise, injectScript } from '../util'
 import * as util from './util'
 
 export interface SerializedMPV {
@@ -72,6 +72,11 @@ export abstract class MarkdownPreviewView {
         if (this.updatePreview) this.updatePreview = undefined
         const doc = this.element.contentDocument
         this.updateStyles()
+        handlePromise(
+          injectScript(doc, require.resolve('../misc-stub')).then(() => {
+            this.element.contentWindow.miscStub.handleScroll(this.handleScroll)
+          }),
+        )
         this.rootElement = doc.createElement('markdown-preview-plus-view')
         this.rootElement.classList.add('native-key-bindings')
         this.rootElement.tabIndex = -1
@@ -556,6 +561,18 @@ export abstract class MarkdownPreviewView {
     elem.innerHTML = ''
     for (const se of atom.styles.getStyleElements()) {
       elem.appendChild(se.cloneNode(true))
+    }
+  }
+
+  private handleScroll = (event: WheelEvent) => {
+    if (event.ctrlKey) {
+      if (event.wheelDeltaY > 0) {
+        atom.commands.dispatch(this.element, 'markdown-preview-plus:zoom-in')
+      } else if (event.wheelDeltaY < 0) {
+        atom.commands.dispatch(this.element, 'markdown-preview-plus:zoom-out')
+      }
+      event.preventDefault()
+      event.stopPropagation()
     }
   }
 }

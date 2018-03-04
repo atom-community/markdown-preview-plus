@@ -34,3 +34,13 @@ export function pairUp<T>(arr: T[], option?: string): Array<[T, T]> {
 export function isElement(node: Node): node is Element {
   return node.nodeType === Node.ELEMENT_NODE
 }
+
+export async function injectScript(doc: HTMLDocument, scriptSrc: string) {
+  const script = doc.createElement('script')
+  script.src = scriptSrc
+  script.type = 'text/javascript'
+  doc.head.appendChild(script)
+  return new Promise<void>((resolve) => {
+    script.addEventListener('load', () => resolve())
+  })
+}

@@ -8,7 +8,7 @@
 import path = require('path')
 import CSON = require('season')
 import fs = require('fs')
-import { isFileSync } from './util'
+import { isFileSync, injectScript } from './util'
 
 let isMathJaxDisabled = false
 
@@ -216,14 +216,4 @@ async function attachMathJax(
   ])
   configureMathJax(frame.contentWindow.mathJaxStub, renderer)
   return frame.contentWindow.mathJaxStub
-}
-
-async function injectScript(doc: HTMLDocument, scriptSrc: string) {
-  const script = doc.createElement('script')
-  script.src = scriptSrc
-  script.type = 'text/javascript'
-  doc.head.appendChild(script)
-  return new Promise<void>((resolve) => {
-    script.addEventListener('load', () => resolve())
-  })
 }
