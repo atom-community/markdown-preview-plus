@@ -741,7 +741,7 @@ var x = 0;
   })
 
   describe('emoji', function() {
-    it('renders checkbox lists', function() {
+    it('renders them', function() {
       const emojis = Array.from(
         preview.findAll('img.emoji'),
       ) as HTMLImageElement[]
@@ -752,6 +752,42 @@ var x = 0;
         expect(i.src).includes('/svg/')
         expect(i.src).includes('.svg')
       }
+    })
+  })
+
+  describe('table alignment', function() {
+    it('realigns table if markdown changed', async function() {
+      const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor
+      editor.setText(`\
+| Tables        |      Are      |  Cool |
+|:--------------|:-------------:|------:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      |   centered    |   $12 |
+| zebra stripes |   are neat    |    $1 |
+`)
+      const pv = await createMarkdownPreviewViewEditor(editor)
+      console.log(pv.element.contentDocument.body)
+      let ths = Array.from(pv.findAll('th')) as HTMLElement[]
+      expect(ths.length).to.equal(3)
+      expect(ths[0].style.textAlign).to.equal('left')
+      expect(ths[1].style.textAlign).to.equal('center')
+      expect(ths[2].style.textAlign).to.equal('right')
+      const spy = sinon.spy<any>(pv, 'renderMarkdown')
+      editor.setText(`\
+| Tables        |      Are      |  Cool |
+|:--------------|:-------------:|:------|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      |   centered    |   $12 |
+| zebra stripes |   are neat    |    $1 |
+`)
+      await waitsFor(() => spy.called)
+      await waitsFor(() => spy.lastCall.returned)
+      await spy.lastCall.returnValue
+      ths = Array.from(pv.findAll('th')) as HTMLElement[]
+      expect(ths.length).to.equal(3)
+      expect(ths[0].style.textAlign).to.equal('left')
+      expect(ths[1].style.textAlign).to.equal('center')
+      expect(ths[2].style.textAlign).to.equal('left')
     })
   })
 })

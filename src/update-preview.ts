@@ -23,7 +23,7 @@
 import { WrappedDomTree } from './wrapped-dom-tree'
 import MathJaxHelper = require('./mathjax-helper')
 import renderer = require('./renderer')
-import { handlePromise } from './util'
+import { handlePromise, isElement } from './util'
 
 export class UpdatePreview {
   private domFragment?: DocumentFragment
@@ -91,6 +91,11 @@ export class UpdatePreview {
   private updateOrderedListsStart(fragment: DocumentFragment) {
     if (this.tree.shownTree === undefined) {
       throw new Error('shownTree undefined in updateOrderedListsStart')
+    }
+    if (!isElement(this.tree.shownTree.dom)) {
+      throw new Error(
+        'this.tree.shownTree.dom is not an Element in updateOrderedListsStart',
+      )
     }
     const previewOLs = this.tree.shownTree.dom.querySelectorAll('ol')
     const parsedOLs = fragment.querySelectorAll('ol')

@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import { TwoDimArray } from './two-dim-array'
+import { isElement } from './util'
 
 let curHash = 0
 const hashTo: { [key: string]: WrappedDomTree | undefined } = {}
@@ -32,7 +33,7 @@ type Operation =
 
 export class WrappedDomTree {
   public readonly shownTree?: WrappedDomTree
-  public readonly dom: Element
+  public readonly dom: Node
   private children: WrappedDomTree[] = []
   private size: number = 0
   private diffHash: {
@@ -41,8 +42,9 @@ export class WrappedDomTree {
       operations?: Operation[]
     }
   }
-  private className: string
-  private tagName: string
+  private className?: string
+  private tagName?: string
+  private style?: string | null
   private rep?: WrappedDomTree
   private isText: boolean
   private hash: number
@@ -52,9 +54,9 @@ export class WrappedDomTree {
   //    https://developer.mozilla.org/en-US/docs/Web/API/element
   // @param clone Boolean flag indicating if this is the DOM tree to modify
   // @param rep WrappedDomTree of a DOM element node in dom
-  constructor(dom: Element, clone: true)
-  constructor(dom: Element, clone: false, rep?: WrappedDomTree)
-  constructor(dom: Element, clone: boolean, rep?: WrappedDomTree) {
+  constructor(dom: Node, clone: true)
+  constructor(dom: Node, clone: false, rep?: WrappedDomTree)
+  constructor(dom: Node, clone: boolean, rep?: WrappedDomTree) {
     if (clone) {
       this.shownTree = new WrappedDomTree(dom, false, this)
       this.dom = dom.cloneNode(true) as Element
@@ -66,9 +68,12 @@ export class WrappedDomTree {
     this.clone = clone
     this.hash = curHash++
     hashTo[this.hash] = this
-    this.isText = dom.nodeType === 3
-    this.tagName = dom.tagName
-    this.className = dom.className
+    this.isText = dom.nodeType === Node.TEXT_NODE
+    if (isElement(dom)) {
+      this.tagName = dom.tagName
+      this.className = dom.className
+      this.style = dom.getAttribute('style')
+    }
     this.diffHash = {}
 
     if (this.isText) {
@@ -97,7 +102,7 @@ export class WrappedDomTree {
   ): {
     possibleReplace?: {
       cur?: Node
-      prev?: Element
+      prev?: Node
     }
     inserted: Node[]
     last?: Node
@@ -116,8 +121,8 @@ export class WrappedDomTree {
     let possibleReplace
     let r
     let lastOp: Operation | undefined
-    let lastElmDeleted: Element | undefined
-    let lastElmInserted: Element | undefined
+    let lastElmDeleted: Node | undefined
+    let lastElmInserted: Node | undefined
 
     if (operations) {
       if (Array.isArray(operations)) {
@@ -236,7 +241,6 @@ export class WrappedDomTree {
     score: number
     operations?: Operation[]
   } {
-    let i
     if (this.equalTo(otherTree)) {
       return { score: 0, operations: undefined }
     }
@@ -277,53 +281,28 @@ export class WrappedDomTree {
     dp.set(0, 0, 0)
 
     let sum = 0
-    // Because coffescripts allows biderctional loops we need this condition
-    // gaurd to prevent a decreasing array list
-    if (otherTree.children.length - offset > 1) {
-      let asc: boolean
-      let end: number
-      for (
-        i = 1, end = otherTree.children.length - offset - 1, asc = 1 <= end;
-        asc ? i <= end : i >= end;
-        asc ? i++ : i--
-      ) {
-        dp.set(0, i, sum)
-        p.set(0, i, i - 1)
-        sum += otherTree.children[i + offset].size
-      }
+    for (let i = 1; i + offset < otherTree.children.length; i++) {
+      dp.set(0, i, sum)
+      p.set(0, i, i - 1)
+      sum += otherTree.children[i + offset].size
     }
     if (otherTree.children.length - offset > 0) {
-      dp.set(0, otherTree.children.length - offset, sum)
-      p.set(
-        0,
-        otherTree.children.length - offset,
-        otherTree.children.length - 1 - offset,
-      )
+      const i = otherTree.children.length - offset
+      dp.set(0, i, sum)
+      p.set(0, i, i - 1)
     }
 
     sum = 0
-    // Because coffescripts allows biderctional loops we need this condition
-    // gaurd to prevent a decreasing array list
-    if (this.children.length - offset > 1) {
-      let asc1: boolean
-      let end1: number
-      for (
-        i = 1, end1 = this.children.length - offset - 1, asc1 = 1 <= end1;
-        asc1 ? i <= end1 : i >= end1;
-        asc1 ? i++ : i--
-      ) {
-        dp.set(i, 0, sum)
-        p.set(i, 0, (i - 1) * p.col)
-        sum += this.children[i + offset].size
-      }
+
+    for (let i = 1; i + offset < this.children.length; i++) {
+      dp.set(i, 0, sum)
+      p.set(i, 0, (i - 1) * p.col)
+      sum += this.children[i + offset].size
     }
-    if (this.children.length - offset) {
-      dp.set(this.children.length - offset, 0, sum)
-      p.set(
-        this.children.length - offset,
-        0,
-        (this.children.length - 1 - offset) * p.col,
-      )
+    if (this.children.length - offset > 0) {
+      const i = this.children.length - offset
+      dp.set(i, 0, sum)
+      p.set(i, 0, (i - 1) * p.col)
     }
 
     const getScore = (i: number, j: number, max?: number): number => {
@@ -455,6 +434,7 @@ export class WrappedDomTree {
       otherTree.isText ||
       this.tagName !== otherTree.tagName ||
       this.className !== otherTree.className ||
+      this.style !== otherTree.style ||
       this.className === 'math' ||
       this.className === 'atom-text-editor' ||
       this.tagName === 'A' ||

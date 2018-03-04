@@ -30,3 +30,7 @@ export function pairUp<T>(arr: T[], option?: string): Array<[T, T]> {
     return result
   }, [])
 }
+
+export function isElement(node: Node): node is Element {
+  return node.nodeType === Node.ELEMENT_NODE
+}
