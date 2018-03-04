@@ -61,15 +61,16 @@ export class UpdatePreview {
       r.last = undefined
     }
 
+    r.inserted = r.inserted.filter((elm) => elm.nodeType === Node.ELEMENT_NODE)
+
     if (renderLaTeX) {
-      r.inserted = r.inserted.map(function(elm: Node) {
-        while (elm.parentElement && !(elm as HTMLElement).innerHTML) {
-          elm = elm.parentElement
-        }
-        return elm
-      })
-      r.inserted = r.inserted.filter((elm) => !!elm)
-      handlePromise(MathJaxHelper.mathProcessor(frame, r.inserted))
+      if (firstTime) {
+        handlePromise(
+          MathJaxHelper.mathProcessor(frame, [frame.contentDocument.body]),
+        )
+      } else {
+        handlePromise(MathJaxHelper.mathProcessor(frame, r.inserted))
+      }
     }
 
     if (
@@ -77,9 +78,8 @@ export class UpdatePreview {
       !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
     ) {
       for (const elm of r.inserted) {
-        if (typeof (elm as any).querySelectorAll === 'function') {
-          renderer.highlightCodeBlocks(elm as Element)
-        }
+        // NOTE: filtered above
+        renderer.highlightCodeBlocks(elm as Element)
       }
     }
 

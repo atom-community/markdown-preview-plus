@@ -109,7 +109,7 @@ export class WrappedDomTree {
     const diff = this.rep && this.rep.diff(otherTree)
     const operations = diff && diff.operations
     let indexShift = 0
-    let inserted: Node[] = []
+    const inserted: Node[] = []
 
     // Force variables to leak to diffTo scope
     let last: Node | undefined
@@ -178,7 +178,7 @@ export class WrappedDomTree {
               }
               lastOp = op
             }
-            inserted = inserted.concat(re.inserted)
+            inserted.push(...re.inserted)
           }
         }
       } else {
