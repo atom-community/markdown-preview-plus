@@ -1,5 +1,7 @@
 $x$ math at the start of the document
 
+Nested: $M = \text{while e^2 $e^2$ do $c^2$ end}$
+
 This document is to test $\LaTeX$ rendering with [markdown-preview-plus](https://atom.io/packages/markdown-preview-plus).
 
 **Math environment Syntax testing**
