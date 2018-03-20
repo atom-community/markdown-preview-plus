@@ -23,9 +23,11 @@ const createRunner = require('atom-mocha-test-runner').createRunner
 
 const extraOptions = {
   testSuffixes: ['spec.js', 'spec.coffee', 'spec.ts'],
+  globalAtom: false,
 }
 
 const optionalConfigurationFunction = function(mocha) {
+  global.atom = global.atom = global.buildAtomEnvironment({enablePersistence: false})
   mocha.timeout(10000)
 
   const wspcDiv = document.createElement('div')
