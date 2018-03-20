@@ -87,11 +87,13 @@ export function copyHtml(_callback: any, _scale: number) {
 
 /// private
 
-function close(event: CommandEvent<MarkdownPreviewViewElement>) {
+async function close(
+  event: CommandEvent<MarkdownPreviewViewElement>,
+): Promise<void> {
   const item = event.currentTarget.getModel()
   const pane = atom.workspace.paneForItem(item)
-  if (!pane) return undefined
-  return pane.destroyItem(item)
+  if (!pane) return
+  await pane.destroyItem(item)
 }
 
 async function toggle(editor: TextEditor) {
@@ -128,19 +130,20 @@ async function addPreviewForEditor(editor: TextEditor) {
   return res
 }
 
-async function previewFile({ currentTarget }: CommandEvent) {
+async function previewFile({ currentTarget }: CommandEvent): Promise<void> {
   const filePath = (currentTarget as HTMLElement).dataset.path
   if (!filePath) {
-    return undefined
+    return
   }
 
   for (const editor of atom.workspace.getTextEditors()) {
     if (editor.getPath() === filePath) {
-      return addPreviewForEditor(editor)
+      await addPreviewForEditor(editor)
+      return
     }
   }
 
-  return atom.workspace.open(
+  await atom.workspace.open(
     `markdown-preview-plus://file/${encodeURI(filePath)}`,
     {
       searchAllPanes: true,
