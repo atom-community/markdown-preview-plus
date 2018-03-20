@@ -190,7 +190,7 @@ describe('Markdown preview plus package', function() {
           atom.views.getView(previewPane.getActiveItem()),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.true
+      ).to.be.ok
       expect(previewPane.getActiveItem()).to.be.undefined
     })
 
@@ -422,10 +422,9 @@ var x = y;
 <p>encoding \u2192 issue</p>\
 `)
 
-      atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
-        [0, 0],
-        [1, 0],
-      ])
+      atom.workspace
+        .getActiveTextEditor()!
+        .setSelectedBufferRange([[0, 0], [1, 0]])
       atom.commands.dispatch(
         atom.views.getView(editor),
         'markdown-preview-plus:copy-html',
@@ -555,10 +554,9 @@ var x = y;
 <p>encoding \u2192 issue</p>\
 `)
 
-      atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
-        [0, 0],
-        [1, 0],
-      ])
+      atom.workspace
+        .getActiveTextEditor()!
+        .setSelectedBufferRange([[0, 0], [1, 0]])
       await copyHtml()
 
       expect(clipboardContents).to.equal(`\
@@ -770,7 +768,7 @@ world</p>\
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.true
+      ).to.be.ok
       await expectPreviewInSplitPane()
     })
     it('Unbinds from scopes when config is changed', async function() {
@@ -786,7 +784,7 @@ world</p>\
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.false
+      ).not.to.be.ok
     })
   })
 
@@ -826,7 +824,7 @@ world</p>\
             atom.views.getView(editor),
             'markdown-preview-plus:toggle',
           ),
-        ).to.be.true
+        ).to.be.ok
         preview = await expectPreviewInSplitPane()
       })
 
@@ -875,7 +873,7 @@ world</p>\
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
         ),
-      ).to.be.true
+      ).to.be.ok
       await expectPreviewInSplitPane()
 
       const workspaceElement = atom.views.getView(atom.workspace)

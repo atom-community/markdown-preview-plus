@@ -15,7 +15,7 @@ if (require.extensions['.ts']) {
 const { register } = require('ts-node')
 
 register({
-  project: __dirname,
+  project: path.join(__dirname, 'tsconfig.json'),
 })
 
 // Configure test runner and export the runner function
@@ -23,10 +23,20 @@ const createRunner = require('atom-mocha-test-runner').createRunner
 
 const extraOptions = {
   testSuffixes: ['spec.js', 'spec.coffee', 'spec.ts'],
+  globalAtom: false,
 }
 
 const optionalConfigurationFunction = function(mocha) {
-  mocha.timeout(60000)
+  global.atom = global.atom = global.buildAtomEnvironment({enablePersistence: false})
+  mocha.timeout(10000)
+
+  const wspcDiv = document.createElement('div')
+  wspcDiv.style.height = '30vh'
+  wspcDiv.style.width = '100vh'
+  wspcDiv.style.overflow = 'hidden'
+  document.body.appendChild(wspcDiv)
+  window.workspaceDiv = wspcDiv
+  wspcDiv.appendChild(atom.views.getView(atom.workspace))
 }
 
 module.exports = createRunner(extraOptions, optionalConfigurationFunction)
