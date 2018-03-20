@@ -472,6 +472,7 @@ export class MarkdownPreviewView {
 
     return markdowPreviewRules
       .concat(this.getTextEditorStyles())
+      .concat([`pre.editor-colors { overflow: auto; }`])
       .join('\n')
       .replace(/\batom-text-editor\b/g, 'pre.editor-colors')
       .replace(/\bmarkdown-preview-plus-view\b/g, '.markdown-preview-plus-view')
