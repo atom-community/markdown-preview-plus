@@ -22,7 +22,7 @@ issue](https://github.com/atom-community/markdown-preview-plus/issues).
 We also have a more detailed description of
 [features](https://github.com/atom-community/markdown-preview-plus/blob/master/docs/features.md).
 
--   Fastly open a preview of any markdown with `ctrl-shift-m`
+-   Quickly open a preview of any markdown with `ctrl-shift-m`
 -   Math rendering with persistent macro support, toggled with
     `ctrl-shift-x`
 -   Optionally use pandoc with citation support
