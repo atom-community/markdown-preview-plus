@@ -766,7 +766,6 @@ var x = 0;
 | zebra stripes |   are neat    |    $1 |
 `)
       const pv = await createMarkdownPreviewViewEditor(editor)
-      console.log(pv.element.contentDocument.body)
       let ths = Array.from(pv.findAll('th')) as HTMLElement[]
       expect(ths.length).to.equal(3)
       expect(ths[0].style.textAlign).to.equal('left')
