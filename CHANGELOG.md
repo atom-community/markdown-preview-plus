@@ -1,3 +1,8 @@
+## 2.5.6
+
+-   Add overflow:auto to saved html code blocks style
+-   Updated spec to not break horribly on new Atom versions
+
 ## 2.5.5
 
 -   Make duplicate attachMathJax calls safe
