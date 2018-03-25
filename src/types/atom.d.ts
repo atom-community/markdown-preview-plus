@@ -20,7 +20,7 @@ declare module 'atom' {
 declare global {
   namespace NodeJS {
     interface Process {
-      resourcesPath: string
+      resourcesPath?: string
     }
   }
 }

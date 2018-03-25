@@ -17,7 +17,7 @@
   },
   "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc -p . && tsc -p src-client",
     "prettier": "prettier --write 'src/**/*.ts' 'spec/**/*.ts'",
     "prettier-check": "prettier -l 'src/**/*.ts' 'spec/**/*.ts'",
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p spec",

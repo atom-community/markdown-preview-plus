@@ -35,11 +35,13 @@ export class UpdatePreview {
   }
 
   public update(
-    frame: HTMLIFrameElement,
+    document: HTMLDocument,
     domFragment: DocumentFragment,
     renderLaTeX: boolean,
+    highlightCodeBlocks: boolean,
+    mjrenderer: MathJaxRenderer,
   ) {
-    prepareCodeBlocksForAtomEditors(frame.contentDocument, domFragment)
+    prepareCodeBlocksForAtomEditors(document, domFragment)
 
     if (this.domFragment && domFragment.isEqualNode(this.domFragment)) {
       return undefined
@@ -48,7 +50,7 @@ export class UpdatePreview {
     const firstTime = this.domFragment === undefined
     this.domFragment = domFragment.cloneNode(true) as DocumentFragment
 
-    const newDom = frame.contentDocument.createElement('div')
+    const newDom = document.createElement('div')
     newDom.className = 'update-preview'
     newDom.appendChild(domFragment)
     const newTree = new WrappedDomTree(newDom, false)
@@ -65,18 +67,14 @@ export class UpdatePreview {
 
     if (renderLaTeX) {
       if (firstTime) {
-        handlePromise(
-          MathJaxHelper.mathProcessor(frame, [frame.contentDocument.body]),
-        )
+        handlePromise(MathJaxHelper.mathProcessor([document.body], mjrenderer))
       } else {
-        handlePromise(MathJaxHelper.mathProcessor(frame, r.inserted))
+        handlePromise(MathJaxHelper.mathProcessor(r.inserted, mjrenderer))
       }
     }
 
-    if (
-      !atom.config.get('markdown-preview-plus.enablePandoc') ||
-      !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
-    ) {
+    // TODO: why is this happening here?
+    if (highlightCodeBlocks) {
       for (const elm of r.inserted) {
         // NOTE: filtered above
         renderer.highlightCodeBlocks(elm as Element)

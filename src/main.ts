@@ -6,7 +6,7 @@ import {
   MarkdownPreviewViewEditor,
 } from './markdown-preview-view'
 import renderer = require('./renderer')
-import mathjaxHelper = require('./mathjax-helper')
+// import mathjaxHelper = require('./mathjax-helper')
 import {
   TextEditor,
   WorkspaceOpenOptions,
@@ -164,15 +164,16 @@ async function copyHtmlInternal(editor: TextEditor): Promise<void> {
     true,
   )
   if (renderLaTeX) {
-    const frame = document.createElement('iframe')
-    frame.src = 'about:blank'
-    frame.style.display = 'none'
-    frame.addEventListener('load', async () => {
-      const proHTML = await mathjaxHelper.processHTMLString(frame, html.body)
-      frame.remove()
-      atom.clipboard.write(proHTML)
-    })
-    document.body.appendChild(frame)
+    // TODO!
+    // const frame = document.createElement('webview')
+    // frame.src = 'about:blank'
+    // frame.style.display = 'none'
+    // frame.addEventListener('load', async () => {
+    //   const proHTML = await mathjaxHelper.processHTMLString(frame, html.body)
+    //   frame.remove()
+    //   atom.clipboard.write(proHTML)
+    // })
+    // document.body.appendChild(frame)
   } else {
     atom.clipboard.write(html.body.innerHTML)
   }

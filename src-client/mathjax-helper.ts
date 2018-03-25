@@ -8,7 +8,7 @@
 import path = require('path')
 import CSON = require('season')
 import fs = require('fs')
-import { isFileSync, injectScript } from './util'
+import { isFileSync } from './util'
 
 let isMathJaxDisabled = false
 
@@ -20,14 +20,11 @@ let isMathJaxDisabled = false
 //   details on DOM elements.
 //
 export async function mathProcessor(
-  frame: HTMLIFrameElement,
   domElements: Node[],
+  renderer: MathJaxRenderer,
 ) {
   if (isMathJaxDisabled) return
-  const jax = await loadMathJax(
-    frame,
-    atom.config.get('markdown-preview-plus.latexRenderer'),
-  )
+  const jax = await loadMathJax(renderer)
   await jax.queueTypeset(domElements)
 }
 
@@ -39,16 +36,22 @@ export async function mathProcessor(
 //   fragment string that is the result of html processed by MathJax
 //
 export async function processHTMLString(
-  frame: HTMLIFrameElement,
+  frame: Electron.WebviewTag,
   element: HTMLElement,
 ) {
   if (isMathJaxDisabled) {
     return element.innerHTML
   }
-  const jax = await loadMathJax(frame, 'SVG')
+  const jax = await loadMathJax('SVG')
   await jax.queueTypeset([element])
 
-  const msvgh = frame.contentDocument.getElementById('MathJax_SVG_Hidden')
+  const msvgh = await new Promise<HTMLElement>((resolve) =>
+    frame.executeJavaScript(
+      `return document.getElementById('MathJax_SVG_Hidden')`,
+      false,
+      resolve,
+    ),
+  )
   const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
   if (svgGlyphs !== null) {
     element.insertBefore(svgGlyphs, element.firstChild)
@@ -67,22 +70,10 @@ function disableMathJax(disable: boolean) {
 // @param listener method to call when the MathJax script was been
 //   loaded to the window. The method is passed no arguments.
 //
-async function loadMathJax(
-  frame: HTMLIFrameElement,
-  renderer: MathJaxRenderer,
-): Promise<MathJaxStub> {
-  if (frame.contentWindow.mathJaxStub) return frame.contentWindow.mathJaxStub
-  if (frame.contentDocument.querySelector('head')) {
-    return attachMathJax(frame, renderer)
-  } else {
-    return new Promise<MathJaxStub>((resolve) => {
-      const onload = () => {
-        frame.removeEventListener('load', onload)
-        resolve(loadMathJax(frame, renderer))
-      }
-      frame.addEventListener('load', onload)
-    })
-  }
+async function loadMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
+  if (window.mathJaxStub) return window.mathJaxStub
+
+  return attachMathJax(renderer)
 }
 
 export const testing = {
@@ -93,12 +84,14 @@ export const testing = {
 // private
 
 function getUserMacrosPath(): string {
-  const userMacrosPath: string | undefined | null = CSON.resolve(
-    path.join(atom.getConfigDirPath(), 'markdown-preview-plus'),
-  )
-  return userMacrosPath != null
-    ? userMacrosPath
-    : path.join(atom.getConfigDirPath(), 'markdown-preview-plus.cson')
+  // TODO!
+  return path.join(process.env.HOME, 'markdown-preview-plus.cson')
+  // const userMacrosPath: string | undefined | null = CSON.resolve(
+  //   path.join(atom.getConfigDirPath(), 'markdown-preview-plus'),
+  // )
+  // return userMacrosPath != null
+  //   ? userMacrosPath
+  //   : path.join(atom.getConfigDirPath(), 'markdown-preview-plus.cson')
 }
 
 function loadMacrosFile(filePath: string): object {
@@ -115,10 +108,10 @@ function loadMacrosFile(filePath: string): object {
           error.stack !== undefined ? error.stack : error
         }`,
       )
-      atom.notifications.addError(
-        `Failed to load Latex Macros from '${filePath}'`,
-        { detail: error.message, dismissable: true },
-      )
+      console.error(`Failed to load Latex Macros from '${filePath}'`, {
+        detail: error.message,
+        dismissable: true,
+      })
     }
     return object
   })
@@ -149,9 +142,8 @@ function checkMacros(macrosObject: object) {
     const value = macrosObject[name]
     if (!name.match(namePattern) || !valueMatchesPattern(value)) {
       delete macrosObject[name]
-      atom.notifications.addError(
+      console.error(
         `Failed to load LaTeX macro named '${name}'. Please see the [LaTeX guide](https://github.com/atom-community/markdown-preview-plus/blob/master/docs/math.md#macro-names)`,
-        { dismissable: true },
       )
     }
   }
@@ -189,31 +181,30 @@ const configureMathJax = function(jax: MathJaxStub, renderer: MathJaxRenderer) {
   jax.jaxConfigure(userMacros, renderer)
 
   // Notify user MathJax has loaded
-  if (atom.inDevMode()) {
-    atom.notifications.addSuccess('Loaded maths rendering engine MathJax')
-  }
+  console.log('Loaded maths rendering engine MathJax')
 }
 
 //
 // Attach main MathJax script to the document
 //
-async function attachMathJax(
-  frame: HTMLIFrameElement,
-  renderer: MathJaxRenderer,
-): Promise<MathJaxStub> {
-  // Notify user MathJax is loading
-  if (atom.inDevMode()) {
-    atom.notifications.addInfo('Loading maths rendering engine MathJax')
-  }
+async function attachMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
+  console.log('Loading maths rendering engine MathJax')
 
   // Attach MathJax script
   await Promise.all([
-    injectScript(
-      frame.contentDocument,
-      `${require.resolve('mathjax')}?delayStartupUntil=configured`,
-    ),
-    injectScript(frame.contentDocument, require.resolve('./mathjax-stub')),
+    injectScript(`${require.resolve('mathjax')}?delayStartupUntil=configured`),
+    injectScript(require.resolve('./mathjax-stub')),
   ])
-  configureMathJax(frame.contentWindow.mathJaxStub, renderer)
-  return frame.contentWindow.mathJaxStub
+  configureMathJax(window.mathJaxStub, renderer)
+  return window.mathJaxStub
+}
+
+export async function injectScript(scriptSrc: string) {
+  const script = document.createElement('script')
+  script.src = scriptSrc
+  script.type = 'text/javascript'
+  document.head.appendChild(script)
+  return new Promise<void>((resolve) => {
+    script.addEventListener('load', () => resolve())
+  })
 }
