@@ -83,7 +83,6 @@ ipcRenderer.on(
     _event: any,
     html: string,
     renderLaTeX: boolean,
-    highlightCodeBlocks: boolean,
     mjrenderer: MathJaxRenderer,
   ) => {
     // div.update-preview created after constructor st UpdatePreview cannot
@@ -99,13 +98,7 @@ ipcRenderer.on(
     for (const elem of Array.from(domDocument.body.childNodes)) {
       domFragment.appendChild(elem)
     }
-    updatePreview.update(
-      document,
-      domFragment,
-      renderLaTeX,
-      highlightCodeBlocks,
-      mjrenderer,
-    )
+    updatePreview.update(document, domFragment, renderLaTeX, mjrenderer)
     const doc = document
     if (doc && domDocument.head.hasChildNodes) {
       let container = doc.head.querySelector('original-elements')

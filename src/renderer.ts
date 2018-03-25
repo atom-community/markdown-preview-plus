@@ -63,6 +63,12 @@ export async function render(
   const doc = parser.parseFromString(html, 'text/html')
   sanitize(doc)
   await resolveImagePaths(doc, filePath, copyHTMLFlag)
+  if (
+    !atom.config.get('markdown-preview-plus.enablePandoc') ||
+    !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
+  ) {
+    highlightCodeBlocks(doc)
+  }
   if (error) {
     const errd = doc.createElement('div')
     const msgel = doc.createElement('code')
@@ -196,4 +202,42 @@ function tokenizeCodeBlocks(
 
     preElement.outerHTML = highlightedHtml
   })
+}
+
+export function highlightCodeBlocks(
+  domFragment: Document,
+  defaultLanguage: string = 'text',
+) {
+  const fontFamily = atom.config.get('editor.fontFamily')
+  if (fontFamily) {
+    for (const codeElement of Array.from(
+      domFragment.querySelectorAll('code'),
+    )) {
+      codeElement.style.fontFamily = fontFamily
+    }
+  }
+
+  for (const preElement of Array.from(domFragment.querySelectorAll('pre'))) {
+    const codeBlock =
+      preElement.firstElementChild !== null
+        ? preElement.firstElementChild
+        : preElement
+    const cbClass = codeBlock.className
+    const fenceName = cbClass
+      ? cbClass.replace(/^(lang-|sourceCode )/, '')
+      : defaultLanguage
+
+    preElement.outerHTML = highlight({
+      fileContents: codeBlock.textContent!.replace(/\n$/, ''),
+      scopeName: scopeForFenceName(fenceName),
+      nbsp: false,
+      lineDivs: true,
+      editorDiv: true,
+      editorDivTag: 'atom-text-editor',
+      // The `editor` class messes things up as `.editor` has absolutely positioned lines
+      editorDivClass: fenceName ? `lang-${fenceName}` : '',
+    })
+  }
+
+  return domFragment
 }

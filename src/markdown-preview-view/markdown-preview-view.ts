@@ -330,8 +330,6 @@ export abstract class MarkdownPreviewView {
         'update-preview',
         domDocument.documentElement.outerHTML,
         this.renderLaTeX,
-        !atom.config.get('markdown-preview-plus.enablePandoc') ||
-          !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles'),
         atom.config.get('markdown-preview-plus.latexRenderer'),
       )
       this.emitter.emit('did-change-markdown')

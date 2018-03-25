@@ -22,7 +22,6 @@
 // THE SOFTWARE.
 import { WrappedDomTree } from './wrapped-dom-tree'
 import MathJaxHelper = require('./mathjax-helper')
-import renderer = require('./renderer')
 import { handlePromise, isElement } from './util'
 
 export class UpdatePreview {
@@ -38,7 +37,6 @@ export class UpdatePreview {
     document: HTMLDocument,
     domFragment: DocumentFragment,
     renderLaTeX: boolean,
-    highlightCodeBlocks: boolean,
     mjrenderer: MathJaxRenderer,
   ) {
     prepareCodeBlocksForAtomEditors(document, domFragment)
@@ -70,14 +68,6 @@ export class UpdatePreview {
         handlePromise(MathJaxHelper.mathProcessor([document.body], mjrenderer))
       } else {
         handlePromise(MathJaxHelper.mathProcessor(r.inserted, mjrenderer))
-      }
-    }
-
-    // TODO: why is this happening here?
-    if (highlightCodeBlocks) {
-      for (const elm of r.inserted) {
-        // NOTE: filtered above
-        renderer.highlightCodeBlocks(elm as Element)
       }
     }
 
