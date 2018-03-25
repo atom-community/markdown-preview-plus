@@ -18,10 +18,10 @@
   "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "scripts": {
     "build": "tsc -p . && tsc -p src-client",
-    "prettier": "prettier --write 'src/**/*.ts' 'spec/**/*.ts'",
-    "prettier-check": "prettier -l 'src/**/*.ts' 'spec/**/*.ts'",
-    "typecheck": "tsc --noEmit -p . && tsc --noEmit -p spec",
-    "lint": "tslint --project . && tslint --project spec",
+    "prettier": "prettier --write 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
+    "prettier-check": "prettier -l 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
+    "typecheck": "tsc --noEmit -p . && tsc --noEmit -p src-client && tsc --noEmit -p spec",
+    "lint": "tslint --project . && tslint --project src-client && tslint --project spec",
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
   "dependencies": {
@@ -49,6 +49,7 @@
     "atom-haskell-tslint-rules": "^0.2.2",
     "atom-ts-spec-runner": "^1.1.0",
     "chai": "^4.1.2",
+    "electron": "~1.7.11",
     "fs-extra": "^5.0.0",
     "jasmine-tagged": "^1.1.4",
     "markdown-it-testgen": "^0.1.4",

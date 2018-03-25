@@ -8,6 +8,7 @@ import {
 } from 'atom'
 import _ = require('lodash')
 import fs = require('fs')
+import {} from 'electron' // this is here soley for typings
 
 import renderer = require('../renderer')
 import markdownIt = require('../markdown-it-helper')
