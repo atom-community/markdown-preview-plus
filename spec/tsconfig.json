@@ -3,7 +3,8 @@
   "include": [
     "./**.ts",
     "./**.d.ts",
-    "../src/types/season.d.ts",
+    "../src-client/season.d.ts",
+    "../src/types/electron.d.ts",
     "../lib/mathjax-stub.d.ts"
   ],
   "exclude": ["../node_modules"],

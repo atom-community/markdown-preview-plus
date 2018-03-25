@@ -2,7 +2,6 @@ import * as path from 'path'
 import * as temp from 'temp'
 import * as cson from 'season'
 import * as markdownIt from '../lib/markdown-it-helper'
-import mathjaxHelper = require('../lib/mathjax-helper')
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as sinon from 'sinon'
 import { waitsFor, expectPreviewInSplitPane } from './util'

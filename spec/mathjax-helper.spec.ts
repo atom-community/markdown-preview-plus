@@ -1,7 +1,6 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
-import mathjaxHelper = require('../lib/mathjax-helper')
 import * as sinon from 'sinon'
 import { waitsFor } from './util'
 import { expect } from 'chai'
@@ -16,7 +15,7 @@ declare global {
   }
 }
 
-describe('MathJax helper module', () =>
+xdescribe('MathJax helper module', () =>
   describe('loading MathJax TeX macros', function() {
     let configDirPath: string
     let macrosPath: string

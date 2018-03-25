@@ -8,7 +8,6 @@ import { waitsFor, expectPreviewInSplitPane } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { TextEditor, TextEditorElement } from 'atom'
-import mathjaxHelper = require('../lib/mathjax-helper')
 
 describe('Markdown preview plus package', function() {
   let preview: MarkdownPreviewView

@@ -101,13 +101,27 @@ export abstract class MarkdownPreviewView {
   }
 
   public async text() {
-    const text = await this.runJS('getText()')
+    const text = await this.runJS<string>('getText()')
     return text
   }
 
   public async html() {
-    const text = await this.runJS('getHTML()')
+    const text = await this.runJS<string>('getHTML()')
     return text
+  }
+
+  public async fragment() {
+    const html = await this.html()
+    const parser = new DOMParser()
+    return parser.parseFromString(html, 'text/html')
+  }
+
+  public async find(selector: string) {
+    return (await this.fragment()).querySelector(selector)
+  }
+
+  public async findAll(selector: string) {
+    return (await this.fragment()).querySelectorAll(selector)
   }
 
   public abstract serialize(): SerializedMPV
