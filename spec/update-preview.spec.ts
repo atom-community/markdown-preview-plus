@@ -64,14 +64,20 @@ describe('the difference algorithm that updates the preview', function() {
       editor.setTextInBufferRange([[35, 0], [35, 12]], '2. Ordered 1')
       await waitsFor.msg(
         '1st ordered list start attribute to update',
-        () => orderedLists[0].getAttribute('start') != null,
+        async () => {
+          orderedLists = Array.from(await preview.findAll('ol'))
+          return orderedLists[0].getAttribute('start') != null
+        },
       )
       expectOrderedListsToStartAt(['2', '1', '1', '1', '1'])
 
       editor.setTextInBufferRange([[148, 0], [148, 14]], '> 2. Ordered 1')
       await waitsFor.msg(
         'ordered list nested in blockquote start attribute to update',
-        () => orderedLists[2].getAttribute('start') != null,
+        async () => {
+          orderedLists = Array.from(await preview.findAll('ol'))
+          return orderedLists[2].getAttribute('start') != null
+        },
       )
       expectOrderedListsToStartAt(['2', '1', '2', '1', '1'])
 
@@ -79,7 +85,10 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'ordered list nested in unordered list start attribute to update',
-        () => orderedLists[3].getAttribute('start') != null,
+        async () => {
+          orderedLists = Array.from(await preview.findAll('ol'))
+          return orderedLists[3].getAttribute('start') != null
+        },
       )
       expectOrderedListsToStartAt(['2', '1', '2', '2', '1'])
     })
@@ -90,10 +99,14 @@ describe('the difference algorithm that updates the preview', function() {
       editor.setTextInBufferRange([[205, 0], [205, 14]], '  2. Ordered 1')
       await waitsFor.msg(
         'ordered lists start attributes to update',
-        () =>
-          orderedLists[0].getAttribute('start') != null &&
-          orderedLists[2].getAttribute('start') != null &&
-          orderedLists[3].getAttribute('start') != null,
+        async () => {
+          orderedLists = Array.from(await preview.findAll('ol'))
+          return (
+            orderedLists[0].getAttribute('start') != null &&
+            orderedLists[2].getAttribute('start') != null &&
+            orderedLists[3].getAttribute('start') != null
+          )
+        },
       )
       expectOrderedListsToStartAt(['2', '1', '2', '2', '1'])
 
@@ -101,7 +114,10 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         '1st ordered list start attribute to be removed',
-        () => orderedLists[0].getAttribute('start') == null,
+        async () => {
+          orderedLists = Array.from(await preview.findAll('ol'))
+          return orderedLists[0].getAttribute('start') == null
+        },
       )
       expectOrderedListsToStartAt(['1', '1', '2', '2', '1'])
 
@@ -109,7 +125,10 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'ordered list nested in blockquote start attribute to be removed',
-        () => orderedLists[2].getAttribute('start') == null,
+        async () => {
+          orderedLists = Array.from(await preview.findAll('ol'))
+          return orderedLists[2].getAttribute('start') == null
+        },
       )
       expectOrderedListsToStartAt(['1', '1', '1', '2', '1'])
 
@@ -117,7 +136,10 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'ordered list nested in unordered list start attribute to be removed',
-        () => orderedLists[3].getAttribute('start') == null,
+        async () => {
+          orderedLists = Array.from(await preview.findAll('ol'))
+          return orderedLists[3].getAttribute('start') == null
+        },
       )
       expectOrderedListsToStartAt(['1', '1', '1', '1', '1'])
     })
