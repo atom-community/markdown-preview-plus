@@ -197,13 +197,10 @@ describe('Markdown preview plus package', function() {
 
     describe('when the editor is modified', function() {
       it('re-renders the preview', async function() {
-        const spy = sinon.spy<any>(preview, 'showLoading')
-
         const markdownEditor = atom.workspace.getActiveTextEditor()!
         markdownEditor.setText('Hey!')
 
-        await waitsFor(() => preview.text().indexOf('Hey!') >= 0)
-        expect(spy).not.to.be.called
+        await waitsFor(async () => (await preview.text()).indexOf('Hey!') >= 0)
       })
 
       it('invokes ::onDidChangeMarkdown listeners', async function() {
@@ -229,7 +226,9 @@ describe('Markdown preview plus package', function() {
 
           markdownEditor.setText('Hey!')
 
-          await waitsFor(() => preview.text().indexOf('Hey!') >= 0)
+          await waitsFor(
+            async () => (await preview.text()).indexOf('Hey!') >= 0,
+          )
 
           expect(previewPane.isActive()).to.equal(true)
           expect(previewPane.getActiveItem()).not.to.equal(preview)
@@ -247,7 +246,9 @@ describe('Markdown preview plus package', function() {
           editorPane.activate()
           markdownEditor.setText('Hey!')
 
-          await waitsFor(() => preview.text().indexOf('Hey!') >= 0)
+          await waitsFor(
+            async () => (await preview.text()).indexOf('Hey!') >= 0,
+          )
 
           expect(editorPane.isActive()).to.equal(true)
           expect(previewPane.getActiveItem()).to.equal(preview)
@@ -264,10 +265,12 @@ describe('Markdown preview plus package', function() {
 
           await waitsFor(() => didStopChangingHandler.callCount > 0)
 
-          expect(preview.text()).not.to.contain('ch ch changes')
+          expect(await preview.text()).not.to.contain('ch ch changes')
           await editor.save()
 
-          await waitsFor(() => preview.text().indexOf('ch ch changes') >= 0)
+          await waitsFor(
+            async () => (await preview.text()).indexOf('ch ch changes') >= 0,
+          )
         }))
     })
 
@@ -283,8 +286,8 @@ var x = y;
 `)
         await waitsFor.msg(
           'markdown to be rendered after its text changed',
-          () => {
-            const ed = preview.find('atom-text-editor') as HTMLElement
+          async () => {
+            const ed = (await preview.find('atom-text-editor')) as HTMLElement
             return ed && ed.className === 'lang-javascript'
           },
         )
@@ -301,8 +304,10 @@ var x = y;
 
         await waitsFor.msg(
           'markdown to be rendered after grammar was added',
-          () => {
-            const el = preview.find('atom-text-editor') as TextEditorElement
+          async () => {
+            const el = (await preview.find(
+              'atom-text-editor',
+            )) as TextEditorElement
             return el && el.dataset.grammar !== 'text plain null-grammar'
           },
         )
@@ -604,7 +609,7 @@ var x = y;
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.find('div.update-preview')!.innerHTML).to.equal(`\
+      expect(await preview.html()).to.equal(`\
 <p>hello</p>
 
 
@@ -625,7 +630,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.find('div.update-preview')!.innerHTML).to.equal(`\
+      expect(await preview.html()).to.equal(`\
 <p>content
 &lt;!doctype html&gt;</p>
 `)
@@ -644,9 +649,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.find('div.update-preview')!.innerHTML).to.equal(
-        'content\n',
-      )
+      expect(await preview.html()).to.equal('content\n')
     }))
 
   describe('when the markdown contains a <pre> tag', () =>
@@ -682,8 +685,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.getRoot()!.getAttribute('data-use-github-style')).not.to
-        .exist
+      expect(await preview.usesGitHubStyle()).not.to.be.true
     })
 
     it('renders markdown using the GitHub styling when enabled', async function() {
@@ -699,9 +701,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.getRoot()!.getAttribute('data-use-github-style')).to.equal(
-        '',
-      )
+      expect(await preview.usesGitHubStyle()).to.be.true
     })
 
     it('updates the rendering style immediately when the configuration is changed', async function() {
@@ -715,15 +715,13 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.getRoot()!.getAttribute('data-use-github-style')).not.to
-        .exist
+      expect(await preview.usesGitHubStyle()).not.to.be.true
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', true)
-      expect(preview.getRoot()!.getAttribute('data-use-github-style')).to.exist
+      expect(await preview.usesGitHubStyle()).to.be.true
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', false)
-      expect(preview.getRoot()!.getAttribute('data-use-github-style')).not.to
-        .exist
+      expect(await preview.usesGitHubStyle()).not.to.be.true
     })
   })
 
@@ -816,24 +814,24 @@ world</p>
         preview = await expectPreviewInSplitPane()
       })
 
-      it('works for inline math', function() {
-        const inline = preview.findAll(
+      it('works for inline math', async function() {
+        const inline = (await preview.findAll(
           'span.math > script[type="math/tex"]',
-        ) as NodeListOf<HTMLElement>
+        )) as NodeListOf<HTMLElement>
         expect(inline.length).to.equal(1)
         expect(inline[0].innerText).to.equal('inlineMath')
       })
-      it('works for block math', function() {
-        const block = preview.findAll(
+      it('works for block math', async function() {
+        const block = (await preview.findAll(
           'span.math > script[type="math/tex; mode=display"]',
-        ) as NodeListOf<HTMLElement>
+        )) as NodeListOf<HTMLElement>
         expect(block.length).to.be.greaterThan(0)
         expect(block[0].innerText).to.equal('displayMath\n')
       })
-      it('respects newline in block math closing tag', function() {
-        const block = preview.findAll(
+      it('respects newline in block math closing tag', async function() {
+        const block = (await preview.findAll(
           'span.math > script[type="math/tex; mode=display"]',
-        ) as NodeListOf<HTMLElement>
+        )) as NodeListOf<HTMLElement>
         expect(block.length).to.be.greaterThan(1)
         expect(block[1].innerText).to.equal('displayMath$$\n')
       })

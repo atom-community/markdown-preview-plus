@@ -124,6 +124,10 @@ export abstract class MarkdownPreviewView {
     return (await this.fragment()).querySelectorAll(selector)
   }
 
+  public async usesGitHubStyle() {
+    return this.runJS<boolean>('getUsesGitHubStyle()')
+  }
+
   public abstract serialize(): SerializedMPV
 
   public destroy() {

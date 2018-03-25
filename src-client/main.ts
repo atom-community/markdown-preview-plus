@@ -145,3 +145,9 @@ export function getHTML() {
   if (!el) return ''
   return el.innerHTML
 }
+
+export function getUsesGitHubStyle() {
+  const el = document.querySelector('markdown-preview-plus-view > div')
+  if (!el) return false
+  return el.getAttribute('data-use-github-style') !== null
+}
