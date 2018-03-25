@@ -147,7 +147,7 @@ export function getHTML() {
 }
 
 export function getUsesGitHubStyle() {
-  const el = document.querySelector('markdown-preview-plus-view > div')
+  const el = document.querySelector('markdown-preview-plus-view')
   if (!el) return false
   return el.getAttribute('data-use-github-style') !== null
 }
