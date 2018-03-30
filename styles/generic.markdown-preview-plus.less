@@ -1,3 +1,5 @@
+@include 'style-variables';
+
 markdown-preview-plus-view {
   display: block;
   overflow: auto !important;
@@ -46,5 +48,17 @@ markdown-preview-plus-view {
   atom-text-editor {
     flex-direction: column;
     overflow: auto;
+  }
+
+  ul.contains-task-list {
+    li.task-list-item {
+      position: relative;
+      list-style-type: none;
+      input.task-list-item-checkbox {
+        position: absolute;
+        transform: translateX(-100%);
+        width: @tab-height;
+      }
+    }
   }
 }
