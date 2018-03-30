@@ -4,7 +4,6 @@
 // They use the syntax-variables to adapt to the color scheme of syntax themes.
 
 @import 'syntax-variables';
-@import 'task-list-mixin';
 
 markdown-preview-plus-view:not([data-use-github-style]) {
   @fg: @syntax-text-color;
@@ -174,6 +173,4 @@ markdown-preview-plus-view:not([data-use-github-style]) {
       darken(@syntax-background-color, 6%)
     );
   }
-
-  .task-list();
 }
