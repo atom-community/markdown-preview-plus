@@ -1,3 +1,7 @@
+## 2.5.7
+
+-   Do not show list bullets for checkbox lists
+
 ## 2.5.6
 
 -   Add overflow:auto to saved html code blocks style
