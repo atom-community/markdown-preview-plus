@@ -42,6 +42,7 @@ export abstract class MarkdownPreviewView {
   )
   private lastTarget?: HTMLElement
   private zoomLevel = 0
+  private getHTMLSVGPromise?: Promise<string>
 
   protected constructor() {
     this.element = document.createElement('webview') as any
@@ -64,36 +65,38 @@ export abstract class MarkdownPreviewView {
       }),
     )
     this.handleEvents()
-    this.element.addEventListener('ipc-message', (e) => {
-      switch (e.channel) {
-        case 'context-menu':
-          this.lastTarget = e.target as HTMLElement
-          const pane = atom.workspace.paneForItem(this)
-          if (pane) pane.activate()
-          const evt = e.args[0] as PointerEvent
-          atom.contextMenu.showForEvent(
-            Object.assign({}, evt, { target: this.element }),
-          )
-          break
-        case 'zoom-in':
-          atom.commands.dispatch(this.element, 'markdown-preview-plus:zoom-in')
-          break
-        case 'zoom-out':
-          atom.commands.dispatch(this.element, 'markdown-preview-plus:zoom-out')
-          break
-        default:
-          throw new Error(`Unknown message recieved ${e.channel}`)
-      }
-    })
+    this.element.addEventListener(
+      'ipc-message',
+      (e: Electron.IpcMessageEventCustom) => {
+        switch (e.channel) {
+          case 'zoom-in':
+            atom.commands.dispatch(
+              this.element,
+              'markdown-preview-plus:zoom-in',
+            )
+            break
+          case 'zoom-out':
+            atom.commands.dispatch(
+              this.element,
+              'markdown-preview-plus:zoom-out',
+            )
+            break
+          default:
+            console.debug(`Unknown message recieved ${e.channel}`)
+        }
+      },
+    )
     this.renderPromise = new Promise((resolve) => {
       const onload = () => {
         if (this.destroyed) return
         this.element.openDevTools()
         this.updateStyles()
-        this.element.send(
-          'use-github-style',
-          atom.config.get('markdown-preview-plus.useGitHubStyle'),
-        )
+        this.element.send<'use-github-style'>('use-github-style', {
+          value: atom.config.get('markdown-preview-plus.useGitHubStyle'),
+        })
+        this.element.send<'set-atom-home'>('set-atom-home', {
+          home: atom.getConfigDirPath(),
+        })
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())
       }
@@ -101,32 +104,25 @@ export abstract class MarkdownPreviewView {
     })
   }
 
-  public async text() {
-    const text = await this.runJS<string>('getText()')
-    return text
+  public async runJS<T>(js: string) {
+    return new Promise<T>((resolve) =>
+      this.element.executeJavaScript(js, false, resolve),
+    )
   }
 
-  public async html() {
-    const text = await this.runJS<string>('getHTML()')
-    return text
-  }
-
-  public async fragment() {
-    const html = await this.html()
-    const parser = new DOMParser()
-    return parser.parseFromString(html, 'text/html')
-  }
-
-  public async find(selector: string) {
-    return (await this.fragment()).querySelector(selector)
-  }
-
-  public async findAll(selector: string) {
-    return (await this.fragment()).querySelectorAll(selector)
-  }
-
-  public async usesGitHubStyle() {
-    return this.runJS<boolean>('getUsesGitHubStyle()')
+  public async getHTMLSVG() {
+    await this.getHTMLSVGPromise
+    this.getHTMLSVGPromise = new Promise<string>((resolve) => {
+      const handler = (e: Electron.IpcMessageEventCustom) => {
+        if (e.channel === 'html-svg-result') {
+          this.element.removeEventListener('ipc-message', handler as any)
+          resolve(e.args[0])
+        }
+      }
+      this.element.addEventListener('ipc-message', handler)
+    })
+    this.element.send<'get-html-svg'>('get-html-svg', undefined)
+    return this.getHTMLSVGPromise
   }
 
   public abstract serialize(): SerializedMPV
@@ -155,7 +151,7 @@ export abstract class MarkdownPreviewView {
 
   public async refreshImages(oldsrc: string): Promise<void> {
     const v = await imageWatcher.getVersion(oldsrc, this.getPath())
-    this.element.send('update-images', oldsrc, v)
+    this.element.send<'update-images'>('update-images', { oldsrc, v })
   }
 
   public abstract getTitle(): string
@@ -230,7 +226,7 @@ export abstract class MarkdownPreviewView {
   protected syncPreview(text: string, line: number) {
     const tokens = markdownIt.getTokens(text, this.renderLaTeX)
     const pathToToken = util.getPathToToken(tokens, line)
-    this.element.send('sync', pathToToken)
+    this.element.send<'sync'>('sync', { pathToToken })
   }
 
   private handleEvents() {
@@ -293,15 +289,11 @@ export abstract class MarkdownPreviewView {
       atom.config.onDidChange(
         'markdown-preview-plus.useGitHubStyle',
         ({ newValue }) => {
-          this.element.send('use-github-style', newValue)
+          this.element.send<'use-github-style'>('use-github-style', {
+            value: newValue,
+          })
         },
       ),
-    )
-  }
-
-  private async runJS<T>(js: string) {
-    return new Promise<T>((resolve) =>
-      this.element.executeJavaScript(js, false, resolve),
     )
   }
 
@@ -312,12 +304,12 @@ export abstract class MarkdownPreviewView {
 
   private async getHTML() {
     const source = await this.getMarkdownSource()
-    return renderer.toHTML(
+    return renderer.render(
       source,
       this.getPath(),
       this.getGrammar(),
       this.renderLaTeX,
-      false,
+      true,
     )
   }
 
@@ -326,17 +318,17 @@ export abstract class MarkdownPreviewView {
       const domDocument = await renderer.render(
         text,
         this.getPath(),
+        this.getGrammar(),
         this.renderLaTeX,
         false,
       )
       if (this.destroyed) return
       this.loading = false
-      this.element.send(
-        'update-preview',
-        domDocument.documentElement.outerHTML,
-        this.renderLaTeX,
-        atom.config.get('markdown-preview-plus.latexRenderer'),
-      )
+      this.element.send<'update-preview'>('update-preview', {
+        html: domDocument.documentElement.outerHTML,
+        renderLaTeX: this.renderLaTeX,
+        mjrenderer: atom.config.get('markdown-preview-plus.latexRenderer'),
+      })
       this.emitter.emit('did-change-markdown')
     } catch (error) {
       this.showError(error as Error)
@@ -355,7 +347,7 @@ export abstract class MarkdownPreviewView {
       )
       return
     }
-    this.element.send('error', error.message)
+    this.element.send<'error'>('error', { msg: error.message })
   }
 
   private copyToClipboard() {
@@ -464,6 +456,6 @@ export abstract class MarkdownPreviewView {
     for (const se of atom.styles.getStyleElements()) {
       styles.push(se.innerHTML)
     }
-    this.element.send('style', styles)
+    this.element.send<'style'>('style', { styles })
   }
 }

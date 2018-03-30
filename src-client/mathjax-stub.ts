@@ -1,4 +1,4 @@
-const mathJaxStub = {
+export const mathJaxStub = {
   jaxConfigure(userMacros: object, renderer: MathJaxRenderer) {
     MathJax.Hub.Config({
       jax: ['input/TeX', `output/${renderer}`],
@@ -33,12 +33,4 @@ const mathJaxStub = {
   },
 }
 
-interface Window {
-  mathJaxStub: MathJaxStub
-}
-
-type MathJaxRenderer = 'SVG' | 'HTML-CSS'
-
-type MathJaxStub = typeof mathJaxStub
-
-window.mathJaxStub = mathJaxStub
+export type MathJaxStub = typeof mathJaxStub

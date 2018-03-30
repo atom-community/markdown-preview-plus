@@ -9,6 +9,7 @@ import path = require('path')
 import CSON = require('season')
 import fs = require('fs')
 import { isFileSync } from './util'
+import { MathJaxStub } from './mathjax-stub'
 
 let isMathJaxDisabled = false
 
@@ -35,23 +36,14 @@ export async function mathProcessor(
 // @param callback A callback method that accepts a single parameter, a HTML
 //   fragment string that is the result of html processed by MathJax
 //
-export async function processHTMLString(
-  frame: Electron.WebviewTag,
-  element: HTMLElement,
-) {
+export async function processHTMLString(element: Element) {
   if (isMathJaxDisabled) {
     return element.innerHTML
   }
   const jax = await loadMathJax('SVG')
   await jax.queueTypeset([element])
 
-  const msvgh = await new Promise<HTMLElement>((resolve) =>
-    frame.executeJavaScript(
-      `return document.getElementById('MathJax_SVG_Hidden')`,
-      false,
-      resolve,
-    ),
-  )
+  const msvgh = document.getElementById('MathJax_SVG_Hidden')
   const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
   if (svgGlyphs !== null) {
     element.insertBefore(svgGlyphs, element.firstChild)
@@ -70,10 +62,11 @@ function disableMathJax(disable: boolean) {
 // @param listener method to call when the MathJax script was been
 //   loaded to the window. The method is passed no arguments.
 //
+let mjPromise: Promise<MathJaxStub>
 async function loadMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
-  if (window.mathJaxStub) return window.mathJaxStub
-
-  return attachMathJax(renderer)
+  if (mjPromise) return mjPromise
+  mjPromise = attachMathJax(renderer)
+  return mjPromise
 }
 
 export const testing = {
@@ -83,15 +76,14 @@ export const testing = {
 
 // private
 
-function getUserMacrosPath(): string {
-  // TODO!
-  return path.join(process.env.HOME, 'markdown-preview-plus.cson')
-  // const userMacrosPath: string | undefined | null = CSON.resolve(
-  //   path.join(atom.getConfigDirPath(), 'markdown-preview-plus'),
-  // )
-  // return userMacrosPath != null
-  //   ? userMacrosPath
-  //   : path.join(atom.getConfigDirPath(), 'markdown-preview-plus.cson')
+async function getUserMacrosPath(): Promise<string> {
+  const home = await window.atomHome
+  const userMacrosPath: string | undefined | null = CSON.resolve(
+    path.join(home, 'markdown-preview-plus'),
+  )
+  return userMacrosPath != null
+    ? userMacrosPath
+    : path.join(home, 'markdown-preview-plus.cson')
 }
 
 function loadMacrosFile(filePath: string): object {
@@ -117,8 +109,8 @@ function loadMacrosFile(filePath: string): object {
   })
 }
 
-function loadUserMacros() {
-  const userMacrosPath = getUserMacrosPath()
+async function loadUserMacros() {
+  const userMacrosPath = await getUserMacrosPath()
   if (isFileSync(userMacrosPath)) {
     return loadMacrosFile(userMacrosPath)
   } else {
@@ -170,8 +162,8 @@ function valueMatchesPattern(value: any) {
 // Configure MathJax environment. Similar to the TeX-AMS_HTML configuration with
 // a few unnecessary features stripped away
 //
-const configureMathJax = function(jax: MathJaxStub, renderer: MathJaxRenderer) {
-  let userMacros = loadUserMacros()
+async function configureMathJax(jax: MathJaxStub, renderer: MathJaxRenderer) {
+  let userMacros = await loadUserMacros()
   if (userMacros) {
     userMacros = checkMacros(userMacros)
   } else {
@@ -193,10 +185,10 @@ async function attachMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
   // Attach MathJax script
   await Promise.all([
     injectScript(`${require.resolve('mathjax')}?delayStartupUntil=configured`),
-    injectScript(require.resolve('./mathjax-stub')),
   ])
-  configureMathJax(window.mathJaxStub, renderer)
-  return window.mathJaxStub
+  const { mathJaxStub } = await import('./mathjax-stub')
+  await configureMathJax(mathJaxStub, renderer)
+  return mathJaxStub
 }
 
 export async function injectScript(scriptSrc: string) {

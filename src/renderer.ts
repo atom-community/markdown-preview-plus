@@ -10,34 +10,10 @@ import { isFileSync } from './util'
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
 
-export async function toHTML(
-  text: string | null,
-  filePath: string | undefined,
-  grammar: Grammar | undefined,
-  renderLaTeX: boolean,
-  copyHTMLFlag: boolean,
-) {
-  if (text === null) {
-    text = ''
-  }
-  const doc = await render(text, filePath, renderLaTeX, copyHTMLFlag)
-  let defaultCodeLanguage: string | undefined
-  // Default code blocks to be coffee in Literate CoffeeScript files
-  if ((grammar && grammar.scopeName) === 'source.litcoffee') {
-    defaultCodeLanguage = 'coffee'
-  }
-  if (
-    !atom.config.get('markdown-preview-plus.enablePandoc') ||
-    !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
-  ) {
-    tokenizeCodeBlocks(doc, defaultCodeLanguage)
-  }
-  return doc
-}
-
 export async function render(
   text: string,
   filePath: string | undefined,
+  grammar: Grammar | undefined,
   renderLaTeX: boolean,
   copyHTMLFlag: boolean,
 ): Promise<HTMLDocument> {
@@ -63,11 +39,16 @@ export async function render(
   const doc = parser.parseFromString(html, 'text/html')
   sanitize(doc)
   await resolveImagePaths(doc, filePath, copyHTMLFlag)
+  let defaultCodeLanguage: string = 'text'
+  // Default code blocks to be coffee in Literate CoffeeScript files
+  if ((grammar && grammar.scopeName) === 'source.litcoffee') {
+    defaultCodeLanguage = 'coffee'
+  }
   if (
     !atom.config.get('markdown-preview-plus.enablePandoc') ||
     !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
   ) {
-    highlightCodeBlocks(doc)
+    highlightCodeBlocks(doc, defaultCodeLanguage, copyHTMLFlag)
   }
   if (error) {
     const errd = doc.createElement('div')
@@ -171,42 +152,10 @@ async function resolveImagePaths(
   )
 }
 
-function tokenizeCodeBlocks(
-  doc: HTMLDocument,
-  defaultLanguage: string = 'text',
-) {
-  const fontFamily = atom.config.get('editor.fontFamily')
-  if (fontFamily) {
-    doc
-      .querySelectorAll('code')
-      .forEach((code) => (code.style.fontFamily = fontFamily || null))
-  }
-
-  doc.querySelectorAll('pre').forEach(function(preElement) {
-    const codeBlock = preElement.firstElementChild as HTMLElement
-    const fenceName =
-      codeBlock.className.replace(/^(lang-|sourceCode )/, '') || defaultLanguage
-
-    const highlightedHtml: string = highlight({
-      fileContents: codeBlock.innerText,
-      scopeName: scopeForFenceName(fenceName),
-      nbsp: false,
-      lineDivs: false,
-      editorDiv: true,
-      editorDivTag: 'pre',
-      // The `editor` class messes things up as `.editor` has absolutely positioned lines
-      editorDivClass: fenceName
-        ? `editor-colors lang-${fenceName}`
-        : 'editor-colors',
-    })
-
-    preElement.outerHTML = highlightedHtml
-  })
-}
-
 export function highlightCodeBlocks(
   domFragment: Document,
-  defaultLanguage: string = 'text',
+  defaultLanguage: string,
+  copyHTML: boolean,
 ) {
   const fontFamily = atom.config.get('editor.fontFamily')
   if (fontFamily) {
@@ -227,15 +176,16 @@ export function highlightCodeBlocks(
       ? cbClass.replace(/^(lang-|sourceCode )/, '')
       : defaultLanguage
 
+    const addClass = copyHTML ? 'editor-colors ' : ''
     preElement.outerHTML = highlight({
       fileContents: codeBlock.textContent!.replace(/\n$/, ''),
       scopeName: scopeForFenceName(fenceName),
       nbsp: false,
-      lineDivs: true,
+      lineDivs: copyHTML ? false : true,
       editorDiv: true,
-      editorDivTag: 'atom-text-editor',
+      editorDivTag: copyHTML ? 'pre' : 'atom-text-editor',
       // The `editor` class messes things up as `.editor` has absolutely positioned lines
-      editorDivClass: fenceName ? `lang-${fenceName}` : '',
+      editorDivClass: fenceName ? `${addClass}lang-${fenceName}` : addClass,
     })
   }
 

@@ -30,7 +30,12 @@
     "typeRoots": ["./typings", "./node_modules/@types"]
   },
   "exclude": ["node_modules", "spec"],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src-client/ipc.d.ts"
+  ],
   "compileOnSave": true,
   "experimentalDecorators": true
 }

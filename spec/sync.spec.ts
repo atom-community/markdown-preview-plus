@@ -4,7 +4,7 @@ import * as cson from 'season'
 import * as markdownIt from '../lib/markdown-it-helper'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as sinon from 'sinon'
-import { waitsFor, expectPreviewInSplitPane } from './util'
+import { waitsFor, expectPreviewInSplitPane, previewFragment } from './util'
 import { expect } from 'chai'
 import { Token } from 'markdown-it'
 import * as previewUtil from '../lib/markdown-preview-view/util'
@@ -41,8 +41,11 @@ describe('Syncronization of source and preview', function() {
     preview = await expectPreviewInSplitPane()
 
     await waitsFor.msg('MathJax to finish processing', async () => {
-      console.log(await preview.fragment())
-      return (await preview.find('.MathJax_SVG')) != null
+      return (
+        (await previewFragment(preview)).querySelector(
+          '.MathJax_SVG_Display',
+        ) != null
+      )
     })
   })
 

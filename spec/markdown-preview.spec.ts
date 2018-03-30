@@ -4,7 +4,13 @@ import * as temp from 'temp'
 import * as wrench from 'fs-extra'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 
-import { waitsFor, expectPreviewInSplitPane } from './util'
+import {
+  waitsFor,
+  expectPreviewInSplitPane,
+  previewText,
+  previewFragment,
+  previewHTML,
+} from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { TextEditor, TextEditorElement } from 'atom'
@@ -200,7 +206,9 @@ describe('Markdown preview plus package', function() {
         const markdownEditor = atom.workspace.getActiveTextEditor()!
         markdownEditor.setText('Hey!')
 
-        await waitsFor(async () => (await preview.text()).indexOf('Hey!') >= 0)
+        await waitsFor(
+          async () => (await previewText(preview)).indexOf('Hey!') >= 0,
+        )
       })
 
       it('invokes ::onDidChangeMarkdown listeners', async function() {
@@ -227,7 +235,7 @@ describe('Markdown preview plus package', function() {
           markdownEditor.setText('Hey!')
 
           await waitsFor(
-            async () => (await preview.text()).indexOf('Hey!') >= 0,
+            async () => (await previewText(preview)).indexOf('Hey!') >= 0,
           )
 
           expect(previewPane.isActive()).to.equal(true)
@@ -247,7 +255,7 @@ describe('Markdown preview plus package', function() {
           markdownEditor.setText('Hey!')
 
           await waitsFor(
-            async () => (await preview.text()).indexOf('Hey!') >= 0,
+            async () => (await previewText(preview)).indexOf('Hey!') >= 0,
           )
 
           expect(editorPane.isActive()).to.equal(true)
@@ -265,11 +273,12 @@ describe('Markdown preview plus package', function() {
 
           await waitsFor(() => didStopChangingHandler.callCount > 0)
 
-          expect(await preview.text()).not.to.contain('ch ch changes')
+          expect(await previewText(preview)).not.to.contain('ch ch changes')
           await editor.save()
 
           await waitsFor(
-            async () => (await preview.text()).indexOf('ch ch changes') >= 0,
+            async () =>
+              (await previewText(preview)).indexOf('ch ch changes') >= 0,
           )
         }))
     })
@@ -287,7 +296,9 @@ var x = y;
         await waitsFor.msg(
           'markdown to be rendered after its text changed',
           async () => {
-            const ed = (await preview.find('atom-text-editor')) as HTMLElement
+            const ed = (await previewFragment(preview)).querySelector(
+              'atom-text-editor',
+            ) as HTMLElement
             return ed && ed.className === 'lang-javascript'
           },
         )
@@ -305,9 +316,9 @@ var x = y;
         await waitsFor.msg(
           'markdown to be rendered after grammar was added',
           async () => {
-            const el = (await preview.find(
+            const el = (await previewFragment(preview)).querySelector(
               'atom-text-editor',
-            )) as TextEditorElement
+            ) as TextEditorElement
             return el && el.dataset.grammar !== 'text plain null-grammar'
           },
         )
@@ -609,7 +620,7 @@ var x = y;
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(await preview.html()).to.equal(`\
+      expect(await previewHTML(preview)).to.equal(`\
 <p>hello</p>
 
 
@@ -630,7 +641,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(await preview.html()).to.equal(`\
+      expect(await previewHTML(preview)).to.equal(`\
 <p>content
 &lt;!doctype html&gt;</p>
 `)
@@ -649,7 +660,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(await preview.html()).to.equal('content\n')
+      expect(await previewHTML(preview)).to.equal('content\n')
     }))
 
   describe('when the markdown contains a <pre> tag', () =>
@@ -664,7 +675,8 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(preview.find('atom-text-editor')).to.exist
+      expect((await previewFragment(preview)).querySelector('atom-text-editor'))
+        .to.exist
     }))
 
   // WARNING If focus is given to this spec alone your `config.cson` may be
@@ -685,7 +697,13 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(await preview.usesGitHubStyle()).not.to.be.true
+      await preview.renderPromise
+
+      expect(
+        await preview.runJS<boolean>(
+          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
+        ),
+      ).to.be.false
     })
 
     it('renders markdown using the GitHub styling when enabled', async function() {
@@ -701,7 +719,11 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(await preview.usesGitHubStyle()).to.be.true
+      expect(
+        await preview.runJS<boolean>(
+          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
+        ),
+      ).to.be.true
     })
 
     it('updates the rendering style immediately when the configuration is changed', async function() {
@@ -715,13 +737,25 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(await preview.usesGitHubStyle()).not.to.be.true
+      expect(
+        await preview.runJS<boolean>(
+          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
+        ),
+      ).not.to.be.true
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', true)
-      expect(await preview.usesGitHubStyle()).to.be.true
+      expect(
+        await preview.runJS<boolean>(
+          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
+        ),
+      ).to.be.true
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', false)
-      expect(await preview.usesGitHubStyle()).not.to.be.true
+      expect(
+        await preview.runJS<boolean>(
+          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
+        ),
+      ).not.to.be.true
     })
   })
 
@@ -783,13 +817,6 @@ world</p>
     describe('Uses new math separators', async function() {
       let preview: MarkdownPreviewView
 
-      before(function() {
-        mathjaxHelper.testing.disableMathJax(true)
-      })
-      after(function() {
-        mathjaxHelper.testing.disableMathJax(false)
-      })
-
       beforeEach(async function() {
         atom.config.set('markdown-preview-plus.inlineMathSeparators', [
           '$$',
@@ -815,23 +842,23 @@ world</p>
       })
 
       it('works for inline math', async function() {
-        const inline = (await preview.findAll(
+        const inline = (await previewFragment(preview)).querySelectorAll(
           'span.math > script[type="math/tex"]',
-        )) as NodeListOf<HTMLElement>
+        ) as NodeListOf<HTMLElement>
         expect(inline.length).to.equal(1)
         expect(inline[0].innerText).to.equal('inlineMath')
       })
       it('works for block math', async function() {
-        const block = (await preview.findAll(
+        const block = (await previewFragment(preview)).querySelectorAll(
           'span.math > script[type="math/tex; mode=display"]',
-        )) as NodeListOf<HTMLElement>
+        ) as NodeListOf<HTMLElement>
         expect(block.length).to.be.greaterThan(0)
         expect(block[0].innerText).to.equal('displayMath\n')
       })
       it('respects newline in block math closing tag', async function() {
-        const block = (await preview.findAll(
+        const block = (await previewFragment(preview)).querySelectorAll(
           'span.math > script[type="math/tex; mode=display"]',
-        )) as NodeListOf<HTMLElement>
+        ) as NodeListOf<HTMLElement>
         expect(block.length).to.be.greaterThan(1)
         expect(block[1].innerText).to.equal('displayMath$$\n')
       })

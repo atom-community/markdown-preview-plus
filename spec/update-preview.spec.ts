@@ -2,7 +2,7 @@ import * as path from 'path'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as renderer from '../lib/renderer'
 import { TextEditor, TextEditorElement } from 'atom'
-import { expectPreviewInSplitPane, waitsFor } from './util'
+import { expectPreviewInSplitPane, waitsFor, previewFragment } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
@@ -41,8 +41,10 @@ describe('the difference algorithm that updates the preview', function() {
     beforeEach(async function() {
       await loadPreviewInSplitPane()
       await waitsFor(async function() {
-        orderedLists = Array.from(await preview.findAll('ol'))
-        return orderedLists.length !== 0
+        orderedLists = Array.from(
+          (await previewFragment(preview)).querySelectorAll('ol'),
+        )
+        return orderedLists.length > 0
       })
     })
 
@@ -65,7 +67,9 @@ describe('the difference algorithm that updates the preview', function() {
       await waitsFor.msg(
         '1st ordered list start attribute to update',
         async () => {
-          orderedLists = Array.from(await preview.findAll('ol'))
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
           return orderedLists[0].getAttribute('start') != null
         },
       )
@@ -75,7 +79,9 @@ describe('the difference algorithm that updates the preview', function() {
       await waitsFor.msg(
         'ordered list nested in blockquote start attribute to update',
         async () => {
-          orderedLists = Array.from(await preview.findAll('ol'))
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
           return orderedLists[2].getAttribute('start') != null
         },
       )
@@ -86,7 +92,9 @@ describe('the difference algorithm that updates the preview', function() {
       await waitsFor.msg(
         'ordered list nested in unordered list start attribute to update',
         async () => {
-          orderedLists = Array.from(await preview.findAll('ol'))
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
           return orderedLists[3].getAttribute('start') != null
         },
       )
@@ -100,7 +108,9 @@ describe('the difference algorithm that updates the preview', function() {
       await waitsFor.msg(
         'ordered lists start attributes to update',
         async () => {
-          orderedLists = Array.from(await preview.findAll('ol'))
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
           return (
             orderedLists[0].getAttribute('start') != null &&
             orderedLists[2].getAttribute('start') != null &&
@@ -115,7 +125,9 @@ describe('the difference algorithm that updates the preview', function() {
       await waitsFor.msg(
         '1st ordered list start attribute to be removed',
         async () => {
-          orderedLists = Array.from(await preview.findAll('ol'))
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
           return orderedLists[0].getAttribute('start') == null
         },
       )
@@ -126,7 +138,9 @@ describe('the difference algorithm that updates the preview', function() {
       await waitsFor.msg(
         'ordered list nested in blockquote start attribute to be removed',
         async () => {
-          orderedLists = Array.from(await preview.findAll('ol'))
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
           return orderedLists[2].getAttribute('start') == null
         },
       )
@@ -137,7 +151,9 @@ describe('the difference algorithm that updates the preview', function() {
       await waitsFor.msg(
         'ordered list nested in unordered list start attribute to be removed',
         async () => {
-          orderedLists = Array.from(await preview.findAll('ol'))
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
           return orderedLists[3].getAttribute('start') == null
         },
       )
@@ -162,7 +178,9 @@ describe('the difference algorithm that updates the preview', function() {
         'preview to update DOM with span.math containers',
         async function() {
           mathBlocks = Array.from(
-            await preview.findAll('script[type*="math/tex"]'),
+            (await previewFragment(preview)).querySelectorAll(
+              'script[type*="math/tex"]',
+            ),
           ).map((x) => x.parentElement!)
           return mathBlocks.length === 20
         },
@@ -172,7 +190,9 @@ describe('the difference algorithm that updates the preview', function() {
         'Maths blocks to be processed by MathJax',
         async function() {
           mathBlocks = Array.from(
-            await preview.findAll('script[type*="math/tex"]'),
+            (await previewFragment(preview)).querySelectorAll(
+              'script[type*="math/tex"]',
+            ),
           ).map((x) => x.parentElement!)
           return mathBlocks.every(
             (x) =>
@@ -199,7 +219,11 @@ describe('the difference algorithm that updates the preview', function() {
       )
       stub.restore()
 
-      mathBlocks = Array.from(await preview.findAll('script[type*="math/tex"]'))
+      mathBlocks = Array.from(
+        (await previewFragment(preview)).querySelectorAll(
+          'script[type*="math/tex"]',
+        ),
+      )
         .map((x) => x.parentElement!)
         .filter((x) => x !== null)
       expect(mathBlocks.length).to.equal(20)
@@ -258,7 +282,7 @@ describe('the difference algorithm that updates the preview', function() {
       )
       spy.restore()
 
-      const f = await preview.fragment()
+      const f = await previewFragment(preview)
       const codeBlocks = Array.from(f.querySelectorAll('span.atom-text-editor'))
       expect(codeBlocks.length).to.equal(5)
 
@@ -283,7 +307,7 @@ describe('the difference algorithm that updates the preview', function() {
       )
       stub.restore()
 
-      const f1 = await preview.fragment()
+      const f1 = await previewFragment(preview)
       const codeBlocks2 = Array.from(
         f1.querySelectorAll('span.atom-text-editor'),
       )

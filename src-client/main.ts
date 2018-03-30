@@ -1,71 +1,66 @@
 import { ipcRenderer } from 'electron'
 import { UpdatePreview } from './update-preview'
+import { processHTMLString } from './mathjax-helper'
 
-ipcRenderer.on('style', (_event: any, style: string[]) => {
+ipcRenderer.on<'style'>('style', (_event, { styles }) => {
   let styleElem = document.head.querySelector('style#atom-styles')
   if (!styleElem) {
     styleElem = document.createElement('style')
     styleElem.id = 'atom-styles'
     document.head.appendChild(styleElem)
   }
-  styleElem.innerHTML = style.join('\n')
+  styleElem.innerHTML = styles.join('\n')
 })
 
-ipcRenderer.on(
-  'update-images',
-  (_event: any, oldsrc: string, v: number | false) => {
-    const imgs = document.querySelectorAll('img[src]') as NodeListOf<
-      HTMLImageElement
-    >
-    for (const img of Array.from(imgs)) {
-      let ovs: string | undefined
-      let ov: number | undefined
-      let src = img.getAttribute('src')!
-      const match = src.match(/^(.*)\?v=(\d+)$/)
-      if (match) [, src, ovs] = match
-      if (src === oldsrc) {
-        if (ovs !== undefined) ov = parseInt(ovs, 10)
-        if (v !== ov) img.src = v ? `${src}?v=${v}` : `${src}`
-      }
+ipcRenderer.on<'update-images'>('update-images', (_event, { oldsrc, v }) => {
+  const imgs = document.querySelectorAll('img[src]') as NodeListOf<
+    HTMLImageElement
+  >
+  for (const img of Array.from(imgs)) {
+    let ovs: string | undefined
+    let ov: number | undefined
+    let src = img.getAttribute('src')!
+    const match = src.match(/^(.*)\?v=(\d+)$/)
+    if (match) [, src, ovs] = match
+    if (src === oldsrc) {
+      if (ovs !== undefined) ov = parseInt(ovs, 10)
+      if (v !== ov) img.src = v ? `${src}?v=${v}` : `${src}`
     }
-  },
-)
+  }
+})
 
-ipcRenderer.on(
-  'sync',
-  (_event: any, pathToToken: Array<{ tag: string; index: number }>) => {
-    let element = document.querySelector('div.update-preview')
-    if (!element) return
+ipcRenderer.on<'sync'>('sync', (_event, { pathToToken }) => {
+  let element = document.querySelector('div.update-preview')
+  if (!element) return
 
-    for (const token of pathToToken) {
-      const candidateElement: HTMLElement | null = element
-        .querySelectorAll(`:scope > ${token.tag}`)
-        .item(token.index) as HTMLElement
-      if (candidateElement) {
-        element = candidateElement
-      } else {
-        break
-      }
+  for (const token of pathToToken) {
+    const candidateElement: HTMLElement | null = element
+      .querySelectorAll(`:scope > ${token.tag}`)
+      .item(token.index) as HTMLElement
+    if (candidateElement) {
+      element = candidateElement
+    } else {
+      break
     }
+  }
 
-    if (element.classList.contains('update-preview')) {
-      return
-    } // Do not jump to the top of the preview for bad syncs
+  if (element.classList.contains('update-preview')) {
+    return
+  } // Do not jump to the top of the preview for bad syncs
 
-    if (!element.classList.contains('update-preview')) {
-      element.scrollIntoView()
-    }
-    const maxScrollTop = document.body.scrollHeight - document.body.clientHeight
-    if (!(document.body.scrollTop >= maxScrollTop)) {
-      document.body.scrollTop -= document.body.clientHeight / 4
-    }
+  if (!element.classList.contains('update-preview')) {
+    element.scrollIntoView()
+  }
+  const maxScrollTop = document.body.scrollHeight - document.body.clientHeight
+  if (!(document.body.scrollTop >= maxScrollTop)) {
+    document.body.scrollTop -= document.body.clientHeight / 4
+  }
 
-    element.classList.add('flash')
-    setTimeout(() => element!.classList.remove('flash'), 1000)
-  },
-)
+  element.classList.add('flash')
+  setTimeout(() => element!.classList.remove('flash'), 1000)
+})
 
-ipcRenderer.on('use-github-style', (_event: any, value: boolean) => {
+ipcRenderer.on<'use-github-style'>('use-github-style', (_event, { value }) => {
   const elem = document.querySelector('markdown-preview-plus-view')
   if (!elem) throw new Error(`Can't find MPP-view`)
   if (value) {
@@ -77,14 +72,9 @@ ipcRenderer.on('use-github-style', (_event: any, value: boolean) => {
 
 let updatePreview: UpdatePreview | undefined
 
-ipcRenderer.on(
+ipcRenderer.on<'update-preview'>(
   'update-preview',
-  (
-    _event: any,
-    html: string,
-    renderLaTeX: boolean,
-    mjrenderer: MathJaxRenderer,
-  ) => {
+  (_event, { html, renderLaTeX, mjrenderer }) => {
     // div.update-preview created after constructor st UpdatePreview cannot
     // be instanced in the constructor
     const preview = document.querySelector('div.update-preview')
@@ -114,7 +104,18 @@ ipcRenderer.on(
   },
 )
 
-ipcRenderer.on('error', (_evt: any, msg: string) => {
+declare global {
+  interface Window {
+    resolveAtomHome(home: string): void
+    atomHome: Promise<string>
+  }
+}
+
+ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
+  window.resolveAtomHome(home)
+})
+
+ipcRenderer.on<'error'>('error', (_evt, { msg }) => {
   const preview = document.querySelector('div.update-preview')
   if (!preview) return
   const errorDiv = document.createElement('div')
@@ -125,29 +126,22 @@ ipcRenderer.on('error', (_evt: any, msg: string) => {
 document.addEventListener('mousewheel', (event) => {
   if (event.ctrlKey) {
     if (event.wheelDeltaY > 0) {
-      ipcRenderer.sendToHost('zoom-in')
+      ipcRenderer.sendToHost<'zoom-in'>('zoom-in', undefined)
     } else if (event.wheelDeltaY < 0) {
-      ipcRenderer.sendToHost('zoom-out')
+      ipcRenderer.sendToHost<'zoom-out'>('zoom-out', undefined)
     }
     event.preventDefault()
     event.stopPropagation()
   }
 })
 
-export function getText() {
-  const el = document.querySelector('markdown-preview-plus-view > div')
-  if (!el) return ''
-  return el.textContent
-}
+document.addEventListener('contextmenu', (e) => {
+  console.log(e)
+})
 
-export function getHTML() {
+ipcRenderer.on<'get-html-svg'>('get-html-svg', async () => {
   const el = document.querySelector('markdown-preview-plus-view > div')
-  if (!el) return ''
-  return el.innerHTML
-}
-
-export function getUsesGitHubStyle() {
-  const el = document.querySelector('markdown-preview-plus-view')
-  if (!el) return false
-  return el.getAttribute('data-use-github-style') !== null
-}
+  if (!el) return
+  const res = await processHTMLString(el)
+  ipcRenderer.sendToHost<'html-svg-result'>('html-svg-result', res)
+})

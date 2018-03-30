@@ -4,6 +4,7 @@ import {
   SerializedMPV,
   MarkdownPreviewViewFile,
   MarkdownPreviewViewEditor,
+  MarkdownPreviewViewString,
 } from './markdown-preview-view'
 import renderer = require('./renderer')
 // import mathjaxHelper = require('./mathjax-helper')
@@ -152,29 +153,27 @@ async function previewFile({ currentTarget }: CommandEvent): Promise<void> {
 }
 
 async function copyHtmlInternal(editor: TextEditor): Promise<void> {
-  const text = editor.getSelectedText() || editor.getText()
   const renderLaTeX = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
-  const html = await renderer.toHTML(
-    text,
-    editor.getPath(),
-    editor.getGrammar(),
-    !!renderLaTeX,
-    true,
-  )
+  const text = editor.getSelectedText() || editor.getText()
   if (renderLaTeX) {
-    // TODO!
-    // const frame = document.createElement('webview')
-    // frame.src = 'about:blank'
-    // frame.style.display = 'none'
-    // frame.addEventListener('load', async () => {
-    //   const proHTML = await mathjaxHelper.processHTMLString(frame, html.body)
-    //   frame.remove()
-    //   atom.clipboard.write(proHTML)
-    // })
-    // document.body.appendChild(frame)
+    const view = new MarkdownPreviewViewString(text)
+    view.element.style.visibility = 'hidden'
+    view.element.style.position = 'absolute'
+    view.element.style.pointerEvents = 'none'
+    document.body.appendChild(view.element)
+    await view.renderPromise
+    const res = await view.getHTMLSVG()
+    atom.clipboard.write(res)
   } else {
+    const html = await renderer.render(
+      text,
+      editor.getPath(),
+      editor.getGrammar(),
+      renderLaTeX,
+      true,
+    )
     atom.clipboard.write(html.body.innerHTML)
   }
 }

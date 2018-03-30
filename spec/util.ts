@@ -90,3 +90,21 @@ export async function expectPreviewInSplitPane() {
   await preview.renderPromise
   return preview
 }
+
+export async function previewText(preview: MarkdownPreviewView) {
+  return preview.runJS<string>(
+    `document.querySelector('markdown-preview-plus-view > div').innerText`,
+  )
+}
+
+export async function previewHTML(preview: MarkdownPreviewView) {
+  return preview.runJS<string>(
+    `document.querySelector('markdown-preview-plus-view > div').innerHTML`,
+  )
+}
+
+export async function previewFragment(preview: MarkdownPreviewView) {
+  const html = await previewHTML(preview)
+  const dom = new DOMParser()
+  return dom.parseFromString(html, 'text/html')
+}
