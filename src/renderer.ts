@@ -48,7 +48,7 @@ export async function render(
     !atom.config.get('markdown-preview-plus.enablePandoc') ||
     !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
   ) {
-    highlightCodeBlocks(doc, defaultCodeLanguage, copyHTMLFlag)
+    di.highlightCodeBlocks(doc, defaultCodeLanguage, copyHTMLFlag)
   }
   if (error) {
     const errd = doc.createElement('div')
@@ -152,7 +152,7 @@ async function resolveImagePaths(
   )
 }
 
-export function highlightCodeBlocks(
+function highlightCodeBlocks(
   domFragment: Document,
   defaultLanguage: string,
   copyHTML: boolean,
@@ -190,4 +190,8 @@ export function highlightCodeBlocks(
   }
 
   return domFragment
+}
+
+export const di = {
+  highlightCodeBlocks,
 }

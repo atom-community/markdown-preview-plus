@@ -62,16 +62,25 @@ function disableMathJax(disable: boolean) {
 // @param listener method to call when the MathJax script was been
 //   loaded to the window. The method is passed no arguments.
 //
-let mjPromise: Promise<MathJaxStub>
+let mjPromise: Promise<MathJaxStub> | undefined
 async function loadMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
   if (mjPromise) return mjPromise
   mjPromise = attachMathJax(renderer)
   return mjPromise
 }
 
+function unloadMathJax(): void {
+  mjPromise = undefined
+  const script = document.head.querySelector(
+    `script[src='${require.resolve('mathjax')}?delayStartupUntil=configured']`,
+  )
+  if (script) script.remove()
+}
+
 export const testing = {
   loadMathJax,
   disableMathJax,
+  unloadMathJax,
 }
 
 // private

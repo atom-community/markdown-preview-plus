@@ -89,7 +89,6 @@ export abstract class MarkdownPreviewView {
     this.renderPromise = new Promise((resolve) => {
       const onload = () => {
         if (this.destroyed) return
-        this.element.openDevTools()
         this.updateStyles()
         this.element.send<'use-github-style'>('use-github-style', {
           value: atom.config.get('markdown-preview-plus.useGitHubStyle'),
@@ -249,6 +248,9 @@ export abstract class MarkdownPreviewView {
         'core:move-down': () => this.element.scrollBy({ top: 10 }),
         'core:copy': (event: CommandEvent) => {
           if (this.copyToClipboard()) event.stopPropagation()
+        },
+        'markdown-preview-plus:open-dev-tools': () => {
+          this.element.openDevTools()
         },
         'markdown-preview-plus:zoom-in': () => {
           this.zoomLevel += 0.1

@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as renderer from '../lib/renderer'
-import { TextEditor, TextEditorElement } from 'atom'
+import { TextEditor } from 'atom'
 import { expectPreviewInSplitPane, waitsFor, previewFragment } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -202,22 +202,20 @@ describe('the difference algorithm that updates the preview', function() {
       )
     })
 
-    xit('replaces the entire span.math container element', async function() {
-      // TODO!
-      const mathjaxHelper: any = ''
-      const stub = sinon
-        .stub(mathjaxHelper, 'mathProcessor')
-        .callsFake(function() {
-          /* noop */
-        })
+    it('replaces the entire span.math container element', async function() {
+      await preview.runJS(`
+      (function() {
+        const mjh = require('./mathjax-helper')
+        const sinon = require('sinon')
+        stub = sinon.stub(mjh, 'mathProcessor').callsFake(function() {})
+      })()`)
 
       editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
 
-      await waitsFor.msg(
-        'mathjaxHelper.mathProcessor to be called',
-        () => stub.called,
+      await waitsFor.msg('mathjaxHelper.mathProcessor to be called', async () =>
+        preview.runJS<boolean>(`stub.called`),
       )
-      stub.restore()
+      await preview.runJS<boolean>(`stub.restore()`)
 
       mathBlocks = Array.from(
         (await previewFragment(preview)).querySelectorAll(
@@ -240,39 +238,48 @@ describe('the difference algorithm that updates the preview', function() {
       )
     })
 
-    xit('subsequently only rerenders the maths block that was modified', async function() {
-      let unprocessedMathBlocks: HTMLElement[] = []
-
-      // TODO!
-      const mathjaxHelper: any = ''
-      const stub = sinon
-        .stub(mathjaxHelper, 'mathProcessor')
-        .callsFake((_iframe: any, domElements: HTMLElement[]) => {
+    it('subsequently only rerenders the maths block that was modified', async function() {
+      await preview.runJS(`
+      (function() {
+        const mjh = require('./mathjax-helper')
+        const sinon = require('sinon')
+        stub = sinon.stub(mjh, 'mathProcessor').callsFake(function(domElements) {
           unprocessedMathBlocks = domElements
         })
+      })()`)
 
       editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
 
-      await waitsFor.msg(
-        'mathjaxHelper.mathProcessor to be called',
-        () => stub.called,
+      await waitsFor.msg('mathjaxHelper.mathProcessor to be called', async () =>
+        preview.runJS<boolean>(`stub.called`),
       )
-      stub.restore()
+      await preview.runJS<boolean>(`stub.restore()`)
 
-      expect(unprocessedMathBlocks.length).to.equal(1)
-      expect(unprocessedMathBlocks[0].tagName.toLowerCase()).to.equal('span')
-      expect(unprocessedMathBlocks[0].className).to.equal('math')
-      expect(unprocessedMathBlocks[0].children.length).to.equal(1)
-      expect(unprocessedMathBlocks[0].children[0].textContent).to.equal(
-        'E=mc^2\n',
+      expect(await preview.runJS<any>(`unprocessedMathBlocks.length`)).to.equal(
+        1,
       )
+      expect(
+        await preview.runJS<any>(
+          `unprocessedMathBlocks[0].tagName.toLowerCase()`,
+        ),
+      ).to.equal('span')
+      expect(
+        await preview.runJS<any>(`unprocessedMathBlocks[0].className`),
+      ).to.equal('math')
+      expect(
+        await preview.runJS<any>(`unprocessedMathBlocks[0].children.length`),
+      ).to.equal(1)
+      expect(
+        await preview.runJS<any>(
+          `unprocessedMathBlocks[0].children[0].textContent`,
+        ),
+      ).to.equal('E=mc^2\n')
     })
   })
 
   describe('when a code block is modified', () =>
     xit('replaces the entire span.atom-text-editor container element', async function() {
-      // TODO!
-      const spy = sinon.spy(renderer as any, 'highlightCodeBlocks')
+      const spy = sinon.spy(renderer.di, 'highlightCodeBlocks')
 
       await loadPreviewInSplitPane()
 
@@ -283,19 +290,11 @@ describe('the difference algorithm that updates the preview', function() {
       spy.restore()
 
       const f = await previewFragment(preview)
-      const codeBlocks = Array.from(f.querySelectorAll('span.atom-text-editor'))
-      expect(codeBlocks.length).to.equal(5)
-
-      const atomTextEditors = ([] as TextEditorElement[]).concat(
-        ...codeBlocks.map((x) =>
-          Array.from(x.querySelectorAll('atom-text-editor')),
-        ),
-      )
+      const atomTextEditors = Array.from(f.querySelectorAll('atom-text-editor'))
       expect(atomTextEditors).to.have.lengthOf(5)
 
-      // TODO!
       const stub = sinon
-        .stub(renderer as any, 'highlightCodeBlocks')
+        .stub(renderer.di, 'highlightCodeBlocks')
         .callsFake(function() {
           /* noop */
         })
@@ -308,20 +307,15 @@ describe('the difference algorithm that updates the preview', function() {
       stub.restore()
 
       const f1 = await previewFragment(preview)
-      const codeBlocks2 = Array.from(
-        f1.querySelectorAll('span.atom-text-editor'),
-      )
-      expect(codeBlocks2.length).to.equal(5)
-
-      const atomTextEditors2 = ([] as TextEditorElement[]).concat(
-        ...codeBlocks2.map((x) =>
-          Array.from(x.querySelectorAll('atom-text-editor')),
-        ),
+      const atomTextEditors2 = Array.from(
+        f1.querySelectorAll('atom-text-editor'),
       )
       expect(atomTextEditors2.length).to.equal(4)
 
-      const modCodeBlock = codeBlocks2[0]
-      expect(modCodeBlock.children.length).to.equal(1)
-      expect(modCodeBlock.children[0].tagName.toLowerCase()).to.equal('pre')
+      const modCodeBlocks = f1.querySelectorAll('code')
+      expect(modCodeBlocks.length).to.equal(1)
+      const modCodeBlock = f1.querySelector('code')
+      expect(modCodeBlock!.children.length).to.equal(1)
+      expect(modCodeBlock!.children[0].tagName.toLowerCase()).to.equal('pre')
     }))
 })

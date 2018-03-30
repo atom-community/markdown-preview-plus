@@ -19,4 +19,5 @@
     {label: 'Sync Source', command: 'markdown-preview-plus:sync-source'}
     {label: 'Copy As HTML', command: 'core:copy'}
     {label: 'Save As HTML\u2026', command: 'core:save-as'}
+    {label: 'Open Dev Tools', command: 'markdown-preview-plus:open-dev-tools'}
   ]
