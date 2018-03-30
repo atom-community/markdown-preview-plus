@@ -116,6 +116,14 @@ ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
   window.resolveAtomHome(home)
 })
 
+const baseElement = document.createElement('base')
+document.head.appendChild(baseElement)
+
+ipcRenderer.on<'set-base-path'>('set-base-path', (_evt, { path }) => {
+  if (path) baseElement.href = path
+  else baseElement.href = ''
+})
+
 ipcRenderer.on<'error'>('error', (_evt, { msg }) => {
   const preview = document.querySelector('div.update-preview')
   if (!preview) return
@@ -205,3 +213,7 @@ ipcRenderer.on<'get-html-svg'>('get-html-svg', async () => {
   const res = await processHTMLString(el)
   ipcRenderer.sendToHost<'html-svg-result'>('html-svg-result', res)
 })
+
+window.onbeforeunload = function() {
+  return false
+}

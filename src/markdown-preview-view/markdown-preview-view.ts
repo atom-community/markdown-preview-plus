@@ -93,6 +93,16 @@ export abstract class MarkdownPreviewView {
         }
       },
     )
+    this.element.addEventListener('will-navigate', async (e) => {
+      const { shell } = await import('electron')
+      const fileUriToPath = await import('file-uri-to-path')
+      console.log(e.url)
+      if (e.url.startsWith('file://')) {
+        atom.workspace.open(fileUriToPath(e.url))
+      } else {
+        shell.openExternal(e.url)
+      }
+    })
     this.renderPromise = new Promise((resolve) => {
       const onload = () => {
         if (this.destroyed) return
@@ -102,6 +112,9 @@ export abstract class MarkdownPreviewView {
         })
         this.element.send<'set-atom-home'>('set-atom-home', {
           home: atom.getConfigDirPath(),
+        })
+        this.element.send<'set-base-path'>('set-base-path', {
+          path: this.getPath(),
         })
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())
