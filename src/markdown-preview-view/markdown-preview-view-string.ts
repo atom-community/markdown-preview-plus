@@ -22,7 +22,7 @@ export class MarkdownPreviewViewString extends MarkdownPreviewView {
     return `markdown-preview-plus://string/`
   }
 
-  public getPath() {
+  public getPath(): string | undefined {
     return undefined
   }
 

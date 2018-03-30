@@ -108,9 +108,8 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
         expect(markdownIt.decode).not.to.be.called
         expect(
-          (await (await previewFragment(preview)).querySelector(
-            'img[alt=absolute]',
-          ))!
+          (await previewFragment(preview))
+            .querySelector('img[alt=absolute]')!
             .getAttribute('src')!
             .startsWith(`${filePath}?v=`),
         ).to.equal(true)
@@ -129,7 +128,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
       })
 
       it("doesn't change the data URL", async function() {
-        const image = await (await previewFragment(preview)).querySelector(
+        const image = (await previewFragment(preview)).querySelector(
           'img[alt=Image4]',
         )
         expect(image).to.exist

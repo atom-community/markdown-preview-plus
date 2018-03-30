@@ -107,8 +107,8 @@ ipcRenderer.on<'update-preview'>(
 
 declare global {
   interface Window {
-    resolveAtomHome(home: string): void
     atomHome: Promise<string>
+    resolveAtomHome(home: string): void
   }
 }
 

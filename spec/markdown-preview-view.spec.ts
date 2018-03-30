@@ -10,6 +10,7 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as wrench from 'fs-extra'
 import * as previewUtil from '../lib/markdown-preview-view/util'
+import {} from 'electron'
 
 import {
   waitsFor,

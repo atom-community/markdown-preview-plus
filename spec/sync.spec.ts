@@ -8,6 +8,7 @@ import { waitsFor, expectPreviewInSplitPane, previewFragment } from './util'
 import { expect } from 'chai'
 import { Token } from 'markdown-it'
 import * as previewUtil from '../lib/markdown-preview-view/util'
+import {} from 'electron'
 
 temp.track()
 
@@ -40,13 +41,13 @@ describe('Syncronization of source and preview', function() {
 
     preview = await expectPreviewInSplitPane()
 
-    await waitsFor.msg('MathJax to finish processing', async () => {
-      return (
+    await waitsFor.msg(
+      'MathJax to finish processing',
+      async () =>
         (await previewFragment(preview)).querySelector(
           '.MathJax_SVG_Display',
-        ) != null
-      )
-    })
+        ) != null,
+    )
   })
 
   afterEach(async function() {

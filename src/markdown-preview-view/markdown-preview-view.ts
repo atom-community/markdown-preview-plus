@@ -83,10 +83,12 @@ export abstract class MarkdownPreviewView {
           case 'open-source':
             const path = this.getPath()
             if (path === undefined) break
-            atom.workspace.open(path, {
-              initialLine: e.args[0].initialLine,
-              searchAllPanes: true,
-            })
+            handlePromise(
+              atom.workspace.open(path, {
+                initialLine: e.args[0].initialLine,
+                searchAllPanes: true,
+              }),
+            )
             break
           default:
             console.debug(`Unknown message recieved ${e.channel}`)
@@ -98,7 +100,7 @@ export abstract class MarkdownPreviewView {
       const fileUriToPath = await import('file-uri-to-path')
       console.log(e.url)
       if (e.url.startsWith('file://')) {
-        atom.workspace.open(fileUriToPath(e.url))
+        handlePromise(atom.workspace.open(fileUriToPath(e.url)))
       } else {
         shell.openExternal(e.url)
       }
@@ -133,6 +135,7 @@ export abstract class MarkdownPreviewView {
     await this.getHTMLSVGPromise
     this.getHTMLSVGPromise = new Promise<string>((resolve) => {
       const handler = (e: Electron.IpcMessageEventCustom) => {
+        // tslint:disable-next-line: totality-check
         if (e.channel === 'html-svg-result') {
           this.element.removeEventListener('ipc-message', handler as any)
           resolve(e.args[0])
