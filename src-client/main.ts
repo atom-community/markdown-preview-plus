@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron'
 import { UpdatePreview } from './update-preview'
 import { processHTMLString } from './mathjax-helper'
+import * as util from './util'
 
 ipcRenderer.on<'style'>('style', (_event, { styles }) => {
   let styleElem = document.head.querySelector('style#atom-styles')
@@ -135,8 +136,67 @@ document.addEventListener('mousewheel', (event) => {
   }
 })
 
+let lastContextMenuTarget: HTMLElement
 document.addEventListener('contextmenu', (e) => {
-  console.log(e)
+  lastContextMenuTarget = e.target as HTMLElement
+})
+
+ipcRenderer.on<'sync-source'>('sync-source', (_evt: any, { tokens }) => {
+  const element = lastContextMenuTarget
+  const pathToElement = util.getPathToElement(element)
+  pathToElement.shift() // remove markdown-preview-plus-view
+  pathToElement.shift() // remove div.update-preview
+  if (!pathToElement.length) {
+    return null
+  }
+
+  let finalToken = null
+  let level = 0
+
+  for (const token of tokens) {
+    if (token.level < level) {
+      break
+    }
+    if (token.hidden) {
+      continue
+    }
+    if (token.tag === pathToElement[0].tag && token.level === level) {
+      if (token.nesting === 1) {
+        if (pathToElement[0].index === 0) {
+          // tslint:disable-next-line:strict-type-predicates // TODO: complain on DT
+          if (token.map != null) {
+            finalToken = token
+          }
+          pathToElement.shift()
+          level++
+        } else {
+          pathToElement[0].index--
+        }
+      } else if (
+        token.nesting === 0 &&
+        ['math', 'code', 'hr'].includes(token.tag)
+      ) {
+        if (pathToElement[0].index === 0) {
+          finalToken = token
+          break
+        } else {
+          pathToElement[0].index--
+        }
+      }
+    }
+    if (pathToElement.length === 0) {
+      break
+    }
+  }
+
+  if (finalToken !== null) {
+    ipcRenderer.sendToHost<'open-source'>('open-source', {
+      initialLine: finalToken.map[0],
+    })
+    return finalToken.map[0]
+  } else {
+    return null
+  }
 })
 
 ipcRenderer.on<'get-html-svg'>('get-html-svg', async () => {

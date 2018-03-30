@@ -40,7 +40,6 @@ export abstract class MarkdownPreviewView {
   private renderLaTeX: boolean = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
-  private lastTarget?: HTMLElement
   private zoomLevel = 0
   private getHTMLSVGPromise?: Promise<string>
 
@@ -80,6 +79,14 @@ export abstract class MarkdownPreviewView {
               this.element,
               'markdown-preview-plus:zoom-out',
             )
+            break
+          case 'open-source':
+            const path = this.getPath()
+            if (path === undefined) break
+            atom.workspace.open(path, {
+              initialLine: e.args[0].initialLine,
+              searchAllPanes: true,
+            })
             break
           default:
             console.debug(`Unknown message recieved ${e.channel}`)
@@ -264,17 +271,10 @@ export abstract class MarkdownPreviewView {
           this.zoomLevel = 0
           this.element.setZoomLevel(this.zoomLevel)
         },
-        'markdown-preview-plus:sync-source': (_event) => {
-          const lastTarget = this.lastTarget
-          if (!lastTarget) return
-          handlePromise(
-            this.getMarkdownSource().then((source?: string) => {
-              if (source === undefined) {
-                return
-              }
-              this.syncSource(source, lastTarget)
-            }),
-          )
+        'markdown-preview-plus:sync-source': async (_event) => {
+          const text = await this.getMarkdownSource()
+          const tokens = markdownIt.getTokens(text, this.renderLaTeX)
+          this.element.send<'sync-source'>('sync-source', { tokens })
         },
       }),
     )
@@ -378,79 +378,6 @@ export abstract class MarkdownPreviewView {
     )
 
     return true
-  }
-
-  //
-  // Set the associated editors cursor buffer position to the line representing
-  // the source markdown of a target element.
-  //
-  // @param {string} text Source markdown of the associated editor.
-  // @param {HTMLElement} element Target element contained within the assoicated
-  //   `markdown-preview-plus-view` container. The method will attempt to identify the
-  //   line of `text` that represents `element` and set the cursor to that line.
-  // @return {number|null} The line of `text` that represents `element`. If no
-  //   line is identified `null` is returned.
-  //
-  private syncSource(text: string, element: HTMLElement) {
-    const filePath = this.getPath()
-    if (!filePath) return null
-    const pathToElement = util.getPathToElement(element)
-    pathToElement.shift() // remove markdown-preview-plus-view
-    pathToElement.shift() // remove div.update-preview
-    if (!pathToElement.length) {
-      return null
-    }
-
-    const tokens = markdownIt.getTokens(text, this.renderLaTeX)
-    let finalToken = null
-    let level = 0
-
-    for (const token of tokens) {
-      if (token.level < level) {
-        break
-      }
-      if (token.hidden) {
-        continue
-      }
-      if (token.tag === pathToElement[0].tag && token.level === level) {
-        if (token.nesting === 1) {
-          if (pathToElement[0].index === 0) {
-            // tslint:disable-next-line:strict-type-predicates // TODO: complain on DT
-            if (token.map != null) {
-              finalToken = token
-            }
-            pathToElement.shift()
-            level++
-          } else {
-            pathToElement[0].index--
-          }
-        } else if (
-          token.nesting === 0 &&
-          ['math', 'code', 'hr'].includes(token.tag)
-        ) {
-          if (pathToElement[0].index === 0) {
-            finalToken = token
-            break
-          } else {
-            pathToElement[0].index--
-          }
-        }
-      }
-      if (pathToElement.length === 0) {
-        break
-      }
-    }
-
-    if (finalToken !== null) {
-      // tslint:disable-next-line:no-floating-promises
-      atom.workspace.open(filePath, {
-        initialLine: finalToken.map[0],
-        searchAllPanes: true,
-      })
-      return finalToken.map[0]
-    } else {
-      return null
-    }
   }
 
   private updateStyles() {
