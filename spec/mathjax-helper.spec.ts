@@ -1,9 +1,12 @@
+/// <reference path="../src-client/node.d.ts"/>
+/// <reference path="../src-client/global-shims.d.ts"/>
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
 import { waitsFor } from './util'
 import { expect } from 'chai'
-import * as mathjaxHelper from '../client/mathjax-helper'
+global.require = require
+import * as mathjaxHelper from '../src-client/mathjax-helper'
 
 temp.track()
 
@@ -12,12 +15,6 @@ declare global {
     interface InputJax {
       TeX: { Definitions: { macros: object } }
     }
-  }
-}
-
-declare global {
-  interface Window {
-    atomHome: string
   }
 }
 
@@ -38,7 +35,7 @@ describe('MathJax helper module', () =>
       configDirPath = temp.mkdirSync('atom-config-dir-')
       macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
 
-      window.atomHome = configDirPath
+      window.atomHome = Promise.resolve(configDirPath)
     })
 
     afterEach(function() {

@@ -236,7 +236,6 @@ var x = 0;
 ~~~
 `)
       expect(
-        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
         await atom.commands.dispatch(
           atom.views.getView(ed),
           'markdown-preview-plus:toggle',

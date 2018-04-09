@@ -105,13 +105,6 @@ ipcRenderer.on<'update-preview'>(
   },
 )
 
-declare global {
-  interface Window {
-    atomHome: Promise<string>
-    resolveAtomHome(home: string): void
-  }
-}
-
 window.atomHome = new Promise((resolve) => (window.resolveAtomHome = resolve))
 
 ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {

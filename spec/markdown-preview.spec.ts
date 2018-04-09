@@ -44,7 +44,7 @@ describe('Markdown preview plus package', function() {
     }
   })
 
-  describe('when a preview has not been created for the file', function() {
+  describe.only('when a preview has not been created for the file', function() {
     it('displays a markdown preview in a split pane', async function() {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/file.markdown'),
@@ -109,7 +109,7 @@ describe('Markdown preview plus package', function() {
     })
   })
 
-  describe('when a preview has been created for the file', function() {
+  describe.only('when a preview has been created for the file', function() {
     beforeEach(async function() {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/file.markdown'),
@@ -192,7 +192,6 @@ describe('Markdown preview plus package', function() {
       previewPane.activate()
 
       expect(
-        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
         await atom.commands.dispatch(
           atom.views.getView(previewPane.getActiveItem()),
           'markdown-preview-plus:toggle',
@@ -608,7 +607,7 @@ var x = y;
     })
   })
 
-  describe('sanitization', function() {
+  describe.only('sanitization', function() {
     it('removes script tags and attributes that commonly contain inline scripts', async function() {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/evil.md'),
@@ -648,7 +647,7 @@ world</p>
     })
   })
 
-  describe('when the markdown contains an <html> tag', () =>
+  describe.only('when the markdown contains an <html> tag', () =>
     it('does not throw an exception', async function() {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/html-tag.md'),
@@ -663,7 +662,7 @@ world</p>
       expect(await previewHTML(preview)).to.equal('content\n')
     }))
 
-  describe('when the markdown contains a <pre> tag', () =>
+  describe.only('when the markdown contains a <pre> tag', () =>
     it('does not throw an exception', async function() {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/pre-tag.md'),
@@ -681,7 +680,7 @@ world</p>
 
   // WARNING If focus is given to this spec alone your `config.cson` may be
   // overwritten. Please ensure that you have yours backed up :D
-  describe('GitHub style markdown preview', function() {
+  describe.only('GitHub style markdown preview', function() {
     beforeEach(() =>
       atom.config.set('markdown-preview-plus.useGitHubStyle', false),
     )
@@ -759,7 +758,7 @@ world</p>
     })
   })
 
-  describe('Binding and unbinding based on config', function() {
+  describe.only('Binding and unbinding based on config', function() {
     let spy: sinon.SinonSpy
     before(async function() {
       await atom.packages.activatePackage('language-javascript')
@@ -780,13 +779,12 @@ world</p>
       const editor = await atom.workspace.open('source.js')
 
       expect(
-        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
         await atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
         ),
       ).to.be.ok
-      await expectPreviewInSplitPane()
+      preview = await expectPreviewInSplitPane()
     })
     it('Unbinds from scopes when config is changed', async function() {
       atom.config.set('markdown-preview-plus.grammars', ['no-such-grammar'])
@@ -798,7 +796,6 @@ world</p>
       atom.grammars.assignLanguageMode(buffer, 'source.gfm')
 
       expect(
-        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
         await atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
@@ -807,7 +804,7 @@ world</p>
     })
   })
 
-  describe('Math separators configuration', function() {
+  describe.only('Math separators configuration', function() {
     beforeEach(function() {
       atom.config.set(
         'markdown-preview-plus.enableLatexRenderingByDefault',
@@ -832,7 +829,6 @@ world</p>
         )
 
         expect(
-          // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
           await atom.commands.dispatch(
             atom.views.getView(editor),
             'markdown-preview-plus:toggle',
@@ -882,24 +878,20 @@ world</p>
       )
 
       expect(
-        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
         await atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:toggle',
         ),
       ).to.be.ok
-      await expectPreviewInSplitPane()
-
-      const workspaceElement = atom.views.getView(atom.workspace)
+      preview = await expectPreviewInSplitPane()
 
       await waitsFor.msg(
         'notification',
         () =>
-          workspaceElement.querySelectorAll('atom-notification.warning')
-            .length === 2,
+          document.querySelectorAll('atom-notification.warning').length === 2,
       )
 
-      const notifications = Array.from(workspaceElement.querySelectorAll(
+      const notifications = Array.from(document.querySelectorAll(
         'atom-notification.warning',
       ) as NodeListOf<HTMLElement>)
       expect(notifications.length).to.equal(2)
