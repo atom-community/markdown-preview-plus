@@ -112,6 +112,8 @@ declare global {
   }
 }
 
+window.atomHome = new Promise((resolve) => (window.resolveAtomHome = resolve))
+
 ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
   window.resolveAtomHome(home)
 })

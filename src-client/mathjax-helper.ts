@@ -12,6 +12,9 @@ import { isFileSync } from './util'
 import { MathJaxStub } from './mathjax-stub'
 
 let isMathJaxDisabled = false
+const mjSrc = `${global.require.resolve(
+  'mathjax',
+)}?delayStartupUntil=configured`
 
 //
 // Process DOM elements for LaTeX equations with MathJax
@@ -71,9 +74,7 @@ async function loadMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
 
 function unloadMathJax(): void {
   mjPromise = undefined
-  const script = document.head.querySelector(
-    `script[src='${require.resolve('mathjax')}?delayStartupUntil=configured']`,
-  )
+  const script = document.head.querySelector(`script[src='${mjSrc}']`)
   if (script) script.remove()
 }
 
@@ -192,9 +193,7 @@ async function attachMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
   console.log('Loading maths rendering engine MathJax')
 
   // Attach MathJax script
-  await Promise.all([
-    injectScript(`${require.resolve('mathjax')}?delayStartupUntil=configured`),
-  ])
+  await Promise.all([injectScript(mjSrc)])
   const { mathJaxStub } = await import('./mathjax-stub')
   await configureMathJax(mathJaxStub, renderer)
   return mathJaxStub

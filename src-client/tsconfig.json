@@ -8,7 +8,7 @@
   "exclude": ["../node_modules"],
   "compileOnSave": true,
   "compilerOptions": {
-    "outDir": "../client",
+    "noEmit": true,
     "types": ["mathjax"]
   }
 }

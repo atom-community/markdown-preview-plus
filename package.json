@@ -17,7 +17,7 @@
   },
   "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "scripts": {
-    "build": "tsc -p . && tsc -p src-client",
+    "build": "tsc -p . && node scripts/build-client.js",
     "prettier": "prettier --write 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "prettier-check": "prettier -l 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "typecheck": "tsc --noEmit -p . && tsc --noEmit -p src-client && tsc --noEmit -p spec",
@@ -55,6 +55,7 @@
     "fs-extra": "^5.0.0",
     "jasmine-tagged": "^1.1.4",
     "markdown-it-testgen": "^0.1.4",
+    "parcel-bundler": "^1.7.0",
     "prettier": "^1.11.1",
     "sinon": "^4.4.6",
     "sinon-chai": "^3.0.0",
