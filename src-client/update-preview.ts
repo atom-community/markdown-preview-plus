@@ -20,99 +20,38 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import { WrappedDomTree } from './wrapped-dom-tree'
+import morph = require('morphdom')
 import MathJaxHelper = require('./mathjax-helper')
-import { handlePromise, isElement } from './util'
+import { handlePromise } from './util'
 
 export class UpdatePreview {
-  private domFragment?: DocumentFragment
-  private tree: WrappedDomTree
-  // @param dom A DOM element object
-  //    https://developer.mozilla.org/en-US/docs/Web/API/element
-  constructor(dom: Element) {
-    this.tree = new WrappedDomTree(dom, true)
+  constructor(private dom: HTMLElement) {
+    /* no-op */
   }
 
   public update(
-    document: HTMLDocument,
     domFragment: DocumentFragment,
     renderLaTeX: boolean,
     mjrenderer: MathJaxRenderer,
   ) {
-    prepareCodeBlocksForAtomEditors(document, domFragment)
+    const newDom = domFragment.cloneNode(true) as DocumentFragment
 
-    if (this.domFragment && domFragment.isEqualNode(this.domFragment)) {
-      return undefined
+    for (const m of Array.from(newDom.querySelectorAll('span.math'))) {
+      const mscr = m.firstElementChild as HTMLScriptElement | null
+      if (!mscr || mscr.nodeName !== 'SCRIPT') continue
+      m.isSameNode = function(target: Node) {
+        if (target.nodeName !== 'SPAN') return false
+        const el = target as HTMLSpanElement
+        if (!el.classList.contains('math')) return false
+        const scr = el.querySelector('script')
+        if (!scr) return false
+        return mscr.innerHTML === scr.innerHTML
+      }
     }
 
-    const firstTime = this.domFragment === undefined
-    this.domFragment = domFragment.cloneNode(true) as DocumentFragment
-
-    const newDom = document.createElement('div')
-    newDom.className = 'update-preview'
-    newDom.appendChild(domFragment)
-    const newTree = new WrappedDomTree(newDom, false)
-
-    const r = this.tree.diffTo(newTree)
-    newTree.removeSelf()
-
-    if (firstTime) {
-      r.possibleReplace = undefined
-      r.last = undefined
-    }
-
-    r.inserted = r.inserted.filter((elm) => elm.nodeType === Node.ELEMENT_NODE)
-
+    morph(this.dom, newDom, { childrenOnly: true })
     if (renderLaTeX) {
-      if (firstTime) {
-        handlePromise(MathJaxHelper.mathProcessor([document.body], mjrenderer))
-      } else {
-        handlePromise(MathJaxHelper.mathProcessor(r.inserted, mjrenderer))
-      }
-    }
-
-    this.updateOrderedListsStart(this.domFragment)
-
-    return r
-  }
-
-  private updateOrderedListsStart(fragment: DocumentFragment) {
-    if (this.tree.shownTree === undefined) {
-      throw new Error('shownTree undefined in updateOrderedListsStart')
-    }
-    if (!isElement(this.tree.shownTree.dom)) {
-      throw new Error(
-        'this.tree.shownTree.dom is not an Element in updateOrderedListsStart',
-      )
-    }
-    const previewOLs = this.tree.shownTree.dom.querySelectorAll('ol')
-    const parsedOLs = fragment.querySelectorAll('ol')
-
-    const end = parsedOLs.length - 1
-    for (let i = 0; i <= end; i++) {
-      const previewStart = previewOLs[i].getAttribute('start')
-      const parsedStart = parsedOLs[i].getAttribute('start')
-
-      if (previewStart === parsedStart) {
-        continue
-      } else if (parsedStart !== null) {
-        previewOLs[i].setAttribute('start', parsedStart)
-      } else {
-        previewOLs[i].removeAttribute('start')
-      }
+      handlePromise(MathJaxHelper.mathProcessor([this.dom], mjrenderer))
     }
   }
-}
-
-function prepareCodeBlocksForAtomEditors(
-  document: HTMLDocument,
-  domFragment: DocumentFragment,
-) {
-  for (const preElement of Array.from(domFragment.querySelectorAll('pre'))) {
-    const preWrapper = document.createElement('span')
-    preWrapper.className = 'atom-text-editor'
-    preElement.parentNode!.insertBefore(preWrapper, preElement)
-    preWrapper.appendChild(preElement)
-  }
-  return domFragment
 }

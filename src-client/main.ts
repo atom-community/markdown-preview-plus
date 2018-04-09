@@ -81,7 +81,7 @@ ipcRenderer.on<'update-preview'>(
     const preview = document.querySelector('div.update-preview')
     if (!preview) return
     if (!updatePreview) {
-      updatePreview = new UpdatePreview(preview)
+      updatePreview = new UpdatePreview(preview as HTMLElement)
     }
     const parser = new DOMParser()
     const domDocument = parser.parseFromString(html, 'text/html')
@@ -89,7 +89,7 @@ ipcRenderer.on<'update-preview'>(
     for (const elem of Array.from(domDocument.body.childNodes)) {
       domFragment.appendChild(elem)
     }
-    updatePreview.update(document, domFragment, renderLaTeX, mjrenderer)
+    updatePreview.update(domFragment, renderLaTeX, mjrenderer)
     const doc = document
     if (doc && domDocument.head.hasChildNodes) {
       let container = doc.head.querySelector('original-elements')
