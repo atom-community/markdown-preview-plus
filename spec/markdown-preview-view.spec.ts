@@ -819,9 +819,10 @@ var x = 0;
       ) as HTMLImageElement[]
       expect(emojis).to.have.lengthOf(11)
       for (const i of emojis) {
-        expect(i.getAttribute('src')).includes('/twemoji/')
-        expect(i.getAttribute('src')).includes('/svg/')
-        expect(i.getAttribute('src')).includes('.svg')
+        const p = path.normalize(i.getAttribute('src') || '')
+        expect(p.split(path.sep)).includes('twemoji')
+        expect(p.split(path.sep)).includes('svg')
+        expect(p.endsWith('.svg')).to.be.true
       }
     })
   })
