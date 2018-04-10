@@ -165,7 +165,7 @@ async function copyHtmlInternal(editor: TextEditor): Promise<void> {
     document.body.appendChild(view.element)
     await view.renderPromise
     const res = await view.getHTMLSVG()
-    atom.clipboard.write(res)
+    if (res) atom.clipboard.write(res)
     view.element.remove()
   } else {
     const html = await renderer.render(

@@ -41,7 +41,7 @@ export abstract class MarkdownPreviewView {
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
   private zoomLevel = 0
-  private getHTMLSVGPromise?: Promise<string>
+  private getHTMLSVGPromise?: Promise<string | undefined>
 
   protected constructor() {
     this.element = document.createElement('webview') as any
@@ -133,7 +133,7 @@ export abstract class MarkdownPreviewView {
 
   public async getHTMLSVG() {
     await this.getHTMLSVGPromise
-    this.getHTMLSVGPromise = new Promise<string>((resolve) => {
+    this.getHTMLSVGPromise = new Promise<string | undefined>((resolve) => {
       const handler = (e: Electron.IpcMessageEventCustom) => {
         // tslint:disable-next-line: totality-check
         if (e.channel === 'html-svg-result') {

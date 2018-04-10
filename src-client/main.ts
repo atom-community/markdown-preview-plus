@@ -204,7 +204,10 @@ ipcRenderer.on<'sync-source'>('sync-source', (_evt: any, { tokens }) => {
 
 ipcRenderer.on<'get-html-svg'>('get-html-svg', async () => {
   const el = document.querySelector('markdown-preview-plus-view > div')
-  if (!el) return
+  if (!el) {
+    ipcRenderer.sendToHost<'html-svg-result'>('html-svg-result', undefined)
+    return
+  }
   const res = await processHTMLString(el)
   ipcRenderer.sendToHost<'html-svg-result'>('html-svg-result', res)
 })

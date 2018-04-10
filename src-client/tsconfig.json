@@ -6,7 +6,7 @@
     "../src/types/electron.d.ts"
   ],
   "exclude": ["../node_modules"],
-  "compileOnSave": true,
+  "compileOnSave": false,
   "compilerOptions": {
     "noEmit": true,
     "types": ["mathjax"]

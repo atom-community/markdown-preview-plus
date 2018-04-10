@@ -23,7 +23,7 @@ declare interface ReplyMap {
   'zoom-in': void
   'zoom-out': void
   'open-source': { initialLine?: number }
-  'html-svg-result': string
+  'html-svg-result': string | undefined
 }
 declare global {
   namespace Electron {
