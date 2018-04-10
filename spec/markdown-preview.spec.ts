@@ -593,7 +593,7 @@ var x = y;
       })
 
       it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
-        // await copyHtml()
+        await copyHtml()
 
         const clipboard = clipboardContents
         expect(clipboard.match(/MathJax_SVG_Hidden/g)!.length).to.equal(1)

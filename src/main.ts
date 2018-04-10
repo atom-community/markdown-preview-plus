@@ -162,7 +162,8 @@ async function copyHtmlInternal(editor: TextEditor): Promise<void> {
     view.element.style.visibility = 'hidden'
     view.element.style.position = 'absolute'
     view.element.style.pointerEvents = 'none'
-    document.body.appendChild(view.element)
+    const ws = atom.views.getView(atom.workspace)
+    ws.appendChild(view.element)
     await view.renderPromise
     const res = await view.getHTMLSVG()
     if (res) atom.clipboard.write(res)
