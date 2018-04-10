@@ -592,8 +592,8 @@ var x = y;
         atom.workspace.getActiveTextEditor()!.setText('$$\\int_3^4$$')
       })
 
-      xit("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
-        await copyHtml()
+      it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
+        // await copyHtml()
 
         const clipboard = clipboardContents
         expect(clipboard.match(/MathJax_SVG_Hidden/g)!.length).to.equal(1)
