@@ -892,9 +892,6 @@ world</p>
       const notifications = Array.from(document.querySelectorAll(
         'atom-notification.warning',
       ) as NodeListOf<HTMLElement>)
-      for (const n of notifications) {
-        console.log(n.innerText)
-      }
       expect(notifications.length).to.equal(2)
       expect(notifications).to.satisfy((x: HTMLElement[]) =>
         x.some((y) => y.innerText.includes('inlineMathSeparators')),
