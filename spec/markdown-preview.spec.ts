@@ -520,13 +520,14 @@ var x = y;
         }))
 
       describe('when the code block is nested in a list', () =>
-        it('detects and styles the block', () =>
+        it('detects and styles the block', () => {
           expect(
             Array.from(
               (element.querySelector('pre.lang-javascript')! as HTMLElement)
                 .classList,
             ),
-          ).to.contain('editor-colors')))
+          ).to.contain('editor-colors')
+        }))
     })
   })
 
@@ -680,8 +681,7 @@ world</p>
   // overwritten. Please ensure that you have yours backed up :D
   describe('GitHub style markdown preview', function() {
     beforeEach(() =>
-      atom.config.set('markdown-preview-plus.useGitHubStyle', false),
-    )
+      atom.config.set('markdown-preview-plus.useGitHubStyle', false))
 
     it('renders markdown using the default style when GitHub styling is disabled', async function() {
       const editor = await atom.workspace.open(
