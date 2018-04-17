@@ -262,13 +262,16 @@ function tokenizeCodeBlocks(html: string, defaultLanguage: string = 'text') {
   }
 
   doc.querySelectorAll('pre').forEach(function(preElement) {
-    const codeBlock = preElement.firstElementChild as HTMLElement
+    const codeBlock =
+      preElement.firstElementChild !== null
+        ? preElement.firstElementChild
+        : preElement
     const fenceName =
       codeBlock.className.replace(/^(lang-|sourceCode )/, '') || defaultLanguage
 
     // tslint:disable-next-line:no-unsafe-any // TODO: tslint bug?
     const highlightedHtml: string = highlight({
-      fileContents: codeBlock.innerText,
+      fileContents: codeBlock.textContent!,
       scopeName: scopeForFenceName(fenceName),
       nbsp: false,
       lineDivs: false,
