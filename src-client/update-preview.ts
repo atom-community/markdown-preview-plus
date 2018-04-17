@@ -20,33 +20,38 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import morph = require('morphdom')
+import MathJaxHelper = require('./mathjax-helper')
+import { handlePromise } from './util'
 
-export class TwoDimArray<T> {
-  private readonly _arr: T[]
-  constructor(public readonly row: number, public readonly col: number) {
-    this._arr = new Array(row * col)
+export class UpdatePreview {
+  constructor(private dom: HTMLElement) {
+    /* no-op */
   }
 
-  public getInd(row: number, col: number) {
-    return row * this.col + col
-  }
+  public update(
+    domFragment: DocumentFragment,
+    renderLaTeX: boolean,
+    mjrenderer: MathJaxRenderer,
+  ) {
+    const newDom = domFragment.cloneNode(true) as DocumentFragment
 
-  public get2DInd(ind: number) {
-    return {
-      r: (ind / this.col) | 0,
-      c: ind % this.col,
+    for (const m of Array.from(newDom.querySelectorAll('span.math'))) {
+      const mscr = m.firstElementChild as HTMLScriptElement | null
+      if (!mscr || mscr.nodeName !== 'SCRIPT') continue
+      m.isSameNode = function(target: Node) {
+        if (target.nodeName !== 'SPAN') return false
+        const el = target as HTMLSpanElement
+        if (!el.classList.contains('math')) return false
+        const scr = el.querySelector('script')
+        if (!scr) return false
+        return mscr.innerHTML === scr.innerHTML
+      }
     }
-  }
 
-  public get(row: number, col: number): T | undefined {
-    return this._arr[this.getInd(row, col)]
-  }
-
-  public set(row: number, col: number, val: T) {
-    this._arr[row * this.col + col] = val
-  }
-
-  public rawGet(ind: number): T | undefined {
-    return this._arr[ind]
+    morph(this.dom, newDom, { childrenOnly: true })
+    if (renderLaTeX) {
+      handlePromise(MathJaxHelper.mathProcessor([this.dom], mjrenderer))
+    }
   }
 }

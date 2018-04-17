@@ -8,12 +8,12 @@ import {
 } from 'atom'
 import _ = require('lodash')
 import fs = require('fs')
+import {} from 'electron' // this is here soley for typings
 
 import renderer = require('../renderer')
-import { UpdatePreview } from '../update-preview'
 import markdownIt = require('../markdown-it-helper')
 import imageWatcher = require('../image-watch-helper')
-import { handlePromise, injectScript } from '../util'
+import { handlePromise } from '../util'
 import * as util from './util'
 
 export interface SerializedMPV {
@@ -22,14 +22,13 @@ export interface SerializedMPV {
   filePath?: string
 }
 
-export type MarkdownPreviewViewElement = HTMLIFrameElement & {
+export type MarkdownPreviewViewElement = Electron.WebviewTag & {
   getModel(): MarkdownPreviewView
 }
 
 export abstract class MarkdownPreviewView {
   public readonly renderPromise: Promise<void>
   public readonly element: MarkdownPreviewViewElement
-
   protected emitter: Emitter<{
     'did-change-title': undefined
     'did-change-markdown': undefined
@@ -38,20 +37,19 @@ export abstract class MarkdownPreviewView {
   protected destroyed = false
 
   private loading: boolean = true
-  private rootElement?: HTMLElement
-  private preview?: HTMLElement
-  private updatePreview?: UpdatePreview
   private renderLaTeX: boolean = atom.config.get(
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
-  private loaded = true // Do not show the loading spinnor on initial load
-  private lastTarget?: HTMLElement
+  private zoomLevel = 0
+  private getHTMLSVGPromise?: Promise<string | undefined>
 
   protected constructor() {
-    this.element = document.createElement('iframe') as any
+    this.element = document.createElement('webview') as any
     this.element.getModel = () => this
     this.element.classList.add('markdown-preview-plus', 'native-key-bindings')
-    this.element.src = 'about:blank'
+    this.element.disablewebsecurity = 'true'
+    this.element.nodeintegration = 'true'
+    this.element.src = `file:///${__dirname}/../../client/template.html`
     this.element.style.width = '100%'
     this.element.style.height = '100%'
     this.disposables.add(
@@ -66,60 +64,87 @@ export abstract class MarkdownPreviewView {
       }),
     )
     this.handleEvents()
+    this.element.addEventListener(
+      'ipc-message',
+      (e: Electron.IpcMessageEventCustom) => {
+        switch (e.channel) {
+          case 'zoom-in':
+            atom.commands.dispatch(
+              this.element,
+              'markdown-preview-plus:zoom-in',
+            )
+            break
+          case 'zoom-out':
+            atom.commands.dispatch(
+              this.element,
+              'markdown-preview-plus:zoom-out',
+            )
+            break
+          case 'open-source':
+            const path = this.getPath()
+            if (path === undefined) break
+            handlePromise(
+              atom.workspace.open(path, {
+                initialLine: e.args[0].initialLine,
+                searchAllPanes: true,
+              }),
+            )
+            break
+          default:
+            console.debug(`Unknown message recieved ${e.channel}`)
+        }
+      },
+    )
+    this.element.addEventListener('will-navigate', async (e) => {
+      const { shell } = await import('electron')
+      const fileUriToPath = await import('file-uri-to-path')
+      console.log(e.url)
+      if (e.url.startsWith('file://')) {
+        handlePromise(atom.workspace.open(fileUriToPath(e.url)))
+      } else {
+        shell.openExternal(e.url)
+      }
+    })
     this.renderPromise = new Promise((resolve) => {
       const onload = () => {
         if (this.destroyed) return
-        if (this.updatePreview) this.updatePreview = undefined
-        const doc = this.element.contentDocument
         this.updateStyles()
-        handlePromise(
-          injectScript(doc, require.resolve('../misc-stub')).then(() => {
-            this.element.contentWindow.miscStub.handleScroll(this.handleScroll)
-          }),
-        )
-        this.rootElement = doc.createElement('markdown-preview-plus-view')
-        this.rootElement.classList.add('native-key-bindings')
-        this.rootElement.tabIndex = -1
-        if (atom.config.get('markdown-preview-plus.useGitHubStyle')) {
-          this.rootElement.setAttribute('data-use-github-style', '')
-        }
-        this.preview = doc.createElement('div')
-        this.preview.classList.add('update-preview')
-        this.rootElement.appendChild(this.preview)
-        doc.body.appendChild(this.rootElement)
-        this.rootElement.oncontextmenu = (e) => {
-          this.lastTarget = e.target as HTMLElement
-          const pane = atom.workspace.paneForItem(this)
-          if (pane) pane.activate()
-          atom.contextMenu.showForEvent(
-            Object.assign({}, e, { target: this.element }),
-          )
-        }
-
+        this.element.send<'use-github-style'>('use-github-style', {
+          value: atom.config.get('markdown-preview-plus.useGitHubStyle'),
+        })
+        this.element.send<'set-atom-home'>('set-atom-home', {
+          home: atom.getConfigDirPath(),
+        })
+        this.element.send<'set-base-path'>('set-base-path', {
+          path: this.getPath(),
+        })
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())
       }
-      this.element.addEventListener('load', onload)
+      this.element.addEventListener('dom-ready', onload)
     })
   }
 
-  public text() {
-    if (!this.rootElement) return ''
-    return this.rootElement.textContent || ''
+  public async runJS<T>(js: string) {
+    return new Promise<T>((resolve) =>
+      this.element.executeJavaScript(js, false, resolve),
+    )
   }
 
-  public find(what: string) {
-    if (!this.rootElement) return null
-    return this.rootElement.querySelector(what)
-  }
-
-  public findAll(what: string) {
-    if (!this.rootElement) return []
-    return this.rootElement.querySelectorAll(what)
-  }
-
-  public getRoot() {
-    return this.rootElement
+  public async getHTMLSVG() {
+    await this.getHTMLSVGPromise
+    this.getHTMLSVGPromise = new Promise<string | undefined>((resolve) => {
+      const handler = (e: Electron.IpcMessageEventCustom) => {
+        // tslint:disable-next-line: totality-check
+        if (e.channel === 'html-svg-result') {
+          this.element.removeEventListener('ipc-message', handler as any)
+          resolve(e.args[0])
+        }
+      }
+      this.element.addEventListener('ipc-message', handler)
+    })
+    this.element.send<'get-html-svg'>('get-html-svg', undefined)
+    return this.getHTMLSVGPromise
   }
 
   public abstract serialize(): SerializedMPV
@@ -146,36 +171,9 @@ export abstract class MarkdownPreviewView {
     this.changeHandler()
   }
 
-  public async refreshImages(oldsrc: string) {
-    const imgs = this.findAll('img[src]') as NodeListOf<HTMLImageElement>
-    const result = []
-    for (const img of Array.from(imgs)) {
-      let ovs: string | undefined
-      let ov: number | undefined
-      let src = img.getAttribute('src')!
-      const match = src.match(/^(.*)\?v=(\d+)$/)
-      if (match) {
-        ;[, src, ovs] = match
-      }
-      if (src === oldsrc) {
-        if (ovs !== undefined) {
-          ov = parseInt(ovs, 10)
-        }
-        const v = await imageWatcher.getVersion(src, this.getPath())
-        if (v !== ov) {
-          if (v) {
-            result.push((img.src = `${src}?v=${v}`))
-          } else {
-            result.push((img.src = `${src}`))
-          }
-        } else {
-          result.push(undefined)
-        }
-      } else {
-        result.push(undefined)
-      }
-    }
-    return result
+  public async refreshImages(oldsrc: string): Promise<void> {
+    const v = await imageWatcher.getVersion(oldsrc, this.getPath())
+    this.element.send<'update-images'>('update-images', { oldsrc, v })
   }
 
   public abstract getTitle(): string
@@ -202,25 +200,39 @@ export abstract class MarkdownPreviewView {
     return { defaultPath }
   }
 
-  public saveAs(htmlFilePath: string | undefined) {
-    if (htmlFilePath === undefined) return
+  public saveAs(filePath: string | undefined) {
+    if (filePath === undefined) return
     if (this.loading) return
 
-    const title = path.parse(htmlFilePath).name
+    const { name, ext } = path.parse(filePath)
 
-    handlePromise(
-      this.getHTML().then(async (html) => {
-        const fullHtml = util.mkHtml(
-          title,
-          html,
-          this.renderLaTeX,
-          atom.config.get('markdown-preview-plus.useGitHubStyle'),
-        )
+    if (ext === '.pdf') {
+      this.element.printToPDF({}, (error, data) => {
+        if (error) {
+          atom.notifications.addError('Failed saving to PDF', {
+            description: error.toString(),
+            dismissable: true,
+            stack: error.stack,
+          })
+          return
+        }
+        fs.writeFileSync(filePath, data)
+      })
+    } else {
+      handlePromise(
+        this.getHTML().then(async (html) => {
+          const fullHtml = util.mkHtml(
+            name,
+            html,
+            this.renderLaTeX,
+            atom.config.get('markdown-preview-plus.useGitHubStyle'),
+          )
 
-        fs.writeFileSync(htmlFilePath, fullHtml)
-        return atom.workspace.open(htmlFilePath)
-      }),
-    )
+          fs.writeFileSync(filePath, fullHtml)
+          return atom.workspace.open(filePath)
+        }),
+      )
+    }
   }
 
   protected changeHandler = () => {
@@ -248,40 +260,9 @@ export abstract class MarkdownPreviewView {
   //   identified `null` is returned.
   //
   protected syncPreview(text: string, line: number) {
-    if (!this.preview) return undefined
-    if (!this.rootElement) return undefined
     const tokens = markdownIt.getTokens(text, this.renderLaTeX)
     const pathToToken = util.getPathToToken(tokens, line)
-
-    let element = this.preview
-    for (const token of pathToToken) {
-      const candidateElement: HTMLElement | null = element
-        .querySelectorAll(`:scope > ${token.tag}`)
-        .item(token.index) as HTMLElement
-      if (candidateElement) {
-        element = candidateElement
-      } else {
-        break
-      }
-    }
-
-    if (element.classList.contains('update-preview')) {
-      return undefined
-    } // Do not jump to the top of the preview for bad syncs
-
-    if (!element.classList.contains('update-preview')) {
-      element.scrollIntoView()
-    }
-    const maxScrollTop =
-      this.rootElement.scrollHeight - this.rootElement.clientHeight
-    if (!(this.rootElement.scrollTop >= maxScrollTop)) {
-      this.rootElement.scrollTop -= this.rootElement.clientHeight / 4
-    }
-
-    element.classList.add('flash')
-    setTimeout(() => element!.classList.remove('flash'), 1000)
-
-    return element
+    this.element.send<'sync'>('sync', { pathToToken })
   }
 
   private handleEvents() {
@@ -300,38 +281,30 @@ export abstract class MarkdownPreviewView {
 
     this.disposables.add(
       atom.commands.add(this.element, {
-        'core:move-up': () =>
-          this.rootElement && this.rootElement.scrollBy({ top: -10 }),
-        'core:move-down': () =>
-          this.rootElement && this.rootElement.scrollBy({ top: 10 }),
+        'core:move-up': () => this.element.scrollBy({ top: -10 }),
+        'core:move-down': () => this.element.scrollBy({ top: 10 }),
         'core:copy': (event: CommandEvent) => {
           if (this.copyToClipboard()) event.stopPropagation()
         },
+        'markdown-preview-plus:open-dev-tools': () => {
+          this.element.openDevTools()
+        },
         'markdown-preview-plus:zoom-in': () => {
-          if (!this.rootElement) return
-          const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
-          this.rootElement.style.zoom = (zoomLevel + 0.1).toString()
+          this.zoomLevel += 0.1
+          this.element.setZoomLevel(this.zoomLevel)
         },
         'markdown-preview-plus:zoom-out': () => {
-          if (!this.rootElement) return
-          const zoomLevel = parseFloat(this.rootElement.style.zoom || '1')
-          this.rootElement.style.zoom = (zoomLevel - 0.1).toString()
+          this.zoomLevel -= 0.1
+          this.element.setZoomLevel(this.zoomLevel)
         },
         'markdown-preview-plus:reset-zoom': () => {
-          if (!this.rootElement) return
-          this.rootElement.style.zoom = '1'
+          this.zoomLevel = 0
+          this.element.setZoomLevel(this.zoomLevel)
         },
-        'markdown-preview-plus:sync-source': (_event) => {
-          const lastTarget = this.lastTarget
-          if (!lastTarget) return
-          handlePromise(
-            this.getMarkdownSource().then((source?: string) => {
-              if (source === undefined) {
-                return
-              }
-              this.syncSource(source, lastTarget)
-            }),
-          )
+        'markdown-preview-plus:sync-source': async (_event) => {
+          const text = await this.getMarkdownSource()
+          const tokens = markdownIt.getTokens(text, this.renderLaTeX)
+          this.element.send<'sync-source'>('sync-source', { tokens })
         },
       }),
     )
@@ -348,34 +321,27 @@ export abstract class MarkdownPreviewView {
       atom.config.onDidChange(
         'markdown-preview-plus.useGitHubStyle',
         ({ newValue }) => {
-          if (newValue) {
-            this.rootElement &&
-              this.rootElement.setAttribute('data-use-github-style', '')
-          } else {
-            this.rootElement &&
-              this.rootElement.removeAttribute('data-use-github-style')
-          }
+          this.element.send<'use-github-style'>('use-github-style', {
+            value: newValue,
+          })
         },
       ),
     )
   }
 
   private async renderMarkdown(): Promise<void> {
-    if (!this.loaded) {
-      this.showLoading()
-    }
     const source = await this.getMarkdownSource()
     await this.renderMarkdownText(source)
   }
 
   private async getHTML() {
     const source = await this.getMarkdownSource()
-    return renderer.toHTML(
+    return renderer.render(
       source,
       this.getPath(),
       this.getGrammar(),
       this.renderLaTeX,
-      false,
+      true,
     )
   }
 
@@ -384,35 +350,17 @@ export abstract class MarkdownPreviewView {
       const domDocument = await renderer.render(
         text,
         this.getPath(),
+        this.getGrammar(),
         this.renderLaTeX,
         false,
       )
       if (this.destroyed) return
       this.loading = false
-      this.loaded = true
-      // div.update-preview created after constructor st UpdatePreview cannot
-      // be instanced in the constructor
-      if (!this.preview) return
-      if (!this.updatePreview) {
-        this.updatePreview = new UpdatePreview(this.preview)
-      }
-      const domFragment = document.createDocumentFragment()
-      for (const elem of Array.from(domDocument.body.childNodes)) {
-        domFragment.appendChild(elem)
-      }
-      this.updatePreview.update(this.element, domFragment, this.renderLaTeX)
-      const doc = this.element.contentDocument
-      if (doc && domDocument.head.hasChildNodes) {
-        let container = doc.head.querySelector('original-elements')
-        if (!container) {
-          container = doc.createElement('original-elements')
-          doc.head.appendChild(container)
-        }
-        container.innerHTML = ''
-        for (const headElement of Array.from(domDocument.head.childNodes)) {
-          container.appendChild(headElement.cloneNode(true))
-        }
-      }
+      this.element.send<'update-preview'>('update-preview', {
+        html: domDocument.documentElement.outerHTML,
+        renderLaTeX: this.renderLaTeX,
+        mjrenderer: atom.config.get('markdown-preview-plus.latexRenderer'),
+      })
       this.emitter.emit('did-change-markdown')
     } catch (error) {
       this.showError(error as Error)
@@ -420,8 +368,6 @@ export abstract class MarkdownPreviewView {
   }
 
   private showError(error: Error) {
-    console.error(error)
-    if (!this.preview) return
     if (this.destroyed) {
       atom.notifications.addFatalError(
         'Error reported on a destroyed Markdown Preview Plus view',
@@ -433,24 +379,11 @@ export abstract class MarkdownPreviewView {
       )
       return
     }
-    const errorDiv = this.element.contentDocument.createElement('div')
-    errorDiv.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${
-      error.message
-    }</h3>`
-    this.preview.appendChild(errorDiv)
-  }
-
-  private showLoading() {
-    if (!this.preview) return
-    this.loading = true
-    const spinner = this.element.contentDocument.createElement('div')
-    spinner.classList.add('markdown-spinner')
-    spinner.innerText = 'Loading Markdown\u2026'
-    this.preview.appendChild(spinner)
+    this.element.send<'error'>('error', { msg: error.message })
   }
 
   private copyToClipboard() {
-    if (this.loading || !this.preview) {
+    if (this.loading) {
       return false
     }
 
@@ -462,8 +395,8 @@ export abstract class MarkdownPreviewView {
     if (
       selectedText &&
       // tslint:disable-next-line:strict-type-predicates //TODO: complain on TS
-      selectedNode != null &&
-      (this.preview === selectedNode || this.preview.contains(selectedNode))
+      selectedNode != null // &&
+      // (this.preview === selectedNode || this.preview.contains(selectedNode))
     ) {
       return false
     }
@@ -477,102 +410,11 @@ export abstract class MarkdownPreviewView {
     return true
   }
 
-  //
-  // Set the associated editors cursor buffer position to the line representing
-  // the source markdown of a target element.
-  //
-  // @param {string} text Source markdown of the associated editor.
-  // @param {HTMLElement} element Target element contained within the assoicated
-  //   `markdown-preview-plus-view` container. The method will attempt to identify the
-  //   line of `text` that represents `element` and set the cursor to that line.
-  // @return {number|null} The line of `text` that represents `element`. If no
-  //   line is identified `null` is returned.
-  //
-  private syncSource(text: string, element: HTMLElement) {
-    const filePath = this.getPath()
-    if (!filePath) return null
-    const pathToElement = util.getPathToElement(element)
-    pathToElement.shift() // remove markdown-preview-plus-view
-    pathToElement.shift() // remove div.update-preview
-    if (!pathToElement.length) {
-      return null
-    }
-
-    const tokens = markdownIt.getTokens(text, this.renderLaTeX)
-    let finalToken = null
-    let level = 0
-
-    for (const token of tokens) {
-      if (token.level < level) {
-        break
-      }
-      if (token.hidden) {
-        continue
-      }
-      if (token.tag === pathToElement[0].tag && token.level === level) {
-        if (token.nesting === 1) {
-          if (pathToElement[0].index === 0) {
-            // tslint:disable-next-line:strict-type-predicates // TODO: complain on DT
-            if (token.map != null) {
-              finalToken = token
-            }
-            pathToElement.shift()
-            level++
-          } else {
-            pathToElement[0].index--
-          }
-        } else if (
-          token.nesting === 0 &&
-          ['math', 'code', 'hr'].includes(token.tag)
-        ) {
-          if (pathToElement[0].index === 0) {
-            finalToken = token
-            break
-          } else {
-            pathToElement[0].index--
-          }
-        }
-      }
-      if (pathToElement.length === 0) {
-        break
-      }
-    }
-
-    if (finalToken !== null) {
-      // tslint:disable-next-line:no-floating-promises
-      atom.workspace.open(filePath, {
-        initialLine: finalToken.map[0],
-        searchAllPanes: true,
-      })
-      return finalToken.map[0]
-    } else {
-      return null
-    }
-  }
-
   private updateStyles() {
-    const doc = this.element.contentDocument
-    if (!doc) return
-    let elem = doc.head.querySelector('atom-styles')
-    if (!elem) {
-      elem = doc.createElement('atom-styles')
-      doc.head.appendChild(elem)
-    }
-    elem.innerHTML = ''
+    const styles: string[] = []
     for (const se of atom.styles.getStyleElements()) {
-      elem.appendChild(se.cloneNode(true))
+      styles.push(se.innerHTML)
     }
-  }
-
-  private handleScroll = (event: WheelEvent) => {
-    if (event.ctrlKey) {
-      if (event.wheelDeltaY > 0) {
-        atom.commands.dispatch(this.element, 'markdown-preview-plus:zoom-in')
-      } else if (event.wheelDeltaY < 0) {
-        atom.commands.dispatch(this.element, 'markdown-preview-plus:zoom-out')
-      }
-      event.preventDefault()
-      event.stopPropagation()
-    }
+    this.element.send<'style'>('style', { styles })
   }
 }

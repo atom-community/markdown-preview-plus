@@ -2,13 +2,13 @@ import * as path from 'path'
 import * as temp from 'temp'
 import * as cson from 'season'
 import * as markdownIt from '../lib/markdown-it-helper'
-import mathjaxHelper = require('../lib/mathjax-helper')
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as sinon from 'sinon'
-import { waitsFor, expectPreviewInSplitPane } from './util'
+import { waitsFor, expectPreviewInSplitPane, previewFragment } from './util'
 import { expect } from 'chai'
 import { Token } from 'markdown-it'
 import * as previewUtil from '../lib/markdown-preview-view/util'
+import {} from 'electron'
 
 temp.track()
 
@@ -34,7 +34,6 @@ describe('Syncronization of source and preview', function() {
 
     atom.config.set('markdown-preview-plus.enableLatexRenderingByDefault', true)
     const editor = await atom.workspace.open(path.join(fixturesPath, 'sync.md'))
-    const spy = sinon.spy(mathjaxHelper, 'mathProcessor')
     atom.commands.dispatch(
       atom.views.getView(editor),
       'markdown-preview-plus:toggle',
@@ -43,17 +42,12 @@ describe('Syncronization of source and preview', function() {
     preview = await expectPreviewInSplitPane()
 
     await waitsFor.msg(
-      'mathjaxHelper.mathProcessor to be called',
-      () => spy.called,
+      'MathJax to finish processing',
+      async () =>
+        (await previewFragment(preview)).querySelector(
+          '.MathJax_SVG_Display',
+        ) != null,
     )
-    spy.restore()
-
-    await waitsFor.msg(
-      'MathJax to load',
-      () => preview.element.contentWindow.MathJax != null,
-    )
-
-    await preview.element.contentWindow.mathJaxStub.queueTypeset([])
   })
 
   afterEach(async function() {

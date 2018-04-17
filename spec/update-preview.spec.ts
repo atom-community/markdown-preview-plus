@@ -1,9 +1,8 @@
 import * as path from 'path'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
-import mathjaxHelper = require('../lib/mathjax-helper')
 import * as renderer from '../lib/renderer'
-import { TextEditor, TextEditorElement } from 'atom'
-import { expectPreviewInSplitPane, waitsFor } from './util'
+import { TextEditor } from 'atom'
+import { expectPreviewInSplitPane, waitsFor, previewFragment } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
@@ -41,9 +40,11 @@ describe('the difference algorithm that updates the preview', function() {
 
     beforeEach(async function() {
       await loadPreviewInSplitPane()
-      await waitsFor(function() {
-        orderedLists = Array.from(preview.findAll('ol'))
-        return orderedLists.length !== 0
+      await waitsFor(async function() {
+        orderedLists = Array.from(
+          (await previewFragment(preview)).querySelectorAll('ol'),
+        )
+        return orderedLists.length > 0
       })
     })
 
@@ -65,14 +66,24 @@ describe('the difference algorithm that updates the preview', function() {
       editor.setTextInBufferRange([[35, 0], [35, 12]], '2. Ordered 1')
       await waitsFor.msg(
         '1st ordered list start attribute to update',
-        () => orderedLists[0].getAttribute('start') != null,
+        async () => {
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
+          return orderedLists[0].getAttribute('start') != null
+        },
       )
       expectOrderedListsToStartAt(['2', '1', '1', '1', '1'])
 
       editor.setTextInBufferRange([[148, 0], [148, 14]], '> 2. Ordered 1')
       await waitsFor.msg(
         'ordered list nested in blockquote start attribute to update',
-        () => orderedLists[2].getAttribute('start') != null,
+        async () => {
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
+          return orderedLists[2].getAttribute('start') != null
+        },
       )
       expectOrderedListsToStartAt(['2', '1', '2', '1', '1'])
 
@@ -80,7 +91,12 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'ordered list nested in unordered list start attribute to update',
-        () => orderedLists[3].getAttribute('start') != null,
+        async () => {
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
+          return orderedLists[3].getAttribute('start') != null
+        },
       )
       expectOrderedListsToStartAt(['2', '1', '2', '2', '1'])
     })
@@ -91,10 +107,16 @@ describe('the difference algorithm that updates the preview', function() {
       editor.setTextInBufferRange([[205, 0], [205, 14]], '  2. Ordered 1')
       await waitsFor.msg(
         'ordered lists start attributes to update',
-        () =>
-          orderedLists[0].getAttribute('start') != null &&
-          orderedLists[2].getAttribute('start') != null &&
-          orderedLists[3].getAttribute('start') != null,
+        async () => {
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
+          return (
+            orderedLists[0].getAttribute('start') != null &&
+            orderedLists[2].getAttribute('start') != null &&
+            orderedLists[3].getAttribute('start') != null
+          )
+        },
       )
       expectOrderedListsToStartAt(['2', '1', '2', '2', '1'])
 
@@ -102,7 +124,12 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         '1st ordered list start attribute to be removed',
-        () => orderedLists[0].getAttribute('start') == null,
+        async () => {
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
+          return orderedLists[0].getAttribute('start') == null
+        },
       )
       expectOrderedListsToStartAt(['1', '1', '2', '2', '1'])
 
@@ -110,7 +137,12 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'ordered list nested in blockquote start attribute to be removed',
-        () => orderedLists[2].getAttribute('start') == null,
+        async () => {
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
+          return orderedLists[2].getAttribute('start') == null
+        },
       )
       expectOrderedListsToStartAt(['1', '1', '1', '2', '1'])
 
@@ -118,7 +150,12 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'ordered list nested in unordered list start attribute to be removed',
-        () => orderedLists[3].getAttribute('start') == null,
+        async () => {
+          orderedLists = Array.from(
+            (await previewFragment(preview)).querySelectorAll('ol'),
+          )
+          return orderedLists[3].getAttribute('start') == null
+        },
       )
       expectOrderedListsToStartAt(['1', '1', '1', '1', '1'])
     })
@@ -139,40 +176,50 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'preview to update DOM with span.math containers',
-        function() {
+        async function() {
           mathBlocks = Array.from(
-            preview.findAll('script[type*="math/tex"]'),
+            (await previewFragment(preview)).querySelectorAll(
+              'script[type*="math/tex"]',
+            ),
           ).map((x) => x.parentElement!)
           return mathBlocks.length === 20
         },
       )
 
-      await waitsFor.msg('Maths blocks to be processed by MathJax', function() {
-        mathBlocks = Array.from(
-          preview.findAll('script[type*="math/tex"]'),
-        ).map((x) => x.parentElement!)
-        return mathBlocks.every(
-          (x) => !!x.querySelector('.MathJax_SVG, .MathJax, .MathJax_Display'),
-        )
-      })
+      await waitsFor.msg(
+        'Maths blocks to be processed by MathJax',
+        async function() {
+          mathBlocks = Array.from(
+            (await previewFragment(preview)).querySelectorAll(
+              'script[type*="math/tex"]',
+            ),
+          ).map((x) => x.parentElement!)
+          return mathBlocks.every(
+            (x) =>
+              !!x.querySelector('.MathJax_SVG, .MathJax, .MathJax_Display'),
+          )
+        },
+      )
     })
 
     it('replaces the entire span.math container element', async function() {
-      const stub = sinon
-        .stub(mathjaxHelper, 'mathProcessor')
-        .callsFake(function() {
-          /* noop */
-        })
+      await preview.runJS<void>(`
+        window.mathSpan = document.querySelectorAll('span.math')[2]
+        `)
 
       editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
 
-      await waitsFor.msg(
-        'mathjaxHelper.mathProcessor to be called',
-        () => stub.called,
+      await waitsFor.msg('math span to be updated', async () =>
+        preview.runJS<boolean>(`
+          !window.mathSpan.isSameNode(document.querySelectorAll('span.math')[2])
+          `),
       )
-      stub.restore()
 
-      mathBlocks = Array.from(preview.findAll('script[type*="math/tex"]'))
+      mathBlocks = Array.from(
+        (await previewFragment(preview)).querySelectorAll(
+          'script[type*="math/tex"]',
+        ),
+      )
         .map((x) => x.parentElement!)
         .filter((x) => x !== null)
       expect(mathBlocks.length).to.equal(20)
@@ -190,35 +237,44 @@ describe('the difference algorithm that updates the preview', function() {
     })
 
     it('subsequently only rerenders the maths block that was modified', async function() {
-      let unprocessedMathBlocks: HTMLElement[] = []
-
-      const stub = sinon
-        .stub(mathjaxHelper, 'mathProcessor')
-        .callsFake((_iframe: any, domElements: HTMLElement[]) => {
-          unprocessedMathBlocks = domElements
-        })
+      await preview.runJS<void>(`
+        window.mathSpans = Array.from(document.querySelectorAll('span.math'))
+        `)
 
       editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
 
-      await waitsFor.msg(
-        'mathjaxHelper.mathProcessor to be called',
-        () => stub.called,
+      await waitsFor.msg('math span to be updated', async () =>
+        preview.runJS<boolean>(`
+          !window.mathSpans[2].isSameNode(document.querySelectorAll('span.math')[2])
+          `),
       )
-      stub.restore()
 
-      expect(unprocessedMathBlocks.length).to.equal(1)
-      expect(unprocessedMathBlocks[0].tagName.toLowerCase()).to.equal('span')
-      expect(unprocessedMathBlocks[0].className).to.equal('math')
-      expect(unprocessedMathBlocks[0].children.length).to.equal(1)
-      expect(unprocessedMathBlocks[0].children[0].textContent).to.equal(
-        'E=mc^2\n',
+      await preview.runJS<boolean>(`
+          window.newMath = Array.from(document.querySelectorAll('span.math'))
+          `)
+
+      await preview.runJS<boolean>(`
+          window.diffMath = window.mathSpans.filter((x, idx) => ! x.isSameNode(window.newMath[idx]))
+          `)
+
+      expect(await preview.runJS<any>(`window.diffMath.length`)).to.equal(1)
+      expect(
+        await preview.runJS<any>(`window.diffMath[0].tagName.toLowerCase()`),
+      ).to.equal('span')
+      expect(await preview.runJS<any>(`window.diffMath[0].className`)).to.equal(
+        'math',
       )
+      expect(
+        await preview.runJS<any>(
+          `window.diffMath[0].querySelector('script').textContent`,
+        ),
+      ).to.equal('E=mc^2\n')
     })
   })
 
   describe('when a code block is modified', () =>
     it('replaces the entire span.atom-text-editor container element', async function() {
-      const spy = sinon.spy(renderer, 'highlightCodeBlocks')
+      const spy = sinon.spy(renderer.di, 'highlightCodeBlocks')
 
       await loadPreviewInSplitPane()
 
@@ -228,18 +284,14 @@ describe('the difference algorithm that updates the preview', function() {
       )
       spy.restore()
 
-      const codeBlocks = Array.from(preview.findAll('span.atom-text-editor'))
-      expect(codeBlocks.length).to.equal(5)
-
-      const atomTextEditors = ([] as TextEditorElement[]).concat(
-        ...codeBlocks.map((x) =>
-          Array.from(x.querySelectorAll('atom-text-editor')),
-        ),
-      )
+      const f = await previewFragment(preview)
+      const atomTextEditors = Array.from(f.querySelectorAll('atom-text-editor'))
       expect(atomTextEditors).to.have.lengthOf(5)
+      const codeBlocks = f.querySelectorAll('pre code')
+      expect(codeBlocks).to.have.lengthOf(0)
 
       const stub = sinon
-        .stub(renderer, 'highlightCodeBlocks')
+        .stub(renderer.di, 'highlightCodeBlocks')
         .callsFake(function() {
           /* noop */
         })
@@ -251,18 +303,8 @@ describe('the difference algorithm that updates the preview', function() {
       )
       stub.restore()
 
-      const codeBlocks2 = Array.from(preview.findAll('span.atom-text-editor'))
-      expect(codeBlocks2.length).to.equal(5)
-
-      const atomTextEditors2 = ([] as TextEditorElement[]).concat(
-        ...codeBlocks2.map((x) =>
-          Array.from(x.querySelectorAll('atom-text-editor')),
-        ),
-      )
-      expect(atomTextEditors2.length).to.equal(4)
-
-      const modCodeBlock = codeBlocks2[0]
-      expect(modCodeBlock.children.length).to.equal(1)
-      expect(modCodeBlock.children[0].tagName.toLowerCase()).to.equal('pre')
+      const f1 = await previewFragment(preview)
+      const modCodeBlocks = f1.querySelectorAll('pre code')
+      expect(modCodeBlocks).to.have.lengthOf(5)
     }))
 })

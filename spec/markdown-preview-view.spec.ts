@@ -10,8 +10,14 @@ import { expect } from 'chai'
 import * as sinon from 'sinon'
 import * as wrench from 'fs-extra'
 import * as previewUtil from '../lib/markdown-preview-view/util'
+import {} from 'electron'
 
-import { waitsFor, expectPreviewInSplitPane } from './util'
+import {
+  waitsFor,
+  expectPreviewInSplitPane,
+  previewText,
+  previewFragment,
+} from './util'
 import { TextEditorElement, TextEditor } from 'atom'
 import { PlaceholderView } from '../lib/placeholder-view'
 
@@ -71,10 +77,10 @@ describe('MarkdownPreviewView', function() {
   })
 
   describe('::constructor', () =>
-    it('shows an error message when there is an error', function() {
+    it('shows an error message when there is an error', async function() {
       // tslint:disable-next-line: no-unsafe-any
       ;(preview as any).showError(new Error('Not a real file'))
-      expect(preview.text()).to.contain('Failed')
+      expect(await previewText(preview)).to.contain('Failed')
     }))
 
   describe('serialization', function() {
@@ -133,7 +139,7 @@ describe('MarkdownPreviewView', function() {
 
   describe('header rendering', function() {
     it('should render headings with and without space', async function() {
-      const headlines = preview.findAll('h2')
+      const headlines = (await previewFragment(preview)).querySelectorAll('h2')
       expect(headlines.length).to.equal(2)
       expect(headlines[0].outerHTML).to.equal(
         '<h2>Level two header without space</h2>',
@@ -146,8 +152,11 @@ describe('MarkdownPreviewView', function() {
     it('should render headings with and without space', async function() {
       atom.config.set('markdown-preview-plus.useLazyHeaders', false)
 
-      await waitsFor(() => preview.findAll('h2').length === 1)
-      const headlines = preview.findAll('h2')
+      await waitsFor(
+        async () =>
+          (await previewFragment(preview)).querySelectorAll('h2').length === 1,
+      )
+      const headlines = (await previewFragment(preview)).querySelectorAll('h2')
       expect(headlines.length).to.equal(1)
       expect(headlines[0].outerHTML).to.equal(
         '<h2>Level two header with space</h2>',
@@ -160,7 +169,9 @@ describe('MarkdownPreviewView', function() {
       const newFilePath = path.join(tempPath, 'subdir/trim-nl.md')
       const newPreview = await createMarkdownPreviewViewFile(newFilePath)
 
-      const editor = newPreview.find('atom-text-editor') as TextEditorElement
+      const editor = (await previewFragment(newPreview)).querySelector(
+        'atom-text-editor',
+      ) as TextEditorElement
       expect(editor).to.exist
       expect(editor.textContent).to.equal(`\
 
@@ -179,7 +190,10 @@ f
     describe("when the code block's fence name has a matching grammar", () =>
       it('assigns the grammar on the atom-text-editor', async function() {
         const rubyEditor = await waitsFor(
-          () => preview.find('atom-text-editor.lang-ruby') as TextEditorElement,
+          async () =>
+            (await previewFragment(preview)).querySelector(
+              'atom-text-editor.lang-ruby',
+            ) as TextEditorElement,
         )
         expect(rubyEditor).to.exist
         expect(rubyEditor.textContent).to.equal(`\
@@ -189,7 +203,7 @@ end
 `)
 
         // nested in a list item
-        const jsEditor = preview.find(
+        const jsEditor = (await previewFragment(preview)).querySelector(
           'atom-text-editor.lang-javascript',
         ) as TextEditorElement
         expect(jsEditor).to.exist
@@ -201,8 +215,8 @@ if a === 3 {
       }))
 
     describe("when the code block's fence name doesn't have a matching grammar", function() {
-      it('does not assign a specific grammar', function() {
-        const plainEditor = preview.find(
+      it('does not assign a specific grammar', async function() {
+        const plainEditor = (await previewFragment(preview)).querySelector(
           'atom-text-editor.lang-text',
         ) as TextEditorElement
         expect(plainEditor).to.exist
@@ -222,7 +236,6 @@ var x = 0;
 ~~~
 `)
       expect(
-        // tslint:disable-next-line: await-promise // TODO: atom 1.25 compat
         await atom.commands.dispatch(
           atom.views.getView(ed),
           'markdown-preview-plus:toggle',
@@ -233,7 +246,10 @@ var x = 0;
 
       // nested in a list item
       const jsEditor = await waitsFor(
-        () => pv.find('atom-text-editor') as TextEditorElement,
+        async () =>
+          (await previewFragment(pv)).querySelector(
+            'atom-text-editor',
+          ) as TextEditorElement,
       )
       expect(jsEditor).to.exist
       expect(jsEditor.textContent).to.equal('var x = 0;\n')
@@ -244,16 +260,20 @@ var x = 0;
 
   describe('image resolving', function() {
     describe('when the image uses a relative path', () =>
-      it('resolves to a path relative to the file', function() {
-        const image = preview.find('img[alt=Image1]')
+      it('resolves to a path relative to the file', async function() {
+        const image = (await previewFragment(preview)).querySelector(
+          'img[alt=Image1]',
+        )
         expect(image!.getAttribute('src')).to.startWith(
           path.join(tempPath, 'subdir/image1.png'),
         )
       }))
 
     describe('when the image uses an absolute path that does not exist', () =>
-      it('resolves to a path relative to the project root', function() {
-        const image = preview.find('img[alt=Image2]')
+      it('resolves to a path relative to the project root', async function() {
+        const image = (await previewFragment(preview)).querySelector(
+          'img[alt=Image2]',
+        )
         expect(image!.getAttribute('src')).to.startWith(
           path.join(tempPath, 'tmp/image2.png'),
         )
@@ -268,20 +288,26 @@ var x = 0;
         preview = await createMarkdownPreviewViewFile(filePath)
 
         expect(
-          preview.find('img[alt=absolute]')!.getAttribute('src'),
+          (await previewFragment(preview))
+            .querySelector('img[alt=absolute]')!
+            .getAttribute('src'),
         ).to.startWith(`${filePath}?v=`)
       }))
 
     describe('when the image uses a URL', function() {
-      it("doesn't change the web URL", function() {
-        const image = preview.find('img[alt=Image3]')
+      it("doesn't change the web URL", async function() {
+        const image = (await previewFragment(preview)).querySelector(
+          'img[alt=Image3]',
+        )
         expect(image!.getAttribute('src')).to.equal(
           'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
         )
       })
 
-      it("doesn't change the data URL", function() {
-        const image = preview.find('img[alt=Image4]')
+      it("doesn't change the data URL", async function() {
+        const image = (await previewFragment(preview)).querySelector(
+          'img[alt=Image4]',
+        )
         expect(image!.getAttribute('src')).to.equal(
           'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7',
         )
@@ -321,7 +347,9 @@ var x = 0;
         )
         preview = await expectPreviewInSplitPane()
 
-        const imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        const imageURL = (await previewFragment(preview))
+          .querySelector('img[alt=img1]')!
+          .getAttribute('src')!
         const imageVer = getImageVersion(img1Path, imageURL)
         expect(imageVer).not.to.equal('deleted')
       }))
@@ -338,15 +366,19 @@ var x = 0;
         )
         preview = await expectPreviewInSplitPane()
 
-        imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        imageURL = (await previewFragment(preview))
+          .querySelector('img[alt=img1]')!
+          .getAttribute('src')!
         expect(imageURL).to.exist
         imageVer = getImageVersion(img1Path, imageURL)
         expect(imageVer).not.to.equal('deleted')
 
         fs.writeFileSync(img1Path, 'still clearly not a png ;D')
 
-        await waitsFor.msg('image src attribute to update', function() {
-          imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        await waitsFor.msg('image src attribute to update', async function() {
+          imageURL = (await previewFragment(preview))
+            .querySelector('img[alt=img1]')!
+            .getAttribute('src')!
           return !imageURL.endsWith(imageVer)
         })
 
@@ -382,16 +414,22 @@ var x = 0;
         )
         preview = await expectPreviewInSplitPane()
 
-        const getImageElementsURL = () => [
-          preview.find('img[alt=img1]')!.getAttribute('src')!,
-          preview.find('img[alt=img2]')!.getAttribute('src')!,
-          preview.find('img[alt=img3]')!.getAttribute('src')!,
+        const getImageElementsURL = async () => [
+          (await previewFragment(preview))
+            .querySelector('img[alt=img1]')!
+            .getAttribute('src')!,
+          (await previewFragment(preview))
+            .querySelector('img[alt=img2]')!
+            .getAttribute('src')!,
+          (await previewFragment(preview))
+            .querySelector('img[alt=img3]')!
+            .getAttribute('src')!,
         ]
 
-        const expectQueryValues = function(queryValues: {
+        const expectQueryValues = async function(queryValues: {
           [key: string]: null | undefined | string
         }) {
-          const [img1URL, img2URL, img3URL] = getImageElementsURL()
+          const [img1URL, img2URL, img3URL] = await getImageElementsURL()
           if (queryValues.img1 != null) {
             expect(img1URL).to.startWith(`${img1Path}?v=`)
             expect(img1URL).to.equal(`${img1Path}?v=${queryValues.img1}`)
@@ -406,7 +444,7 @@ var x = 0;
           }
         }
 
-        let [img1URL, img2URL, img3URL] = getImageElementsURL()
+        let [img1URL, img2URL, img3URL] = await getImageElementsURL()
 
         let img1Ver = getImageVersion(img1Path, img1URL!)
         let img2Ver = getImageVersion(img2Path, img2URL!)
@@ -414,12 +452,14 @@ var x = 0;
 
         fs.writeFileSync(img1Path, 'still clearly not a png ;D')
 
-        await waitsFor.msg('img1 src attribute to update', function() {
-          img1URL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        await waitsFor.msg('img1 src attribute to update', async function() {
+          img1URL = (await previewFragment(preview))
+            .querySelector('img[alt=img1]')!
+            .getAttribute('src')!
           return !img1URL.endsWith(img1Ver)
         })
 
-        expectQueryValues({
+        await expectQueryValues({
           img2: img2Ver,
           img3: img3Ver,
         })
@@ -433,12 +473,14 @@ var x = 0;
 
         fs.writeFileSync(img2Path, 'still clearly not a png either ;D')
 
-        await waitsFor.msg('img2 src attribute to update', function() {
-          img2URL = preview.find('img[alt=img2]')!.getAttribute('src')!
+        await waitsFor.msg('img2 src attribute to update', async function() {
+          img2URL = (await previewFragment(preview))
+            .querySelector('img[alt=img2]')!
+            .getAttribute('src')!
           return !img2URL.endsWith(img2Ver)
         })
 
-        expectQueryValues({
+        await expectQueryValues({
           img1: img1Ver,
           img3: img3Ver,
         })
@@ -452,12 +494,14 @@ var x = 0;
 
         fs.writeFileSync(img3Path, "you better believe i'm not a png ;D")
 
-        await waitsFor.msg('img3 src attribute to update', function() {
-          img3URL = preview.find('img[alt=img3]')!.getAttribute('src')!
+        await waitsFor.msg('img3 src attribute to update', async function() {
+          img3URL = (await previewFragment(preview))
+            .querySelector('img[alt=img3]')!
+            .getAttribute('src')!
           return !img3URL.endsWith(img3Ver)
         })
 
-        expectQueryValues({
+        await expectQueryValues({
           img1: img1Ver,
           img2: img2Ver,
         })
@@ -481,14 +525,18 @@ var x = 0;
         )
         preview = await expectPreviewInSplitPane()
 
-        imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        imageURL = (await previewFragment(preview))
+          .querySelector('img[alt=img1]')!
+          .getAttribute('src')!
         imageVer = getImageVersion(img1Path, imageURL)
         expect(imageVer).not.to.equal('deleted')
 
         fs.unlinkSync(img1Path)
 
-        await waitsFor.msg('image src attribute to update', function() {
-          imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        await waitsFor.msg('image src attribute to update', async function() {
+          imageURL = (await previewFragment(preview))
+            .querySelector('img[alt=img1]')!
+            .getAttribute('src')!
           return !imageURL.endsWith(imageVer)
         })
 
@@ -500,8 +548,10 @@ var x = 0;
 
         editor.setTextInBufferRange([[0, 0], [0, 0]], '')
 
-        await waitsFor.msg('image src attribute to update', function() {
-          imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        await waitsFor.msg('image src attribute to update', async function() {
+          imageURL = (await previewFragment(preview))
+            .querySelector('img[alt=img1]')!
+            .getAttribute('src')!
           return imageURL !== img1Path
         })
 
@@ -523,14 +573,18 @@ var x = 0;
         )
         preview = await expectPreviewInSplitPane()
 
-        imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        imageURL = (await previewFragment(preview))
+          .querySelector('img[alt=img1]')!
+          .getAttribute('src')!
         imageVer = getImageVersion(img1Path, imageURL)
         expect(imageVer).not.to.equal('deleted')
 
         fs.renameSync(img1Path, img1Path + 'trol')
 
-        await waitsFor.msg('image src attribute to update', function() {
-          imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        await waitsFor.msg('image src attribute to update', async function() {
+          imageURL = (await previewFragment(preview))
+            .querySelector('img[alt=img1]')!
+            .getAttribute('src')!
           return !imageURL.endsWith(imageVer)
         })
 
@@ -539,8 +593,10 @@ var x = 0;
 
         editor.setTextInBufferRange([[0, 0], [0, 0]], '')
 
-        await waitsFor.msg('image src attribute to update', function() {
-          imageURL = preview.find('img[alt=img1]')!.getAttribute('src')!
+        await waitsFor.msg('image src attribute to update', async function() {
+          imageURL = (await previewFragment(preview))
+            .querySelector('img[alt=img1]')!
+            .getAttribute('src')!
           return imageURL !== img1Path
         })
 
@@ -556,18 +612,32 @@ var x = 0;
       it('creates a single paragraph with <br>', async function() {
         atom.config.set('markdown-preview-plus.breakOnSingleNewline', false)
 
-        await waitsFor(() => preview.findAll('p:last-child br').length === 0)
+        await waitsFor(
+          async () =>
+            (await previewFragment(preview)).querySelectorAll('p:last-child br')
+              .length === 0,
+        )
 
-        expect(preview.findAll('p:last-child br').length).to.equal(0)
+        expect(
+          (await previewFragment(preview)).querySelectorAll('p:last-child br')
+            .length,
+        ).to.equal(0)
       }))
 
     describe('when gfm newlines are enabled', () =>
       it('creates a single paragraph with no <br>', async function() {
         atom.config.set('markdown-preview-plus.breakOnSingleNewline', true)
 
-        await waitsFor(() => preview.findAll('p:last-child br').length === 1)
+        await waitsFor(
+          async () =>
+            (await previewFragment(preview)).querySelectorAll('p:last-child br')
+              .length === 1,
+        )
 
-        expect(preview.findAll('p:last-child br').length).to.equal(1)
+        expect(
+          (await previewFragment(preview)).querySelectorAll('p:last-child br')
+            .length,
+        ).to.equal(1)
       }))
   })
 
@@ -692,7 +762,7 @@ var x = 0;
     }))
 
   describe('when maths rendering is enabled by default', function() {
-    it('notifies the user MathJax is loading when first preview is opened', async function() {
+    xit('notifies the user MathJax is loading when first preview is opened', async function() {
       preview.destroy()
 
       await atom.packages.activatePackage('notifications')
@@ -724,9 +794,11 @@ var x = 0;
   })
 
   describe('checkbox lists', function() {
-    it('renders checkbox lists', function() {
+    it('renders checkbox lists', async function() {
       const checkBoxes = Array.from(
-        preview.findAll('input[type=checkbox]'),
+        (await previewFragment(preview)).querySelectorAll(
+          'input[type=checkbox]',
+        ),
       ) as HTMLInputElement[]
       expect(checkBoxes).to.have.lengthOf(3)
       expect(checkBoxes[0].checked).to.be.false
@@ -741,16 +813,16 @@ var x = 0;
   })
 
   describe('emoji', function() {
-    it('renders them', function() {
+    it('renders them', async function() {
       const emojis = Array.from(
-        preview.findAll('img.emoji'),
+        (await previewFragment(preview)).querySelectorAll('img.emoji'),
       ) as HTMLImageElement[]
       expect(emojis).to.have.lengthOf(11)
       for (const i of emojis) {
-        expect(i.src).includes('file:///')
-        expect(i.src).includes('/twemoji/')
-        expect(i.src).includes('/svg/')
-        expect(i.src).includes('.svg')
+        const p = path.normalize(i.getAttribute('src') || '')
+        expect(p.split(path.sep)).includes('twemoji')
+        expect(p.split(path.sep)).includes('svg')
+        expect(p.endsWith('.svg')).to.be.true
       }
     })
   })
@@ -766,7 +838,9 @@ var x = 0;
 | zebra stripes |   are neat    |    $1 |
 `)
       const pv = await createMarkdownPreviewViewEditor(editor)
-      let ths = Array.from(pv.findAll('th')) as HTMLElement[]
+      let ths = Array.from(
+        (await previewFragment(pv)).querySelectorAll('th'),
+      ) as HTMLElement[]
       expect(ths.length).to.equal(3)
       expect(ths[0].style.textAlign).to.equal('left')
       expect(ths[1].style.textAlign).to.equal('center')
@@ -781,7 +855,9 @@ var x = 0;
 `)
       await waitsFor(() => spy.called)
       await (spy.lastCall.returnValue as Promise<void>)
-      ths = Array.from(pv.findAll('th')) as HTMLElement[]
+      ths = Array.from(
+        (await previewFragment(pv)).querySelectorAll('th'),
+      ) as HTMLElement[]
       expect(ths.length).to.equal(3)
       expect(ths[0].style.textAlign).to.equal('left')
       expect(ths[1].style.textAlign).to.equal('center')

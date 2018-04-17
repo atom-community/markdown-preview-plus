@@ -11,7 +11,7 @@ import pandocHelper = require('../lib/pandoc-helper')
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
-import { waitsFor } from './util'
+import { waitsFor, previewFragment } from './util'
 
 describe('MarkdownPreviewView when Pandoc is enabled', function() {
   let html: string
@@ -68,7 +68,10 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
     describe('when the image uses a relative path', () =>
       it('resolves to a path relative to the file', async function() {
-        const image = await waitsFor(() => preview.find('img[alt=Image1]')!)
+        const image = await waitsFor(
+          async () =>
+            (await previewFragment(preview)).querySelector('img[alt=Image1]')!,
+        )
         expect(markdownIt.decode).not.to.be.called
         expect(image.getAttribute('src')).to.startWith(
           path.join(__dirname, 'fixtures/subdir/image1.png'),
@@ -77,7 +80,10 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
     describe('when the image uses an absolute path that does not exist', () =>
       it('resolves to a path relative to the project root', async function() {
-        const image = await waitsFor(() => preview.find('img[alt=Image2]')!)
+        const image = await waitsFor(
+          async () =>
+            (await previewFragment(preview)).querySelector('img[alt=Image2]')!,
+        )
         expect(markdownIt.decode).not.to.be.called
         expect(image.getAttribute('src')).to.startWith('/tmp/image2.png')
       }))
@@ -96,12 +102,14 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
         await preview.renderPromise
 
-        await waitsFor(() => preview.find('img[alt=absolute]'))
+        await waitsFor(async () =>
+          (await previewFragment(preview)).querySelector('img[alt=absolute]'),
+        )
 
         expect(markdownIt.decode).not.to.be.called
         expect(
-          preview
-            .find('img[alt=absolute]')!
+          (await previewFragment(preview))
+            .querySelector('img[alt=absolute]')!
             .getAttribute('src')!
             .startsWith(`${filePath}?v=`),
         ).to.equal(true)
@@ -109,15 +117,20 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
     describe('when the image uses an URL', function() {
       it("doesn't change the http(s) URL", async function() {
-        const image = await waitsFor(() => preview.find('img[alt=Image3]')!)
+        const image = await waitsFor(
+          async () =>
+            (await previewFragment(preview)).querySelector('img[alt=Image3]')!,
+        )
         expect(markdownIt.decode).not.to.be.called
         expect(image.getAttribute('src')).to.equal(
           'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
         )
       })
 
-      it("doesn't change the data URL", function() {
-        const image = preview.find('img[alt=Image4]')
+      it("doesn't change the data URL", async function() {
+        const image = (await previewFragment(preview)).querySelector(
+          'img[alt=Image4]',
+        )
         expect(image).to.exist
         expect(markdownIt.decode).not.to.be.called
         expect(image!.getAttribute('src')).to.equal(

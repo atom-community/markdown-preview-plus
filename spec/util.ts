@@ -31,7 +31,7 @@ use(function(chai: any) {
 
 export interface WaitsFor {
   <T>(
-    func: () => T | undefined,
+    func: () => T | undefined | null | Promise<T | undefined | null>,
     timeout?: number,
     intervalTime?: number,
     msg?: string,
@@ -45,17 +45,17 @@ export interface WaitsFor {
 }
 
 export const waitsFor = async function<T>(
-  func: () => T | undefined,
+  func: () => T | undefined | null | Promise<T | undefined | null>,
   timeout = 8000,
   intervalTime = 10,
   msg: string = func.toString(),
 ): Promise<T> {
   return new Promise<T>(function(fufill, reject) {
-    const interval = setInterval(function() {
+    const interval = setInterval(async function() {
       try {
-        const res = func()
+        const res = await func()
         if (res) {
-          clearTimeout(timeout)
+          clearTimeout(timeoutId)
           clearInterval(interval)
           fufill(res)
         }
@@ -64,7 +64,7 @@ export const waitsFor = async function<T>(
       }
     }, intervalTime)
 
-    setTimeout(function() {
+    const timeoutId = setTimeout(function() {
       clearInterval(interval)
       reject(new Error('Waits for condition never met: ' + msg))
     }, timeout)
@@ -89,4 +89,22 @@ export async function expectPreviewInSplitPane() {
 
   await preview.renderPromise
   return preview
+}
+
+export async function previewText(preview: MarkdownPreviewView) {
+  return preview.runJS<string>(
+    `document.querySelector('markdown-preview-plus-view > div').innerText`,
+  )
+}
+
+export async function previewHTML(preview: MarkdownPreviewView) {
+  return preview.runJS<string>(
+    `document.querySelector('markdown-preview-plus-view > div').innerHTML`,
+  )
+}
+
+export async function previewFragment(preview: MarkdownPreviewView) {
+  const html = await previewHTML(preview)
+  const dom = new DOMParser()
+  return dom.parseFromString(html, 'text/html')
 }
