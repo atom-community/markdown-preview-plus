@@ -11,7 +11,9 @@ let bundler = new Bundler('src-client/template.html', {
   contentHash: false,
 })
 const out = path.join(__dirname, '..', 'client')
-fs.readdirSync(out).forEach(function(f) {
-  fs.unlinkSync(path.join(out, f))
-})
+if (fs.existsSync(out)) {
+  fs.readdirSync(out).forEach(function(f) {
+    fs.unlinkSync(path.join(out, f))
+  })
+}
 bundler.bundle()
