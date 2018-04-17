@@ -9,12 +9,12 @@ import path = require('path')
 import CSON = require('season')
 import fs = require('fs')
 import { isFileSync } from './util'
-import { MathJaxStub } from './mathjax-stub'
 
 let isMathJaxDisabled = false
 const mjSrc = `${global.require.resolve(
   'mathjax',
 )}?delayStartupUntil=configured`
+const defaultRenderer: MathJaxRenderer = 'HTML-CSS'
 
 //
 // Process DOM elements for LaTeX equations with MathJax
@@ -28,8 +28,8 @@ export async function mathProcessor(
   renderer: MathJaxRenderer,
 ) {
   if (isMathJaxDisabled) return
-  const jax = await loadMathJax(renderer)
-  await jax.queueTypeset(domElements)
+  await loadMathJax()
+  await queueTypeset(domElements, renderer)
 }
 
 //
@@ -43,8 +43,8 @@ export async function processHTMLString(element: Element) {
   if (isMathJaxDisabled) {
     return element.innerHTML
   }
-  const jax = await loadMathJax('SVG')
-  await jax.queueTypeset([element])
+  await loadMathJax()
+  await queueTypeset([element], 'SVG')
 
   const msvgh = document.getElementById('MathJax_SVG_Hidden')
   const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
@@ -65,10 +65,10 @@ function disableMathJax(disable: boolean) {
 // @param listener method to call when the MathJax script was been
 //   loaded to the window. The method is passed no arguments.
 //
-let mjPromise: Promise<MathJaxStub> | undefined
-async function loadMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
+let mjPromise: Promise<void> | undefined
+async function loadMathJax(): Promise<void> {
   if (mjPromise) return mjPromise
-  mjPromise = attachMathJax(renderer)
+  mjPromise = attachMathJax()
   return mjPromise
 }
 
@@ -172,7 +172,7 @@ function valueMatchesPattern(value: any) {
 // Configure MathJax environment. Similar to the TeX-AMS_HTML configuration with
 // a few unnecessary features stripped away
 //
-async function configureMathJax(jax: MathJaxStub, renderer: MathJaxRenderer) {
+async function configureMathJax() {
   let userMacros = await loadUserMacros()
   if (userMacros) {
     userMacros = checkMacros(userMacros)
@@ -180,7 +180,7 @@ async function configureMathJax(jax: MathJaxStub, renderer: MathJaxRenderer) {
     userMacros = {}
   }
 
-  jax.jaxConfigure(userMacros, renderer)
+  jaxConfigure(userMacros)
 
   // Notify user MathJax has loaded
   console.log('Loaded maths rendering engine MathJax')
@@ -189,14 +189,12 @@ async function configureMathJax(jax: MathJaxStub, renderer: MathJaxRenderer) {
 //
 // Attach main MathJax script to the document
 //
-async function attachMathJax(renderer: MathJaxRenderer): Promise<MathJaxStub> {
+async function attachMathJax(): Promise<void> {
   console.log('Loading maths rendering engine MathJax')
 
   // Attach MathJax script
   await Promise.all([injectScript(mjSrc)])
-  const { mathJaxStub } = await import('./mathjax-stub')
-  await configureMathJax(mathJaxStub, renderer)
-  return mathJaxStub
+  await configureMathJax()
 }
 
 export async function injectScript(scriptSrc: string) {
@@ -206,5 +204,40 @@ export async function injectScript(scriptSrc: string) {
   document.head.appendChild(script)
   return new Promise<void>((resolve) => {
     script.addEventListener('load', () => resolve())
+  })
+}
+
+function jaxConfigure(userMacros: object) {
+  MathJax.Hub.Config({
+    jax: ['input/TeX', `output/${defaultRenderer}`],
+    extensions: [],
+    TeX: {
+      extensions: [
+        'AMSmath.js',
+        'AMSsymbols.js',
+        'noErrors.js',
+        'noUndefined.js',
+      ],
+      Macros: userMacros,
+    },
+    'HTML-CSS': {
+      availableFonts: [],
+      webFont: 'TeX',
+    },
+    messageStyle: 'none',
+    showMathMenu: false,
+    skipStartupTypeset: true,
+  })
+  MathJax.Hub.Configured()
+}
+
+async function queueTypeset(domElements: Node[], renderer: MathJaxRenderer) {
+  return new Promise((resolve) => {
+    MathJax.Hub.Queue(['setRenderer', MathJax.Hub, renderer])
+    domElements.forEach((elem) => {
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, elem])
+    })
+    MathJax.Hub.Queue(['setRenderer', MathJax.Hub, defaultRenderer])
+    MathJax.Hub.Queue([resolve])
   })
 }

@@ -44,7 +44,7 @@ describe('MathJax helper module', () =>
     })
 
     const waitsForMacrosToLoad = async function() {
-      await mathjaxHelper.testing.loadMathJax('SVG')
+      await mathjaxHelper.testing.loadMathJax()
 
       // Trigger MathJax TeX extension to load
 
