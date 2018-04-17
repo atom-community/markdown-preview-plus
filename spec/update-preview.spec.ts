@@ -273,7 +273,7 @@ describe('the difference algorithm that updates the preview', function() {
   })
 
   describe('when a code block is modified', () =>
-    xit('replaces the entire span.atom-text-editor container element', async function() {
+    it('replaces the entire span.atom-text-editor container element', async function() {
       const spy = sinon.spy(renderer.di, 'highlightCodeBlocks')
 
       await loadPreviewInSplitPane()
@@ -287,6 +287,8 @@ describe('the difference algorithm that updates the preview', function() {
       const f = await previewFragment(preview)
       const atomTextEditors = Array.from(f.querySelectorAll('atom-text-editor'))
       expect(atomTextEditors).to.have.lengthOf(5)
+      const codeBlocks = f.querySelectorAll('pre code')
+      expect(codeBlocks).to.have.lengthOf(0)
 
       const stub = sinon
         .stub(renderer.di, 'highlightCodeBlocks')
@@ -302,15 +304,7 @@ describe('the difference algorithm that updates the preview', function() {
       stub.restore()
 
       const f1 = await previewFragment(preview)
-      const atomTextEditors2 = Array.from(
-        f1.querySelectorAll('atom-text-editor'),
-      )
-      expect(atomTextEditors2.length).to.equal(4)
-
-      const modCodeBlocks = f1.querySelectorAll('code')
-      expect(modCodeBlocks.length).to.equal(1)
-      const modCodeBlock = f1.querySelector('code')
-      expect(modCodeBlock!.children.length).to.equal(1)
-      expect(modCodeBlock!.children[0].tagName.toLowerCase()).to.equal('pre')
+      const modCodeBlocks = f1.querySelectorAll('pre code')
+      expect(modCodeBlocks).to.have.lengthOf(5)
     }))
 })
