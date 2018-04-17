@@ -1,3 +1,7 @@
+## 2.5.8
+
+-   Fix #371
+
 ## 2.5.7
 
 -   Do not show list bullets for checkbox lists
