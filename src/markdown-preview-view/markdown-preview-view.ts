@@ -200,25 +200,39 @@ export abstract class MarkdownPreviewView {
     return { defaultPath }
   }
 
-  public saveAs(htmlFilePath: string | undefined) {
-    if (htmlFilePath === undefined) return
+  public saveAs(filePath: string | undefined) {
+    if (filePath === undefined) return
     if (this.loading) return
 
-    const title = path.parse(htmlFilePath).name
+    const { name, ext } = path.parse(filePath)
 
-    handlePromise(
-      this.getHTML().then(async (html) => {
-        const fullHtml = util.mkHtml(
-          title,
-          html,
-          this.renderLaTeX,
-          atom.config.get('markdown-preview-plus.useGitHubStyle'),
-        )
+    if (ext === '.pdf') {
+      this.element.printToPDF({}, (error, data) => {
+        if (error) {
+          atom.notifications.addError('Failed saving to PDF', {
+            description: error.toString(),
+            dismissable: true,
+            stack: error.stack,
+          })
+          return
+        }
+        fs.writeFileSync(filePath, data)
+      })
+    } else {
+      handlePromise(
+        this.getHTML().then(async (html) => {
+          const fullHtml = util.mkHtml(
+            name,
+            html,
+            this.renderLaTeX,
+            atom.config.get('markdown-preview-plus.useGitHubStyle'),
+          )
 
-        fs.writeFileSync(htmlFilePath, fullHtml)
-        return atom.workspace.open(htmlFilePath)
-      }),
-    )
+          fs.writeFileSync(filePath, fullHtml)
+          return atom.workspace.open(filePath)
+        }),
+      )
+    }
   }
 
   protected changeHandler = () => {
