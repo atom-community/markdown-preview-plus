@@ -99,7 +99,7 @@ function handleError(error: string, html: string, renderMath: boolean): never {
  * @param {string} HTML to be adjusted
  * @return {string} HTML with adjusted math environments
  */
-function handleMath(html: string) {
+function handleMath(html: string): string {
   const doc = document.createElement('div')
   doc.innerHTML = html
   doc.querySelectorAll('.math').forEach(function(elem) {
@@ -129,10 +129,10 @@ function removeReferences(html: string) {
 
 /**
  * Handle successful response from Pandoc
- * @param {string} Returned HTML
- * @return {array} with Arguments for callbackFunction (error set to null)
+ * @param Returned HTML
+ * @return Possibly modified returned HTML
  */
-function handleSuccess(html: string, renderMath: boolean) {
+function handleSuccess(html: string, renderMath: boolean): string {
   if (renderMath) {
     html = handleMath(html)
   }
