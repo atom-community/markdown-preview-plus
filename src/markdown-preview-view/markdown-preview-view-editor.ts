@@ -1,6 +1,7 @@
 import { TextEditor, Grammar } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
+import { handlePromise } from '../util'
 
 export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   private static editorMap = new WeakMap<
@@ -60,16 +61,32 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
 
   private handleEditorEvents() {
     this.disposables.add(
+      atom.workspace.onDidChangeActiveTextEditor((ed) => {
+        if (
+          atom.config.get('markdown-preview-plus.activatePreviewWithEditor')
+        ) {
+          if (ed === this.editor) {
+            const pane = atom.workspace.paneForItem(this)
+            if (!pane) return
+            pane.activateItem(this)
+          }
+        }
+      }),
       this.editor.getBuffer().onDidStopChanging(() => {
         if (atom.config.get('markdown-preview-plus.liveUpdate')) {
           this.changeHandler()
+        }
+        if (atom.config.get('markdown-preview-plus.syncPreviewOnChange')) {
+          handlePromise(this.syncPreviewHelper())
         }
       }),
       this.editor.onDidChangePath(() => {
         this.emitter.emit('did-change-title')
       }),
       this.editor.onDidDestroy(() => {
-        util.destroy(this)
+        if (atom.config.get('markdown-preview-plus.closePreviewWithEditor')) {
+          util.destroy(this)
+        }
       }),
       this.editor.getBuffer().onDidSave(() => {
         if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
@@ -82,12 +99,14 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       atom.commands.add(atom.views.getView(this.editor), {
-        'markdown-preview-plus:sync-preview': async (_event) => {
-          const source = await this.getMarkdownSource()
-          if (!this.editor) return
-          this.syncPreview(source, this.editor.getCursorBufferPosition().row)
-        },
+        'markdown-preview-plus:sync-preview': this.syncPreviewHelper,
       }),
     )
+  }
+
+  private syncPreviewHelper = async () => {
+    const pos = this.editor.getCursorBufferPosition().row
+    const source = await this.getMarkdownSource()
+    this.syncPreview(source, pos)
   }
 }

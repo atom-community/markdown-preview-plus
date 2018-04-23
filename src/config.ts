@@ -21,6 +21,24 @@ export const config = {
     enum: ['down', 'right'],
     order: 25,
   },
+  closePreviewWithEditor: {
+    title: 'Close preview when editor closes',
+    type: 'boolean',
+    default: true,
+    order: 26
+  },
+  activatePreviewWithEditor: {
+    title: 'Bring up preview when editor activates',
+    type: 'boolean',
+    default: false,
+    order: 27
+  },
+  syncPreviewOnChange: {
+    title: 'Sync preview position when text in editor changes',
+    type: 'boolean',
+    default: false,
+    order: 28
+  },
   grammars: {
     type: 'array',
     default: [
@@ -225,6 +243,9 @@ declare module 'atom' {
     'markdown-preview-plus.liveUpdate': boolean
     'markdown-preview-plus.openPreviewInSplitPane': boolean
     'markdown-preview-plus.previewSplitPaneDir': 'down' | 'right'
+    'markdown-preview-plus.closePreviewWithEditor': boolean
+    'markdown-preview-plus.activatePreviewWithEditor': boolean
+    'markdown-preview-plus.syncPreviewOnChange': boolean
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.enableLatexRenderingByDefault': boolean
@@ -252,6 +273,9 @@ declare module 'atom' {
       liveUpdate: boolean
       openPreviewInSplitPane: boolean
       previewSplitPaneDir: 'down' | 'right'
+      closePreviewWithEditor: boolean
+      activatePreviewWithEditor: boolean
+      syncPreviewOnChange: boolean
       grammars: string[]
       extensions: string[]
       enableLatexRenderingByDefault: boolean
