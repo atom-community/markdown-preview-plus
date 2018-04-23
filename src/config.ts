@@ -25,19 +25,19 @@ export const config = {
     title: 'Close preview when editor closes',
     type: 'boolean',
     default: true,
-    order: 26
+    order: 26,
   },
   activatePreviewWithEditor: {
     title: 'Bring up preview when editor activates',
     type: 'boolean',
     default: false,
-    order: 27
+    order: 27,
   },
   syncPreviewOnChange: {
     title: 'Sync preview position when text in editor changes',
     type: 'boolean',
     default: false,
-    order: 28
+    order: 28,
   },
   grammars: {
     type: 'array',
