@@ -270,3 +270,11 @@ $$$ bar
 $$$ bar
 </div>
 .
+
+Math in text block
+.
+Some text $$M = \text{while $$E$$ do $$C$$ end}$$ more text
+
+.
+<p>Some text <span class="math inline">M = \text{while $$E$$ do $$C$$ end}</span> more text</p>
+.

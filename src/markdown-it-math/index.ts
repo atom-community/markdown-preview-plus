@@ -4,6 +4,24 @@
 import * as mdIt from 'markdown-it'
 import { makeTable } from './lib/table'
 
+function skipTextCommand(state: any, max: number) {
+  const textCommand = state.src.slice(state.pos, state.pos + 5)
+  const curPos = state.pos
+  if (textCommand === '\\text') {
+    state.pos += 5
+    while (state.src[state.pos] === ' ') {
+      state.pos++
+    }
+    if (state.src[state.pos] !== '{') {
+      state.pos = curPos
+    } else {
+      while (state.src[state.pos] !== '}' && state.pos < max) {
+        state.pos++
+      }
+    }
+  }
+}
+
 function scanDelims(state: any, start: number, delimLength: number) {
   let pos = start
   let lastChar
@@ -114,6 +132,7 @@ function makeMath_inline(delims: [[string, string]]) {
           break
         }
       }
+      skipTextCommand(state, max)
 
       state.md.inline.skipToken(state)
     }
