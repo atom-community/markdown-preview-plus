@@ -81,6 +81,16 @@ export const config = {
     default: 'SVG' as 'HTML-CSS' | 'SVG',
     order: 41,
   },
+  numberEquations: {
+    title: 'Number equations',
+    description:
+      'Number equations that are in equation environment, etc. ' +
+      'Requires preview reopen to take effect. ' +
+      'Will re-render all math on each math change, which might be undesirable.',
+    type: 'boolean',
+    default: false,
+    order: 42,
+  },
   useLazyHeaders: {
     title: 'Use Lazy Headers',
     description: 'Require no space after headings #',
@@ -252,6 +262,7 @@ declare module 'atom' {
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.enableLatexRenderingByDefault': boolean
     'markdown-preview-plus.latexRenderer': 'HTML-CSS' | 'SVG'
+    'markdown-preview-plus.numberEquations': boolean
     'markdown-preview-plus.useLazyHeaders': boolean
     'markdown-preview-plus.useCheckBoxes': boolean
     'markdown-preview-plus.useEmoji': boolean
@@ -282,6 +293,7 @@ declare module 'atom' {
       extensions: string[]
       enableLatexRenderingByDefault: boolean
       latexRenderer: 'HTML-CSS' | 'SVG'
+      numberEquations: boolean
       useLazyHeaders: boolean
       useCheckBoxes: boolean
       useEmoji: boolean

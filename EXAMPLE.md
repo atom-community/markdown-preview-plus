@@ -4,6 +4,17 @@ Nested: $M = \text{while e^2 $e^2$ do $c^2$ end}$
 
 This document is to test $\LaTeX$ rendering with [markdown-preview-plus](https://atom.io/packages/markdown-preview-plus).
 
+**Numbered equations**
+
+$$
+\begin{equation}
+\int_0^x \sin(x) dx
+\label{eq:test}
+\end{equation}
+$$
+
+$\eqref{eq:test}$
+
 **Math environment Syntax testing**
 
 Inline Math should work with `$`  $\frac{x+y}{y}$

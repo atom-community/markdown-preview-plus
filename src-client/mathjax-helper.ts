@@ -40,11 +40,9 @@ export async function mathProcessor(
 //   fragment string that is the result of html processed by MathJax
 //
 export async function processHTMLString(element: Element) {
-  if (isMathJaxDisabled) {
-    return element.innerHTML
-  }
-  await loadMathJax()
-  await queueTypeset([element], 'SVG')
+  if (isMathJaxDisabled) return element.innerHTML
+
+  await mathProcessor([element], 'SVG')
 
   const msvgh = document.getElementById('MathJax_SVG_Hidden')
   const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
@@ -87,7 +85,7 @@ export const testing = {
 // private
 
 async function getUserMacrosPath(): Promise<string> {
-  const home = await window.atomHome
+  const home = await window.atom.home
   const userMacrosPath: string | undefined | null = CSON.resolve(
     path.join(home, 'markdown-preview-plus'),
   )
@@ -180,7 +178,7 @@ async function configureMathJax() {
     userMacros = {}
   }
 
-  jaxConfigure(userMacros)
+  jaxConfigure(userMacros, await window.atom.numberEqns)
 
   // Notify user MathJax has loaded
   console.log('Loaded maths rendering engine MathJax')
@@ -207,7 +205,7 @@ export async function injectScript(scriptSrc: string) {
   })
 }
 
-function jaxConfigure(userMacros: object) {
+function jaxConfigure(userMacros: object, numberEqns: boolean) {
   MathJax.Hub.Config({
     jax: ['input/TeX', `output/${defaultRenderer}`],
     extensions: [],
@@ -219,6 +217,12 @@ function jaxConfigure(userMacros: object) {
         'noUndefined.js',
       ],
       Macros: userMacros,
+      equationNumbers: numberEqns
+        ? {
+            autoNumber: 'AMS',
+            useLabelIds: false,
+          }
+        : {},
     },
     'HTML-CSS': {
       availableFonts: [],
@@ -232,7 +236,16 @@ function jaxConfigure(userMacros: object) {
 }
 
 async function queueTypeset(domElements: Node[], renderer: MathJaxRenderer) {
+  const numberEqns = await window.atom.numberEqns
   return new Promise((resolve) => {
+    if (MathJax.InputJax.TeX) {
+      MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])
+      if (numberEqns) {
+        MathJax.Hub.Queue(['PreProcess', MathJax.Hub])
+        MathJax.Hub.Queue(['Reprocess', MathJax.Hub])
+      }
+    }
+
     MathJax.Hub.Queue(['setRenderer', MathJax.Hub, renderer])
     domElements.forEach((elem) => {
       MathJax.Hub.Queue(['Typeset', MathJax.Hub, elem])
