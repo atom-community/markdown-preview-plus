@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "main": "./lib/main",
   "description": "Markdown Preview + Community Features",
   "keywords": [
