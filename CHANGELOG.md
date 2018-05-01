@@ -1,3 +1,70 @@
+## 3.0.0
+
+### Changes
+
+-   Preview is rendered inside a WebView now
+
+    This provides better isolation.
+    As a bonus, `pandoc --standalone`, `pandoc --toc` and `pandoc --css` should
+    now "just work", and PDF export is handled by the WebView
+    semi-automatically (see below).
+
+-   `openPreviewInSplitPane` option removed. Set `previewSplitPaneDir` to `none
+    if you want to disable pane splitting.
+
+-   Math is rendered using SVG renderer by default (due to it being faster).
+    You can change to HTML-CSS renderer using package settings.
+
+### New features
+
+-   Save to PDF
+
+    To use this feature, right-click on preview, choose 'Save As...' and use
+    a filename with '.pdf' extension.
+
+-   Configurable math renderer (HTML-CSS or SVG)
+-   Zoom on ctrl-scroll
+-   Open links in preview
+
+    Links to local files will be opened either in Atom, or via system
+    opener. URLs will be open with the default browser.
+
+### GUI options
+
+-   Add option to open preview in dock
+-   Sync on change
+-   Close preview with editor
+-   Activate preview when editor activates
+
+### Fixes
+
+-   Skip text{} in inline math
+-   Fix outdated JSDoc
+-   Fix task list CSS (remove extraneous bullet point)
+
+### Maintenence
+
+-   Clean-up code
+-   Bump dependencies (most notably, MathJax updated to 2.7.4)
+-   Switch to using morphdom library for diff-updates instead of using "home-grown" solution
+-   Stop ignoring package-lock
+-   Use atom-ts-spec-runner
+-   Disable persistence in spec runner (can lose config on Atom >= 1.25)
+-   Fix grammar in README (#356) (Steve Moser)
+-   Update styles during differential update
+-   Nested math example
+-   Memeber-access, member-ordering
+-   Factor MarkdownPreviewView into two subclasses
+-   Use old URL parser (less noise)
+-   Fix file URL parsing
+-   Fix latex macro name guide link
+-   Simplify mathjax rendering a bit
+-   Add spinner to placeholder view
+-   Bind preview to editor directly instead of via editorId
+-   Destroy preview on editor close
+-   Report copy\/save html errors more explicitly
+-   Use Atom's new save-as approach
+
 ## 2.5.7
 
 -   Do not show list bullets for checkbox lists
