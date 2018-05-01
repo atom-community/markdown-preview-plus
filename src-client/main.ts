@@ -72,7 +72,7 @@ ipcRenderer.on<'sync'>('sync', (_event, { pathToToken }) => {
   } // Do not jump to the top of the preview for bad syncs
 
   if (!element.classList.contains('update-preview')) {
-    element.scrollIntoView()
+    element.scrollIntoViewIfNeeded(true)
   }
   const maxScrollTop = document.body.scrollHeight - document.body.clientHeight
   if (!(document.body.scrollTop >= maxScrollTop)) {
