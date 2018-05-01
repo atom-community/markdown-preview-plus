@@ -10,7 +10,6 @@ import CSON = require('season')
 import fs = require('fs')
 import { isFileSync } from './util'
 
-let isMathJaxDisabled = false
 const mjSrc = `${global.require.resolve(
   'mathjax',
 )}?delayStartupUntil=configured`
@@ -27,7 +26,6 @@ export async function mathProcessor(
   domElement: Node,
   renderer: MathJaxRenderer,
 ) {
-  if (isMathJaxDisabled) return
   await loadMathJax()
   await queueTypeset(domElement, renderer)
 }
@@ -40,8 +38,6 @@ export async function mathProcessor(
 //   fragment string that is the result of html processed by MathJax
 //
 export async function processHTMLString(element: Element) {
-  if (isMathJaxDisabled) return element.innerHTML
-
   await mathProcessor(element, 'SVG')
 
   const msvgh = document.getElementById('MathJax_SVG_Hidden')
@@ -50,11 +46,6 @@ export async function processHTMLString(element: Element) {
     element.insertBefore(svgGlyphs, element.firstChild)
   }
   return element.innerHTML
-}
-
-// For testing
-function disableMathJax(disable: boolean) {
-  isMathJaxDisabled = disable
 }
 
 //
@@ -70,22 +61,17 @@ async function loadMathJax(): Promise<void> {
   return mjPromise
 }
 
-function unloadMathJax(): void {
+// for testing
+export function unloadMathJax(): void {
   mjPromise = undefined
   const script = document.head.querySelector(`script[src='${mjSrc}']`)
   if (script) script.remove()
 }
 
-export const testing = {
-  loadMathJax,
-  disableMathJax,
-  unloadMathJax,
-}
-
 // private
 
 async function getUserMacrosPath(): Promise<string> {
-  const home = await window.atom.home
+  const home = await window.atomVars.home
   const userMacrosPath: string | undefined | null = CSON.resolve(
     path.join(home, 'markdown-preview-plus'),
   )
@@ -178,7 +164,7 @@ async function configureMathJax() {
     userMacros = {}
   }
 
-  jaxConfigure(userMacros, await window.atom.numberEqns)
+  jaxConfigure(userMacros, await window.atomVars.numberEqns)
 
   // Notify user MathJax has loaded
   console.log('Loaded maths rendering engine MathJax')
@@ -240,7 +226,7 @@ async function queueTypeset(domElement: Node, renderer: MathJaxRenderer) {
     document.querySelectorAll('script[type^="math/tex"]'),
   ).some((x) => !x.id)
   if (!hasUnprocessedMath) return
-  const numberEqns = await window.atom.numberEqns
+  const numberEqns = await window.atomVars.numberEqns
   return new Promise<void>((resolve) => {
     if (MathJax.InputJax.TeX) {
       MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])

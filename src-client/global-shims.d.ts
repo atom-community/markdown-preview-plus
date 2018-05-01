@@ -3,7 +3,7 @@ type ResolvablePromise<T> = Promise<T> & {
 }
 
 interface Window {
-  atom: {
+  atomVars: {
     home: ResolvablePromise<string>
     numberEqns: ResolvablePromise<boolean>
   }

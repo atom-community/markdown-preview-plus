@@ -23,6 +23,7 @@ describe('MathJax helper module', () =>
     let configDirPath: string
     let macrosPath: string
     let macros: { [key: string]: any }
+    let spans = [] as Element[]
 
     before(async () => {
       await atom.packages.activatePackage(path.join(__dirname, '..'))
@@ -35,17 +36,22 @@ describe('MathJax helper module', () =>
       configDirPath = temp.mkdirSync('atom-config-dir-')
       macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
 
-      window.atomHome = Promise.resolve(configDirPath)
+      window.atomVars = {
+        home: Promise.resolve(configDirPath) as any,
+        numberEqns: Promise.resolve(false) as any,
+      }
     })
 
     afterEach(function() {
-      delete window.atomHome
-      mathjaxHelper.testing.unloadMathJax()
+      delete window.atomVars
+      mathjaxHelper.unloadMathJax()
+      spans.forEach((x) => {
+        x.remove()
+      })
+      spans = []
     })
 
     const waitsForMacrosToLoad = async function() {
-      await mathjaxHelper.testing.loadMathJax()
-
       // Trigger MathJax TeX extension to load
 
       const span = document.createElement('span')
@@ -53,7 +59,9 @@ describe('MathJax helper module', () =>
       equation.type = 'math/tex; mode=display'
       equation.textContent = '\\int_1^2'
       span.appendChild(equation)
-      await mathjaxHelper.mathProcessor([span], 'SVG')
+      atom.views.getView(atom.workspace).appendChild(span)
+      spans.push(span)
+      await mathjaxHelper.mathProcessor(span, 'SVG')
 
       macros = await waitsFor.msg('MathJax macros to be defined', function() {
         try {

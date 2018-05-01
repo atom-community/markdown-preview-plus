@@ -12,17 +12,17 @@ function mkResPromise<T>(): ResolvablePromise<T> {
   return p
 }
 
-window.atom = {
+window.atomVars = {
   home: mkResPromise(),
   numberEqns: mkResPromise(),
 }
 
 ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
-  window.atom.home.resolve(home)
+  window.atomVars.home.resolve(home)
 })
 
 ipcRenderer.on<'set-number-eqns'>('set-number-eqns', (_evt, { numberEqns }) => {
-  window.atom.numberEqns.resolve(numberEqns)
+  window.atomVars.numberEqns.resolve(numberEqns)
 })
 
 ipcRenderer.on<'style'>('style', (_event, { styles }) => {
