@@ -178,6 +178,10 @@ export abstract class MarkdownPreviewView {
 
   public abstract getTitle(): string
 
+  public getDefaultLocation(): 'left' | 'right' | 'bottom' | 'center' {
+    return atom.config.get('markdown-preview-plus.previewDock')
+  }
+
   public getIconName() {
     return 'markdown'
   }

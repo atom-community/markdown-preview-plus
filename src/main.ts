@@ -118,10 +118,11 @@ function removePreviewForEditor(editor: TextEditor) {
 async function addPreviewForEditor(editor: TextEditor) {
   const previousActivePane = atom.workspace.getActivePane()
   const options: WorkspaceOpenOptions = { searchAllPanes: true }
-  if (atom.config.get('markdown-preview-plus.openPreviewInSplitPane')) {
-    options.split = atom.config.get(
-      'markdown-preview-plus.previewSplitPaneDir',
-    )!
+  const splitConfig = atom.config.get(
+    'markdown-preview-plus.previewSplitPaneDir',
+  )
+  if (splitConfig !== 'none') {
+    options.split = splitConfig
   }
   const res = await atom.workspace.open(
     MarkdownPreviewViewEditor.create(editor),

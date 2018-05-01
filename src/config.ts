@@ -9,16 +9,18 @@ export const config = {
     default: true,
     order: 10,
   },
-  openPreviewInSplitPane: {
-    type: 'boolean',
-    default: true,
-    order: 20,
-  },
   previewSplitPaneDir: {
     title: 'Direction to load the preview in split pane',
     type: 'string',
-    default: 'right' as 'right' | 'down',
-    enum: ['down', 'right'],
+    default: 'right' as 'right' | 'down' | 'none',
+    enum: ['down', 'right', 'none'],
+    order: 20,
+  },
+  previewDock: {
+    title: 'Open preview in dock',
+    type: 'string',
+    default: 'center' as 'left' | 'right' | 'bottom' | 'center',
+    enum: ['left', 'right', 'bottom', 'center'],
     order: 25,
   },
   closePreviewWithEditor: {
@@ -241,8 +243,8 @@ declare module 'atom' {
   interface ConfigValues {
     'markdown-preview-plus.breakOnSingleNewline': boolean
     'markdown-preview-plus.liveUpdate': boolean
-    'markdown-preview-plus.openPreviewInSplitPane': boolean
-    'markdown-preview-plus.previewSplitPaneDir': 'down' | 'right'
+    'markdown-preview-plus.previewSplitPaneDir': 'down' | 'right' | 'none'
+    'markdown-preview-plus.previewDock': 'left' | 'right' | 'bottom' | 'center'
     'markdown-preview-plus.closePreviewWithEditor': boolean
     'markdown-preview-plus.activatePreviewWithEditor': boolean
     'markdown-preview-plus.syncPreviewOnChange': boolean
@@ -271,8 +273,8 @@ declare module 'atom' {
     'markdown-preview-plus': {
       breakOnSingleNewline: boolean
       liveUpdate: boolean
-      openPreviewInSplitPane: boolean
-      previewSplitPaneDir: 'down' | 'right'
+      previewSplitPaneDir: 'down' | 'right' | 'none'
+      previewDock: 'left' | 'right' | 'bottom' | 'center'
       closePreviewWithEditor: boolean
       activatePreviewWithEditor: boolean
       syncPreviewOnChange: boolean
