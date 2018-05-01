@@ -108,6 +108,7 @@ export abstract class MarkdownPreviewView {
     this.renderPromise = new Promise((resolve) => {
       const onload = () => {
         if (this.destroyed) return
+        this.element.setZoomLevel(this.zoomLevel)
         this.updateStyles()
         this.element.send<'use-github-style'>('use-github-style', {
           value: atom.config.get('markdown-preview-plus.useGitHubStyle'),
