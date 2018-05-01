@@ -51,7 +51,7 @@ export class UpdatePreview {
 
     morph(this.dom, newDom, { childrenOnly: true })
     if (renderLaTeX) {
-      handlePromise(MathJaxHelper.mathProcessor([this.dom], mjrenderer))
+      handlePromise(MathJaxHelper.mathProcessor(this.dom, mjrenderer))
     }
   }
 }

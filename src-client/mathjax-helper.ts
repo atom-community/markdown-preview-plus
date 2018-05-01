@@ -24,12 +24,12 @@ const defaultRenderer: MathJaxRenderer = 'HTML-CSS'
 //   details on DOM elements.
 //
 export async function mathProcessor(
-  domElements: Node[],
+  domElement: Node,
   renderer: MathJaxRenderer,
 ) {
   if (isMathJaxDisabled) return
   await loadMathJax()
-  await queueTypeset(domElements, renderer)
+  await queueTypeset(domElement, renderer)
 }
 
 //
@@ -42,7 +42,7 @@ export async function mathProcessor(
 export async function processHTMLString(element: Element) {
   if (isMathJaxDisabled) return element.innerHTML
 
-  await mathProcessor([element], 'SVG')
+  await mathProcessor(element, 'SVG')
 
   const msvgh = document.getElementById('MathJax_SVG_Hidden')
   const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
@@ -235,9 +235,13 @@ function jaxConfigure(userMacros: object, numberEqns: boolean) {
   MathJax.Hub.Configured()
 }
 
-async function queueTypeset(domElements: Node[], renderer: MathJaxRenderer) {
+async function queueTypeset(domElement: Node, renderer: MathJaxRenderer) {
+  const hasUnprocessedMath = Array.from(
+    document.querySelectorAll('script[type^="math/tex"]'),
+  ).some((x) => !x.id)
+  if (!hasUnprocessedMath) return
   const numberEqns = await window.atom.numberEqns
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     if (MathJax.InputJax.TeX) {
       MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])
       if (numberEqns) {
@@ -247,9 +251,7 @@ async function queueTypeset(domElements: Node[], renderer: MathJaxRenderer) {
     }
 
     MathJax.Hub.Queue(['setRenderer', MathJax.Hub, renderer])
-    domElements.forEach((elem) => {
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, elem])
-    })
+    MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElement])
     MathJax.Hub.Queue(['setRenderer', MathJax.Hub, defaultRenderer])
     MathJax.Hub.Queue([resolve])
   })
