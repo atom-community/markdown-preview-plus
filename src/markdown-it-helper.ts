@@ -3,55 +3,67 @@ import twemoji = require('twemoji')
 import * as path from 'path'
 import { pairUp } from './util'
 import * as _ from 'lodash'
+import { ConfigValues } from 'atom'
 let markdownIt: markdownItModule.MarkdownIt | null = null
-let markdownItOptions: markdownItModule.Options | null = null
-let renderLaTeX: boolean | null = null
-let math: any = null
-let lazyHeaders: any = null
-let checkBoxes: any = null
-let emoji: any = null
-let inlineMathSeparators: any = null
-let blockMathSeparators: any = null
+type Config = ConfigValues['markdown-preview-plus']
+type InitState = Readonly<{
+  renderLaTeX: boolean
+  lazyHeaders: Config['useLazyHeaders']
+  checkBoxes: Config['useCheckBoxes']
+  emoji: Config['useEmoji']
+  breaks: Config['breakOnSingleNewline']
+  inlineMathSeparators: Config['inlineMathSeparators']
+  blockMathSeparators: Config['blockMathSeparators']
+}>
+let initState: InitState | null = null
 
-const mathInline = (text: string) =>
-  `<span class='math'><script type='math/tex'>${text}</script></span>`
-const mathBlock = (text: string) =>
-  `<span class='math'><script type='math/tex; mode=display'>${text}</script></span>`
+function mathInline(text: string) {
+  return `<span class='math'><script type='math/tex'>${text}</script></span>`
+}
 
-const getOptions = () => ({
-  html: true,
-  xhtmlOut: false,
-  breaks: atom.config.get('markdown-preview-plus.breakOnSingleNewline'),
-  langPrefix: 'lang-',
-  linkify: true,
-  typographer: true,
-})
+function mathBlock(text: string) {
+  return `<span class='math'><script type='math/tex; mode=display'>${text}</script></span>`
+}
+
+function getOptions(breaks: boolean) {
+  return {
+    html: true,
+    xhtmlOut: false,
+    breaks,
+    langPrefix: 'lang-',
+    linkify: true,
+    typographer: true,
+  }
+}
+
+function currentConfig(rL: boolean): InitState {
+  const config = atom.config.get('markdown-preview-plus')
+  return {
+    renderLaTeX: rL,
+    lazyHeaders: config.useLazyHeaders,
+    checkBoxes: config.useCheckBoxes,
+    emoji: config.useEmoji,
+    breaks: config.breakOnSingleNewline,
+    inlineMathSeparators: config.inlineMathSeparators,
+    blockMathSeparators: config.blockMathSeparators,
+  }
+}
 
 function init(rL: boolean) {
-  renderLaTeX = rL
+  initState = currentConfig(rL)
+  markdownIt = markdownItModule(getOptions(initState.breaks))
 
-  markdownItOptions = getOptions()
-
-  markdownIt = markdownItModule(markdownItOptions)
-
-  if (renderLaTeX) {
-    if (math == null) {
-      // tslint:disable-next-line:no-unsafe-any
-      math = require('./markdown-it-math').math_plugin
-    }
+  if (rL) {
     const inlineDelim = pairUp(
-      (inlineMathSeparators = atom.config.get(
-        'markdown-preview-plus.inlineMathSeparators',
-      )),
+      initState.inlineMathSeparators,
       'inlineMathSeparators',
     )
     const blockDelim = pairUp(
-      (blockMathSeparators = atom.config.get(
-        'markdown-preview-plus.blockMathSeparators',
-      )),
+      initState.blockMathSeparators,
       'blockMathSeparators',
     )
-    markdownIt.use(math, {
+    // tslint:disable-next-line:no-unsafe-any
+    markdownIt.use(require('./markdown-it-math').math_plugin, {
       inlineDelim,
       blockDelim,
       inlineRenderer: mathInline,
@@ -59,21 +71,15 @@ function init(rL: boolean) {
     })
   }
 
-  lazyHeaders = atom.config.get('markdown-preview-plus.useLazyHeaders')
-
-  if (lazyHeaders) {
+  if (initState.lazyHeaders) {
     markdownIt.use(require('markdown-it-lazy-headers'))
   }
 
-  checkBoxes = atom.config.get('markdown-preview-plus.useCheckBoxes')
-
-  if (checkBoxes) {
+  if (initState.checkBoxes) {
     markdownIt.use(require('markdown-it-task-lists'))
   }
 
-  emoji = atom.config.get('markdown-preview-plus.useEmoji')
-
-  if (emoji) {
+  if (initState.emoji) {
     markdownIt.use(require('markdown-it-emoji'))
     markdownIt.renderer.rules.emoji = function(token, idx) {
       return twemoji.parse(token[idx].content, {
@@ -85,28 +91,16 @@ function init(rL: boolean) {
   }
 }
 
-const needsInit = (rL: boolean) =>
-  markdownIt === null ||
-  markdownItOptions === null ||
-  markdownItOptions.breaks !==
-    atom.config.get('markdown-preview-plus.breakOnSingleNewline') ||
-  lazyHeaders !== atom.config.get('markdown-preview-plus.useLazyHeaders') ||
-  checkBoxes !== atom.config.get('markdown-preview-plus.useCheckBoxes') ||
-  emoji !== atom.config.get('markdown-preview-plus.emoji') ||
-  rL !== renderLaTeX ||
-  !_.isEqual(
-    inlineMathSeparators,
-    atom.config.get('markdown-preview-plus.inlineMathSeparators'),
-  ) ||
-  !_.isEqual(
-    blockMathSeparators,
-    atom.config.get('markdown-preview-plus.blockMathSeparators'),
+function needsInit(rL: boolean) {
+  return (
+    markdownIt === null ||
+    initState === null ||
+    !_.isEqual(initState, currentConfig(rL))
   )
+}
 
 export function render(text: string, rL: boolean) {
-  if (needsInit(rL)) {
-    init(rL)
-  }
+  if (needsInit(rL)) init(rL)
   return markdownIt!.render(text)
 }
 
@@ -116,8 +110,6 @@ export function decode(url: string) {
 }
 
 export function getTokens(text: string, rL: boolean) {
-  if (needsInit(rL)) {
-    init(rL)
-  }
+  if (needsInit(rL)) init(rL)
   return markdownIt!.parse(text, {})
 }
