@@ -267,10 +267,8 @@ export abstract class MarkdownPreviewView {
   // @return {number|null} The element that represents `line`. If no element is
   //   identified `null` is returned.
   //
-  protected syncPreview(text: string, line: number) {
-    const tokens = markdownIt.getTokens(text, this.renderLaTeX)
-    const pathToToken = util.getPathToToken(tokens, line)
-    this.element.send<'sync'>('sync', { pathToToken })
+  protected syncPreview(line: number) {
+    this.element.send<'sync'>('sync', { line })
   }
 
   private handleEvents() {
@@ -310,9 +308,7 @@ export abstract class MarkdownPreviewView {
           this.element.setZoomLevel(this.zoomLevel)
         },
         'markdown-preview-plus:sync-source': async (_event) => {
-          const text = await this.getMarkdownSource()
-          const tokens = markdownIt.getTokens(text, this.renderLaTeX)
-          this.element.send<'sync-source'>('sync-source', { tokens })
+          this.element.send<'sync-source'>('sync-source', undefined)
         },
       }),
     )
@@ -368,6 +364,9 @@ export abstract class MarkdownPreviewView {
         html: domDocument.documentElement.outerHTML,
         renderLaTeX: this.renderLaTeX,
         mjrenderer: atom.config.get('markdown-preview-plus.latexRenderer'),
+      })
+      this.element.send<'set-source-map'>('set-source-map', {
+        map: util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),
       })
       this.emitter.emit('did-change-markdown')
     } catch (error) {

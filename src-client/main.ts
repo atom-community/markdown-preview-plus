@@ -15,6 +15,8 @@ function mkResPromise<T>(): ResolvablePromise<T> {
 window.atomVars = {
   home: mkResPromise(),
   numberEqns: mkResPromise(),
+  sourceLineMap: [],
+  revSourceMap: new WeakMap(),
 }
 
 ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
@@ -24,6 +26,59 @@ ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
 ipcRenderer.on<'set-number-eqns'>('set-number-eqns', (_evt, { numberEqns }) => {
   window.atomVars.numberEqns.resolve(numberEqns)
 })
+
+ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
+  const root = document.querySelector('div.update-preview')
+  if (!root) throw new Error('No root element!')
+  const slsm: Element[] = []
+  const rsm = new WeakMap<Element, number[]>()
+  for (const lineS of Object.keys(map)) {
+    const line = parseInt(lineS, 10)
+    const path = map[line]
+    const elem = util.resolveElement(root, path)
+    if (elem) {
+      slsm[line] = elem
+      const rsmel = rsm.get(elem)
+      if (rsmel) rsmel.push(line)
+      else rsm.set(elem, [line])
+    }
+  }
+  window.atomVars.sourceLineMap = slsm
+  window.atomVars.revSourceMap = rsm
+})
+
+ipcRenderer.on<'scroll-sync'>(
+  'scroll-sync',
+  (_evt, { firstLine, lastLine }) => {
+    const mean = Math.floor(0.5 * (firstLine + lastLine))
+    let topLine
+    let topBound
+    for (topLine = mean; topLine >= 0; topLine -= 1) {
+      topBound = window.atomVars.sourceLineMap[topLine]
+      if (topBound) break
+    }
+    if (!topBound) return
+    let bottomLine
+    let bottomBound
+    for (
+      bottomLine = mean + 1;
+      bottomLine < window.atomVars.sourceLineMap.length;
+      bottomLine += 1
+    ) {
+      bottomBound = window.atomVars.sourceLineMap[bottomLine]
+      if (bottomBound) break
+    }
+    if (!bottomBound) return
+    const topScroll = topBound.getBoundingClientRect().top
+    const bottomScroll = bottomBound.getBoundingClientRect().top
+    const frac = (mean - firstLine) / (lastLine - firstLine)
+    const offset = document.documentElement.scrollTop
+    const clientHeight = document.documentElement.clientHeight
+    const top =
+      offset - clientHeight / 2 + topScroll + frac * (bottomScroll - topScroll)
+    window.scroll({ top, behavior: 'smooth' })
+  },
+)
 
 ipcRenderer.on<'style'>('style', (_event, { styles }) => {
   let styleElem = document.head.querySelector('style#atom-styles')
@@ -52,32 +107,22 @@ ipcRenderer.on<'update-images'>('update-images', (_event, { oldsrc, v }) => {
   }
 })
 
-ipcRenderer.on<'sync'>('sync', (_event, { pathToToken }) => {
-  let element = document.querySelector('div.update-preview')
-  if (!element) return
+ipcRenderer.on<'sync'>('sync', (_event, { line }) => {
+  const root = document.querySelector('div.update-preview')
+  if (!root) return
 
-  for (const token of pathToToken) {
-    const candidateElement: HTMLElement | null = element
-      .querySelectorAll(`:scope > ${token.tag}`)
-      .item(token.index) as HTMLElement
-    if (candidateElement) {
-      element = candidateElement
-    } else {
-      break
+  let element = window.atomVars.sourceLineMap[line]
+
+  if (!element) {
+    for (let i = line - 1; i >= 0; i -= 1) {
+      element = window.atomVars.sourceLineMap[i]
+      if (element) break
     }
   }
 
-  if (element.classList.contains('update-preview')) {
-    return
-  } // Do not jump to the top of the preview for bad syncs
+  if (!element) return
 
-  if (!element.classList.contains('update-preview')) {
-    element.scrollIntoViewIfNeeded(true)
-  }
-  const maxScrollTop = document.body.scrollHeight - document.body.clientHeight
-  if (!(document.body.scrollTop >= maxScrollTop)) {
-    document.body.scrollTop -= document.body.clientHeight / 4
-  }
+  element.scrollIntoViewIfNeeded(true)
 
   element.classList.add('flash')
   setTimeout(() => element!.classList.remove('flash'), 1000)
@@ -160,62 +205,20 @@ document.addEventListener('contextmenu', (e) => {
   lastContextMenuTarget = e.target as HTMLElement
 })
 
-ipcRenderer.on<'sync-source'>('sync-source', (_evt: any, { tokens }) => {
-  const element = lastContextMenuTarget
-  const pathToElement = util.getPathToElement(element)
-  pathToElement.shift() // remove markdown-preview-plus-view
-  pathToElement.shift() // remove div.update-preview
-  if (!pathToElement.length) {
-    return null
-  }
+ipcRenderer.on<'sync-source'>('sync-source', () => {
+  let element = lastContextMenuTarget
+  const rsm = window.atomVars.revSourceMap
+  let lines = rsm.get(element)
 
-  let finalToken = null
-  let level = 0
-
-  for (const token of tokens) {
-    if (token.level < level) {
-      break
-    }
-    if (token.hidden) {
-      continue
-    }
-    if (token.tag === pathToElement[0].tag && token.level === level) {
-      if (token.nesting === 1) {
-        if (pathToElement[0].index === 0) {
-          // tslint:disable-next-line:strict-type-predicates // TODO: complain on DT
-          if (token.map != null) {
-            finalToken = token
-          }
-          pathToElement.shift()
-          level++
-        } else {
-          pathToElement[0].index--
-        }
-      } else if (
-        token.nesting === 0 &&
-        ['math', 'code', 'hr'].includes(token.tag)
-      ) {
-        if (pathToElement[0].index === 0) {
-          finalToken = token
-          break
-        } else {
-          pathToElement[0].index--
-        }
-      }
-    }
-    if (pathToElement.length === 0) {
-      break
-    }
+  while (!lines && element.parentElement) {
+    element = element.parentElement
+    lines = rsm.get(element)
   }
+  if (!lines) return
 
-  if (finalToken !== null) {
-    ipcRenderer.sendToHost<'open-source'>('open-source', {
-      initialLine: finalToken.map[0],
-    })
-    return finalToken.map[0]
-  } else {
-    return null
-  }
+  ipcRenderer.sendToHost<'open-source'>('open-source', {
+    initialLine: Math.min(...lines),
+  })
 })
 
 ipcRenderer.on<'get-html-svg'>('get-html-svg', async () => {

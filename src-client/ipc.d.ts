@@ -3,7 +3,7 @@ import * as MarkdownIt from 'markdown-it'
 declare interface ChannelMap {
   style: { styles: string[] }
   'update-images': { oldsrc: string; v: number | false }
-  sync: { pathToToken: Array<{ tag: string; index: number }> }
+  sync: { line: number }
   'use-github-style': { value: boolean }
   'update-preview': {
     html: string
@@ -14,11 +14,15 @@ declare interface ChannelMap {
   'set-atom-home': { home: string }
   'set-number-eqns': { numberEqns: boolean }
   'set-base-path': { path?: string }
+  'set-source-map': {
+    map: { [line: number]: Array<{ tag: string; index: number }> }
+  }
   'get-text': void
   'get-html': void
   'get-html-svg': void
   'get-uses-github-style': void
-  'sync-source': { tokens: MarkdownIt.Token[] }
+  'sync-source': void
+  'scroll-sync': { firstLine: number; lastLine: number }
 }
 declare interface ReplyMap {
   'zoom-in': void

@@ -34,7 +34,7 @@ export function getStyles(context: string): string[] {
   )
 }
 
-export function getMarkdownPreviewCSS() {
+function getMarkdownPreviewCSS() {
   const markdowPreviewRules = ['body { padding: 0; margin: 0; }']
   const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
@@ -59,42 +59,17 @@ export function getMarkdownPreviewCSS() {
 }
 
 //
-// Determine a subsequence of a sequence of tokens representing a path through
-// HTMLElements that does not continue deeper than a table element.
-//
-// @param {(tag: <tag>, index: <index>)[]} pathToToken Array of tokens
-//   representing a path to a HTMLElement with the root element at
-//   pathToToken[0] and the target element at the highest index. Each element
-//   consists of a `tag` and `index` representing its index amongst its
-//   sibling elements of the same `tag`.
-// @return {(tag: <tag>, index: <index>)[]} The subsequence of pathToToken that
-//   maintains the same root but terminates at a table element or the target
-//   element, whichever comes first.
-//
-export function bubbleToContainerToken(
-  pathToToken: Array<{ tag: string; index: number }>,
-) {
-  const end = pathToToken.length - 1
-  for (let i = 0; i <= end; i++) {
-    if (pathToToken[i].tag === 'table') {
-      return pathToToken.slice(0, i + 1)
-    }
-  }
-  return pathToToken
-}
-
-//
 // Decode tags used by markdown-it
 //
 // @param {markdown-it.Token} token Decode the tag of token.
 // @return {string|null} Decoded tag or `null` if the token has no tag.
 //
-export function decodeTag(token: Token): string | null {
+function decodeTag(token: Token): string | null {
   if (token.tag === 'math') {
     return 'span'
   }
   if (token.tag === 'code') {
-    return 'span'
+    return 'atom-text-editor'
   }
   if (token.tag === '') {
     return null
@@ -115,62 +90,49 @@ export function decodeTag(token: Token): string | null {
 //   `tokens` of the same `tag`. `line` will lie between the properties
 //   `map[0]` and `map[1]` of the target token.
 //
-export function getPathToToken(tokens: Token[], line: number) {
-  let pathToToken: Array<{ tag: string; index: number }> = []
-  let tokenTagCount: { [key: string]: number | undefined } = {}
-  let level = 0
+export function buildLineMap(tokens: ReadonlyArray<Readonly<Token>>) {
+  const lineMap: { [line: number]: Array<{ tag: string; index: number }> } = {}
+  const tokenTagCount: { [line: number]: { [tag: string]: number } } = {}
+  tokenTagCount[0] = {}
 
   for (const token of tokens) {
-    if (token.level < level) {
-      break
-    }
-    if (token.hidden) {
-      continue
-    }
-    if (token.nesting === -1) {
-      continue
-    }
+    if (token.hidden) continue
+    // tslint:disable-next-line:strict-type-predicates // TODO: complain on DT
+    if (token.map == null) continue
 
     const tag = decodeTag(token)
-    if (tag === null) {
-      continue
-    }
-    token.tag = tag
+    if (tag === null) continue
 
-    if (
-      // tslint:disable-next-line:strict-type-predicates // TODO: complain on DT
-      token.map != null && // token.map *can* be null
-      line >= token.map[0] &&
-      line <= token.map[1] - 1
-    ) {
-      if (token.nesting === 1) {
-        pathToToken.push({
-          tag: token.tag,
-          index: tokenTagCount[token.tag] || 0,
+    if (token.nesting === 1) {
+      // opening tag
+      for (let line = token.map[0]; line < token.map[1]; line += 1) {
+        // tslint:disable-next-line:strict-type-predicates
+        if (lineMap[line] == null) lineMap[line] = []
+        lineMap[line].push({
+          tag: tag,
+          index: tokenTagCount[token.level][tag] || 0,
         })
-        tokenTagCount = {}
-        level++
-      } else if (token.nesting === 0) {
-        pathToToken.push({
-          tag: token.tag,
-          index: tokenTagCount[token.tag] || 0,
-        })
-        break
       }
-    } else if (token.level === level) {
-      if (tokenTagCount[token.tag] !== undefined) {
-        tokenTagCount[token.tag]!++
-      } else {
-        tokenTagCount[token.tag] = 1
+      tokenTagCount[token.level + 1] = {}
+    } else if (token.nesting === 0) {
+      // self-closing tag
+      for (let line = token.map[0]; line < token.map[1]; line += 1) {
+        // tslint:disable-next-line:strict-type-predicates
+        if (lineMap[line] == null) lineMap[line] = []
+        lineMap[line].push({
+          tag: tag,
+          index: tokenTagCount[token.level][tag] || 0,
+        })
       }
     }
+    const ttc = tokenTagCount[token.level][tag]
+    tokenTagCount[token.level][tag] = ttc ? ttc + 1 : 1
   }
 
-  pathToToken = bubbleToContainerToken(pathToToken)
-  return pathToToken
+  return lineMap
 }
 
-export const mathJaxScript = `\
+const mathJaxScript = `\
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
 jax: ["input/TeX","output/HTML-CSS"],

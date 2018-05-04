@@ -15,6 +15,12 @@ $$
 
 $\eqref{eq:test}$
 
+**Blockquotes**
+
+> 1.  A block quote
+> 2.  With a list inside
+> 3.  With $math$
+
 **Math environment Syntax testing**
 
 Inline Math should work with `$`  $\frac{x+y}{y}$
@@ -165,6 +171,12 @@ _math $x^2$ in emphasis_
 ~~math $x^2$ in strikethrough~~
 
 **In Tables**
+
+| Left-Aligned  | Center Aligned  | Right Aligned |
+| :------------ |:---------------:| -----:|
+| $a+b$         | some wordy text | $1600 |
+| $a+b$         | some wordy text | $1600 |
+| $a+b$         | some wordy text | $1600 |
 
 (only works with Pandoc)
 

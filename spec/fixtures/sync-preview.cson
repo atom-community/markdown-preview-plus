@@ -9,10 +9,6 @@
     ]
   }
   {
-    line: 1
-    path: []
-  }
-  {
     line: 2
     path: [
       {
@@ -20,10 +16,6 @@
         index: 0
       }
     ]
-  }
-  {
-    line: 3
-    path: []
   }
   {
     line: 4
@@ -51,10 +43,6 @@
         index: 1
       }
     ]
-  }
-  {
-    line: 7
-    path: []
   }
   {
     line: 8
@@ -129,10 +117,6 @@
     ]
   }
   {
-    line: 16
-    path: []
-  }
-  {
     line: 17
     path: [
       {
@@ -144,10 +128,6 @@
         index: 0
       }
     ]
-  }
-  {
-    line: 18
-    path: []
   }
   {
     line: 19
@@ -189,16 +169,11 @@
     ]
   }
   {
-    line: 22
-    path: []
-  }
-  {
     line: 23
     path: [
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -206,9 +181,8 @@
     line: 24
     path: [
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -216,9 +190,8 @@
     line: 25
     path: [
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -226,9 +199,8 @@
     line: 26
     path: [
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -236,15 +208,10 @@
     line: 27
     path: [
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
-  }
-  {
-    line: 28
-    path: []
   }
   {
     line: 29
@@ -254,10 +221,6 @@
         index: 0
       }
     ]
-  }
-  {
-    line: 30
-    path: []
   }
   {
     line: 31
@@ -370,6 +333,26 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "thead"
+        index: 0
+      }
+      {
+        tag: "tr"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 1
+      }
+      {
+        tag: "th"
+        index: 2
+      }
     ]
   }
   {
@@ -388,6 +371,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -395,6 +382,10 @@
     path: [
       {
         tag: "table"
+        index: 0
+      }
+      {
+        tag: "tbody"
         index: 0
       }
     ]
@@ -406,19 +397,18 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
-  }
-  {
-    line: 44
-    path: []
   }
   {
     line: 45
     path: [
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -427,8 +417,7 @@
     path: [
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -437,22 +426,16 @@
     path: [
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
-  }
-  {
-    line: 48
-    path: []
   }
   {
     line: 49
     path: [
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -461,8 +444,7 @@
     path: [
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -471,14 +453,9 @@
     path: [
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
-  }
-  {
-    line: 52
-    path: []
   }
   {
     line: 53
@@ -499,10 +476,6 @@
     ]
   }
   {
-    line: 55
-    path: []
-  }
-  {
     line: 56
     path: [
       {
@@ -512,10 +485,6 @@
     ]
   }
   {
-    line: 57
-    path: []
-  }
-  {
     line: 58
     path: [
       {
@@ -523,10 +492,6 @@
         index: 4
       }
     ]
-  }
-  {
-    line: 59
-    path: []
   }
   {
     line: 60
@@ -554,10 +519,6 @@
         index: 5
       }
     ]
-  }
-  {
-    line: 63
-    path: []
   }
   {
     line: 64
@@ -632,10 +593,6 @@
     ]
   }
   {
-    line: 72
-    path: []
-  }
-  {
     line: 73
     path: [
       {
@@ -647,10 +604,6 @@
         index: 0
       }
     ]
-  }
-  {
-    line: 74
-    path: []
   }
   {
     line: 75
@@ -692,16 +645,11 @@
     ]
   }
   {
-    line: 78
-    path: []
-  }
-  {
     line: 79
     path: [
       {
-        tag: "span"
-        index: 3
-        class: "atom-text-editor"
+        tag: "atom-text-editor"
+        index: 1
       }
     ]
   }
@@ -709,9 +657,8 @@
     line: 80
     path: [
       {
-        tag: "span"
-        index: 3
-        class: "atom-text-editor"
+        tag: "atom-text-editor"
+        index: 1
       }
     ]
   }
@@ -719,9 +666,8 @@
     line: 81
     path: [
       {
-        tag: "span"
-        index: 3
-        class: "atom-text-editor"
+        tag: "atom-text-editor"
+        index: 1
       }
     ]
   }
@@ -729,9 +675,8 @@
     line: 82
     path: [
       {
-        tag: "span"
-        index: 3
-        class: "atom-text-editor"
+        tag: "atom-text-editor"
+        index: 1
       }
     ]
   }
@@ -739,15 +684,10 @@
     line: 83
     path: [
       {
-        tag: "span"
-        index: 3
-        class: "atom-text-editor"
+        tag: "atom-text-editor"
+        index: 1
       }
     ]
-  }
-  {
-    line: 84
-    path: []
   }
   {
     line: 85
@@ -757,10 +697,6 @@
         index: 1
       }
     ]
-  }
-  {
-    line: 86
-    path: []
   }
   {
     line: 87
@@ -873,6 +809,26 @@
         tag: "table"
         index: 1
       }
+      {
+        tag: "thead"
+        index: 0
+      }
+      {
+        tag: "tr"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 1
+      }
+      {
+        tag: "th"
+        index: 2
+      }
     ]
   }
   {
@@ -891,6 +847,10 @@
         tag: "table"
         index: 1
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -899,6 +859,10 @@
       {
         tag: "table"
         index: 1
+      }
+      {
+        tag: "tbody"
+        index: 0
       }
     ]
   }
@@ -909,19 +873,18 @@
         tag: "table"
         index: 1
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
-  }
-  {
-    line: 100
-    path: []
   }
   {
     line: 101
     path: [
       {
         tag: "span"
-        index: 4
-        class: "math"
+        index: 2
       }
     ]
   }
@@ -930,8 +893,7 @@
     path: [
       {
         tag: "span"
-        index: 4
-        class: "math"
+        index: 2
       }
     ]
   }
@@ -940,22 +902,16 @@
     path: [
       {
         tag: "span"
-        index: 4
-        class: "math"
+        index: 2
       }
     ]
-  }
-  {
-    line: 104
-    path: []
   }
   {
     line: 105
     path: [
       {
         tag: "span"
-        index: 5
-        class: "math"
+        index: 3
       }
     ]
   }
@@ -964,8 +920,7 @@
     path: [
       {
         tag: "span"
-        index: 5
-        class: "math"
+        index: 3
       }
     ]
   }
@@ -974,14 +929,9 @@
     path: [
       {
         tag: "span"
-        index: 5
-        class: "math"
+        index: 3
       }
     ]
-  }
-  {
-    line: 108
-    path: []
   }
   {
     line: 109
@@ -1009,10 +959,6 @@
         index: 7
       }
     ]
-  }
-  {
-    line: 112
-    path: []
   }
   {
     line: 113
@@ -1313,9 +1259,8 @@
         index: 4
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -1327,9 +1272,8 @@
         index: 4
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -1341,9 +1285,8 @@
         index: 4
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -1355,9 +1298,8 @@
         index: 4
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -1369,9 +1311,8 @@
         index: 4
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -1553,6 +1494,26 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "thead"
+        index: 0
+      }
+      {
+        tag: "tr"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 1
+      }
+      {
+        tag: "th"
+        index: 2
+      }
     ]
   }
   {
@@ -1579,6 +1540,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -1592,6 +1557,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -1603,6 +1572,10 @@
       }
       {
         tag: "table"
+        index: 0
+      }
+      {
+        tag: "tbody"
         index: 0
       }
     ]
@@ -1625,8 +1598,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -1639,8 +1611,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -1653,8 +1624,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -1676,8 +1646,7 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -1690,8 +1659,7 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -1704,14 +1672,9 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
-  }
-  {
-    line: 165
-    path: []
   }
   {
     line: 166
@@ -1721,10 +1684,6 @@
         index: 8
       }
     ]
-  }
-  {
-    line: 167
-    path: []
   }
   {
     line: 168
@@ -2151,9 +2110,8 @@
         index: 0
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -2169,9 +2127,8 @@
         index: 0
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -2187,9 +2144,8 @@
         index: 0
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -2205,9 +2161,8 @@
         index: 0
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -2223,9 +2178,8 @@
         index: 0
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -2455,6 +2409,26 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "thead"
+        index: 0
+      }
+      {
+        tag: "tr"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 1
+      }
+      {
+        tag: "th"
+        index: 2
+      }
     ]
   }
   {
@@ -2489,6 +2463,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -2506,6 +2484,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -2521,6 +2503,10 @@
       }
       {
         tag: "table"
+        index: 0
+      }
+      {
+        tag: "tbody"
         index: 0
       }
     ]
@@ -2551,8 +2537,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -2569,8 +2554,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -2587,8 +2571,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -2618,8 +2601,7 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -2636,8 +2618,7 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -2654,8 +2635,7 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -3097,9 +3077,8 @@
         index: 1
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -3115,9 +3094,8 @@
         index: 1
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -3133,9 +3111,8 @@
         index: 1
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -3151,9 +3128,8 @@
         index: 1
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -3169,9 +3145,8 @@
         index: 1
       }
       {
-        tag: "span"
+        tag: "atom-text-editor"
         index: 0
-        class: "atom-text-editor"
       }
     ]
   }
@@ -3401,6 +3376,26 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "thead"
+        index: 0
+      }
+      {
+        tag: "tr"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 0
+      }
+      {
+        tag: "th"
+        index: 1
+      }
+      {
+        tag: "th"
+        index: 2
+      }
     ]
   }
   {
@@ -3435,6 +3430,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -3452,6 +3451,10 @@
         tag: "table"
         index: 0
       }
+      {
+        tag: "tbody"
+        index: 0
+      }
     ]
   }
   {
@@ -3467,6 +3470,10 @@
       }
       {
         tag: "table"
+        index: 0
+      }
+      {
+        tag: "tbody"
         index: 0
       }
     ]
@@ -3497,8 +3504,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -3515,8 +3521,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -3533,8 +3538,7 @@
       }
       {
         tag: "span"
-        index: 1
-        class: "math"
+        index: 0
       }
     ]
   }
@@ -3564,8 +3568,7 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -3582,8 +3585,7 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
   }
@@ -3600,13 +3602,8 @@
       }
       {
         tag: "span"
-        index: 2
-        class: "math"
+        index: 1
       }
     ]
-  }
-  {
-    line: 277
-    path: []
   }
 ]
