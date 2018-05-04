@@ -30,7 +30,7 @@ describe('Markdown preview plus pandoc helper', function() {
   })
 
   describe('PandocHelper::findFileRecursive', function() {
-    const fR = pandocHelper.findFileRecursive
+    const fR = pandocHelper.testing.findFileRecursive
 
     it('should return bibFile in the same directory', function() {
       const bibPath = path.join(tempPath, 'subdir', bibFile)
@@ -54,7 +54,7 @@ describe('Markdown preview plus pandoc helper', function() {
   })
 
   describe('PandocHelper::getArguments', function() {
-    const { getArguments } = pandocHelper
+    const { getArguments } = pandocHelper.testing
 
     it('should filter empty arguments', function() {
       const args = {
@@ -105,7 +105,7 @@ describe('Markdown preview plus pandoc helper', function() {
   describe('PandocHelper::setPandocOptions', function() {
     const fallBackBib = '/foo/fallback.bib'
     const fallBackCsl = '/foo/fallback.csl'
-    const { setPandocOptions } = pandocHelper
+    const { setPandocOptions } = pandocHelper.testing
 
     beforeEach(function() {
       file = path.join(tempPath, 'subdir', 'simple.md')
