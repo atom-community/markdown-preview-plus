@@ -107,7 +107,7 @@ async function resolveImagePaths(
       let src = img.getAttribute('src')
       if (src) {
         if (!atom.config.get('markdown-preview-plus.enablePandoc')) {
-          src = markdownIt.decode(src)
+          src = decodeURI(src)
         }
 
         if (src.match(/^(https?|atom|data):/)) {

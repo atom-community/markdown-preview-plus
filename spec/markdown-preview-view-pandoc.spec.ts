@@ -6,7 +6,6 @@ import {
   MarkdownPreviewViewFile,
   MarkdownPreviewView,
 } from '../lib/markdown-preview-view'
-import markdownIt = require('../lib/markdown-it-helper')
 import pandocHelper = require('../lib/pandoc-helper')
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -55,15 +54,8 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
   })
 
   describe('image resolving', function() {
-    let spy: sinon.SinonSpy
     beforeEach(async function() {
-      spy && spy.restore()
-      spy = sinon.spy(markdownIt, 'decode')
       await preview.renderPromise
-    })
-
-    afterEach(function() {
-      spy.restore()
     })
 
     describe('when the image uses a relative path', () =>
@@ -72,7 +64,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
           async () =>
             (await previewFragment(preview)).querySelector('img[alt=Image1]')!,
         )
-        expect(markdownIt.decode).not.to.be.called
         expect(image.getAttribute('src')).to.startWith(
           path.join(__dirname, 'fixtures/subdir/image1.png'),
         )
@@ -84,7 +75,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
           async () =>
             (await previewFragment(preview)).querySelector('img[alt=Image2]')!,
         )
-        expect(markdownIt.decode).not.to.be.called
         expect(image.getAttribute('src')).to.startWith('/tmp/image2.png')
       }))
 
@@ -106,7 +96,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
           (await previewFragment(preview)).querySelector('img[alt=absolute]'),
         )
 
-        expect(markdownIt.decode).not.to.be.called
         expect(
           (await previewFragment(preview))
             .querySelector('img[alt=absolute]')!
@@ -121,7 +110,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
           async () =>
             (await previewFragment(preview)).querySelector('img[alt=Image3]')!,
         )
-        expect(markdownIt.decode).not.to.be.called
         expect(image.getAttribute('src')).to.equal(
           'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
         )
@@ -132,7 +120,6 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
           'img[alt=Image4]',
         )
         expect(image).to.exist
-        expect(markdownIt.decode).not.to.be.called
         expect(image!.getAttribute('src')).to.equal(
           'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7',
         )

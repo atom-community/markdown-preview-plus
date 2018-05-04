@@ -1,10 +1,10 @@
 import markdownItModule = require('markdown-it')
-import twemoji = require('twemoji')
+import * as twemoji from 'twemoji'
 import * as path from 'path'
 import { pairUp } from './util'
 import * as _ from 'lodash'
 import { ConfigValues } from 'atom'
-let markdownIt: markdownItModule.MarkdownIt | null = null
+
 type Config = ConfigValues['markdown-preview-plus']
 type InitState = Readonly<{
   renderLaTeX: boolean
@@ -15,7 +15,6 @@ type InitState = Readonly<{
   inlineMathSeparators: Config['inlineMathSeparators']
   blockMathSeparators: Config['blockMathSeparators']
 }>
-let initState: InitState | null = null
 
 function mathInline(text: string) {
   return `<span class='math'><script type='math/tex'>${text}</script></span>`
@@ -49,11 +48,10 @@ function currentConfig(rL: boolean): InitState {
   }
 }
 
-function init(rL: boolean) {
-  initState = currentConfig(rL)
-  markdownIt = markdownItModule(getOptions(initState.breaks))
+function init(initState: InitState): markdownItModule.MarkdownIt {
+  const markdownIt = markdownItModule(getOptions(initState.breaks))
 
-  if (rL) {
+  if (initState.renderLaTeX) {
     const inlineDelim = pairUp(
       initState.inlineMathSeparators,
       'inlineMathSeparators',
@@ -71,13 +69,8 @@ function init(rL: boolean) {
     })
   }
 
-  if (initState.lazyHeaders) {
-    markdownIt.use(require('markdown-it-lazy-headers'))
-  }
-
-  if (initState.checkBoxes) {
-    markdownIt.use(require('markdown-it-task-lists'))
-  }
+  if (initState.lazyHeaders) markdownIt.use(require('markdown-it-lazy-headers'))
+  if (initState.checkBoxes) markdownIt.use(require('markdown-it-task-lists'))
 
   if (initState.emoji) {
     markdownIt.use(require('markdown-it-emoji'))
@@ -89,27 +82,32 @@ function init(rL: boolean) {
       })
     }
   }
+
+  return markdownIt
 }
 
-function needsInit(rL: boolean) {
-  return (
-    markdownIt === null ||
-    initState === null ||
-    !_.isEqual(initState, currentConfig(rL))
-  )
+function wrapInitIfNeeded(initf: typeof init): typeof init {
+  let markdownIt: markdownItModule.MarkdownIt | null = null
+  let initState: InitState | null = null
+
+  return function(newState: InitState) {
+    if (markdownIt === null || !_.isEqual(initState, newState)) {
+      initState = newState
+      console.error('initialized')
+      markdownIt = initf(newState)
+    }
+    return markdownIt
+  }
 }
+
+const initIfNeeded = wrapInitIfNeeded(init)
 
 export function render(text: string, rL: boolean) {
-  if (needsInit(rL)) init(rL)
-  return markdownIt!.render(text)
-}
-
-export function decode(url: string) {
-  if (!markdownIt) throw new Error('markdownIt not initialized')
-  return markdownIt.normalizeLinkText(url)
+  const markdownIt = initIfNeeded(currentConfig(rL))
+  return markdownIt.render(text)
 }
 
 export function getTokens(text: string, rL: boolean) {
-  if (needsInit(rL)) init(rL)
+  const markdownIt = initIfNeeded(currentConfig(rL))
   return markdownIt!.parse(text, {})
 }
