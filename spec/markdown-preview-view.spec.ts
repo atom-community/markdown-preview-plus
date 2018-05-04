@@ -864,4 +864,77 @@ var x = 0;
       expect(ths[2].style.textAlign).to.equal('left')
     })
   })
+
+  describe('Equation numbering', () => {
+    describe('When numberEquations is enabled', () => {
+      before(() => {
+        atom.config.set('markdown-preview-plus.numberEquations', true)
+        atom.config.set('markdown-preview-plus.latexRenderer', 'HTML-CSS')
+        atom.config.set(
+          'markdown-preview-plus.enableLatexRenderingByDefault',
+          true,
+        )
+      })
+      after(() => {
+        atom.config.unset('markdown-preview-plus.numberEquations')
+        atom.config.unset('markdown-preview-plus.latexRenderer')
+        atom.config.unset('markdown-preview-plus.enableLatexRenderingByDefault')
+      })
+      it('Renders equation numbers', async () => {
+        const editor = (await atom.workspace.open(
+          'nonexistent.md',
+        )) as TextEditor
+        editor.setText(`\
+$$
+\\begin{equation}
+\\int_0^x \\sin(x) dx
+\\label{eq:test}
+\\end{equation}
+$$
+
+<span id="math-ref">$\\eqref{eq:test}$</span>
+        `)
+        const pv = await createMarkdownPreviewViewEditor(editor)
+        const res = await waitsFor(async () =>
+          pv.runJS<string>(`document.querySelector('#math-ref').innerText`),
+        )
+        expect(res).to.equal('(1)')
+      })
+    })
+    describe('When numberEquations is disabled', () => {
+      before(() => {
+        atom.config.set('markdown-preview-plus.numberEquations', false)
+        atom.config.set('markdown-preview-plus.latexRenderer', 'HTML-CSS')
+        atom.config.set(
+          'markdown-preview-plus.enableLatexRenderingByDefault',
+          true,
+        )
+      })
+      after(() => {
+        atom.config.unset('markdown-preview-plus.numberEquations')
+        atom.config.unset('markdown-preview-plus.latexRenderer')
+        atom.config.unset('markdown-preview-plus.enableLatexRenderingByDefault')
+      })
+      it('Renders equation numbers', async () => {
+        const editor = (await atom.workspace.open(
+          'nonexistent.md',
+        )) as TextEditor
+        editor.setText(`\
+$$
+\\begin{equation}
+\\int_0^x \\sin(x) dx
+\\label{eq:test}
+\\end{equation}
+$$
+
+<span id="math-ref">$\\eqref{eq:test}$</span>
+        `)
+        const pv = await createMarkdownPreviewViewEditor(editor)
+        const res = await waitsFor(async () =>
+          pv.runJS<string>(`document.querySelector('#math-ref').innerText`),
+        )
+        expect(res).to.equal('(???)')
+      })
+    })
+  })
 })

@@ -116,6 +116,9 @@ export abstract class MarkdownPreviewView {
         this.element.send<'set-atom-home'>('set-atom-home', {
           home: atom.getConfigDirPath(),
         })
+        this.element.send<'set-number-eqns'>('set-number-eqns', {
+          numberEqns: atom.config.get('markdown-preview-plus.numberEquations'),
+        })
         this.element.send<'set-base-path'>('set-base-path', {
           path: this.getPath(),
         })

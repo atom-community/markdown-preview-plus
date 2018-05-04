@@ -12,6 +12,7 @@ declare interface ChannelMap {
   }
   error: { msg: string }
   'set-atom-home': { home: string }
+  'set-number-eqns': { numberEqns: boolean }
   'set-base-path': { path?: string }
   'get-text': void
   'get-html': void

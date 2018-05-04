@@ -3,6 +3,28 @@ import { UpdatePreview } from './update-preview'
 import { processHTMLString } from './mathjax-helper'
 import * as util from './util'
 
+function mkResPromise<T>(): ResolvablePromise<T> {
+  let resFn: (value?: T | PromiseLike<T> | undefined) => void
+  const p = new Promise<T>((resolve) => (resFn = resolve)) as ResolvablePromise<
+    T
+  >
+  p.resolve = resFn!
+  return p
+}
+
+window.atomVars = {
+  home: mkResPromise(),
+  numberEqns: mkResPromise(),
+}
+
+ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
+  window.atomVars.home.resolve(home)
+})
+
+ipcRenderer.on<'set-number-eqns'>('set-number-eqns', (_evt, { numberEqns }) => {
+  window.atomVars.numberEqns.resolve(numberEqns)
+})
+
 ipcRenderer.on<'style'>('style', (_event, { styles }) => {
   let styleElem = document.head.querySelector('style#atom-styles')
   if (!styleElem) {
@@ -50,7 +72,7 @@ ipcRenderer.on<'sync'>('sync', (_event, { pathToToken }) => {
   } // Do not jump to the top of the preview for bad syncs
 
   if (!element.classList.contains('update-preview')) {
-    element.scrollIntoView()
+    element.scrollIntoViewIfNeeded(true)
   }
   const maxScrollTop = document.body.scrollHeight - document.body.clientHeight
   if (!(document.body.scrollTop >= maxScrollTop)) {
@@ -104,12 +126,6 @@ ipcRenderer.on<'update-preview'>(
     }
   },
 )
-
-window.atomHome = new Promise((resolve) => (window.resolveAtomHome = resolve))
-
-ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
-  window.resolveAtomHome(home)
-})
 
 const baseElement = document.createElement('base')
 document.head.appendChild(baseElement)

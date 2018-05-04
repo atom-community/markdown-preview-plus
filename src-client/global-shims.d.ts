@@ -1,4 +1,10 @@
+type ResolvablePromise<T> = Promise<T> & {
+  resolve(val?: T | PromiseLike<T>): void
+}
+
 interface Window {
-  atomHome: Promise<string>
-  resolveAtomHome(home: string): void
+  atomVars: {
+    home: ResolvablePromise<string>
+    numberEqns: ResolvablePromise<boolean>
+  }
 }
