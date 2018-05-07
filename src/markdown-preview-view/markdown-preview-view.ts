@@ -90,9 +90,9 @@ export abstract class MarkdownPreviewView {
               }),
             )
             break
-          case 'sync-preview':
+          case 'did-scroll-preview':
             const { min, max } = e.args[0]
-            this.editorScroll(min, max)
+            this.didScrollPreview(min, max)
             break
           default:
             console.debug(`Unknown message recieved ${e.channel}`)
@@ -246,7 +246,7 @@ export abstract class MarkdownPreviewView {
     }
   }
 
-  protected editorScroll(_min: number, _max: number) {
+  protected didScrollPreview(_min: number, _max: number) {
     /* noop, implementation in editor preview */
   }
 

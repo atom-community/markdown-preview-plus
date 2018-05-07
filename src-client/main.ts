@@ -208,7 +208,7 @@ document.addEventListener('scroll', (_event) => {
       return top > 0 && bottom < height
     })
     .map(([line, _elem]) => line)
-  ipcRenderer.sendToHost<'sync-preview'>('sync-preview', {
+  ipcRenderer.sendToHost<'did-scroll-preview'>('did-scroll-preview', {
     max: Math.max(...visible),
     min: Math.min(...visible),
   })

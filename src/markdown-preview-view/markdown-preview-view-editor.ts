@@ -59,9 +59,8 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     return this.editor.getGrammar()
   }
 
-  protected editorScroll(min: number, max: number) {
-    const pane = atom.workspace.paneForItem(this)
-    if (pane && !pane.isActive()) return
+  protected didScrollPreview(min: number, max: number) {
+    if (!this.shouldScrollSync('preview')) return
     if (min === 0) {
       this.editor.scrollToBufferPosition([min, 0])
     } else if (max >= this.editor.getLastBufferRow() - 1) {
@@ -117,8 +116,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       atom.views.getView(this.editor).onDidChangeScrollTop(() => {
-        const pane = atom.workspace.paneForItem(this.editor)
-        if (pane && !pane.isActive()) return
+        if (!this.shouldScrollSync('editor')) return
         const [first, last] = this.editor.getVisibleRowRange()
         this.element.send<'scroll-sync'>('scroll-sync', {
           firstLine: this.editor.bufferRowForScreenRow(first),
@@ -134,5 +132,19 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   private syncPreviewHelper = async () => {
     const pos = this.editor.getCursorBufferPosition().row
     this.syncPreview(pos)
+  }
+
+  private shouldScrollSync(whatScrolled: 'editor' | 'preview') {
+    const config = atom.config.get('markdown-preview-plus')
+    if (config.syncEditorOnPreviewScroll && config.syncPreviewOnEditorScroll) {
+      const item = whatScrolled === 'editor' ? this.editor : this
+      const pane = atom.workspace.paneForItem(item)
+      return pane && pane.isActive()
+    } else {
+      return (
+        (config.syncEditorOnPreviewScroll && whatScrolled === 'preview') ||
+        (config.syncPreviewOnEditorScroll && whatScrolled === 'editor')
+      )
+    }
   }
 }
