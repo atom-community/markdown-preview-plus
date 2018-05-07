@@ -29,6 +29,7 @@ declare interface ReplyMap {
   'zoom-out': void
   'open-source': { initialLine?: number }
   'html-svg-result': string | undefined
+  'sync-preview': { max: number; min: number }
 }
 declare global {
   namespace Electron {
@@ -51,6 +52,7 @@ declare global {
       | IpcMessageEventCustomFixed<'zoom-out'>
       | IpcMessageEventCustomFixed<'open-source'>
       | IpcMessageEventCustomFixed<'html-svg-result'>
+      | IpcMessageEventCustomFixed<'sync-preview'>
     type IpcMessageEventCustomFixed<T extends keyof ReplyMap> = {
       channel: T
       args: [ReplyMap[T]]

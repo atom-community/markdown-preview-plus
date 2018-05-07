@@ -7,5 +7,6 @@ declare module 'atom' {
   interface TextEditor {
     getVisibleRowRange(): [number, number]
     bufferRowForScreenRow(row: number): number
+    scrollToScreenRange(range: Range, options?: { center: boolean }): void
   }
 }

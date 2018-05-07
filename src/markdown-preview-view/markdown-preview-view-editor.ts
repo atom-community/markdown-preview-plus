@@ -1,4 +1,4 @@
-import { TextEditor, Grammar } from 'atom'
+import { TextEditor, Grammar, Range } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 import { handlePromise } from '../util'
@@ -59,6 +59,24 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     return this.editor.getGrammar()
   }
 
+  protected editorScroll(min: number, max: number) {
+    const pane = atom.workspace.paneForItem(this)
+    if (pane && !pane.isActive()) return
+    if (min === 0) {
+      this.editor.scrollToBufferPosition([min, 0])
+    } else if (max >= this.editor.getLastBufferRow() - 1) {
+      this.editor.scrollToBufferPosition([max, 0])
+    } else {
+      // const mid = Math.floor(0.5 * (min + max))
+      // this.editor.scrollToBufferPosition([mid, 0], { center: true })
+      const range = Range.fromObject([[min, 0], [max, 0]])
+      this.editor.scrollToScreenRange(
+        this.editor.screenRangeForBufferRange(range),
+        { center: false },
+      )
+    }
+  }
+
   private handleEditorEvents() {
     this.disposables.add(
       atom.workspace.onDidChangeActiveTextEditor((ed) => {
@@ -99,6 +117,8 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       atom.views.getView(this.editor).onDidChangeScrollTop(() => {
+        const pane = atom.workspace.paneForItem(this.editor)
+        if (pane && !pane.isActive()) return
         const [first, last] = this.editor.getVisibleRowRange()
         this.element.send<'scroll-sync'>('scroll-sync', {
           firstLine: this.editor.bufferRowForScreenRow(first),

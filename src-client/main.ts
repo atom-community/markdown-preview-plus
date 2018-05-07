@@ -15,7 +15,7 @@ function mkResPromise<T>(): ResolvablePromise<T> {
 window.atomVars = {
   home: mkResPromise(),
   numberEqns: mkResPromise(),
-  sourceLineMap: [],
+  sourceLineMap: new Map(),
   revSourceMap: new WeakMap(),
 }
 
@@ -30,14 +30,14 @@ ipcRenderer.on<'set-number-eqns'>('set-number-eqns', (_evt, { numberEqns }) => {
 ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
   const root = document.querySelector('div.update-preview')
   if (!root) throw new Error('No root element!')
-  const slsm: Element[] = []
+  const slsm = new Map<number, Element>()
   const rsm = new WeakMap<Element, number[]>()
   for (const lineS of Object.keys(map)) {
     const line = parseInt(lineS, 10)
     const path = map[line]
     const elem = util.resolveElement(root, path)
     if (elem) {
-      slsm[line] = elem
+      slsm.set(line, elem)
       const rsmel = rsm.get(elem)
       if (rsmel) rsmel.push(line)
       else rsm.set(elem, [line])
@@ -51,21 +51,20 @@ ipcRenderer.on<'scroll-sync'>(
   'scroll-sync',
   (_evt, { firstLine, lastLine }) => {
     const mean = Math.floor(0.5 * (firstLine + lastLine))
+    const slm = window.atomVars.sourceLineMap
     let topLine
     let topBound
     for (topLine = mean; topLine >= 0; topLine -= 1) {
-      topBound = window.atomVars.sourceLineMap[topLine]
+      topBound = slm.get(topLine)
       if (topBound) break
     }
     if (!topBound) return
+
+    const max = Math.max(...Array.from(slm.keys()))
     let bottomLine
     let bottomBound
-    for (
-      bottomLine = mean + 1;
-      bottomLine < window.atomVars.sourceLineMap.length;
-      bottomLine += 1
-    ) {
-      bottomBound = window.atomVars.sourceLineMap[bottomLine]
+    for (bottomLine = mean + 1; bottomLine < max; bottomLine += 1) {
+      bottomBound = slm.get(bottomLine)
       if (bottomBound) break
     }
     if (!bottomBound) return
@@ -76,7 +75,7 @@ ipcRenderer.on<'scroll-sync'>(
     const clientHeight = document.documentElement.clientHeight
     const top =
       offset - clientHeight / 2 + topScroll + frac * (bottomScroll - topScroll)
-    window.scroll({ top, behavior: 'smooth' })
+    window.scroll({ top })
   },
 )
 
@@ -111,11 +110,11 @@ ipcRenderer.on<'sync'>('sync', (_event, { line }) => {
   const root = document.querySelector('div.update-preview')
   if (!root) return
 
-  let element = window.atomVars.sourceLineMap[line]
+  let element = window.atomVars.sourceLineMap.get(line)
 
   if (!element) {
     for (let i = line - 1; i >= 0; i -= 1) {
-      element = window.atomVars.sourceLineMap[i]
+      element = window.atomVars.sourceLineMap.get(line)
       if (element) break
     }
   }
@@ -198,6 +197,21 @@ document.addEventListener('mousewheel', (event) => {
     event.preventDefault()
     event.stopPropagation()
   }
+})
+
+document.addEventListener('scroll', (_event) => {
+  const el = document.documentElement
+  const height = el.clientHeight
+  const visible = Array.from(window.atomVars.sourceLineMap.entries())
+    .filter(([_line, elem]) => {
+      const { top, bottom } = elem.getBoundingClientRect()
+      return top > 0 && bottom < height
+    })
+    .map(([line, _elem]) => line)
+  ipcRenderer.sendToHost<'sync-preview'>('sync-preview', {
+    max: Math.max(...visible),
+    min: Math.min(...visible),
+  })
 })
 
 let lastContextMenuTarget: HTMLElement

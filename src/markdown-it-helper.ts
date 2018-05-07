@@ -93,7 +93,6 @@ function wrapInitIfNeeded(initf: typeof init): typeof init {
   return function(newState: InitState) {
     if (markdownIt === null || !_.isEqual(initState, newState)) {
       initState = newState
-      console.error('initialized')
       markdownIt = initf(newState)
     }
     return markdownIt

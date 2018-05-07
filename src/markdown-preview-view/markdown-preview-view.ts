@@ -90,6 +90,10 @@ export abstract class MarkdownPreviewView {
               }),
             )
             break
+          case 'sync-preview':
+            const { min, max } = e.args[0]
+            this.editorScroll(min, max)
+            break
           default:
             console.debug(`Unknown message recieved ${e.channel}`)
         }
@@ -98,7 +102,6 @@ export abstract class MarkdownPreviewView {
     this.element.addEventListener('will-navigate', async (e) => {
       const { shell } = await import('electron')
       const fileUriToPath = await import('file-uri-to-path')
-      console.log(e.url)
       if (e.url.startsWith('file://')) {
         handlePromise(atom.workspace.open(fileUriToPath(e.url)))
       } else {
@@ -241,6 +244,10 @@ export abstract class MarkdownPreviewView {
         }),
       )
     }
+  }
+
+  protected editorScroll(_min: number, _max: number) {
+    /* noop, implementation in editor preview */
   }
 
   protected changeHandler = () => {
