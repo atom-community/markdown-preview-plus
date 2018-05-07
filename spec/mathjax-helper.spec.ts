@@ -40,7 +40,7 @@ describe('MathJax helper module', () =>
         home: Promise.resolve(configDirPath) as any,
         numberEqns: Promise.resolve(false) as any,
         revSourceMap: new WeakMap(),
-        sourceLineMap: [],
+        sourceLineMap: new Map(),
       }
     })
 
