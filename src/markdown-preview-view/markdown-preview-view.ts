@@ -302,6 +302,9 @@ export abstract class MarkdownPreviewView {
         'markdown-preview-plus:open-dev-tools': () => {
           this.element.openDevTools()
         },
+        'markdown-preview-plus:print': () => {
+          this.element.print()
+        },
         'markdown-preview-plus:zoom-in': () => {
           this.zoomLevel += 0.1
           this.element.setZoomLevel(this.zoomLevel)
