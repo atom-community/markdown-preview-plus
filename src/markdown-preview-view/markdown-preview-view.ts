@@ -13,7 +13,7 @@ import {} from 'electron' // this is here soley for typings
 import renderer = require('../renderer')
 import markdownIt = require('../markdown-it-helper')
 import imageWatcher = require('../image-watch-helper')
-import { handlePromise } from '../util'
+import { handlePromise, copyHtml } from '../util'
 import * as util from './util'
 
 export interface SerializedMPV {
@@ -37,13 +37,15 @@ export abstract class MarkdownPreviewView {
   protected destroyed = false
 
   private loading: boolean = true
-  private renderLaTeX: boolean = atom.config.get(
-    'markdown-preview-plus.enableLatexRenderingByDefault',
-  )
   private zoomLevel = 0
   private getHTMLSVGPromise?: Promise<string | undefined>
 
-  protected constructor() {
+  protected constructor(
+    private defaultRenderMode: Exclude<renderer.RenderMode, 'save'> = 'normal',
+    private renderLaTeX: boolean = atom.config.get(
+      'markdown-preview-plus.enableLatexRenderingByDefault',
+    ),
+  ) {
     this.element = document.createElement('webview') as any
     this.element.getModel = () => this
     this.element.classList.add('markdown-preview-plus', 'native-key-bindings')
@@ -231,7 +233,7 @@ export abstract class MarkdownPreviewView {
       })
     } else {
       handlePromise(
-        this.getHTML().then(async (html) => {
+        this.getHTMLToSave(filePath).then(async (html) => {
           const fullHtml = util.mkHtml(
             name,
             html,
@@ -348,14 +350,15 @@ export abstract class MarkdownPreviewView {
     await this.renderMarkdownText(source)
   }
 
-  private async getHTML() {
+  private async getHTMLToSave(savePath: string) {
     const source = await this.getMarkdownSource()
     return renderer.render(
       source,
       this.getPath(),
       this.getGrammar(),
       this.renderLaTeX,
-      true,
+      'save',
+      savePath,
     )
   }
 
@@ -366,7 +369,7 @@ export abstract class MarkdownPreviewView {
         this.getPath(),
         this.getGrammar(),
         this.renderLaTeX,
-        false,
+        this.defaultRenderMode,
       )
       if (this.destroyed) return
       this.loading = false
@@ -419,9 +422,9 @@ export abstract class MarkdownPreviewView {
     }
 
     handlePromise(
-      this.getHTML().then(function(html) {
-        atom.clipboard.write(html.body.innerHTML)
-      }),
+      this.getMarkdownSource().then(async (src) =>
+        copyHtml(src, this.renderLaTeX),
+      ),
     )
 
     return true

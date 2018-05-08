@@ -4,9 +4,7 @@ import {
   SerializedMPV,
   MarkdownPreviewViewFile,
   MarkdownPreviewViewEditor,
-  MarkdownPreviewViewString,
 } from './markdown-preview-view'
-import renderer = require('./renderer')
 // import mathjaxHelper = require('./mathjax-helper')
 import {
   TextEditor,
@@ -15,7 +13,7 @@ import {
   CompositeDisposable,
   ContextMenuOptions,
 } from 'atom'
-import { handlePromise, isFileSync } from './util'
+import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
 
 export { config } from './config'
@@ -73,7 +71,7 @@ export function deactivate() {
 export function createMarkdownPreviewView(state: SerializedMPV) {
   if (state.editorId !== undefined) {
     return new PlaceholderView(state.editorId)
-  } else if (state.filePath && isFileSync(state.filePath)) {
+  } else if (state.filePath && util.isFileSync(state.filePath)) {
     return new MarkdownPreviewViewFile(state.filePath)
   }
   return undefined
@@ -83,7 +81,7 @@ export function createMarkdownPreviewView(state: SerializedMPV) {
 export function copyHtml(_callback: any, _scale: number) {
   const editor = atom.workspace.getActiveTextEditor()
   if (!editor) return
-  handlePromise(copyHtmlInternal(editor))
+  util.handlePromise(copyHtmlInternal(editor))
 }
 
 /// private
@@ -111,7 +109,7 @@ function removePreviewForEditor(editor: TextEditor) {
     previewPane.activateItem(item)
     return false
   }
-  handlePromise(previewPane.destroyItem(item))
+  util.handlePromise(previewPane.destroyItem(item))
   return true
 }
 
@@ -158,27 +156,7 @@ async function copyHtmlInternal(editor: TextEditor): Promise<void> {
     'markdown-preview-plus.enableLatexRenderingByDefault',
   )
   const text = editor.getSelectedText() || editor.getText()
-  if (renderLaTeX) {
-    const view = new MarkdownPreviewViewString(text)
-    view.element.style.visibility = 'hidden'
-    view.element.style.position = 'absolute'
-    view.element.style.pointerEvents = 'none'
-    const ws = atom.views.getView(atom.workspace)
-    ws.appendChild(view.element)
-    await view.renderPromise
-    const res = await view.getHTMLSVG()
-    if (res) atom.clipboard.write(res)
-    view.destroy()
-  } else {
-    const html = await renderer.render(
-      text,
-      editor.getPath(),
-      editor.getGrammar(),
-      renderLaTeX,
-      true,
-    )
-    atom.clipboard.write(html.body.innerHTML)
-  }
+  await util.copyHtml(text, renderLaTeX)
 }
 
 type ContextMenu = { [key: string]: ContextMenuOptions[] }
@@ -239,10 +217,10 @@ function registerGrammars(
     disp.add(
       atom.commands.add(selector as 'atom-text-editor', {
         'markdown-preview-plus:toggle': (e) => {
-          handlePromise(toggle(e.currentTarget.getModel()))
+          util.handlePromise(toggle(e.currentTarget.getModel()))
         },
         'markdown-preview-plus:copy-html': (e) => {
-          handlePromise(copyHtmlInternal(e.currentTarget.getModel()))
+          util.handlePromise(copyHtmlInternal(e.currentTarget.getModel()))
         },
       }),
     )
