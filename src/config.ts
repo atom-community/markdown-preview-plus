@@ -47,6 +47,13 @@ export const config: IConfig = {
     default: false,
     order: 2,
   },
+  renderer: {
+    type: 'string',
+    default: 'markdown-it' as 'markdown-it' | 'pandoc',
+    title: 'Renderer backend',
+    enum: ['markdown-it', 'pandoc'],
+    order: 3,
+  },
   previewConfig: {
     title: 'Preview Behaviour',
     order: 10,
@@ -153,13 +160,6 @@ export const config: IConfig = {
         order: 10,
       },
     },
-  },
-  renderer: {
-    type: 'string',
-    default: 'markdown-it' as 'markdown-it' | 'pandoc',
-    title: 'Renderer backend',
-    enum: ['markdown-it', 'pandoc'],
-    order: 35,
   },
   markdownItConfig: {
     type: 'object',
@@ -332,6 +332,7 @@ declare module 'atom' {
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.useGitHubStyle': boolean
+    'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
     'markdown-preview-plus.previewConfig.relativizeMediaOnSave': boolean
     'markdown-preview-plus.previewConfig.previewSplitPaneDir':
@@ -369,7 +370,6 @@ declare module 'atom' {
       latexRenderer: 'HTML-CSS' | 'SVG'
       numberEquations: boolean
     }
-    'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.markdownItConfig.breakOnSingleNewline': boolean
     'markdown-preview-plus.markdownItConfig.useLazyHeaders': boolean
     'markdown-preview-plus.markdownItConfig.useCheckBoxes': boolean
@@ -414,6 +414,7 @@ declare module 'atom' {
       grammars: string[]
       extensions: string[]
       useGitHubStyle: boolean
+      renderer: 'markdown-it' | 'pandoc'
       'previewConfig.liveUpdate': boolean
       'previewConfig.relativizeMediaOnSave': boolean
       'previewConfig.previewSplitPaneDir': 'down' | 'right' | 'none'
@@ -444,7 +445,6 @@ declare module 'atom' {
         latexRenderer: 'HTML-CSS' | 'SVG'
         numberEquations: boolean
       }
-      renderer: 'markdown-it' | 'pandoc'
       'markdownItConfig.breakOnSingleNewline': boolean
       'markdownItConfig.useLazyHeaders': boolean
       'markdownItConfig.useCheckBoxes': boolean
