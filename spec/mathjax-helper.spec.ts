@@ -39,6 +39,8 @@ describe('MathJax helper module', () =>
       window.atomVars = {
         home: Promise.resolve(configDirPath) as any,
         numberEqns: Promise.resolve(false) as any,
+        revSourceMap: new WeakMap(),
+        sourceLineMap: new Map(),
       }
     })
 

@@ -41,6 +41,24 @@ export const config = {
     default: false,
     order: 28,
   },
+  syncPreviewOnEditorScroll: {
+    title: 'Sync preview position when text editor is scrolled',
+    description:
+      'Note: if both scroll sync options are enabled, the editor ' +
+      'has to be in active pane for this option to take effect',
+    type: 'boolean',
+    default: false,
+    order: 28.1,
+  },
+  syncEditorOnPreviewScroll: {
+    title: 'Sync editor position when preview is scrolled',
+    description:
+      'Note: if both scroll sync options are enabled, the preview ' +
+      'has to be in active pane for this option to take effect',
+    type: 'boolean',
+    default: false,
+    order: 28.2,
+  },
   grammars: {
     type: 'array',
     default: [
@@ -258,6 +276,8 @@ declare module 'atom' {
     'markdown-preview-plus.closePreviewWithEditor': boolean
     'markdown-preview-plus.activatePreviewWithEditor': boolean
     'markdown-preview-plus.syncPreviewOnChange': boolean
+    'markdown-preview-plus.syncPreviewOnEditorScroll': boolean
+    'markdown-preview-plus.syncEditorOnPreviewScroll': boolean
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.enableLatexRenderingByDefault': boolean
@@ -289,6 +309,8 @@ declare module 'atom' {
       closePreviewWithEditor: boolean
       activatePreviewWithEditor: boolean
       syncPreviewOnChange: boolean
+      syncPreviewOnEditorScroll: boolean
+      syncEditorOnPreviewScroll: boolean
       grammars: string[]
       extensions: string[]
       enableLatexRenderingByDefault: boolean

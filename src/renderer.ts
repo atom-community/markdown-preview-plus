@@ -48,7 +48,7 @@ export async function render(
     !atom.config.get('markdown-preview-plus.enablePandoc') ||
     !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
   ) {
-    di.highlightCodeBlocks(doc, defaultCodeLanguage, copyHTMLFlag)
+    highlightCodeBlocks(doc, defaultCodeLanguage, copyHTMLFlag)
   }
   if (error) {
     const errd = doc.createElement('div')
@@ -107,7 +107,7 @@ async function resolveImagePaths(
       let src = img.getAttribute('src')
       if (src) {
         if (!atom.config.get('markdown-preview-plus.enablePandoc')) {
-          src = markdownIt.decode(src)
+          src = decodeURI(src)
         }
 
         if (src.match(/^(https?|atom|data):/)) {
@@ -190,8 +190,4 @@ function highlightCodeBlocks(
   }
 
   return domFragment
-}
-
-export const di = {
-  highlightCodeBlocks,
 }

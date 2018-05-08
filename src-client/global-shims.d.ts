@@ -6,5 +6,7 @@ interface Window {
   atomVars: {
     home: ResolvablePromise<string>
     numberEqns: ResolvablePromise<boolean>
+    sourceLineMap: Map<number, Element>
+    revSourceMap: WeakMap<Element, number[]>
   }
 }

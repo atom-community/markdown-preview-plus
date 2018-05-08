@@ -22,10 +22,7 @@ const getMathJaxPath = (function() {
   }
 })()
 
-export function findFileRecursive(
-  filePath: string,
-  fileName: string,
-): string | false {
+function findFileRecursive(filePath: string, fileName: string): string | false {
   const bibFile = path.join(filePath, '../', fileName)
   if (fs.existsSync(bibFile)) {
     return bibFile
@@ -39,6 +36,7 @@ export function findFileRecursive(
   }
 }
 
+// exported for tests
 export interface Args {
   from: string
   to: 'html'
@@ -48,10 +46,7 @@ export interface Args {
   csl?: string
 }
 
-export function setPandocOptions(
-  filePath: string | undefined,
-  renderMath: boolean,
-) {
+function setPandocOptions(filePath: string | undefined, renderMath: boolean) {
   // see https://github.com/atom-community/markdown-preview-plus/issues/316
   const opts: CP.ExecFileOptions = { maxBuffer: Infinity }
   if (filePath !== undefined) {
@@ -193,7 +188,7 @@ export async function renderPandoc(
   })
 }
 
-export function getArguments(iargs: Args) {
+function getArguments(iargs: Args) {
   const args = _.reduce(
     iargs,
     function(res: string[], val, key) {
@@ -220,4 +215,10 @@ export function getArguments(iargs: Args) {
     }
   }
   return res
+}
+
+export const testing = {
+  setPandocOptions,
+  getArguments,
+  findFileRecursive,
 }

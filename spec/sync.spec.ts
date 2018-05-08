@@ -85,8 +85,10 @@ describe('Syncronization of source and preview', function() {
     })
 
     it('identifies the correct HTMLElement path', () => {
+      const elementPaths = previewUtil.buildLineMap(tokens)
       for (const sourceLine of sourceMap) {
-        const elementPath = previewUtil.getPathToToken(tokens, sourceLine.line)
+        if (sourceLine.path.length === 0) continue
+        const elementPath = elementPaths[sourceLine.line]
         elementPath.forEach((_x, i) => {
           expect(elementPath[i].tag).to.equal(sourceLine.path[i].tag)
           expect(elementPath[i].index).to.equal(sourceLine.path[i].index)

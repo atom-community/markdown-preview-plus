@@ -90,6 +90,10 @@ export abstract class MarkdownPreviewView {
               }),
             )
             break
+          case 'did-scroll-preview':
+            const { min, max } = e.args[0]
+            this.didScrollPreview(min, max)
+            break
           default:
             console.debug(`Unknown message recieved ${e.channel}`)
         }
@@ -98,7 +102,6 @@ export abstract class MarkdownPreviewView {
     this.element.addEventListener('will-navigate', async (e) => {
       const { shell } = await import('electron')
       const fileUriToPath = await import('file-uri-to-path')
-      console.log(e.url)
       if (e.url.startsWith('file://')) {
         handlePromise(atom.workspace.open(fileUriToPath(e.url)))
       } else {
@@ -243,6 +246,10 @@ export abstract class MarkdownPreviewView {
     }
   }
 
+  protected didScrollPreview(_min: number, _max: number) {
+    /* noop, implementation in editor preview */
+  }
+
   protected changeHandler = () => {
     handlePromise(this.renderMarkdown())
 
@@ -267,10 +274,8 @@ export abstract class MarkdownPreviewView {
   // @return {number|null} The element that represents `line`. If no element is
   //   identified `null` is returned.
   //
-  protected syncPreview(text: string, line: number) {
-    const tokens = markdownIt.getTokens(text, this.renderLaTeX)
-    const pathToToken = util.getPathToToken(tokens, line)
-    this.element.send<'sync'>('sync', { pathToToken })
+  protected syncPreview(line: number) {
+    this.element.send<'sync'>('sync', { line })
   }
 
   private handleEvents() {
@@ -310,9 +315,7 @@ export abstract class MarkdownPreviewView {
           this.element.setZoomLevel(this.zoomLevel)
         },
         'markdown-preview-plus:sync-source': async (_event) => {
-          const text = await this.getMarkdownSource()
-          const tokens = markdownIt.getTokens(text, this.renderLaTeX)
-          this.element.send<'sync-source'>('sync-source', { tokens })
+          this.element.send<'sync-source'>('sync-source', undefined)
         },
       }),
     )
@@ -368,6 +371,9 @@ export abstract class MarkdownPreviewView {
         html: domDocument.documentElement.outerHTML,
         renderLaTeX: this.renderLaTeX,
         mjrenderer: atom.config.get('markdown-preview-plus.latexRenderer'),
+      })
+      this.element.send<'set-source-map'>('set-source-map', {
+        map: util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),
       })
       this.emitter.emit('did-change-markdown')
     } catch (error) {
