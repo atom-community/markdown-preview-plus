@@ -19,5 +19,6 @@
     {label: 'Sync Source', command: 'markdown-preview-plus:sync-source'}
     {label: 'Copy As HTML', command: 'core:copy'}
     {label: 'Save As\u2026', command: 'core:save-as'}
+    {label: 'Print\u2026', command: 'markdown-preview-plus:print'}
     {label: 'Open Dev Tools', command: 'markdown-preview-plus:open-dev-tools'}
   ]
