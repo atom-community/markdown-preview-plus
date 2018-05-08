@@ -44,6 +44,10 @@ function getMarkdownPreviewCSS() {
     .join('\n')
     .replace(/\batom-text-editor\b/g, 'pre.editor-colors')
     .replace(/\bmarkdown-preview-plus-view\b/g, '.markdown-preview-plus-view')
+    .replace(
+      /\b\.\.markdown-preview-plus-view\b/g,
+      '.markdown-preview-plus-view',
+    )
     .replace(cssUrlRefExp, function(
       _match,
       assetsName: string,
