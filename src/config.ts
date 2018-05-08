@@ -233,9 +233,9 @@ export const config: IConfig = {
         title: 'Use native Pandoc code block style',
         type: 'boolean',
         default: false,
-        description: `\
-    Don't convert fenced code blocks to Atom editors when using
-    Pandoc parser`,
+        description:
+          "Don't convert fenced code blocks to Atom editors when using" +
+          'Pandoc parser',
         order: 0,
       },
       pandocPath: {
@@ -279,12 +279,11 @@ export const config: IConfig = {
       pandocBibliography: {
         type: 'boolean',
         default: false,
-        title: 'Citations',
-        description: `\
-    Enable this for bibliography parsing.
-    Note: pandoc-citeproc is applied after other filters specified in
-    Filters, but before other commandline arguments\
-    `,
+        title: 'Citations (via pandoc-citeproc)',
+        description:
+          'Enable this for bibliography parsing. ' +
+          'Note: pandoc-citeproc is applied after other filters specified in ' +
+          'Filters, but before other commandline arguments ',
         order: 25,
       },
       pandocRemoveReferences: {
