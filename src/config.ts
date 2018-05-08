@@ -1,4 +1,19 @@
-export const config = {
+export interface IConfig {
+  [key: string]: {
+    title: string
+    order: number
+    type: string
+    description?: string
+    properties?: IConfig
+    default?: any
+    enum?: any[]
+    items?: {
+      type: string
+    }
+  }
+}
+
+export const config: IConfig = {
   grammars: {
     title: 'Markdown Grammars',
     description: 'Editors using what grammars are considered Markdown',
@@ -38,6 +53,7 @@ export const config = {
     type: 'object',
     properties: {
       liveUpdate: {
+        title: 'Live Update',
         type: 'boolean',
         default: true,
         order: 10,
@@ -152,6 +168,7 @@ export const config = {
     order: 40,
     properties: {
       breakOnSingleNewline: {
+        title: 'Break on single newline',
         type: 'boolean',
         default: false,
         order: 0,
@@ -214,6 +231,7 @@ export const config = {
     order: 50,
     properties: {
       useNativePandocCodeStyles: {
+        title: 'Use native Pandoc code block style',
         type: 'boolean',
         default: false,
         description: `\
@@ -227,7 +245,6 @@ export const config = {
         title: 'Pandoc Options: Path',
         description:
           'Please specify the correct path to your pandoc executable',
-        dependencies: ['enablePandoc'],
         order: 5,
       },
       pandocFilters: {
@@ -236,7 +253,6 @@ export const config = {
         title: 'Pandoc Options: Filters',
         description:
           'Comma separated pandoc filters, in order of application. Will be passed via command-line arguments',
-        dependencies: ['enablePandoc'],
         order: 10,
         items: {
           type: 'string',
@@ -248,7 +264,6 @@ export const config = {
         title: 'Pandoc Options: Commandline Arguments',
         description:
           'Comma separated pandoc arguments e.g. `--smart, --filter=/bin/exe`. Please use long argument names.',
-        dependencies: ['enablePandoc'],
         order: 15,
         items: {
           type: 'string',
@@ -259,7 +274,6 @@ export const config = {
         default: 'markdown-raw_tex+tex_math_single_backslash',
         title: 'Pandoc Options: Markdown Flavor',
         description: 'Enter the pandoc markdown flavor you want',
-        dependencies: ['enablePandoc'],
         order: 20,
       },
       pandocBibliography: {
@@ -271,7 +285,6 @@ export const config = {
     Note: pandoc-citeproc is applied after other filters specified in
     Filters, but before other commandline arguments\
     `,
-        dependencies: ['enablePandoc'],
         order: 25,
       },
       pandocRemoveReferences: {
@@ -279,7 +292,6 @@ export const config = {
         default: true,
         title: 'Pandoc Options: Remove References',
         description: 'Removes references at the end of the HTML preview',
-        dependencies: ['pandocBibliography'],
         order: 30,
       },
       pandocBIBFile: {
@@ -287,7 +299,6 @@ export const config = {
         default: 'bibliography.bib',
         title: 'Pandoc Options: Bibliography (bibfile)',
         description: 'Name of bibfile to search for recursively',
-        dependencies: ['pandocBibliography'],
         order: 35,
       },
       pandocBIBFileFallback: {
@@ -295,7 +306,6 @@ export const config = {
         default: '',
         title: 'Pandoc Options: Fallback Bibliography (bibfile)',
         description: 'Full path to fallback bibfile',
-        dependencies: ['pandocBibliography'],
         order: 40,
       },
       pandocCSLFile: {
@@ -303,7 +313,6 @@ export const config = {
         default: 'custom.csl',
         title: 'Pandoc Options: Bibliography Style (cslfile)',
         description: 'Name of cslfile to search for recursively',
-        dependencies: ['pandocBibliography'],
         order: 45,
       },
       pandocCSLFileFallback: {
@@ -311,7 +320,6 @@ export const config = {
         default: '',
         title: 'Pandoc Options: Fallback Bibliography Style (cslfile)',
         description: 'Full path to fallback cslfile',
-        dependencies: ['pandocBibliography'],
         order: 50,
       },
     },
