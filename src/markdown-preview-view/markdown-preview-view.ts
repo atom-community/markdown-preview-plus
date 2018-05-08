@@ -95,6 +95,9 @@ export abstract class MarkdownPreviewView {
             const { min, max } = e.args[0]
             this.didScrollPreview(min, max)
             break
+          case 'reload':
+            this.element.reload()
+            break
           default:
             console.debug(`Unknown message recieved ${e.channel}`)
         }
@@ -332,8 +335,14 @@ export abstract class MarkdownPreviewView {
         if (atomConfig().renderer === 'pandoc') this.changeHandler()
       }),
       atom.config.onDidChange(
-        'markdown-preview-plus.mathConfig',
+        'markdown-preview-plus.mathConfig.latexRenderer',
         this.changeHandler,
+      ),
+      atom.config.onDidChange(
+        'markdown-preview-plus.mathConfig.numberEquations',
+        () => {
+          this.element.send<'reload'>('reload', undefined)
+        },
       ),
       atom.config.onDidChange(
         'markdown-preview-plus.renderer',

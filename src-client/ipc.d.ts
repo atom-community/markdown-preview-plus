@@ -23,6 +23,7 @@ declare interface ChannelMap {
   'get-uses-github-style': void
   'sync-source': void
   'scroll-sync': { firstLine: number; lastLine: number }
+  reload: void
 }
 declare interface ReplyMap {
   'zoom-in': void
@@ -30,6 +31,10 @@ declare interface ReplyMap {
   'open-source': { initialLine?: number }
   'html-svg-result': string | undefined
   'did-scroll-preview': { max: number; min: number }
+  reload: void
+}
+declare type ReplyMapEvents = {
+  [K in keyof ReplyMap]: Electron.IpcMessageEventCustomFixed<K>
 }
 declare global {
   namespace Electron {
@@ -47,12 +52,7 @@ declare global {
         h: (e: IpcMessageEventCustom) => void,
       ): void
     }
-    type IpcMessageEventCustom =
-      | IpcMessageEventCustomFixed<'zoom-in'>
-      | IpcMessageEventCustomFixed<'zoom-out'>
-      | IpcMessageEventCustomFixed<'open-source'>
-      | IpcMessageEventCustomFixed<'html-svg-result'>
-      | IpcMessageEventCustomFixed<'did-scroll-preview'>
+    type IpcMessageEventCustom = ReplyMapEvents[keyof ReplyMapEvents]
     type IpcMessageEventCustomFixed<T extends keyof ReplyMap> = {
       channel: T
       args: [ReplyMap[T]]

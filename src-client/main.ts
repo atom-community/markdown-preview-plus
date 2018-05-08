@@ -244,6 +244,13 @@ ipcRenderer.on<'get-html-svg'>('get-html-svg', async () => {
   ipcRenderer.sendToHost<'html-svg-result'>('html-svg-result', res)
 })
 
-window.onbeforeunload = function() {
-  return false
-}
+let allowNavigate = false
+
+ipcRenderer.on<'reload'>('reload', () => {
+  allowNavigate = true
+  ipcRenderer.sendToHost<'reload'>('reload', undefined)
+})
+
+window.addEventListener('beforeunload', function() {
+  return allowNavigate
+})

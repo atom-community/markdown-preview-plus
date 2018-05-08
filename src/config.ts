@@ -147,7 +147,6 @@ export const config: IConfig = {
         title: 'Number equations',
         description:
           'Number equations that are in equation environment, etc. ' +
-          'Requires preview reopen to take effect. ' +
           'Will re-render all math on each math change, which might be undesirable.',
         type: 'boolean',
         default: false,
