@@ -35,7 +35,8 @@ export class UpdatePreview {
     renderLaTeX: boolean,
     mjrenderer: MathJaxRenderer,
   ) {
-    const lastMJRenderer = this.cachedMJRenderer
+    const lastMJRenderer =
+      this.cachedMJRenderer === undefined ? mjrenderer : this.cachedMJRenderer
     this.cachedMJRenderer = mjrenderer
     const newDom = domFragment.cloneNode(true) as DocumentFragment
 
