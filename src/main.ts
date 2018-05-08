@@ -15,12 +15,21 @@ import {
 } from 'atom'
 import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
+import { migrateConfig } from './migrate-config'
 
 export { config } from './config'
 
 let disposables: CompositeDisposable | undefined
 
 export async function activate() {
+  if (migrateConfig()) {
+    atom.notifications.addInfo(
+      'Markdown-Preivew-Plus has updated your config to a new format. ' +
+        'Please check if everything is in order. ' +
+        'This message will not be shown again.',
+      { dismissable: true },
+    )
+  }
   if (atom.packages.isPackageActive('markdown-preview')) {
     await atom.packages.deactivatePackage('markdown-preview')
     atom.notifications.addInfo(
