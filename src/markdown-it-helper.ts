@@ -3,18 +3,8 @@ import * as twemoji from 'twemoji'
 import * as path from 'path'
 import { pairUp } from './util'
 import * as _ from 'lodash'
-import { ConfigValues } from 'atom'
 
-type Config = ConfigValues['markdown-preview-plus']
-type InitState = Readonly<{
-  renderLaTeX: boolean
-  lazyHeaders: Config['useLazyHeaders']
-  checkBoxes: Config['useCheckBoxes']
-  emoji: Config['useEmoji']
-  breaks: Config['breakOnSingleNewline']
-  inlineMathSeparators: Config['inlineMathSeparators']
-  blockMathSeparators: Config['blockMathSeparators']
-}>
+type InitState = Readonly<ReturnType<typeof currentConfig>>
 
 function mathInline(text: string) {
   return `<span class='math'><script type='math/tex'>${text}</script></span>`
@@ -35,12 +25,13 @@ function getOptions(breaks: boolean) {
   }
 }
 
-function currentConfig(rL: boolean): InitState {
+function currentConfig(rL: boolean) {
   const config = atom.config.get('markdown-preview-plus')
   return {
     renderLaTeX: rL,
     lazyHeaders: config.useLazyHeaders,
     checkBoxes: config.useCheckBoxes,
+    toc: config.useToc,
     emoji: config.useEmoji,
     breaks: config.breakOnSingleNewline,
     inlineMathSeparators: config.inlineMathSeparators,
@@ -71,6 +62,7 @@ function init(initState: InitState): markdownItModule.MarkdownIt {
 
   if (initState.lazyHeaders) markdownIt.use(require('markdown-it-lazy-headers'))
   if (initState.checkBoxes) markdownIt.use(require('markdown-it-task-lists'))
+  if (initState.toc) markdownIt.use(require('markdown-it-table-of-contents'))
 
   if (initState.emoji) {
     markdownIt.use(require('markdown-it-emoji'))
