@@ -325,8 +325,14 @@ export abstract class MarkdownPreviewView {
     )
 
     this.disposables.add(
+      atom.config.onDidChange('markdown-preview-plus.markdownItConfig', () => {
+        if (atomConfig().renderer === 'markdown-it') this.changeHandler()
+      }),
+      atom.config.onDidChange('markdown-preview-plus.pandocConfig', () => {
+        if (atomConfig().renderer === 'pandoc') this.changeHandler()
+      }),
       atom.config.onDidChange(
-        'markdown-preview-plus.markdownItConfig',
+        'markdown-preview-plus.mathConfig',
         this.changeHandler,
       ),
       atom.config.onDidChange(
