@@ -242,15 +242,16 @@ export const config: IConfig = {
       pandocPath: {
         type: 'string',
         default: 'pandoc',
-        title: 'Pandoc Options: Path',
+        title: 'Path to Pandoc executable',
         description:
-          'Please specify the correct path to your pandoc executable',
+          'Please specify the correct path to your pandoc executable, ' +
+          'for example, /usr/bin/pandoc, or C:\\Program Files\\Pandoc\\pandoc.exe',
         order: 5,
       },
       pandocFilters: {
         type: 'array',
         default: [] as string[],
-        title: 'Pandoc Options: Filters',
+        title: 'Filters',
         description:
           'Comma separated pandoc filters, in order of application. Will be passed via command-line arguments',
         order: 10,
@@ -261,7 +262,7 @@ export const config: IConfig = {
       pandocArguments: {
         type: 'array',
         default: [] as string[],
-        title: 'Pandoc Options: Commandline Arguments',
+        title: 'Commandline Arguments',
         description:
           'Comma separated pandoc arguments e.g. `--smart, --filter=/bin/exe`. Please use long argument names.',
         order: 15,
@@ -272,14 +273,14 @@ export const config: IConfig = {
       pandocMarkdownFlavor: {
         type: 'string',
         default: 'markdown-raw_tex+tex_math_single_backslash',
-        title: 'Pandoc Options: Markdown Flavor',
+        title: 'Markdown Flavor',
         description: 'Enter the pandoc markdown flavor you want',
         order: 20,
       },
       pandocBibliography: {
         type: 'boolean',
         default: false,
-        title: 'Pandoc Options: Citations',
+        title: 'Citations',
         description: `\
     Enable this for bibliography parsing.
     Note: pandoc-citeproc is applied after other filters specified in
@@ -290,35 +291,35 @@ export const config: IConfig = {
       pandocRemoveReferences: {
         type: 'boolean',
         default: true,
-        title: 'Pandoc Options: Remove References',
+        title: 'Remove References',
         description: 'Removes references at the end of the HTML preview',
         order: 30,
       },
       pandocBIBFile: {
         type: 'string',
         default: 'bibliography.bib',
-        title: 'Pandoc Options: Bibliography (bibfile)',
+        title: 'Bibliography (bibfile)',
         description: 'Name of bibfile to search for recursively',
         order: 35,
       },
       pandocBIBFileFallback: {
         type: 'string',
         default: '',
-        title: 'Pandoc Options: Fallback Bibliography (bibfile)',
+        title: 'Fallback Bibliography (bibfile)',
         description: 'Full path to fallback bibfile',
         order: 40,
       },
       pandocCSLFile: {
         type: 'string',
         default: 'custom.csl',
-        title: 'Pandoc Options: Bibliography Style (cslfile)',
+        title: 'Bibliography Style (cslfile)',
         description: 'Name of cslfile to search for recursively',
         order: 45,
       },
       pandocCSLFileFallback: {
         type: 'string',
         default: '',
-        title: 'Pandoc Options: Fallback Bibliography Style (cslfile)',
+        title: 'Fallback Bibliography Style (cslfile)',
         description: 'Full path to fallback cslfile',
         order: 50,
       },
