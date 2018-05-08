@@ -30,12 +30,6 @@ export async function activate() {
   }
   disposables = new CompositeDisposable()
   disposables.add(
-    atom.commands.add('atom-workspace', {
-      'markdown-preview-plus:toggle-break-on-single-newline': function() {
-        const keyPath = 'markdown-preview-plus.breakOnSingleNewline'
-        atom.config.set(keyPath, !atom.config.get(keyPath))
-      },
-    }),
     atom.commands.add('.markdown-preview-plus', {
       'markdown-preview-plus:toggle': close,
     }),
@@ -109,9 +103,7 @@ function removePreviewForEditor(editor: TextEditor) {
 async function addPreviewForEditor(editor: TextEditor) {
   const previousActivePane = atom.workspace.getActivePane()
   const options: WorkspaceOpenOptions = { searchAllPanes: true }
-  const splitConfig = atom.config.get(
-    'markdown-preview-plus.previewSplitPaneDir',
-  )
+  const splitConfig = util.atomConfig().previewConfig.previewSplitPaneDir
   if (splitConfig !== 'none') {
     options.split = splitConfig
   }
@@ -145,9 +137,7 @@ async function previewFile({ currentTarget }: CommandEvent): Promise<void> {
 }
 
 async function copyHtmlInternal(editor: TextEditor): Promise<void> {
-  const renderLaTeX = atom.config.get(
-    'markdown-preview-plus.enableLatexRenderingByDefault',
-  )
+  const renderLaTeX = util.atomConfig().mathConfig.enableLatexRenderingByDefault
   const text = editor.getSelectedText() || editor.getText()
   await util.copyHtml(text, renderLaTeX)
 }

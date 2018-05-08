@@ -1,7 +1,7 @@
 import { TextEditor, Grammar, Range } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
-import { handlePromise } from '../util'
+import { handlePromise, atomConfig } from '../util'
 
 export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   private static editorMap = new WeakMap<
@@ -79,9 +79,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   private handleEditorEvents() {
     this.disposables.add(
       atom.workspace.onDidChangeActiveTextEditor((ed) => {
-        if (
-          atom.config.get('markdown-preview-plus.activatePreviewWithEditor')
-        ) {
+        if (atomConfig().previewConfig.activatePreviewWithEditor) {
           if (ed === this.editor) {
             const pane = atom.workspace.paneForItem(this)
             if (!pane) return
@@ -90,10 +88,10 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       this.editor.getBuffer().onDidStopChanging(() => {
-        if (atom.config.get('markdown-preview-plus.liveUpdate')) {
+        if (atomConfig().previewConfig.liveUpdate) {
           this.changeHandler()
         }
-        if (atom.config.get('markdown-preview-plus.syncPreviewOnChange')) {
+        if (atomConfig().syncConfig.syncPreviewOnChange) {
           handlePromise(this.syncPreviewHelper())
         }
       }),
@@ -101,17 +99,17 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         this.emitter.emit('did-change-title')
       }),
       this.editor.onDidDestroy(() => {
-        if (atom.config.get('markdown-preview-plus.closePreviewWithEditor')) {
+        if (atomConfig().previewConfig.closePreviewWithEditor) {
           util.destroy(this)
         }
       }),
       this.editor.getBuffer().onDidSave(() => {
-        if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
+        if (!atomConfig().previewConfig.liveUpdate) {
           this.changeHandler()
         }
       }),
       this.editor.getBuffer().onDidReload(() => {
-        if (!atom.config.get('markdown-preview-plus.liveUpdate')) {
+        if (!atomConfig().previewConfig.liveUpdate) {
           this.changeHandler()
         }
       }),
@@ -135,7 +133,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   }
 
   private shouldScrollSync(whatScrolled: 'editor' | 'preview') {
-    const config = atom.config.get('markdown-preview-plus')
+    const config = atomConfig().syncConfig
     if (config.syncEditorOnPreviewScroll && config.syncPreviewOnEditorScroll) {
       const item = whatScrolled === 'editor' ? this.editor : this
       const pane = atom.workspace.paneForItem(item)

@@ -2,8 +2,7 @@ import _ = require('lodash')
 import CP = require('child_process')
 import fs = require('fs')
 import path = require('path')
-
-const atomConfig = () => atom.config.get('markdown-preview-plus')!
+import { atomConfig } from './util'
 
 /**
  * Sets local mathjaxPath if available
@@ -53,24 +52,23 @@ function setPandocOptions(filePath: string | undefined, renderMath: boolean) {
     opts.cwd = path.dirname(filePath)
   }
   const mathjaxPath = getMathJaxPath()
+  const config = atomConfig().pandocConfig
   const args: Args = {
-    from: atomConfig().pandocMarkdownFlavor,
+    from: config.pandocMarkdownFlavor,
     to: 'html',
     mathjax: renderMath ? mathjaxPath : undefined,
-    filter: atomConfig().pandocFilters,
+    filter: config.pandocFilters,
   }
-  if (atomConfig().pandocBibliography) {
+  if (config.pandocBibliography) {
     args.filter.push('pandoc-citeproc')
-    let bibFile =
-      filePath && findFileRecursive(filePath, atomConfig().pandocBIBFile)
+    let bibFile = filePath && findFileRecursive(filePath, config.pandocBIBFile)
     if (!bibFile) {
-      bibFile = atomConfig().pandocBIBFileFallback
+      bibFile = config.pandocBIBFileFallback
     }
     args.bibliography = bibFile ? bibFile : undefined
-    let cslFile =
-      filePath && findFileRecursive(filePath, atomConfig().pandocCSLFile)
+    let cslFile = filePath && findFileRecursive(filePath, config.pandocCSLFile)
     if (!cslFile) {
-      cslFile = atomConfig().pandocCSLFileFallback
+      cslFile = config.pandocCSLFileFallback
     }
     args.csl = cslFile ? cslFile : undefined
   }
@@ -131,7 +129,7 @@ function handleSuccess(html: string, renderMath: boolean): string {
   if (renderMath) {
     html = handleMath(html)
   }
-  if (atomConfig().pandocRemoveReferences) {
+  if (atomConfig().pandocConfig.pandocRemoveReferences) {
     html = removeReferences(html)
   }
   return html
@@ -164,7 +162,7 @@ export async function renderPandoc(
   const { args, opts } = setPandocOptions(filePath, renderMath)
   return new Promise<string>((resolve, reject) => {
     const cp = CP.execFile(
-      atomConfig().pandocPath,
+      atomConfig().pandocConfig.pandocPath,
       getArguments(args),
       opts,
       function(error, stdout, stderr) {
@@ -205,10 +203,7 @@ function getArguments(iargs: Args) {
     [],
   )
   const res: string[] = []
-  for (const val of [
-    ...args,
-    ...atom.config.get('markdown-preview-plus.pandocArguments')!,
-  ]) {
+  for (const val of [...args, ...atomConfig().pandocConfig.pandocArguments]) {
     const newval = val.replace(/^(--[\w\-]+)\s(.+)$/i, '$1=$2')
     if (newval.substr(0, 1) === '-') {
       res.push(newval)

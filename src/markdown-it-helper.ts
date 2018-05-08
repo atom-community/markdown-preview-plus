@@ -1,7 +1,7 @@
 import markdownItModule = require('markdown-it')
 import * as twemoji from 'twemoji'
 import * as path from 'path'
-import { pairUp } from './util'
+import { pairUp, atomConfig } from './util'
 import * as _ from 'lodash'
 
 type InitState = Readonly<ReturnType<typeof currentConfig>>
@@ -26,7 +26,7 @@ function getOptions(breaks: boolean) {
 }
 
 function currentConfig(rL: boolean) {
-  const config = atom.config.get('markdown-preview-plus')
+  const config = atomConfig().markdownItConfig
   return {
     renderLaTeX: rL,
     lazyHeaders: config.useLazyHeaders,

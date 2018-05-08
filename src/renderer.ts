@@ -5,7 +5,7 @@ import markdownIt = require('./markdown-it-helper') // Defer until used
 import { scopeForFenceName } from './extension-helper'
 import imageWatcher = require('./image-watch-helper')
 import { Grammar } from 'atom'
-import { isFileSync } from './util'
+import { isFileSync, atomConfig } from './util'
 import { getMedia } from './util-common'
 
 const { resourcePath } = atom.getLoadSettings()
@@ -27,7 +27,7 @@ export async function render(
 
   let html
   let error
-  if (atom.config.get('markdown-preview-plus.enablePandoc')) {
+  if (atomConfig().renderer === 'pandoc') {
     try {
       html = await pandocHelper.renderPandoc(text, filePath, renderLaTeX)
     } catch (err) {
@@ -53,8 +53,7 @@ export async function render(
       filePath,
       {
         version: false,
-        relativize: atom.config.get('markdown-preview-plus')
-          .relativizeMediaOnSave,
+        relativize: atomConfig().previewConfig.relativizeMediaOnSave,
       },
       savePath,
     )
@@ -67,8 +66,10 @@ export async function render(
     defaultCodeLanguage = 'coffee'
   }
   if (
-    !atom.config.get('markdown-preview-plus.enablePandoc') ||
-    !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
+    !(
+      atomConfig().renderer === 'pandoc' &&
+      atomConfig().pandocConfig.useNativePandocCodeStyles
+    )
   ) {
     highlightCodeBlocks(doc, defaultCodeLanguage, mode !== 'normal')
   }
@@ -130,7 +131,7 @@ async function resolveImagePaths(
     Array.from(media).map(async function(img) {
       let src = img.getAttribute('src')
       if (src) {
-        if (!atom.config.get('markdown-preview-plus.enablePandoc')) {
+        if (atomConfig().renderer !== 'pandoc') {
           src = decodeURI(src)
         }
 

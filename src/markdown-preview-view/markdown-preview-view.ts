@@ -13,7 +13,7 @@ import {} from 'electron' // this is here soley for typings
 import renderer = require('../renderer')
 import markdownIt = require('../markdown-it-helper')
 import imageWatcher = require('../image-watch-helper')
-import { handlePromise, copyHtml } from '../util'
+import { handlePromise, copyHtml, atomConfig } from '../util'
 import * as util from './util'
 
 export interface SerializedMPV {
@@ -42,9 +42,8 @@ export abstract class MarkdownPreviewView {
 
   protected constructor(
     private defaultRenderMode: Exclude<renderer.RenderMode, 'save'> = 'normal',
-    private renderLaTeX: boolean = atom.config.get(
-      'markdown-preview-plus.enableLatexRenderingByDefault',
-    ),
+    private renderLaTeX: boolean = atomConfig().mathConfig
+      .enableLatexRenderingByDefault,
   ) {
     this.element = document.createElement('webview') as any
     this.element.getModel = () => this
@@ -122,7 +121,7 @@ export abstract class MarkdownPreviewView {
           home: atom.getConfigDirPath(),
         })
         this.element.send<'set-number-eqns'>('set-number-eqns', {
-          numberEqns: atom.config.get('markdown-preview-plus.numberEquations'),
+          numberEqns: atomConfig().mathConfig.numberEquations,
         })
         this.element.send<'set-base-path'>('set-base-path', {
           path: this.getPath(),
@@ -188,7 +187,7 @@ export abstract class MarkdownPreviewView {
   public abstract getTitle(): string
 
   public getDefaultLocation(): 'left' | 'right' | 'bottom' | 'center' {
-    return atom.config.get('markdown-preview-plus.previewDock')
+    return atomConfig().previewConfig.previewDock
   }
 
   public getIconName() {
@@ -327,11 +326,11 @@ export abstract class MarkdownPreviewView {
 
     this.disposables.add(
       atom.config.onDidChange(
-        'markdown-preview-plus.breakOnSingleNewline',
+        'markdown-preview-plus.markdownItConfig',
         this.changeHandler,
       ),
       atom.config.onDidChange(
-        'markdown-preview-plus.useLazyHeaders',
+        'markdown-preview-plus.renderer',
         this.changeHandler,
       ),
       atom.config.onDidChange(
@@ -376,7 +375,7 @@ export abstract class MarkdownPreviewView {
       this.element.send<'update-preview'>('update-preview', {
         html: domDocument.documentElement.outerHTML,
         renderLaTeX: this.renderLaTeX,
-        mjrenderer: atom.config.get('markdown-preview-plus.latexRenderer'),
+        mjrenderer: atomConfig().mathConfig.latexRenderer,
       })
       this.element.send<'set-source-map'>('set-source-map', {
         map: util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),

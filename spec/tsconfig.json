@@ -5,7 +5,8 @@
     "./**.d.ts",
     "../src-client/season.d.ts",
     "../lib/mathjax-stub.d.ts",
-    "../src-client/ipc.d.ts"
+    "../src-client/ipc.d.ts",
+    "../src/config.ts"
   ],
   "exclude": ["../node_modules"],
   "compileOnSave": false,

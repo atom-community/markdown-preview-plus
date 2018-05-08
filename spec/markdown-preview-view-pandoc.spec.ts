@@ -34,7 +34,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
     const htmlPath = path.join(__dirname, 'fixtures/subdir/file-pandoc.html')
     html = fs.readFileSync(htmlPath, { encoding: 'utf-8' })
 
-    atom.config.set('markdown-preview-plus.enablePandoc', true)
+    atom.config.set('markdown-preview-plus.renderer', 'pandoc')
     stub = sinon
       .stub(pandocHelper, 'renderPandoc')
       .callsFake(async (_text, _filePath, _renderMath) => html)

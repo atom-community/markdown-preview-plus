@@ -263,7 +263,10 @@ describe('Markdown preview plus package', function() {
 
       describe('when the liveUpdate config is set to false', () =>
         it('only re-renders the markdown when the editor is saved, not when the contents are modified', async function() {
-          atom.config.set('markdown-preview-plus.liveUpdate', false)
+          atom.config.set(
+            'markdown-preview-plus.previewConfig.liveUpdate',
+            false,
+          )
 
           const didStopChangingHandler = sinon.spy()
           const editor = atom.workspace.getActiveTextEditor()!
@@ -584,7 +587,7 @@ var x = y;
     describe('when LaTeX rendering is enabled by default', function() {
       beforeEach(async function() {
         atom.config.set(
-          'markdown-preview-plus.enableLatexRenderingByDefault',
+          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
           true,
         )
 
@@ -805,7 +808,7 @@ world</p>
   describe('Math separators configuration', function() {
     beforeEach(function() {
       atom.config.set(
-        'markdown-preview-plus.enableLatexRenderingByDefault',
+        'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
         true,
       )
     })
@@ -813,14 +816,14 @@ world</p>
       let preview: MarkdownPreviewView
 
       beforeEach(async function() {
-        atom.config.set('markdown-preview-plus.inlineMathSeparators', [
-          '$$',
-          '$$',
-        ])
-        atom.config.set('markdown-preview-plus.blockMathSeparators', [
-          '$$\n',
-          '\n$$',
-        ])
+        atom.config.set(
+          'markdown-preview-plus.markdownItConfig.inlineMathSeparators',
+          ['$$', '$$'],
+        )
+        atom.config.set(
+          'markdown-preview-plus.markdownItConfig.blockMathSeparators',
+          ['$$\n', '\n$$'],
+        )
 
         const editor = await atom.workspace.open(
           path.join(tempPath, 'subdir/kramdown-math.md'),
@@ -860,16 +863,14 @@ world</p>
     it('Shows warnings on odd number of math separators', async function() {
       await atom.packages.activatePackage('notifications')
 
-      atom.config.set('markdown-preview-plus.inlineMathSeparators', [
-        '$$',
-        '$$',
-        '$',
-      ])
-      atom.config.set('markdown-preview-plus.blockMathSeparators', [
-        '$$\n',
-        '\n$$',
-        '$$$',
-      ])
+      atom.config.set(
+        'markdown-preview-plus.markdownItConfig.inlineMathSeparators',
+        ['$$', '$$', '$'],
+      )
+      atom.config.set(
+        'markdown-preview-plus.markdownItConfig.blockMathSeparators',
+        ['$$\n', '\n$$', '$$$'],
+      )
 
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/kramdown-math.md'),

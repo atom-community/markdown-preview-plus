@@ -51,3 +51,7 @@ export async function copyHtml(
   if (res) atom.clipboard.write(res)
   view.destroy()
 }
+
+export function atomConfig() {
+  return atom.config.get('markdown-preview-plus')
+}
