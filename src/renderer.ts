@@ -6,6 +6,7 @@ import { scopeForFenceName } from './extension-helper'
 import imageWatcher = require('./image-watch-helper')
 import { Grammar } from 'atom'
 import { isFileSync } from './util'
+import { getMedia } from './util-common'
 
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
@@ -102,8 +103,9 @@ async function resolveImagePaths(
   copyHTMLFlag: boolean,
 ) {
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
+  const media = getMedia(doc)
   await Promise.all(
-    Array.from(doc.querySelectorAll('img')).map(async function(img) {
+    Array.from(media).map(async function(img) {
       let src = img.getAttribute('src')
       if (src) {
         if (!atom.config.get('markdown-preview-plus.enablePandoc')) {

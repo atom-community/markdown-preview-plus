@@ -2,6 +2,7 @@ import { ipcRenderer } from 'electron'
 import { UpdatePreview } from './update-preview'
 import { processHTMLString } from './mathjax-helper'
 import * as util from './util'
+import { getMedia } from '../src/util-common'
 
 function mkResPromise<T>(): ResolvablePromise<T> {
   let resFn: (value?: T | PromiseLike<T> | undefined) => void
@@ -90,9 +91,7 @@ ipcRenderer.on<'style'>('style', (_event, { styles }) => {
 })
 
 ipcRenderer.on<'update-images'>('update-images', (_event, { oldsrc, v }) => {
-  const imgs = document.querySelectorAll('img[src]') as NodeListOf<
-    HTMLImageElement
-  >
+  const imgs = getMedia(document)
   for (const img of Array.from(imgs)) {
     let ovs: string | undefined
     let ov: number | undefined
