@@ -77,13 +77,6 @@ export function createMarkdownPreviewView(state: SerializedMPV) {
   return undefined
 }
 
-/// used by markdown-pdf
-export function copyHtml(_callback: any, _scale: number) {
-  const editor = atom.workspace.getActiveTextEditor()
-  if (!editor) return
-  util.handlePromise(copyHtmlInternal(editor))
-}
-
 /// private
 
 async function close(
