@@ -48,15 +48,24 @@ export async function render(
       relativize: false,
     })
   } else if (mode === 'save') {
-    await resolveImagePaths(
-      doc,
-      filePath,
-      {
-        version: false,
-        relativize: atomConfig().previewConfig.relativizeMediaOnSave,
-      },
-      savePath,
-    )
+    const saveBehaviour = atomConfig().saveConfig.mediaOnSaveAsHTMLBehaviour
+    const relativize = saveBehaviour === 'relativized'
+    switch (saveBehaviour) {
+      case 'relativized':
+      case 'absolutized':
+        await resolveImagePaths(
+          doc,
+          filePath,
+          {
+            version: false,
+            relativize,
+          },
+          savePath,
+        )
+        break
+      case 'untouched':
+      /* noop */
+    }
   } else if (mode === 'copy') {
     /* noop */
   }

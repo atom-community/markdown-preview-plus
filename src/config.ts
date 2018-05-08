@@ -49,7 +49,7 @@ export const config: IConfig = {
   },
   renderer: {
     type: 'string',
-    default: 'markdown-it' as 'markdown-it' | 'pandoc',
+    default: 'markdown-it',
     title: 'Renderer backend',
     enum: ['markdown-it', 'pandoc'],
     order: 3,
@@ -65,23 +65,17 @@ export const config: IConfig = {
         default: true,
         order: 10,
       },
-      relativizeMediaOnSave: {
-        title: 'Relativize media paths when saved as HTML',
-        type: 'boolean',
-        default: true,
-        order: 15,
-      },
       previewSplitPaneDir: {
         title: 'Direction to load the preview in split pane',
         type: 'string',
-        default: 'right' as 'right' | 'down' | 'none',
+        default: 'right',
         enum: ['down', 'right', 'none'],
         order: 20,
       },
       previewDock: {
         title: 'Open preview in dock',
         type: 'string',
-        default: 'center' as 'left' | 'right' | 'bottom' | 'center',
+        default: 'center',
         enum: ['left', 'right', 'bottom', 'center'],
         order: 25,
       },
@@ -96,6 +90,32 @@ export const config: IConfig = {
         type: 'boolean',
         default: false,
         order: 27,
+      },
+    },
+  },
+  saveConfig: {
+    type: 'object',
+    title: 'Saving Behaviour',
+    order: 15,
+    properties: {
+      mediaOnSaveAsHTMLBehaviour: {
+        title: 'When saving as HTML, media paths will be',
+        description:
+          'Media includes images, audio and video. ' +
+          'relative src attributes of img, audio, video tags can either be rewritten ' +
+          'to use absolute file paths, paths relative to save location, or be left ' +
+          'unaltered',
+        type: 'string',
+        default: 'relativized',
+        enum: ['relativized', 'absolutized', 'untouched'],
+        order: 10,
+      },
+      defaultSaveFormat: {
+        title: 'Default format to save as',
+        type: 'string',
+        order: 20,
+        enum: ['html', 'pdf'],
+        default: 'html',
       },
     },
   },
@@ -147,7 +167,7 @@ export const config: IConfig = {
           'SVG is noticeably faster, but might look worse on some systems',
         type: 'string',
         enum: ['HTML-CSS', 'SVG'],
-        default: 'SVG' as 'HTML-CSS' | 'SVG',
+        default: 'SVG',
         order: 5,
       },
       numberEquations: {
@@ -249,7 +269,7 @@ export const config: IConfig = {
       },
       pandocFilters: {
         type: 'array',
-        default: [] as string[],
+        default: [],
         title: 'Filters',
         description:
           'Comma separated pandoc filters, in order of application. Will be passed via command-line arguments',
@@ -260,7 +280,7 @@ export const config: IConfig = {
       },
       pandocArguments: {
         type: 'array',
-        default: [] as string[],
+        default: [],
         title: 'Commandline Arguments',
         description:
           'Comma separated pandoc arguments e.g. `--smart, --filter=/bin/exe`. Please use long argument names.',
@@ -333,7 +353,6 @@ declare module 'atom' {
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
-    'markdown-preview-plus.previewConfig.relativizeMediaOnSave': boolean
     'markdown-preview-plus.previewConfig.previewSplitPaneDir':
       | 'down'
       | 'right'
@@ -347,11 +366,19 @@ declare module 'atom' {
     'markdown-preview-plus.previewConfig.activatePreviewWithEditor': boolean
     'markdown-preview-plus.previewConfig': {
       liveUpdate: boolean
-      relativizeMediaOnSave: boolean
       previewSplitPaneDir: 'down' | 'right' | 'none'
       previewDock: 'left' | 'right' | 'bottom' | 'center'
       closePreviewWithEditor: boolean
       activatePreviewWithEditor: boolean
+    }
+    'markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour':
+      | 'relativized'
+      | 'absolutized'
+      | 'untouched'
+    'markdown-preview-plus.saveConfig.defaultSaveFormat': 'html' | 'pdf'
+    'markdown-preview-plus.saveConfig': {
+      mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
+      defaultSaveFormat: 'html' | 'pdf'
     }
     'markdown-preview-plus.syncConfig.syncPreviewOnChange': boolean
     'markdown-preview-plus.syncConfig.syncPreviewOnEditorScroll': boolean
@@ -415,18 +442,25 @@ declare module 'atom' {
       useGitHubStyle: boolean
       renderer: 'markdown-it' | 'pandoc'
       'previewConfig.liveUpdate': boolean
-      'previewConfig.relativizeMediaOnSave': boolean
       'previewConfig.previewSplitPaneDir': 'down' | 'right' | 'none'
       'previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
       'previewConfig.closePreviewWithEditor': boolean
       'previewConfig.activatePreviewWithEditor': boolean
       previewConfig: {
         liveUpdate: boolean
-        relativizeMediaOnSave: boolean
         previewSplitPaneDir: 'down' | 'right' | 'none'
         previewDock: 'left' | 'right' | 'bottom' | 'center'
         closePreviewWithEditor: boolean
         activatePreviewWithEditor: boolean
+      }
+      'saveConfig.mediaOnSaveAsHTMLBehaviour':
+        | 'relativized'
+        | 'absolutized'
+        | 'untouched'
+      'saveConfig.defaultSaveFormat': 'html' | 'pdf'
+      saveConfig: {
+        mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
+        defaultSaveFormat: 'html' | 'pdf'
       }
       'syncConfig.syncPreviewOnChange': boolean
       'syncConfig.syncPreviewOnEditorScroll': boolean

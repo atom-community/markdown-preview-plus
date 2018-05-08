@@ -203,15 +203,14 @@ export abstract class MarkdownPreviewView {
 
   public getSaveDialogOptions() {
     let defaultPath = this.getPath()
-    if (defaultPath) {
-      defaultPath += '.html'
-    } else {
+    if (defaultPath === undefined) {
       const projectPath = atom.project.getPaths()[0]
-      defaultPath = 'untitled.md.html'
+      defaultPath = 'untitled.md'
       if (projectPath) {
         defaultPath = path.join(projectPath, defaultPath)
       }
     }
+    defaultPath += '.' + atomConfig().saveConfig.defaultSaveFormat
     return { defaultPath }
   }
 
