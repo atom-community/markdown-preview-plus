@@ -1,10 +1,15 @@
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
+import { RenderMode } from '../renderer'
 
 export class MarkdownPreviewViewString extends MarkdownPreviewView {
   private mdtext: string
 
-  constructor(text: string) {
-    super()
+  constructor(
+    text: string,
+    mode: Exclude<RenderMode, 'save'>,
+    renderLaTeX: boolean,
+  ) {
+    super(mode, renderLaTeX)
     this.mdtext = text
   }
 

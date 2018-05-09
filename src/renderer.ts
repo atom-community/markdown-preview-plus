@@ -11,12 +11,15 @@ import { getMedia } from './util-common'
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
 
+export type RenderMode = 'normal' | 'copy' | 'save'
+
 export async function render(
   text: string,
   filePath: string | undefined,
   grammar: Grammar | undefined,
   renderLaTeX: boolean,
-  copyHTMLFlag: boolean,
+  mode: RenderMode,
+  savePath?: string,
 ): Promise<HTMLDocument> {
   // Remove the <!doctype> since otherwise marked will escape it
   // https://github.com/chjj/marked/issues/354
@@ -39,7 +42,25 @@ export async function render(
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
   sanitize(doc)
-  await resolveImagePaths(doc, filePath, copyHTMLFlag)
+  if (mode === 'normal') {
+    await resolveImagePaths(doc, filePath, {
+      version: true,
+      relativize: false,
+    })
+  } else if (mode === 'save') {
+    await resolveImagePaths(
+      doc,
+      filePath,
+      {
+        version: false,
+        relativize: atom.config.get('markdown-preview-plus')
+          .relativizeMediaOnSave,
+      },
+      savePath,
+    )
+  } else if (mode === 'copy') {
+    /* noop */
+  }
   let defaultCodeLanguage: string = 'text'
   // Default code blocks to be coffee in Literate CoffeeScript files
   if ((grammar && grammar.scopeName) === 'source.litcoffee') {
@@ -49,7 +70,7 @@ export async function render(
     !atom.config.get('markdown-preview-plus.enablePandoc') ||
     !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
   ) {
-    highlightCodeBlocks(doc, defaultCodeLanguage, copyHTMLFlag)
+    highlightCodeBlocks(doc, defaultCodeLanguage, mode !== 'normal')
   }
   if (error) {
     const errd = doc.createElement('div')
@@ -100,7 +121,8 @@ function sanitize(doc: HTMLDocument) {
 async function resolveImagePaths(
   doc: HTMLDocument,
   filePath: string | undefined,
-  copyHTMLFlag: boolean,
+  options: Record<'version' | 'relativize', boolean>,
+  savePath?: string,
 ) {
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
   const media = getMedia(doc)
@@ -139,8 +161,16 @@ async function resolveImagePaths(
           src = path.resolve(path.dirname(filePath), src)
         }
 
+        if (
+          options.relativize &&
+          (filePath !== undefined || savePath !== undefined)
+        ) {
+          const fp = savePath !== undefined ? savePath : filePath!
+          src = path.relative(path.dirname(fp), src)
+        }
+
         // Use most recent version of image
-        if (!copyHTMLFlag) {
+        if (options.version) {
           const v = await imageWatcher.getVersion(src, filePath)
           if (v) {
             src = `${src}?v=${v}`

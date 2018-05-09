@@ -34,3 +34,20 @@ export function pairUp<T>(arr: T[], option?: string): Array<[T, T]> {
 export function isElement(node: Node): node is Element {
   return node.nodeType === Node.ELEMENT_NODE
 }
+
+import { MarkdownPreviewViewString } from './markdown-preview-view'
+export async function copyHtml(
+  text: string,
+  renderLaTeX: boolean,
+): Promise<void> {
+  const view = new MarkdownPreviewViewString(text, 'copy', renderLaTeX)
+  view.element.style.visibility = 'hidden'
+  view.element.style.position = 'absolute'
+  view.element.style.pointerEvents = 'none'
+  const ws = atom.views.getView(atom.workspace)
+  ws.appendChild(view.element)
+  await view.renderPromise
+  const res = await view.getHTMLSVG()
+  if (res) atom.clipboard.write(res)
+  view.destroy()
+}

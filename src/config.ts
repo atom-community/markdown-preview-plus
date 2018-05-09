@@ -9,6 +9,12 @@ export const config = {
     default: true,
     order: 10,
   },
+  relativizeMediaOnSave: {
+    title: 'Relativize media paths when saved as HTML',
+    type: 'boolean',
+    default: true,
+    order: 15,
+  },
   previewSplitPaneDir: {
     title: 'Direction to load the preview in split pane',
     type: 'string',
@@ -278,6 +284,7 @@ declare module 'atom' {
   interface ConfigValues {
     'markdown-preview-plus.breakOnSingleNewline': boolean
     'markdown-preview-plus.liveUpdate': boolean
+    'markdown-preview-plus.relativizeMediaOnSave': boolean
     'markdown-preview-plus.previewSplitPaneDir': 'down' | 'right' | 'none'
     'markdown-preview-plus.previewDock': 'left' | 'right' | 'bottom' | 'center'
     'markdown-preview-plus.closePreviewWithEditor': boolean
@@ -312,6 +319,7 @@ declare module 'atom' {
     'markdown-preview-plus': {
       breakOnSingleNewline: boolean
       liveUpdate: boolean
+      relativizeMediaOnSave: boolean
       previewSplitPaneDir: 'down' | 'right' | 'none'
       previewDock: 'left' | 'right' | 'bottom' | 'center'
       closePreviewWithEditor: boolean
