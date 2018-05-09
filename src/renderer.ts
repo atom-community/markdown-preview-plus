@@ -4,7 +4,7 @@ import pandocHelper = require('./pandoc-helper')
 import markdownIt = require('./markdown-it-helper') // Defer until used
 import { scopeForFenceName } from './extension-helper'
 import imageWatcher = require('./image-watch-helper')
-import { Grammar } from 'atom'
+import { Grammar, ConfigValues } from 'atom'
 import { isFileSync, atomConfig } from './util'
 import { getMedia } from './util-common'
 
@@ -47,27 +47,19 @@ export async function render(
       version: true,
       relativize: false,
     })
-  } else if (mode === 'save') {
-    const saveBehaviour = atomConfig().saveConfig.mediaOnSaveAsHTMLBehaviour
-    const relativize = saveBehaviour === 'relativized'
-    switch (saveBehaviour) {
-      case 'relativized':
-      case 'absolutized':
-        await resolveImagePaths(
-          doc,
-          filePath,
-          {
-            version: false,
-            relativize,
-          },
-          savePath,
-        )
+  } else {
+    let behaviour: ConfigValues['markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour']
+    switch (mode) {
+      case 'save':
+        behaviour = atomConfig().saveConfig.mediaOnSaveAsHTMLBehaviour
         break
-      case 'untouched':
-      /* noop */
+      case 'copy':
+        behaviour = atomConfig().saveConfig.mediaOnCopyAsHTMLBehaviour
+        break
+      default:
+        throw invalidMode(mode)
     }
-  } else if (mode === 'copy') {
-    /* noop */
+    await handleImages({ doc, filePath, savePath, behaviour })
   }
   let defaultCodeLanguage: string = 'text'
   // Default code blocks to be coffee in Literate CoffeeScript files
@@ -90,6 +82,10 @@ export async function render(
     doc.body.insertBefore(errd, doc.body.firstElementChild)
   }
   return doc
+}
+
+function invalidMode(mode: never) {
+  return new Error(`Invalid render mode ${mode}`)
 }
 
 function sanitize(doc: HTMLDocument) {
@@ -126,6 +122,31 @@ function sanitize(doc: HTMLDocument) {
       elem.removeAttribute(attribute)
     }),
   )
+}
+
+async function handleImages(opts: {
+  behaviour: 'relativized' | 'absolutized' | 'untouched'
+  doc: HTMLDocument
+  filePath?: string
+  savePath?: string
+}) {
+  const relativize = opts.behaviour === 'relativized'
+  switch (opts.behaviour) {
+    case 'relativized':
+    case 'absolutized':
+      await resolveImagePaths(
+        opts.doc,
+        opts.filePath,
+        {
+          version: false,
+          relativize,
+        },
+        opts.savePath,
+      )
+      break
+    case 'untouched':
+    /* noop */
+  }
 }
 
 async function resolveImagePaths(

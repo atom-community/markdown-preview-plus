@@ -95,7 +95,7 @@ export const config: IConfig = {
   },
   saveConfig: {
     type: 'object',
-    title: 'Saving Behaviour',
+    title: 'Export Behaviour',
     order: 15,
     properties: {
       mediaOnSaveAsHTMLBehaviour: {
@@ -109,6 +109,18 @@ export const config: IConfig = {
         default: 'relativized',
         enum: ['relativized', 'absolutized', 'untouched'],
         order: 10,
+      },
+      mediaOnCopyAsHTMLBehaviour: {
+        title: 'When copying as HTML, media paths will be',
+        description:
+          'Media includes images, audio and video. ' +
+          'relative src attributes of img, audio, video tags can either be rewritten ' +
+          'to use absolute file paths, paths relative to save location, or be left ' +
+          'unaltered',
+        type: 'string',
+        default: 'untouched',
+        enum: ['relativized', 'absolutized', 'untouched'],
+        order: 15,
       },
       defaultSaveFormat: {
         title: 'Default format to save as',
@@ -375,9 +387,14 @@ declare module 'atom' {
       | 'relativized'
       | 'absolutized'
       | 'untouched'
+    'markdown-preview-plus.saveConfig.mediaOnCopyAsHTMLBehaviour':
+      | 'relativized'
+      | 'absolutized'
+      | 'untouched'
     'markdown-preview-plus.saveConfig.defaultSaveFormat': 'html' | 'pdf'
     'markdown-preview-plus.saveConfig': {
       mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
+      mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
       defaultSaveFormat: 'html' | 'pdf'
     }
     'markdown-preview-plus.syncConfig.syncPreviewOnChange': boolean
@@ -457,9 +474,14 @@ declare module 'atom' {
         | 'relativized'
         | 'absolutized'
         | 'untouched'
+      'saveConfig.mediaOnCopyAsHTMLBehaviour':
+        | 'relativized'
+        | 'absolutized'
+        | 'untouched'
       'saveConfig.defaultSaveFormat': 'html' | 'pdf'
       saveConfig: {
         mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
+        mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         defaultSaveFormat: 'html' | 'pdf'
       }
       'syncConfig.syncPreviewOnChange': boolean
