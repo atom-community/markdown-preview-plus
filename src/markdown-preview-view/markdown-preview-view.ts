@@ -436,7 +436,7 @@ export abstract class MarkdownPreviewView {
 
     handlePromise(
       this.getMarkdownSource().then(async (src) =>
-        copyHtml(src, this.renderLaTeX),
+        copyHtml(src, this.getPath(), this.renderLaTeX),
       ),
     )
 

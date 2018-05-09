@@ -148,7 +148,7 @@ async function previewFile({ currentTarget }: CommandEvent): Promise<void> {
 async function copyHtmlInternal(editor: TextEditor): Promise<void> {
   const renderLaTeX = util.atomConfig().mathConfig.enableLatexRenderingByDefault
   const text = editor.getSelectedText() || editor.getText()
-  await util.copyHtml(text, renderLaTeX)
+  await util.copyHtml(text, editor.getPath(), renderLaTeX)
 }
 
 type ContextMenu = { [key: string]: ContextMenuOptions[] }

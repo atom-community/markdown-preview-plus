@@ -38,9 +38,15 @@ export function isElement(node: Node): node is Element {
 import { MarkdownPreviewViewString } from './markdown-preview-view'
 export async function copyHtml(
   text: string,
+  filePath: string | undefined,
   renderLaTeX: boolean,
 ): Promise<void> {
-  const view = new MarkdownPreviewViewString(text, 'copy', renderLaTeX)
+  const view = new MarkdownPreviewViewString(
+    text,
+    'copy',
+    renderLaTeX,
+    filePath,
+  )
   view.element.style.visibility = 'hidden'
   view.element.style.position = 'absolute'
   view.element.style.pointerEvents = 'none'

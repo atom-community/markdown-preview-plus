@@ -8,6 +8,7 @@ export class MarkdownPreviewViewString extends MarkdownPreviewView {
     text: string,
     mode: Exclude<RenderMode, 'save'>,
     renderLaTeX: boolean,
+    private readonly filePath: string | undefined,
   ) {
     super(mode, renderLaTeX)
     this.mdtext = text
@@ -28,7 +29,7 @@ export class MarkdownPreviewViewString extends MarkdownPreviewView {
   }
 
   public getPath(): string | undefined {
-    return undefined
+    return this.filePath
   }
 
   protected getGrammar(): undefined {
