@@ -30,11 +30,11 @@ export async function activate() {
       { dismissable: true },
     )
   }
-  if (atom.packages.isPackageActive('markdown-preview')) {
-    await atom.packages.deactivatePackage('markdown-preview')
+  if (!atom.packages.isPackageDisabled('markdown-preview')) {
+    atom.packages.disablePackage('markdown-preview')
     atom.notifications.addInfo(
-      'Markdown-preview-plus has deactivated markdown-preview package.' +
-        'You may want to disable it manually to avoid this message.',
+      'Markdown-preview-plus has disabled markdown-preview package.',
+      { dismissable: true },
     )
   }
   disposables = new CompositeDisposable()
