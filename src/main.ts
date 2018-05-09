@@ -30,6 +30,9 @@ export async function activate() {
       { dismissable: true },
     )
   }
+  if (atom.packages.isPackageActive('markdown-preview')) {
+    await atom.packages.deactivatePackage('markdown-preview')
+  }
   if (!atom.packages.isPackageDisabled('markdown-preview')) {
     atom.packages.disablePackage('markdown-preview')
     atom.notifications.addInfo(
