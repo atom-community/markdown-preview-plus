@@ -251,6 +251,6 @@ ipcRenderer.on<'reload'>('reload', () => {
   ipcRenderer.sendToHost<'reload'>('reload', undefined)
 })
 
-window.addEventListener('beforeunload', function() {
+window.onbeforeunload = function() {
   return allowNavigate
-})
+}
