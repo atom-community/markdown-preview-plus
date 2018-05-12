@@ -216,7 +216,7 @@ export abstract class MarkdownPreviewView {
 
   public saveAs(filePath: string | undefined) {
     if (filePath === undefined) return
-    if (this.loading) return
+    if (this.loading) throw new Error('Preview is still loading')
 
     const { name, ext } = path.parse(filePath)
 
