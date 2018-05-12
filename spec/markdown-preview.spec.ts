@@ -773,7 +773,7 @@ world</p>
       spy.restore()
     })
     beforeEach(function() {
-      spy.reset()
+      spy.resetHistory()
     })
     it('Binds to new scopes when config is changed', async function() {
       atom.config.set('markdown-preview-plus.grammars', ['source.js'])
