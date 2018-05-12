@@ -1,3 +1,9 @@
+## 3.1.1
+
+-   Fix preview navigating to external URLs
+-   When activatePreviewWithEditor enabled, don't activate preview if editor is
+    in the same pane as preview
+
 ## 3.1.0
 
 ### Changes
