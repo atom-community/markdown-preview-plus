@@ -82,14 +82,7 @@ export abstract class MarkdownPreviewView {
             )
             break
           case 'open-source':
-            const path = this.getPath()
-            if (path === undefined) break
-            handlePromise(
-              atom.workspace.open(path, {
-                initialLine: e.args[0].initialLine,
-                searchAllPanes: true,
-              }),
-            )
+            this.openSource(e.args[0].initialLine)
             break
           case 'did-scroll-preview':
             const { min, max } = e.args[0]
@@ -266,6 +259,17 @@ export abstract class MarkdownPreviewView {
 
   protected abstract getGrammar(): Grammar | undefined
 
+  protected openSource(initialLine?: number) {
+    const path = this.getPath()
+    if (path === undefined) return
+    handlePromise(
+      atom.workspace.open(path, {
+        initialLine,
+        searchAllPanes: true,
+      }),
+    )
+  }
+
   //
   // Scroll the associated preview to the element representing the target line of
   // of the source markdown.
@@ -279,6 +283,20 @@ export abstract class MarkdownPreviewView {
   //
   protected syncPreview(line: number) {
     this.element.send<'sync'>('sync', { line })
+  }
+
+  protected openNewWindow() {
+    const path = this.getPath()
+    if (!path) {
+      atom.notifications.addWarning(
+        'Can not open this preview in new window: no file path',
+      )
+      return
+    }
+    atom.open({
+      pathsToOpen: [`markdown-preview-plus://file/${path}`],
+    })
+    util.destroy(this)
   }
 
   private handleEvents() {
@@ -306,17 +324,7 @@ export abstract class MarkdownPreviewView {
           this.element.openDevTools()
         },
         'markdown-preview-plus:new-window': () => {
-          const path = this.getPath()
-          if (!path) {
-            atom.notifications.addWarning(
-              'Can not open this preview in new window: no file path',
-            )
-            return
-          }
-          atom.open({
-            pathsToOpen: [`markdown-preview-plus://file/${path}`],
-          })
-          util.destroy(this)
+          this.openNewWindow()
         },
         'markdown-preview-plus:print': () => {
           this.element.print()
