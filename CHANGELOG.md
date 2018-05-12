@@ -1,6 +1,6 @@
 ## 3.1.0
 
-## Changes
+### Changes
 
 -   Settings cleanup
 
@@ -18,7 +18,7 @@
     and markdown-pdf not supporting compatiblity with MPP by default, and that
     whole code branch being deprecated, this shouldn't affect many users.
 
-# New features
+### New features
 
 -   Options to relativize media paths on save/copy
 
@@ -64,7 +64,7 @@
     equation changes. This can be slow, especially with documents containing
     a lot of math, and re-rendering flicker can be distracting.
 
-# Fixes
+### Fixes
 
 -   Fix github-style saved HTML scrollability
 
@@ -84,7 +84,7 @@
     speed up rendering a tiny bit and it will avoid unnecessary re-renders
     when math numbering is on.
 
-# Maintenence
+### Maintenence
 
 -   Don't use deprecated sinon.reset()
 -   Throw error when trying to saveAs a loading preview
