@@ -1,3 +1,102 @@
+## 3.1.0
+
+## Changes
+
+-   Settings cleanup
+
+    Settings have been reworked to provide better categorization.
+    Old package config should be migrated automatically after upgrade,
+    but be sure to check just in case.
+
+-   MPP will now disable bundled `markdown-preview` on first activation to avoid
+    conflicts.
+
+-   Most package config changes related to rendering will now be automatically
+    applied to all open previews instantly.
+
+-   Removed makrdown-pdf compatibility. Since we provide our own PDF export,
+    and markdown-pdf not supporting compatiblity with MPP by default, and that
+    whole code branch being deprecated, this shouldn't affect many users.
+
+# New features
+
+-   Options to relativize media paths on save/copy
+
+    This behaviour is controlled by `saveConfig.mediaOnSaveAsHTMLBehaviour` and
+    `saveConfig.mediaOnCopyAsHTMLBehaviour`. Both can have value of:
+    -   `untouched` -- media paths will be left as they are in source Markdown
+    -   `relativized` -- media paths will be relativized wrt save path (on save)
+        or Markdown file path (on copy)
+    -   `absolutized` -- media paths will be absolutized. This is the behaviour
+        of all previous versions, and bundled markdown-preview.
+
+-   In addition to images, `audio` and `video` tags sources are also resolved
+    in the filesystem and are auto-updated on source file changes.
+
+-   Optional support for `markdown-it-table-of-contents` plugin.
+
+    When enabled in package config, `[[toc]]` will be replaced with table of
+    contents when using markdown-it parser/renderer.
+
+-   Added 'Print' menu item to preview context menu and
+    `markdown-preview-plus:print` command. This will display system
+    printing dialog, which will also offer saving to PDF.
+
+-   Continuous scroll syncronization.
+
+    There are two possible synchronization directions:
+
+    -   Autoscroll preview when editor is scrolled
+
+        This is controlled by `syncConfig.syncEditorOnPreviewScroll` setting
+
+    -   Autoscroll editor when preview is scrolled
+
+        This is controlled by `syncConfig.syncEditorOnPreviewScroll` setting
+
+    When both are enabled, preview/editor is autoscroleld only when
+    editor/preview respectively is in the active pane. In practice this can
+    mean an additional click to engage scroll syncronization.
+
+-   Support for auto-numbered math.
+
+    Note that to support this, all math has to be re-rendered if even one
+    equation changes. This can be slow, especially with documents containing
+    a lot of math, and re-rendering flicker can be distracting.
+
+# Fixes
+
+-   Fix github-style saved HTML scrollability
+
+    Due to botched CSS style, HTML saved with github style was not scrollable.
+
+-   Fix unneeded reinitializations in markdown-it parser/renderer
+
+    Due to botched check for changed settings, markdown-it was reinitialized
+    on every render. Now that this has been fixed, rendering with
+    markdown-it backend should be a little bit faster.
+
+-   Labelled MathJax math doesn't break on re-renders anymore. See
+    [#180](https://github.com/atom-community/markdown-preview-plus/issues/180)
+    for more details
+
+-   Math will only be typeset if there's any unprocessed math. This should
+    speed up rendering a tiny bit and it will avoid unnecessary re-renders
+    when math numbering is on.
+
+# Maintenence
+
+-   Don't use deprecated sinon.reset()
+-   Throw error when trying to saveAs a loading preview
+-   Spec for saveConfig configuration
+-   Add spec: disable bundled markdown-preview on activation
+-   Clean-up pandoc-helper exports
+-   Rewrite highlighting spec to be less hacky
+-   Avoid global state and more clean-up in markdown-it-helper
+-   Clean-up markdown-it-helper
+-   Fix mathjax-helper spec
+-   Add equation numbering spec
+
 ## 3.0.1
 
 ### Changes
