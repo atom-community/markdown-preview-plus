@@ -83,6 +83,8 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
           if (ed === this.editor) {
             const pane = atom.workspace.paneForItem(this)
             if (!pane) return
+            const edPane = atom.workspace.paneForItem(ed)
+            if (pane === edPane) return
             pane.activateItem(this)
           }
         }
