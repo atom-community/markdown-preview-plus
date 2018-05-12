@@ -15,27 +15,33 @@ import {
 } from 'atom'
 import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
+import { migrateConfig } from './migrate-config'
 
 export { config } from './config'
 
 let disposables: CompositeDisposable | undefined
 
 export async function activate() {
+  if (migrateConfig()) {
+    atom.notifications.addInfo(
+      'Markdown-Preivew-Plus has updated your config to a new format. ' +
+        'Please check if everything is in order. ' +
+        'This message will not be shown again.',
+      { dismissable: true },
+    )
+  }
   if (atom.packages.isPackageActive('markdown-preview')) {
     await atom.packages.deactivatePackage('markdown-preview')
+  }
+  if (!atom.packages.isPackageDisabled('markdown-preview')) {
+    atom.packages.disablePackage('markdown-preview')
     atom.notifications.addInfo(
-      'Markdown-preview-plus has deactivated markdown-preview package.' +
-        'You may want to disable it manually to avoid this message.',
+      'Markdown-preview-plus has disabled markdown-preview package.',
+      { dismissable: true },
     )
   }
   disposables = new CompositeDisposable()
   disposables.add(
-    atom.commands.add('atom-workspace', {
-      'markdown-preview-plus:toggle-break-on-single-newline': function() {
-        const keyPath = 'markdown-preview-plus.breakOnSingleNewline'
-        atom.config.set(keyPath, !atom.config.get(keyPath))
-      },
-    }),
     atom.commands.add('.markdown-preview-plus', {
       'markdown-preview-plus:toggle': close,
     }),
@@ -109,9 +115,7 @@ function removePreviewForEditor(editor: TextEditor) {
 async function addPreviewForEditor(editor: TextEditor) {
   const previousActivePane = atom.workspace.getActivePane()
   const options: WorkspaceOpenOptions = { searchAllPanes: true }
-  const splitConfig = atom.config.get(
-    'markdown-preview-plus.previewSplitPaneDir',
-  )
+  const splitConfig = util.atomConfig().previewConfig.previewSplitPaneDir
   if (splitConfig !== 'none') {
     options.split = splitConfig
   }
@@ -145,11 +149,9 @@ async function previewFile({ currentTarget }: CommandEvent): Promise<void> {
 }
 
 async function copyHtmlInternal(editor: TextEditor): Promise<void> {
-  const renderLaTeX = atom.config.get(
-    'markdown-preview-plus.enableLatexRenderingByDefault',
-  )
+  const renderLaTeX = util.atomConfig().mathConfig.enableLatexRenderingByDefault
   const text = editor.getSelectedText() || editor.getText()
-  await util.copyHtml(text, renderLaTeX)
+  await util.copyHtml(text, editor.getPath(), renderLaTeX)
 }
 
 type ContextMenu = { [key: string]: ContextMenuOptions[] }

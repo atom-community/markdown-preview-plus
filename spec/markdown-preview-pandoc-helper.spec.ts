@@ -69,7 +69,7 @@ describe('Markdown preview plus pandoc helper', function() {
     })
 
     it('should load user arguments', function() {
-      atom.config.set('markdown-preview-plus.pandocArguments', [
+      atom.config.set('markdown-preview-plus.pandocConfig.pandocArguments', [
         '-v',
         '--smart',
         'rem',
@@ -86,7 +86,7 @@ describe('Markdown preview plus pandoc helper', function() {
     })
 
     it('should combine user arguments and given arguments', function() {
-      atom.config.set('markdown-preview-plus.pandocArguments', [
+      atom.config.set('markdown-preview-plus.pandocConfig.pandocArguments', [
         '-v',
         '--filter-foo /foo/baz',
       ])
@@ -109,28 +109,42 @@ describe('Markdown preview plus pandoc helper', function() {
 
     beforeEach(function() {
       file = path.join(tempPath, 'subdir', 'simple.md')
-      atom.config.set('markdown-preview-plus.pandocBibliography', true)
-      atom.config.set('markdown-preview-plus.pandocBIBFile', bibFile)
       atom.config.set(
-        'markdown-preview-plus.pandocBIBFileFallback',
+        'markdown-preview-plus.pandocConfig.pandocBibliography',
+        true,
+      )
+      atom.config.set(
+        'markdown-preview-plus.pandocConfig.pandocBIBFile',
+        bibFile,
+      )
+      atom.config.set(
+        'markdown-preview-plus.pandocConfig.pandocBIBFileFallback',
         fallBackBib,
       )
-      atom.config.set('markdown-preview-plus.pandocCSLFile', cslFile)
       atom.config.set(
-        'markdown-preview-plus.pandocCSLFileFallback',
+        'markdown-preview-plus.pandocConfig.pandocCSLFile',
+        cslFile,
+      )
+      atom.config.set(
+        'markdown-preview-plus.pandocConfig.pandocCSLFileFallback',
         fallBackCsl,
       )
     })
 
     it("shouldn't set pandoc bib options if citations are disabled", function() {
-      atom.config.set('markdown-preview-plus.pandocBibliography', false)
+      atom.config.set(
+        'markdown-preview-plus.pandocConfig.pandocBibliography',
+        false,
+      )
       fs.writeFileSync(path.join(tempPath, bibFile), '')
       const config = setPandocOptions(file, false)
       expect(config.args.bibliography).to.equal(undefined)
     })
 
     it("shouldn't set pandoc bib options if no fallback file exists", function() {
-      atom.config.unset('markdown-preview-plus.pandocBIBFileFallback')
+      atom.config.unset(
+        'markdown-preview-plus.pandocConfig.pandocBIBFileFallback',
+      )
       const config = setPandocOptions(file, false)
       expect(config.args.bibliography).to.equal(undefined)
     })
@@ -148,14 +162,19 @@ describe('Markdown preview plus pandoc helper', function() {
     })
 
     it("shouldn't set pandoc csl options if citations are disabled", function() {
-      atom.config.set('markdown-preview-plus.pandocBibliography', false)
+      atom.config.set(
+        'markdown-preview-plus.pandocConfig.pandocBibliography',
+        false,
+      )
       fs.writeFileSync(path.join(tempPath, cslFile), '')
       const config = setPandocOptions(file, false)
       expect(config.args.csl).to.equal(undefined)
     })
 
     it("shouldn't set pandoc csl options if no fallback file exists", function() {
-      atom.config.unset('markdown-preview-plus.pandocCSLFileFallback')
+      atom.config.unset(
+        'markdown-preview-plus.pandocConfig.pandocCSLFileFallback',
+      )
       const config = setPandocOptions(file, false)
       expect(config.args.csl).to.equal(undefined)
     })

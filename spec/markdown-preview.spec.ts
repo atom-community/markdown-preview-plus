@@ -2,7 +2,10 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
 import * as wrench from 'fs-extra'
-import { MarkdownPreviewView } from '../lib/markdown-preview-view'
+import {
+  MarkdownPreviewView,
+  MarkdownPreviewViewFile,
+} from '../lib/markdown-preview-view'
 
 import {
   waitsFor,
@@ -13,7 +16,7 @@ import {
 } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
-import { TextEditor, TextEditorElement } from 'atom'
+import { TextEditor, TextEditorElement, ConfigValues } from 'atom'
 
 describe('Markdown preview plus package', function() {
   let preview: MarkdownPreviewView
@@ -263,7 +266,10 @@ describe('Markdown preview plus package', function() {
 
       describe('when the liveUpdate config is set to false', () =>
         it('only re-renders the markdown when the editor is saved, not when the contents are modified', async function() {
-          atom.config.set('markdown-preview-plus.liveUpdate', false)
+          atom.config.set(
+            'markdown-preview-plus.previewConfig.liveUpdate',
+            false,
+          )
 
           const didStopChangingHandler = sinon.spy()
           const editor = atom.workspace.getActiveTextEditor()!
@@ -584,7 +590,7 @@ var x = y;
     describe('when LaTeX rendering is enabled by default', function() {
       beforeEach(async function() {
         atom.config.set(
-          'markdown-preview-plus.enableLatexRenderingByDefault',
+          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
           true,
         )
 
@@ -767,7 +773,7 @@ world</p>
       spy.restore()
     })
     beforeEach(function() {
-      spy.reset()
+      spy.resetHistory()
     })
     it('Binds to new scopes when config is changed', async function() {
       atom.config.set('markdown-preview-plus.grammars', ['source.js'])
@@ -805,7 +811,7 @@ world</p>
   describe('Math separators configuration', function() {
     beforeEach(function() {
       atom.config.set(
-        'markdown-preview-plus.enableLatexRenderingByDefault',
+        'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
         true,
       )
     })
@@ -813,14 +819,14 @@ world</p>
       let preview: MarkdownPreviewView
 
       beforeEach(async function() {
-        atom.config.set('markdown-preview-plus.inlineMathSeparators', [
-          '$$',
-          '$$',
-        ])
-        atom.config.set('markdown-preview-plus.blockMathSeparators', [
-          '$$\n',
-          '\n$$',
-        ])
+        atom.config.set(
+          'markdown-preview-plus.markdownItConfig.inlineMathSeparators',
+          ['$$', '$$'],
+        )
+        atom.config.set(
+          'markdown-preview-plus.markdownItConfig.blockMathSeparators',
+          ['$$\n', '\n$$'],
+        )
 
         const editor = await atom.workspace.open(
           path.join(tempPath, 'subdir/kramdown-math.md'),
@@ -860,16 +866,14 @@ world</p>
     it('Shows warnings on odd number of math separators', async function() {
       await atom.packages.activatePackage('notifications')
 
-      atom.config.set('markdown-preview-plus.inlineMathSeparators', [
-        '$$',
-        '$$',
-        '$',
-      ])
-      atom.config.set('markdown-preview-plus.blockMathSeparators', [
-        '$$\n',
-        '\n$$',
-        '$$$',
-      ])
+      atom.config.set(
+        'markdown-preview-plus.markdownItConfig.inlineMathSeparators',
+        ['$$', '$$', '$'],
+      )
+      atom.config.set(
+        'markdown-preview-plus.markdownItConfig.blockMathSeparators',
+        ['$$\n', '\n$$', '$$$'],
+      )
 
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/kramdown-math.md'),
@@ -901,6 +905,177 @@ world</p>
       )
 
       await atom.packages.deactivatePackage('notifications')
+    })
+  })
+  describe('saveConfig configuration', () => {
+    beforeEach(async () => {
+      preview = new MarkdownPreviewViewFile(
+        path.join(tempPath, 'subdir', 'file.markdown'),
+      )
+      atom.views
+        .getView(atom.workspace)
+        .appendChild(atom.views.getView(preview))
+      await preview.renderPromise
+    })
+    afterEach(() => {
+      preview.destroy()
+    })
+    describe('when defaultSaveFormat is changed', () => {
+      it('changes default options', async () => {
+        // default
+        expect(preview.getSaveDialogOptions().defaultPath.endsWith('.html')).to
+          .be.true
+        // html
+        atom.config.set(
+          'markdown-preview-plus.saveConfig.defaultSaveFormat',
+          'html',
+        )
+        expect(preview.getSaveDialogOptions().defaultPath.endsWith('.html')).to
+          .be.true
+        // pdf
+        atom.config.set(
+          'markdown-preview-plus.saveConfig.defaultSaveFormat',
+          'pdf',
+        )
+        expect(preview.getSaveDialogOptions().defaultPath.endsWith('.pdf')).to
+          .be.true
+      })
+    })
+    describe('depending on mediaOnSaveAsHTMLBehaviour value', () => {
+      let outPath: string
+      beforeEach(() => {
+        outPath = path.join(tempPath, 'test.html')
+      })
+      async function readHTML(path: string) {
+        await waitsFor(() => {
+          try {
+            fs.accessSync(path)
+            return true
+          } catch (e) {
+            return false
+          }
+        })
+        const content = fs.readFileSync(path, { encoding: 'utf-8' })
+        const dom = new DOMParser()
+        const doc = dom.parseFromString(content, 'text/html')
+        return doc
+      }
+      async function getImgs(
+        settingVal: ConfigValues['markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour'],
+      ) {
+        atom.config.set(
+          'markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour',
+          settingVal,
+        )
+        preview.saveAs(outPath)
+        const doc = await readHTML(outPath)
+        const imgs = Array.from(doc.body.querySelectorAll('img')).slice(-4)
+        expect(imgs.length).to.equal(4)
+        return imgs
+      }
+      it('doesnt touch media if it is "untouched"', async () => {
+        const imgs = await getImgs('untouched')
+        expect(imgs[0].getAttribute('src')).to.equal('image1.png')
+        expect(imgs[1].getAttribute('src')).to.equal('/tmp/image2.png')
+        expect(imgs[2].getAttribute('src')).to.equal(
+          'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
+        )
+        expect(imgs[3].getAttribute('src')!.startsWith('data:')).to.be.true
+      })
+      it('relativizes paths if it is "relativized"', async () => {
+        const imgs = await getImgs('relativized')
+        expect(imgs[0].getAttribute('src')).to.equal(
+          path.join('subdir', 'image1.png'),
+        )
+        expect(imgs[1].getAttribute('src')).to.equal(
+          path.join('tmp', 'image2.png'),
+        )
+        expect(imgs[2].getAttribute('src')).to.equal(
+          'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
+        )
+        expect(imgs[3].getAttribute('src')!.startsWith('data:')).to.be.true
+      })
+      it('absolutizes paths if it is "absolutized"', async () => {
+        const imgs = await getImgs('absolutized')
+        expect(imgs[0].getAttribute('src')).to.equal(
+          path.join(tempPath, 'subdir', 'image1.png'),
+        )
+        expect(imgs[1].getAttribute('src')).to.equal(
+          path.join(tempPath, 'tmp', 'image2.png'),
+        )
+        expect(imgs[2].getAttribute('src')).to.equal(
+          'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
+        )
+        expect(imgs[3].getAttribute('src')!.startsWith('data:')).to.be.true
+      })
+    })
+    describe('depending on mediaOnCopyAsHTMLBehaviour value', () => {
+      let clipboardContents: string = ''
+      let stub: sinon.SinonStub
+      before(() => {
+        stub = sinon
+          .stub(atom.clipboard, 'write')
+          .callsFake(function(val: string) {
+            clipboardContents = val
+          })
+      })
+      after(() => {
+        clipboardContents = ''
+        stub.restore()
+      })
+      async function readHTML() {
+        stub.resetHistory()
+        await atom.commands.dispatch(atom.views.getView(preview), 'core:copy')
+        await waitsFor(() => stub.called)
+        const dom = new DOMParser()
+        const doc = dom.parseFromString(clipboardContents, 'text/html')
+        return doc
+      }
+      async function getImgs(
+        settingVal: ConfigValues['markdown-preview-plus.saveConfig.mediaOnCopyAsHTMLBehaviour'],
+      ) {
+        atom.config.set(
+          'markdown-preview-plus.saveConfig.mediaOnCopyAsHTMLBehaviour',
+          settingVal,
+        )
+        const doc = await readHTML()
+        const imgs = Array.from(doc.body.querySelectorAll('img')).slice(-4)
+        expect(imgs.length).to.equal(4)
+        return imgs
+      }
+      it('doesnt touch media if it is "untouched"', async () => {
+        const imgs = await getImgs('untouched')
+        expect(imgs[0].getAttribute('src')).to.equal('image1.png')
+        expect(imgs[1].getAttribute('src')).to.equal('/tmp/image2.png')
+        expect(imgs[2].getAttribute('src')).to.equal(
+          'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
+        )
+        expect(imgs[3].getAttribute('src')!.startsWith('data:')).to.be.true
+      })
+      it('relativizes paths if it is "relativized"', async () => {
+        const imgs = await getImgs('relativized')
+        expect(imgs[0].getAttribute('src')).to.equal(path.join('image1.png'))
+        expect(imgs[1].getAttribute('src')).to.equal(
+          path.join('..', 'tmp', 'image2.png'),
+        )
+        expect(imgs[2].getAttribute('src')).to.equal(
+          'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
+        )
+        expect(imgs[3].getAttribute('src')!.startsWith('data:')).to.be.true
+      })
+      it('absolutizes paths if it is "absolutized"', async () => {
+        const imgs = await getImgs('absolutized')
+        expect(imgs[0].getAttribute('src')).to.equal(
+          path.join(tempPath, 'subdir', 'image1.png'),
+        )
+        expect(imgs[1].getAttribute('src')).to.equal(
+          path.join(tempPath, 'tmp', 'image2.png'),
+        )
+        expect(imgs[2].getAttribute('src')).to.equal(
+          'https://raw.githubusercontent.com/Galadirith/markdown-preview-plus/master/assets/hr.png',
+        )
+        expect(imgs[3].getAttribute('src')!.startsWith('data:')).to.be.true
+      })
     })
   })
 })

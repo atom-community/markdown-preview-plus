@@ -25,6 +25,7 @@ import MathJaxHelper = require('./mathjax-helper')
 import { handlePromise } from './util'
 
 export class UpdatePreview {
+  private cachedMJRenderer?: MathJaxRenderer
   constructor(private dom: HTMLElement) {
     /* no-op */
   }
@@ -34,12 +35,16 @@ export class UpdatePreview {
     renderLaTeX: boolean,
     mjrenderer: MathJaxRenderer,
   ) {
+    const lastMJRenderer =
+      this.cachedMJRenderer === undefined ? mjrenderer : this.cachedMJRenderer
+    this.cachedMJRenderer = mjrenderer
     const newDom = domFragment.cloneNode(true) as DocumentFragment
 
     for (const m of Array.from(newDom.querySelectorAll('span.math'))) {
       const mscr = m.firstElementChild as HTMLScriptElement | null
       if (!mscr || mscr.nodeName !== 'SCRIPT') continue
       m.isSameNode = function(target: Node) {
+        if (lastMJRenderer !== mjrenderer) return false
         if (target.nodeName !== 'SPAN') return false
         const el = target as HTMLSpanElement
         if (!el.classList.contains('math')) return false

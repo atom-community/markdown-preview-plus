@@ -165,7 +165,7 @@ describe('the difference algorithm that updates the preview', function() {
     beforeEach(async function() {
       await waitsFor.msg('LaTeX rendering to be enabled', () =>
         atom.config.set(
-          'markdown-preview-plus.enableLatexRenderingByDefault',
+          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
           true,
         ),
       )

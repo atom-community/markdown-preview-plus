@@ -150,7 +150,10 @@ describe('MarkdownPreviewView', function() {
     })
 
     it('should render headings with and without space', async function() {
-      atom.config.set('markdown-preview-plus.useLazyHeaders', false)
+      atom.config.set(
+        'markdown-preview-plus.markdownItConfig.useLazyHeaders',
+        false,
+      )
 
       await waitsFor(
         async () =>
@@ -610,7 +613,10 @@ var x = 0;
   describe('gfm newlines', function() {
     describe('when gfm newlines are not enabled', () =>
       it('creates a single paragraph with <br>', async function() {
-        atom.config.set('markdown-preview-plus.breakOnSingleNewline', false)
+        atom.config.set(
+          'markdown-preview-plus.markdownItConfig.breakOnSingleNewline',
+          false,
+        )
 
         await waitsFor(
           async () =>
@@ -626,7 +632,10 @@ var x = 0;
 
     describe('when gfm newlines are enabled', () =>
       it('creates a single paragraph with no <br>', async function() {
-        atom.config.set('markdown-preview-plus.breakOnSingleNewline', true)
+        atom.config.set(
+          'markdown-preview-plus.markdownItConfig.breakOnSingleNewline',
+          true,
+        )
 
         await waitsFor(
           async () =>
@@ -770,7 +779,7 @@ var x = 0;
       const editor = await atom.workspace.open(filePath)
 
       atom.config.set(
-        'markdown-preview-plus.enableLatexRenderingByDefault',
+        'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
         true,
       )
       atom.commands.dispatch(
@@ -868,17 +877,25 @@ var x = 0;
   describe('Equation numbering', () => {
     describe('When numberEquations is enabled', () => {
       before(() => {
-        atom.config.set('markdown-preview-plus.numberEquations', true)
-        atom.config.set('markdown-preview-plus.latexRenderer', 'HTML-CSS')
         atom.config.set(
-          'markdown-preview-plus.enableLatexRenderingByDefault',
+          'markdown-preview-plus.mathConfig.numberEquations',
+          true,
+        )
+        atom.config.set(
+          'markdown-preview-plus.mathConfig.latexRenderer',
+          'HTML-CSS',
+        )
+        atom.config.set(
+          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
           true,
         )
       })
       after(() => {
-        atom.config.unset('markdown-preview-plus.numberEquations')
-        atom.config.unset('markdown-preview-plus.latexRenderer')
-        atom.config.unset('markdown-preview-plus.enableLatexRenderingByDefault')
+        atom.config.unset('markdown-preview-plus.mathConfig.numberEquations')
+        atom.config.unset('markdown-preview-plus.mathConfig.latexRenderer')
+        atom.config.unset(
+          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
+        )
       })
       it('Renders equation numbers', async () => {
         const editor = (await atom.workspace.open(
@@ -903,17 +920,25 @@ $$
     })
     describe('When numberEquations is disabled', () => {
       before(() => {
-        atom.config.set('markdown-preview-plus.numberEquations', false)
-        atom.config.set('markdown-preview-plus.latexRenderer', 'HTML-CSS')
         atom.config.set(
-          'markdown-preview-plus.enableLatexRenderingByDefault',
+          'markdown-preview-plus.mathConfig.numberEquations',
+          false,
+        )
+        atom.config.set(
+          'markdown-preview-plus.mathConfig.latexRenderer',
+          'HTML-CSS',
+        )
+        atom.config.set(
+          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
           true,
         )
       })
       after(() => {
-        atom.config.unset('markdown-preview-plus.numberEquations')
-        atom.config.unset('markdown-preview-plus.latexRenderer')
-        atom.config.unset('markdown-preview-plus.enableLatexRenderingByDefault')
+        atom.config.unset('markdown-preview-plus.mathConfig.numberEquations')
+        atom.config.unset('markdown-preview-plus.mathConfig.latexRenderer')
+        atom.config.unset(
+          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
+        )
       })
       it('Renders equation numbers', async () => {
         const editor = (await atom.workspace.open(

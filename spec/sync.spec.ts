@@ -32,7 +32,10 @@ describe('Syncronization of source and preview', function() {
     const configDirPath = temp.mkdirSync('atom-config-dir-')
     stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
 
-    atom.config.set('markdown-preview-plus.enableLatexRenderingByDefault', true)
+    atom.config.set(
+      'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
+      true,
+    )
     const editor = await atom.workspace.open(path.join(fixturesPath, 'sync.md'))
     atom.commands.dispatch(
       atom.views.getView(editor),

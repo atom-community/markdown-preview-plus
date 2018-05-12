@@ -4,8 +4,8 @@ import pandocHelper = require('./pandoc-helper')
 import markdownIt = require('./markdown-it-helper') // Defer until used
 import { scopeForFenceName } from './extension-helper'
 import imageWatcher = require('./image-watch-helper')
-import { Grammar } from 'atom'
-import { isFileSync } from './util'
+import { Grammar, ConfigValues } from 'atom'
+import { isFileSync, atomConfig } from './util'
 import { getMedia } from './util-common'
 
 const { resourcePath } = atom.getLoadSettings()
@@ -27,7 +27,7 @@ export async function render(
 
   let html
   let error
-  if (atom.config.get('markdown-preview-plus.enablePandoc')) {
+  if (atomConfig().renderer === 'pandoc') {
     try {
       html = await pandocHelper.renderPandoc(text, filePath, renderLaTeX)
     } catch (err) {
@@ -47,19 +47,19 @@ export async function render(
       version: true,
       relativize: false,
     })
-  } else if (mode === 'save') {
-    await resolveImagePaths(
-      doc,
-      filePath,
-      {
-        version: false,
-        relativize: atom.config.get('markdown-preview-plus')
-          .relativizeMediaOnSave,
-      },
-      savePath,
-    )
-  } else if (mode === 'copy') {
-    /* noop */
+  } else {
+    let behaviour: ConfigValues['markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour']
+    switch (mode) {
+      case 'save':
+        behaviour = atomConfig().saveConfig.mediaOnSaveAsHTMLBehaviour
+        break
+      case 'copy':
+        behaviour = atomConfig().saveConfig.mediaOnCopyAsHTMLBehaviour
+        break
+      default:
+        throw invalidMode(mode)
+    }
+    await handleImages({ doc, filePath, savePath, behaviour })
   }
   let defaultCodeLanguage: string = 'text'
   // Default code blocks to be coffee in Literate CoffeeScript files
@@ -67,8 +67,10 @@ export async function render(
     defaultCodeLanguage = 'coffee'
   }
   if (
-    !atom.config.get('markdown-preview-plus.enablePandoc') ||
-    !atom.config.get('markdown-preview-plus.useNativePandocCodeStyles')
+    !(
+      atomConfig().renderer === 'pandoc' &&
+      atomConfig().pandocConfig.useNativePandocCodeStyles
+    )
   ) {
     highlightCodeBlocks(doc, defaultCodeLanguage, mode !== 'normal')
   }
@@ -80,6 +82,10 @@ export async function render(
     doc.body.insertBefore(errd, doc.body.firstElementChild)
   }
   return doc
+}
+
+function invalidMode(mode: never) {
+  return new Error(`Invalid render mode ${mode}`)
 }
 
 function sanitize(doc: HTMLDocument) {
@@ -118,6 +124,31 @@ function sanitize(doc: HTMLDocument) {
   )
 }
 
+async function handleImages(opts: {
+  behaviour: 'relativized' | 'absolutized' | 'untouched'
+  doc: HTMLDocument
+  filePath?: string
+  savePath?: string
+}) {
+  const relativize = opts.behaviour === 'relativized'
+  switch (opts.behaviour) {
+    case 'relativized':
+    case 'absolutized':
+      await resolveImagePaths(
+        opts.doc,
+        opts.filePath,
+        {
+          version: false,
+          relativize,
+        },
+        opts.savePath,
+      )
+      break
+    case 'untouched':
+    /* noop */
+  }
+}
+
 async function resolveImagePaths(
   doc: HTMLDocument,
   filePath: string | undefined,
@@ -130,7 +161,7 @@ async function resolveImagePaths(
     Array.from(media).map(async function(img) {
       let src = img.getAttribute('src')
       if (src) {
-        if (!atom.config.get('markdown-preview-plus.enablePandoc')) {
+        if (atomConfig().renderer !== 'pandoc') {
           src = decodeURI(src)
         }
 
