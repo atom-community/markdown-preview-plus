@@ -305,6 +305,19 @@ export abstract class MarkdownPreviewView {
         'markdown-preview-plus:open-dev-tools': () => {
           this.element.openDevTools()
         },
+        'markdown-preview-plus:new-window': () => {
+          const path = this.getPath()
+          if (!path) {
+            atom.notifications.addWarning(
+              'Can not open this preview in new window: no file path',
+            )
+            return
+          }
+          atom.open({
+            pathsToOpen: [`markdown-preview-plus://file/${path}`],
+          })
+          util.destroy(this)
+        },
         'markdown-preview-plus:print': () => {
           this.element.print()
         },
