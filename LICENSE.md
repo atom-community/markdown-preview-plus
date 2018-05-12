@@ -1,4 +1,7 @@
-Copyright (c) 2014-2015 Edward Fauchon-Jones
+Copyright (c) 2014 Edward Fauchon-Jones
+Copyright (c) 2015 Lukas Eipert
+Copyright (c) 2016 Nikolay Yakimov
+Copyright (c) 2017 Atom Community
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
