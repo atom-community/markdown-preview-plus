@@ -27,7 +27,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
       .then((v) => {
         this.text = v.text
         this.path = v.path
-        this.grammar = atom.grammars.grammarForScopeName(v.grammar)!
+        this.grammar = atom.grammars.grammarForScopeName(v.grammar)
         this.title = v.title
         this.emitter.emit('did-change-title')
         this.changeHandler()
@@ -48,6 +48,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
       pathsToOpen: [
         `markdown-preview-plus://remote-editor/${windowId}/${editorId}`,
       ],
+      newWindow: true,
     })
     RemoteEditorServer.create(editor)
   }

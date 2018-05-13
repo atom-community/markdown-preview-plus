@@ -295,6 +295,7 @@ export abstract class MarkdownPreviewView {
     }
     atom.open({
       pathsToOpen: [`markdown-preview-plus://file/${path}`],
+      newWindow: true,
     })
     util.destroy(this)
   }
