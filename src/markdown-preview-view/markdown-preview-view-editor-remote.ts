@@ -70,6 +70,14 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
     return undefined as any
   }
 
+  protected openNewWindow() {
+    atom.open({
+      pathsToOpen: [this.getURI()],
+      newWindow: true,
+    })
+    util.destroy(this)
+  }
+
   protected async getMarkdownSource() {
     return this.text
   }
