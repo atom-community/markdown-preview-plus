@@ -68,6 +68,32 @@ export function unloadMathJax(): void {
   if (script) script.remove()
 }
 
+export async function jaxTeXConfig() {
+  let userMacros = await loadUserMacros()
+  if (userMacros) {
+    userMacros = checkMacros(userMacros)
+  } else {
+    userMacros = {}
+  }
+  const numberEqns = await window.atomVars.numberEqns
+
+  return {
+    extensions: [
+      'AMSmath.js',
+      'AMSsymbols.js',
+      'noErrors.js',
+      'noUndefined.js',
+    ],
+    Macros: userMacros,
+    equationNumbers: numberEqns
+      ? {
+          autoNumber: 'AMS',
+          useLabelIds: false,
+        }
+      : {},
+  }
+}
+
 // private
 
 async function getUserMacrosPath(): Promise<string> {
@@ -157,14 +183,20 @@ function valueMatchesPattern(value: any) {
 // a few unnecessary features stripped away
 //
 async function configureMathJax() {
-  let userMacros = await loadUserMacros()
-  if (userMacros) {
-    userMacros = checkMacros(userMacros)
-  } else {
-    userMacros = {}
-  }
-
-  jaxConfigure(userMacros, await window.atomVars.numberEqns)
+  MathJax.Hub.Config({
+    jax: ['input/TeX', `output/${defaultRenderer}`],
+    extensions: [],
+    TeX: await jaxTeXConfig(),
+    'HTML-CSS': {
+      availableFonts: [],
+      webFont: 'TeX',
+      imageFont: null as any, // TODO: complain on DT
+    },
+    messageStyle: 'none',
+    showMathMenu: false,
+    skipStartupTypeset: true,
+  })
+  MathJax.Hub.Configured()
 
   // Notify user MathJax has loaded
   console.log('Loaded maths rendering engine MathJax')
@@ -181,7 +213,7 @@ async function attachMathJax(): Promise<void> {
   await configureMathJax()
 }
 
-export async function injectScript(scriptSrc: string) {
+async function injectScript(scriptSrc: string) {
   const script = document.createElement('script')
   script.src = scriptSrc
   script.type = 'text/javascript'
@@ -189,36 +221,6 @@ export async function injectScript(scriptSrc: string) {
   return new Promise<void>((resolve) => {
     script.addEventListener('load', () => resolve())
   })
-}
-
-function jaxConfigure(userMacros: object, numberEqns: boolean) {
-  MathJax.Hub.Config({
-    jax: ['input/TeX', `output/${defaultRenderer}`],
-    extensions: [],
-    TeX: {
-      extensions: [
-        'AMSmath.js',
-        'AMSsymbols.js',
-        'noErrors.js',
-        'noUndefined.js',
-      ],
-      Macros: userMacros,
-      equationNumbers: numberEqns
-        ? {
-            autoNumber: 'AMS',
-            useLabelIds: false,
-          }
-        : {},
-    },
-    'HTML-CSS': {
-      availableFonts: [],
-      webFont: 'TeX',
-    },
-    messageStyle: 'none',
-    showMathMenu: false,
-    skipStartupTypeset: true,
-  })
-  MathJax.Hub.Configured()
 }
 
 async function queueTypeset(domElement: Node, renderer: MathJaxRenderer) {

@@ -19,19 +19,33 @@ declare interface ChannelMap {
   }
   'get-text': void
   'get-html': void
-  'get-html-svg': void
   'get-uses-github-style': void
   'sync-source': void
   'scroll-sync': { firstLine: number; lastLine: number }
   reload: void
+  // actual requests
+  'get-html-svg': { id: number }
+  'get-tex-config': { id: number }
 }
 declare interface ReplyMap {
   'zoom-in': void
   'zoom-out': void
   'open-source': { initialLine?: number }
-  'html-svg-result': string | undefined
   'did-scroll-preview': { max: number; min: number }
   reload: void
+  // actual replies
+  'request-reply': RequestReplyType[keyof RequestReplyMap]
+}
+declare interface RequestReplyMap {
+  'get-html-svg': string | undefined
+  'get-tex-config': MathJax.TeXInputProcessor
+}
+declare type RequestReplyType = {
+  [K in keyof RequestReplyMap]: {
+    id: number
+    request: K
+    result: RequestReplyMap[K]
+  }
 }
 declare type ReplyMapEvents = {
   [K in keyof ReplyMap]: Electron.IpcMessageEventCustomFixed<K>

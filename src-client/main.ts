@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
 import { UpdatePreview } from './update-preview'
-import { processHTMLString } from './mathjax-helper'
+import { processHTMLString, jaxTeXConfig } from './mathjax-helper'
 import * as util from './util'
 import { getMedia } from '../src/util-common'
 
@@ -234,23 +234,36 @@ ipcRenderer.on<'sync-source'>('sync-source', () => {
   })
 })
 
-ipcRenderer.on<'get-html-svg'>('get-html-svg', async () => {
+ipcRenderer.on<'get-html-svg'>('get-html-svg', async (_, { id }) => {
   const el = document.querySelector('markdown-preview-plus-view > div')
   if (!el) {
-    ipcRenderer.sendToHost<'html-svg-result'>('html-svg-result', undefined)
+    ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+      id,
+      request: 'get-html-svg',
+      result: undefined,
+    })
     return
   }
-  const res = await processHTMLString(el)
-  ipcRenderer.sendToHost<'html-svg-result'>('html-svg-result', res)
+  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+    id,
+    request: 'get-html-svg',
+    result: await processHTMLString(el),
+  })
 })
 
-let allowNavigate = false
-
 ipcRenderer.on<'reload'>('reload', () => {
-  allowNavigate = true
+  window.onbeforeunload = null
   ipcRenderer.sendToHost<'reload'>('reload', undefined)
 })
 
 window.onbeforeunload = function() {
-  return allowNavigate
+  return false
 }
+
+ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
+  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+    id,
+    request: 'get-tex-config',
+    result: await jaxTeXConfig(),
+  })
+})

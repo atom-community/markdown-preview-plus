@@ -136,31 +136,30 @@ export function buildLineMap(tokens: ReadonlyArray<Readonly<Token>>) {
   return lineMap
 }
 
-const mathJaxScript = `\
+function mathJaxScript(texConfig: MathJax.TeXInputProcessor) {
+  return `\
 <script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-jax: ["input/TeX","output/HTML-CSS"],
-extensions: [],
-TeX: {
-extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
-},
-showMathMenu: false
-});
+  MathJax.Hub.Config({
+    jax: ["input/TeX","output/HTML-CSS"],
+    extensions: ["[a11y]/accessibility-menu.js"],
+    TeX: ${JSON.stringify(texConfig, undefined, 2)},
+    showMathMenu: true
+  });
 </script>
-<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js">
-</script>\
-`
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js"></script>`
+}
 
 export function mkHtml(
   title: string,
   html: HTMLDocument,
   renderLaTeX: boolean,
   useGithubStyle: boolean,
+  texConfig: MathJax.TeXInputProcessor,
 ) {
   const githubStyle = useGithubStyle ? ' data-use-github-style' : ''
-  let maybeMathJaxScript
+  let maybeMathJaxScript: string
   if (renderLaTeX) {
-    maybeMathJaxScript = mathJaxScript
+    maybeMathJaxScript = mathJaxScript(texConfig)
   } else {
     maybeMathJaxScript = ''
   }

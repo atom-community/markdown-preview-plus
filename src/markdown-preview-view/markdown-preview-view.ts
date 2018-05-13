@@ -15,6 +15,7 @@ import markdownIt = require('../markdown-it-helper')
 import imageWatcher = require('../image-watch-helper')
 import { handlePromise, copyHtml, atomConfig } from '../util'
 import * as util from './util'
+import { RequestReplyMap } from '../../src-client/ipc'
 
 export interface SerializedMPV {
   deserializer: 'markdown-preview-plus/MarkdownPreviewView'
@@ -38,7 +39,16 @@ export abstract class MarkdownPreviewView {
 
   private loading: boolean = true
   private zoomLevel = 0
-  private getHTMLSVGPromise?: Promise<string | undefined>
+  private replyCallbacks = new Map<
+    number,
+    {
+      [K in keyof RequestReplyMap]: {
+        request: K
+        callback: (reply: RequestReplyMap[K]) => void
+      }
+    }[keyof RequestReplyMap]
+  >()
+  private replyCallbackId = 0
 
   protected constructor(
     private defaultRenderMode: Exclude<renderer.RenderMode, 'save'> = 'normal',
@@ -91,8 +101,16 @@ export abstract class MarkdownPreviewView {
           case 'reload':
             this.element.reload()
             break
-          default:
-            console.debug(`Unknown message recieved ${e.channel}`)
+          // replies
+          case 'request-reply': {
+            const { id, request, result } = e.args[0]
+            const cb = this.replyCallbacks.get(id)
+            if (cb && request === cb.request) {
+              const callback: (r: any) => void = cb.callback
+              callback(result)
+            }
+            break
+          }
         }
       },
     )
@@ -136,19 +154,7 @@ export abstract class MarkdownPreviewView {
   }
 
   public async getHTMLSVG() {
-    await this.getHTMLSVGPromise
-    this.getHTMLSVGPromise = new Promise<string | undefined>((resolve) => {
-      const handler = (e: Electron.IpcMessageEventCustom) => {
-        // tslint:disable-next-line: totality-check
-        if (e.channel === 'html-svg-result') {
-          this.element.removeEventListener('ipc-message', handler as any)
-          resolve(e.args[0])
-        }
-      }
-      this.element.addEventListener('ipc-message', handler)
-    })
-    this.element.send<'get-html-svg'>('get-html-svg', undefined)
-    return this.getHTMLSVGPromise
+    return this.runRequest('get-html-svg')
   }
 
   public abstract serialize(): SerializedMPV
@@ -233,6 +239,7 @@ export abstract class MarkdownPreviewView {
             html,
             this.renderLaTeX,
             atom.config.get('markdown-preview-plus.useGitHubStyle'),
+            await this.runRequest('get-tex-config'),
           )
 
           fs.writeFileSync(filePath, fullHtml)
@@ -298,6 +305,20 @@ export abstract class MarkdownPreviewView {
       newWindow: true,
     })
     util.destroy(this)
+  }
+
+  private async runRequest<T extends keyof RequestReplyMap>(request: T) {
+    const id = this.replyCallbackId++
+    return new Promise<RequestReplyMap[T]>((resolve) => {
+      this.replyCallbacks.set(id, {
+        request: request as any,
+        callback: (result: RequestReplyMap[T]) => {
+          this.replyCallbacks.delete(id)
+          resolve(result)
+        },
+      })
+      this.element.send<T>(request, { id })
+    })
   }
 
   private handleEvents() {
