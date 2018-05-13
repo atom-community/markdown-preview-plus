@@ -30,7 +30,7 @@ export class IPCCaller implements IPCCmdPromise {
     cmd: T,
     args: Arg<IPCCmd[T]>,
   ): Promise<ReturnType<IPCCmd[T]>> {
-    return new Promise<any>((resolve) => {
+    return new Promise<any>((resolve, reject) => {
       const idx = this.ipcIdx++
       const handler = (e: {
         editorId: number
@@ -52,8 +52,7 @@ export class IPCCaller implements IPCCmdPromise {
           resolve(e.reply)
         }
       }
-      remote.ipcMain.on('markdown-preview-plus:editor-reply', handler)
-      remote.ipcMain.emit('markdown-preview-plus:editor-request', {
+      const res = remote.ipcMain.emit('markdown-preview-plus:editor-request', {
         windowId: this.windowId,
         editorId: this.editorId,
         forWindowId: this.myWindowId,
@@ -61,6 +60,11 @@ export class IPCCaller implements IPCCmdPromise {
         cmd,
         args,
       })
+      if (!res) {
+        reject(new Error('Nobody is listening for editor requests'))
+        return
+      } // otherwise,
+      remote.ipcMain.on('markdown-preview-plus:editor-reply', handler)
     })
   }
 }

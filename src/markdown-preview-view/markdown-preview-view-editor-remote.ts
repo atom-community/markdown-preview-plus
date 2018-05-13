@@ -15,17 +15,25 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
   constructor(private windowId: number, private editorId: number) {
     super()
     this.ipc = new IPCCaller(windowId, editorId)
+    this.disposables.add(this.ipc)
     this.handleEditorEvents()
-    handlePromise(
-      this.ipc.init().then((v) => {
+    this.ipc
+      .init()
+      .then((v) => {
         this.text = v.text
         this.path = v.path
         this.grammar = atom.grammars.grammarForScopeName(v.grammar)!
         this.title = v.title
         this.emitter.emit('did-change-title')
         this.changeHandler()
-      }),
-    )
+      })
+      .catch((e: Error) => {
+        atom.notifications.addError('Failed to open preview', {
+          dismissable: true,
+          detail: e.toString(),
+          stack: e.stack,
+        })
+      })
   }
 
   public static open(editor: TextEditor) {
@@ -40,8 +48,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
   }
 
   public destroy() {
-    handlePromise(this.ipc.destroy())
-    this.ipc.dispose()
+    this.ipc.destroy().catch(ignore)
     super.destroy()
   }
 
@@ -71,13 +78,27 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
     return this.grammar
   }
 
-  protected async didScrollPreview(min: number, max: number) {
+  protected didScrollPreview(min: number, max: number) {
     if (!shouldScrollSync('preview')) return
-    await this.ipc.scrollToBufferRange([min, max])
+    this.ipc.scrollToBufferRange([min, max]).catch(ignore)
   }
 
   protected openSource(initialLine?: number) {
-    handlePromise(this.ipc.openSource(initialLine))
+    this.ipc.openSource(initialLine).catch((e) => {
+      console.log(e)
+      const path = this.getPath()
+      if (path) {
+        handlePromise(
+          atom.workspace.open(path, {
+            initialLine,
+          }),
+        )
+      } else {
+        atom.notifications.addWarning(
+          'Failed to sync source: no editor and no path',
+        )
+      }
+    })
   }
 
   private handleEditorEvents() {
@@ -111,4 +132,8 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
       }),
     )
   }
+}
+
+function ignore() {
+  /* do notihng */
 }

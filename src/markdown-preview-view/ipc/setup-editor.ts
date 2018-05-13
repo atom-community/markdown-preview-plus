@@ -5,7 +5,7 @@ import { atomConfig } from '../../util'
 import { shouldScrollSync } from './should-scroll-sync'
 import { constructEmitter } from './event-handler'
 
-export function setupEditor(editor: TextEditor): CompositeDisposable {
+export function setupEditor(editor: TextEditor) {
   const disp = new CompositeDisposable()
   const windowId = remote.getCurrentWindow().id
   const editorId = editor.id
@@ -64,6 +64,7 @@ export function setupEditor(editor: TextEditor): CompositeDisposable {
       emit('changeGrammar', grammar.scopeName)
     }),
     editor.onDidDestroy(() => {
+      disp.dispose()
       if (atomConfig().previewConfig.closePreviewWithEditor) {
         emit('destroy', undefined)
       }
@@ -92,5 +93,4 @@ export function setupEditor(editor: TextEditor): CompositeDisposable {
     }),
     requestHandler,
   )
-  return disp
 }
