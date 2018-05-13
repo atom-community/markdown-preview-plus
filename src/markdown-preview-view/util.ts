@@ -141,12 +141,12 @@ function mathJaxScript(texConfig: MathJax.TeXInputProcessor) {
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     jax: ["input/TeX","output/HTML-CSS"],
-    extensions: [],
+    extensions: ["[a11y]/accessibility-menu.js"],
     TeX: ${JSON.stringify(texConfig, undefined, 2)},
-    showMathMenu: false
+    showMathMenu: true
   });
 </script>
-<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js"></script>`
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js"></script>`
 }
 
 export function mkHtml(
