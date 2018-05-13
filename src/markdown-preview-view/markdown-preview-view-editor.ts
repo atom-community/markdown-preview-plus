@@ -2,7 +2,6 @@ import { TextEditor, Grammar, Range } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 import { handlePromise, atomConfig } from '../util'
-import { remote } from 'electron'
 import { MarkdownPreviewViewEditorRemote } from './markdown-preview-view-editor-remote'
 
 export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
@@ -79,14 +78,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   }
 
   protected openNewWindow() {
-    const windowId = remote.getCurrentWindow().id
-    const editorId = this.editor.id
-    atom.open({
-      pathsToOpen: [
-        `markdown-preview-plus://remote-editor/${windowId}/${editorId}`,
-      ],
-    })
-    MarkdownPreviewViewEditorRemote.setupEditor(this.editor)
+    MarkdownPreviewViewEditorRemote.open(this.editor)
     util.destroy(this)
   }
 
