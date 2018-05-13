@@ -213,6 +213,7 @@ function jaxConfigure(userMacros: object, numberEqns: boolean) {
     'HTML-CSS': {
       availableFonts: [],
       webFont: 'TeX',
+      imageFont: null as any, // TODO: complain on DT
     },
     messageStyle: 'none',
     showMathMenu: false,
