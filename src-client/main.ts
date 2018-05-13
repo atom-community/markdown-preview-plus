@@ -251,15 +251,13 @@ ipcRenderer.on<'get-html-svg'>('get-html-svg', async (_, { id }) => {
   })
 })
 
-let allowNavigate = false
-
 ipcRenderer.on<'reload'>('reload', () => {
-  allowNavigate = true
+  window.onbeforeunload = null
   ipcRenderer.sendToHost<'reload'>('reload', undefined)
 })
 
 window.onbeforeunload = function() {
-  return allowNavigate
+  return false
 }
 
 ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
