@@ -2,7 +2,12 @@ import { TextEditor, Grammar } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 import { handlePromise } from '../util'
-import { EventHandler, IPCCaller, shouldScrollSync, setupEditor } from './ipc'
+import {
+  EventHandler,
+  IPCCaller,
+  shouldScrollSync,
+  RemoteEditorServer,
+} from './ipc'
 import { remote } from 'electron'
 
 export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
@@ -44,7 +49,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
         `markdown-preview-plus://remote-editor/${windowId}/${editorId}`,
       ],
     })
-    setupEditor(editor)
+    RemoteEditorServer.create(editor)
   }
 
   public destroy() {

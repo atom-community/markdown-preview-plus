@@ -42,14 +42,3 @@ export class EventHandler {
     handler(e.arg)
   }
 }
-
-export function constructEmitter(windowId: number, editorId: number) {
-  return function<T extends keyof IPCEvents>(event: T, arg: IPCEvents[T]) {
-    remote.ipcMain.emit('markdown-preview-plus:editor-event', {
-      editorId,
-      windowId,
-      event,
-      arg,
-    })
-  }
-}
