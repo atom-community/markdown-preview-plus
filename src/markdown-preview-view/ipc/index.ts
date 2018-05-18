@@ -1,0 +1,5 @@
+export { IPCCaller } from './ipc-caller'
+export { EventHandler } from './event-handler'
+export { RequestHandler } from './request-handler'
+export { RemoteEditorServer } from './setup-editor'
+export { shouldScrollSync } from './should-scroll-sync'

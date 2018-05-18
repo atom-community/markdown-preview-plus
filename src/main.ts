@@ -16,6 +16,7 @@ import {
 import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
 import { migrateConfig } from './migrate-config'
+import { MarkdownPreviewViewEditorRemote } from './markdown-preview-view/markdown-preview-view-editor-remote'
 
 export { config } from './config'
 
@@ -250,6 +251,12 @@ function opener(uriToOpen: string) {
 
   if (uri.hostname === 'file') {
     return new MarkdownPreviewViewFile(pathname.slice(1))
+  } else if (uri.hostname === 'remote-editor') {
+    const [windowId, editorId] = pathname
+      .slice(1)
+      .split('/')
+      .map((x) => parseInt(x, 10))
+    return new MarkdownPreviewViewEditorRemote(windowId, editorId)
   } else {
     throw new Error(
       `Tried to open markdown-preview-plus with uri ${uriToOpen}. This is not supported. Please report this error.`,

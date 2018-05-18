@@ -2,6 +2,7 @@ import { TextEditor, Grammar, Range } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 import { handlePromise, atomConfig } from '../util'
+import { MarkdownPreviewViewEditorRemote } from './markdown-preview-view-editor-remote'
 
 export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   private static editorMap = new WeakMap<
@@ -74,6 +75,21 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         { center: false },
       )
     }
+  }
+
+  protected openNewWindow() {
+    MarkdownPreviewViewEditorRemote.open(this.editor)
+    util.destroy(this)
+  }
+
+  protected openSource(initialLine?: number) {
+    if (initialLine !== undefined) {
+      this.editor.setCursorBufferPosition([initialLine, 0])
+    }
+    const pane = atom.workspace.paneForItem(this.editor)
+    if (!pane) return
+    pane.activateItem(this.editor)
+    pane.activate()
   }
 
   private handleEditorEvents() {
