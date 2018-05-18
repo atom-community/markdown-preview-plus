@@ -53,7 +53,13 @@ export class UpdatePreview {
       }
     }
 
-    morph(this.dom, newDom, { childrenOnly: true })
+    morph(this.dom, newDom, {
+      childrenOnly: true,
+      onElUpdated: function(el) {
+        if (el.tagName === 'LI') el.innerHTML = el.innerHTML // force re-render
+      },
+    })
+
     if (renderLaTeX) {
       handlePromise(MathJaxHelper.mathProcessor(this.dom, mjrenderer))
     }
