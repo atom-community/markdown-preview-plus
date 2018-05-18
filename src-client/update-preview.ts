@@ -31,14 +31,13 @@ export class UpdatePreview {
   }
 
   public update(
-    domFragment: DocumentFragment,
+    newDom: Element,
     renderLaTeX: boolean,
     mjrenderer: MathJaxRenderer,
   ) {
     const lastMJRenderer =
       this.cachedMJRenderer === undefined ? mjrenderer : this.cachedMJRenderer
     this.cachedMJRenderer = mjrenderer
-    const newDom = domFragment.cloneNode(true) as DocumentFragment
 
     for (const m of Array.from(newDom.querySelectorAll('span.math'))) {
       const mscr = m.firstElementChild as HTMLScriptElement | null
