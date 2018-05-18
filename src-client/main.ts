@@ -150,11 +150,7 @@ ipcRenderer.on<'update-preview'>(
     }
     const parser = new DOMParser()
     const domDocument = parser.parseFromString(html, 'text/html')
-    const domFragment = document.createDocumentFragment()
-    for (const elem of Array.from(domDocument.body.childNodes)) {
-      domFragment.appendChild(elem)
-    }
-    updatePreview.update(domFragment, renderLaTeX, mjrenderer)
+    updatePreview.update(domDocument.body, renderLaTeX, mjrenderer)
     const doc = document
     if (doc && domDocument.head.hasChildNodes) {
       let container = doc.head.querySelector('original-elements')
@@ -164,7 +160,7 @@ ipcRenderer.on<'update-preview'>(
       }
       container.innerHTML = ''
       for (const headElement of Array.from(domDocument.head.childNodes)) {
-        container.appendChild(headElement.cloneNode(true))
+        container.appendChild(headElement)
       }
     }
   },
