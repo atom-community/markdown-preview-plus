@@ -1,3 +1,57 @@
+## 3.2.0
+
+### Changes
+
+-   Updated MathJax CDN URL in saved HTML
+
+-   Enabled MathJax menu in saved HTML
+
+-   Added accessability extensions to MathJax config in saved HTML
+
+-   Saved HTML will use math config from package settings
+
+    This is mostly related to equation numbering
+
+### New features
+
+-   Context menu item to reopen preview in a new window. Caveats apply
+
+    It's now possible to move a given preview to a new Atom window. For
+    file-based previews, this could be done prior by simple tab drag-n-drop.
+    For editor-based previews, drag-n-drop doesn't work.
+
+    A new preview context menu option 'Open in new window' and command
+    `markdown-preview-plus:new-window` can be used on any preview to
+    move it to a new Atom window.
+
+    This can be useful in multi-monitor setups.
+
+### Fixes
+
+-   Force re-render of `li` elements on changes
+
+    In some cases, `li` elements wouldn't be updated properly due to
+    weridness in Chromium. To avoid that, those have to be forcibly re-rendered.
+    See [#386](https://github.com/atom-community/markdown-preview-plus/issues/386)
+    for details.
+
+-   Disable image fonts in MathJax config
+
+    Reportedly, in some rare cases, MathJax would try to load image fonts, but
+    our MathJax for Electron lacks those. The config was amended to tell
+    MathJax that it shouldn't look for math fonts.
+
+-   Fix preview reload on settings change
+
+    Preview could fail to reload when some settings were changed (in particular,
+    equation numbering)
+
+### Maintenence
+
+-   Reduce copying in UpdatePreview
+-   Better request-reply for webview
+-   Get saved HTML TeX config from preview
+
 ## 3.1.1
 
 -   Fix preview navigating to external URLs
