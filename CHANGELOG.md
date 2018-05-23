@@ -1,3 +1,11 @@
+## 3.2.1
+
+-   Wrap code block lines in print media
+
+    Previously, code blocks with overlong lines would be printed to pdf/paper
+    with scroll-bars (which obviously can't be scrolled) and cut-off lines.
+    This has been fixed.
+
 ## 3.2.0
 
 ### Changes
