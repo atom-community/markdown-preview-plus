@@ -45,6 +45,15 @@ markdown-preview-plus-view {
     overflow: auto;
   }
 
+  @media print {
+    atom-text-editor {
+      overflow: visible !important;
+      .line {
+        white-space: pre-wrap !important;
+      }
+    }
+  }
+
   ul.contains-task-list {
     li.task-list-item {
       position: relative;
