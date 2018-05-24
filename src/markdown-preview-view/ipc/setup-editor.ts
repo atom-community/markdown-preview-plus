@@ -47,11 +47,6 @@ export class RemoteEditorServer {
       this.usageCounter -= 1
       if (this.usageCounter <= 0) {
         this.resetTimeout()
-        console.debug(
-          `Scheduled disposal of remote-editor listener for ${this.windowId}/${
-            this.editor.id
-          }`,
-        )
         this.destroyTimeout = window.setTimeout(() => {
           this.dispose()
         }, this.destroyTimeoutLength)
@@ -80,9 +75,6 @@ export class RemoteEditorServer {
   }
 
   private constructor(private readonly editor: TextEditor) {
-    console.debug(
-      `Created remote-editor listener for ${this.windowId}/${this.editor.id}`,
-    )
     this.disposables.add(
       new RequestHandler(this.windowId, editor.id, this.eventHandlers),
     )
@@ -100,20 +92,12 @@ export class RemoteEditorServer {
   public dispose() {
     RemoteEditorServer.editorMap.delete(this.editor)
     this.disposables.dispose()
-    console.debug(
-      `Disposed remote-editor listener for ${this.windowId}/${this.editor.id}`,
-    )
   }
 
   private resetTimeout() {
     if (this.destroyTimeout !== undefined) {
       window.clearTimeout(this.destroyTimeout)
       this.destroyTimeout = undefined
-      console.debug(
-        `Cancelled disposal of remote-editor listener for ${this.windowId}/${
-          this.editor.id
-        }`,
-      )
     }
   }
 

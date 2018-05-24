@@ -22,7 +22,6 @@
 // THE SOFTWARE.
 import morph = require('morphdom')
 import MathJaxHelper = require('./mathjax-helper')
-import { handlePromise } from './util'
 
 export class UpdatePreview {
   private cachedMJRenderer?: MathJaxRenderer
@@ -30,11 +29,11 @@ export class UpdatePreview {
     /* no-op */
   }
 
-  public update(
+  public async update(
     newDom: Element,
     renderLaTeX: boolean,
     mjrenderer: MathJaxRenderer,
-  ) {
+  ): Promise<void> {
     const lastMJRenderer =
       this.cachedMJRenderer === undefined ? mjrenderer : this.cachedMJRenderer
     this.cachedMJRenderer = mjrenderer
@@ -61,7 +60,7 @@ export class UpdatePreview {
     })
 
     if (renderLaTeX) {
-      handlePromise(MathJaxHelper.mathProcessor(this.dom, mjrenderer))
+      return MathJaxHelper.mathProcessor(this.dom, mjrenderer)
     }
   }
 }
