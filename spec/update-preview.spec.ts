@@ -202,33 +202,34 @@ describe('the difference algorithm that updates the preview', function() {
 
     it('replaces the entire span.math container element', async function() {
       await preview.runJS<void>(`
-        window.mathSpan = document.querySelectorAll('span.math')[2]
+        window.mathSpans = document.querySelectorAll('span.math')
         `)
 
       editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
 
       await waitsFor.msg('math span to be updated', async () =>
         preview.runJS<boolean>(`
-          !window.mathSpan.isSameNode(document.querySelectorAll('span.math')[2])
+          !window.mathSpans[2].isSameNode(document.querySelectorAll('span.math')[2])
           `),
       )
 
-      mathBlocks = Array.from(
-        (await previewFragment(preview)).querySelectorAll(
-          'script[type*="math/tex"]',
-        ),
+      const numMathBlocks = await preview.runJS<number>(
+        `window.mathSpans.length`,
       )
-        .map((x) => x.parentElement!)
-        .filter((x) => x !== null)
-      expect(mathBlocks.length).to.equal(20)
+      expect(numMathBlocks).to.equal(20)
 
-      const mathHTMLCSS = mathBlocks
-        .map((x) => x.querySelector('.MathJax_SVG, .MathJax, .MathJax_Display'))
-        .filter((x) => x !== null)
-      expect(mathHTMLCSS.length).to.equal(19)
+      const numSameMathBlocks = await preview.runJS<number>(`{
+        const newMathSpans = document.querySelectorAll('span.math')
+        Array.from(window.mathSpans).filter(
+          (x, i) => x.isSameNode(newMathSpans[i])
+        ).length
+        }`)
+      expect(numSameMathBlocks).to.equal(19)
 
+      const mathBlocks = (await previewFragment(preview)).querySelectorAll(
+        'span.math',
+      )
       const modMathBlock = mathBlocks[2]
-      expect(modMathBlock.children.length).to.equal(1)
       expect(modMathBlock.querySelector('script')!.innerText).to.equal(
         'E=mc^2\n',
       )
