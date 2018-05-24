@@ -47,7 +47,7 @@ export interface WaitsFor {
 export const waitsFor = async function<T>(
   func: () => T | undefined | null | Promise<T | undefined | null>,
   timeout = 8000,
-  intervalTime = 10,
+  intervalTime = 500,
   msg: string = func.toString(),
 ): Promise<T> {
   return new Promise<T>(function(fufill, reject) {
