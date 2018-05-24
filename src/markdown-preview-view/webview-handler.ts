@@ -3,7 +3,7 @@ import { Emitter, CompositeDisposable } from 'atom'
 import { WebviewTag } from 'electron' // this is here soley for typings
 
 import { handlePromise } from '../util'
-import { RequestReplyMap } from '../../src-client/ipc'
+import { RequestReplyMap, ChannelMap } from '../../src-client/ipc'
 
 export class WebviewHandler {
   public readonly element: WebviewTag
@@ -111,7 +111,11 @@ export class WebviewHandler {
     mjrenderer: MathJaxRenderer,
   ) {
     if (this.destroyed) return undefined
-    return this.runRequest('update-preview', { html, renderLaTeX, mjrenderer })
+    return this.runRequest('update-preview', {
+      html,
+      renderLaTeX,
+      mjrenderer,
+    })
   }
 
   public setSourceMap(map: {
@@ -158,7 +162,7 @@ export class WebviewHandler {
   }
 
   public async syncSource() {
-    return this.runRequest('sync-source')
+    return this.runRequest('sync-source', {})
   }
 
   public scrollSync(firstLine: number, lastLine: number) {
@@ -189,7 +193,7 @@ export class WebviewHandler {
   }
 
   public async reload() {
-    await this.runRequest('reload')
+    await this.runRequest('reload', {})
     this.element.reload()
   }
 
@@ -198,12 +202,12 @@ export class WebviewHandler {
   }
 
   public async getTeXConfig() {
-    return this.runRequest('get-tex-config')
+    return this.runRequest('get-tex-config', {})
   }
 
   protected async runRequest<T extends keyof RequestReplyMap>(
     request: T,
-    args: object = {},
+    args: { [K in Exclude<keyof ChannelMap[T], 'id'>]: ChannelMap[T][K] },
   ) {
     const id = this.replyCallbackId++
     return new Promise<RequestReplyMap[T]>((resolve) => {
@@ -214,7 +218,8 @@ export class WebviewHandler {
           resolve(result)
         },
       })
-      this.element.send<T>(request, { id, ...args })
+      const newargs = Object.assign({ id }, args)
+      this.element.send<T>(request, newargs)
     })
   }
 
