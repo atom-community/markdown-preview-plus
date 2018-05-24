@@ -563,7 +563,6 @@ var x = y;
       await waitsFor.msg(
         'atom.clipboard.write to have been called',
         () => stub.called,
-        60000,
       )
     }
 
@@ -589,8 +588,6 @@ var x = y;
     })
 
     describe('when LaTeX rendering is enabled by default', function() {
-      this.timeout(60000)
-
       beforeEach(async function() {
         atom.config.set(
           'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
