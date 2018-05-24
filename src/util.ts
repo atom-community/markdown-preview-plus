@@ -35,27 +35,40 @@ export function isElement(node: Node): node is Element {
   return node.nodeType === Node.ELEMENT_NODE
 }
 
-import { MarkdownPreviewViewString } from './markdown-preview-view'
+import { WebviewHandler } from './markdown-preview-view/webview-handler'
+import * as renderer from './renderer'
 export async function copyHtml(
   text: string,
   filePath: string | undefined,
   renderLaTeX: boolean,
 ): Promise<void> {
-  const view = new MarkdownPreviewViewString(
-    text,
-    'copy',
-    renderLaTeX,
-    filePath,
-  )
+  const view = new WebviewHandler(async () => {
+    view.init(atom.getConfigDirPath(), atomConfig().mathConfig.numberEquations)
+    view.setUseGitHubStyle(
+      atom.config.get('markdown-preview-plus.useGitHubStyle'),
+    )
+    view.setBasePath(filePath)
+
+    const domDocument = await renderer.render(
+      text,
+      filePath,
+      undefined,
+      renderLaTeX,
+      'copy',
+    )
+    const res = await view.update(
+      domDocument.documentElement.outerHTML,
+      renderLaTeX,
+      'SVG',
+    )
+    if (res) atom.clipboard.write(res)
+    view.destroy()
+  })
   view.element.style.visibility = 'hidden'
   view.element.style.position = 'absolute'
   view.element.style.pointerEvents = 'none'
   const ws = atom.views.getView(atom.workspace)
   ws.appendChild(view.element)
-  await view.renderPromise
-  const res = await view.getHTMLSVG()
-  if (res) atom.clipboard.write(res)
-  view.destroy()
 }
 
 export function atomConfig() {

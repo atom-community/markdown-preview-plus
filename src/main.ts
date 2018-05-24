@@ -1,9 +1,9 @@
 import url = require('url')
 import {
-  MarkdownPreviewViewElement,
   SerializedMPV,
   MarkdownPreviewViewFile,
   MarkdownPreviewViewEditor,
+  MarkdownPreviewView,
 } from './markdown-preview-view'
 // import mathjaxHelper = require('./mathjax-helper')
 import {
@@ -55,8 +55,8 @@ export async function activate() {
     }),
     atom.commands.add('.markdown-preview-plus', {
       'markdown-preview-plus:toggle-render-latex': (e) => {
-        const view = e.currentTarget.getModel()
-        view.toggleRenderLatex()
+        const view = MarkdownPreviewView.viewForElement(e.currentTarget)
+        if (view) view.toggleRenderLatex()
       },
     }),
     atom.workspace.addOpener(opener),
@@ -86,10 +86,9 @@ export function createMarkdownPreviewView(state: SerializedMPV) {
 
 /// private
 
-async function close(
-  event: CommandEvent<MarkdownPreviewViewElement>,
-): Promise<void> {
-  const item = event.currentTarget.getModel()
+async function close(event: CommandEvent<HTMLElement>): Promise<void> {
+  const item = MarkdownPreviewView.viewForElement(event.currentTarget)
+  if (!item) return
   const pane = atom.workspace.paneForItem(item)
   if (!pane) return
   await pane.destroyItem(item)

@@ -38,14 +38,13 @@ export async function mathProcessor(
 //   fragment string that is the result of html processed by MathJax
 //
 export async function processHTMLString(element: Element) {
-  await mathProcessor(element, 'SVG')
-
   const msvgh = document.getElementById('MathJax_SVG_Hidden')
-  const svgGlyphs = msvgh && msvgh.parentNode!.cloneNode(true)
+  const svgGlyphs = msvgh && msvgh.parentElement
   if (svgGlyphs !== null) {
-    element.insertBefore(svgGlyphs, element.firstChild)
+    return svgGlyphs.innerHTML + element.innerHTML
+  } else {
+    return element.innerHTML
   }
-  return element.innerHTML
 }
 
 //

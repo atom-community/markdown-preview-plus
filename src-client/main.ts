@@ -20,11 +20,8 @@ window.atomVars = {
   revSourceMap: new WeakMap(),
 }
 
-ipcRenderer.on<'set-atom-home'>('set-atom-home', (_evt, { home }) => {
-  window.atomVars.home.resolve(home)
-})
-
-ipcRenderer.on<'set-number-eqns'>('set-number-eqns', (_evt, { numberEqns }) => {
+ipcRenderer.on<'init'>('init', (_evt, { atomHome, numberEqns }) => {
+  window.atomVars.home.resolve(atomHome)
   window.atomVars.numberEqns.resolve(numberEqns)
 })
 
@@ -140,7 +137,7 @@ let updatePreview: UpdatePreview | undefined
 
 ipcRenderer.on<'update-preview'>(
   'update-preview',
-  (_event, { html, renderLaTeX, mjrenderer }) => {
+  (_event, { id, html, renderLaTeX, mjrenderer }) => {
     // div.update-preview created after constructor st UpdatePreview cannot
     // be instanced in the constructor
     const preview = document.querySelector('div.update-preview')
@@ -150,7 +147,17 @@ ipcRenderer.on<'update-preview'>(
     }
     const parser = new DOMParser()
     const domDocument = parser.parseFromString(html, 'text/html')
-    updatePreview.update(domDocument.body, renderLaTeX, mjrenderer)
+    util.handlePromise(
+      updatePreview
+        .update(domDocument.body, renderLaTeX, mjrenderer)
+        .then(async () => {
+          ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+            id,
+            request: 'update-preview',
+            result: await processHTMLString(preview),
+          })
+        }),
+    )
     const doc = document
     if (doc && domDocument.head.hasChildNodes) {
       let container = doc.head.querySelector('original-elements')
@@ -214,7 +221,7 @@ document.addEventListener('contextmenu', (e) => {
   lastContextMenuTarget = e.target as HTMLElement
 })
 
-ipcRenderer.on<'sync-source'>('sync-source', () => {
+ipcRenderer.on<'sync-source'>('sync-source', (_, { id }) => {
   let element = lastContextMenuTarget
   const rsm = window.atomVars.revSourceMap
   let lines = rsm.get(element)
@@ -225,31 +232,20 @@ ipcRenderer.on<'sync-source'>('sync-source', () => {
   }
   if (!lines) return
 
-  ipcRenderer.sendToHost<'open-source'>('open-source', {
-    initialLine: Math.min(...lines),
-  })
-})
-
-ipcRenderer.on<'get-html-svg'>('get-html-svg', async (_, { id }) => {
-  const el = document.querySelector('markdown-preview-plus-view > div')
-  if (!el) {
-    ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-      id,
-      request: 'get-html-svg',
-      result: undefined,
-    })
-    return
-  }
   ipcRenderer.sendToHost<'request-reply'>('request-reply', {
     id,
-    request: 'get-html-svg',
-    result: await processHTMLString(el),
+    request: 'sync-source',
+    result: Math.min(...lines),
   })
 })
 
-ipcRenderer.on<'reload'>('reload', () => {
+ipcRenderer.on<'reload'>('reload', (_, { id }) => {
   window.onbeforeunload = null
-  ipcRenderer.sendToHost<'reload'>('reload', undefined)
+  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+    id,
+    request: 'reload',
+    result: undefined,
+  })
 })
 
 window.onbeforeunload = function() {

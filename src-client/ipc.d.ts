@@ -6,39 +6,35 @@ declare interface ChannelMap {
   sync: { line: number }
   'use-github-style': { value: boolean }
   'update-preview': {
+    id: number
     html: string
     renderLaTeX: boolean
     mjrenderer: MathJaxRenderer
   }
   error: { msg: string }
-  'set-atom-home': { home: string }
-  'set-number-eqns': { numberEqns: boolean }
+  init: { atomHome: string; numberEqns: boolean }
   'set-base-path': { path?: string }
   'set-source-map': {
     map: { [line: number]: Array<{ tag: string; index: number }> }
   }
-  'get-text': void
-  'get-html': void
-  'get-uses-github-style': void
-  'sync-source': void
   'scroll-sync': { firstLine: number; lastLine: number }
-  reload: void
   // actual requests
-  'get-html-svg': { id: number }
   'get-tex-config': { id: number }
+  'sync-source': { id: number }
+  reload: { id: number }
 }
 declare interface ReplyMap {
   'zoom-in': void
   'zoom-out': void
-  'open-source': { initialLine?: number }
   'did-scroll-preview': { max: number; min: number }
-  reload: void
   // actual replies
   'request-reply': RequestReplyType[keyof RequestReplyMap]
 }
 declare interface RequestReplyMap {
-  'get-html-svg': string | undefined
+  'update-preview': string
   'get-tex-config': MathJax.TeXInputProcessor
+  reload: void
+  'sync-source': number | undefined
 }
 declare type RequestReplyType = {
   [K in keyof RequestReplyMap]: {

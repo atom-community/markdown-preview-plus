@@ -134,10 +134,10 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
       atom.views.getView(this.editor).onDidChangeScrollTop(() => {
         if (!this.shouldScrollSync('editor')) return
         const [first, last] = this.editor.getVisibleRowRange()
-        this.element.send<'scroll-sync'>('scroll-sync', {
-          firstLine: this.editor.bufferRowForScreenRow(first),
-          lastLine: this.editor.bufferRowForScreenRow(last),
-        })
+        this.handler.scrollSync(
+          this.editor.bufferRowForScreenRow(first),
+          this.editor.bufferRowForScreenRow(last),
+        )
       }),
       atom.commands.add(atom.views.getView(this.editor), {
         'markdown-preview-plus:sync-preview': this.syncPreviewHelper,
