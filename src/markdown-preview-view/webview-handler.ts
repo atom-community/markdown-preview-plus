@@ -1,12 +1,21 @@
 import * as fs from 'fs'
 import { Emitter, CompositeDisposable } from 'atom'
-import { WebviewTag } from 'electron' // this is here soley for typings
+import { WebviewTag, shell } from 'electron'
+import fileUriToPath = require('file-uri-to-path')
 
 import { handlePromise } from '../util'
 import { RequestReplyMap, ChannelMap } from '../../src-client/ipc'
 
+export type ReplyCallbackStruct<
+  T extends keyof RequestReplyMap = keyof RequestReplyMap
+> = {
+  [K in keyof RequestReplyMap]: {
+    request: K
+    callback: (reply: RequestReplyMap[K]) => void
+  }
+}[T]
+
 export class WebviewHandler {
-  public readonly element: WebviewTag
   public readonly emitter = new Emitter<
     {},
     {
@@ -14,28 +23,21 @@ export class WebviewHandler {
     }
   >()
   protected disposables = new CompositeDisposable()
+  private readonly _element: WebviewTag
   private destroyed = false
   private zoomLevel = 0
-  private replyCallbacks = new Map<
-    number,
-    {
-      [K in keyof RequestReplyMap]: {
-        request: K
-        callback: (reply: RequestReplyMap[K]) => void
-      }
-    }[keyof RequestReplyMap]
-  >()
+  private replyCallbacks = new Map<number, ReplyCallbackStruct>()
   private replyCallbackId = 0
 
   constructor(init: () => void) {
-    this.element = document.createElement('webview') as any
-    this.element.classList.add('markdown-preview-plus', 'native-key-bindings')
-    this.element.disablewebsecurity = 'true'
-    this.element.nodeintegration = 'true'
-    this.element.src = `file:///${__dirname}/../../client/template.html`
-    this.element.style.width = '100%'
-    this.element.style.height = '100%'
-    this.element.addEventListener(
+    this._element = document.createElement('webview')
+    this._element.classList.add('markdown-preview-plus', 'native-key-bindings')
+    this._element.disablewebsecurity = 'true'
+    this._element.nodeintegration = 'true'
+    this._element.src = `file:///${__dirname}/../../client/template.html`
+    this._element.style.width = '100%'
+    this._element.style.height = '100%'
+    this._element.addEventListener(
       'ipc-message',
       (e: Electron.IpcMessageEventCustom) => {
         switch (e.channel) {
@@ -61,9 +63,7 @@ export class WebviewHandler {
         }
       },
     )
-    this.element.addEventListener('will-navigate', async (e) => {
-      const { shell } = await import('electron')
-      const fileUriToPath = await import('file-uri-to-path')
+    this._element.addEventListener('will-navigate', async (e) => {
       if (e.url.startsWith('file://')) {
         handlePromise(atom.workspace.open(fileUriToPath(e.url)))
       } else {
@@ -85,16 +85,20 @@ export class WebviewHandler {
 
     const onload = () => {
       if (this.destroyed) return
-      this.element.setZoomLevel(this.zoomLevel)
+      this._element.setZoomLevel(this.zoomLevel)
       this.updateStyles()
       init()
     }
-    this.element.addEventListener('dom-ready', onload)
+    this._element.addEventListener('dom-ready', onload)
+  }
+
+  public get element(): HTMLElement {
+    return this._element
   }
 
   public async runJS<T>(js: string) {
     return new Promise<T>((resolve) =>
-      this.element.executeJavaScript(js, false, resolve),
+      this._element.executeJavaScript(js, false, resolve),
     )
   }
 
@@ -102,7 +106,7 @@ export class WebviewHandler {
     if (this.destroyed) return
     this.destroyed = true
     this.disposables.dispose()
-    this.element.remove()
+    this._element.remove()
   }
 
   public async update(
@@ -121,30 +125,30 @@ export class WebviewHandler {
   public setSourceMap(map: {
     [line: number]: { tag: string; index: number }[]
   }) {
-    this.element.send<'set-source-map'>('set-source-map', { map })
+    this._element.send<'set-source-map'>('set-source-map', { map })
   }
 
   public setUseGitHubStyle(value: boolean) {
-    this.element.send<'use-github-style'>('use-github-style', { value })
+    this._element.send<'use-github-style'>('use-github-style', { value })
   }
 
   public setBasePath(path?: string) {
-    this.element.send<'set-base-path'>('set-base-path', { path })
+    this._element.send<'set-base-path'>('set-base-path', { path })
   }
 
   public init(atomHome: string, numberEqns: boolean) {
-    this.element.send<'init'>('init', { atomHome, numberEqns })
+    this._element.send<'init'>('init', { atomHome, numberEqns })
   }
 
   public updateImages(oldSource: string, version: number | false) {
-    this.element.send<'update-images'>('update-images', {
+    this._element.send<'update-images'>('update-images', {
       oldsrc: oldSource,
       v: version,
     })
   }
 
   public saveToPDF(filePath: string) {
-    this.element.printToPDF({}, (error, data) => {
+    this._element.printToPDF({}, (error, data) => {
       if (error) {
         atom.notifications.addError('Failed saving to PDF', {
           description: error.toString(),
@@ -158,7 +162,7 @@ export class WebviewHandler {
   }
 
   public sync(line: number) {
-    this.element.send<'sync'>('sync', { line })
+    this._element.send<'sync'>('sync', { line })
   }
 
   public async syncSource() {
@@ -166,39 +170,39 @@ export class WebviewHandler {
   }
 
   public scrollSync(firstLine: number, lastLine: number) {
-    this.element.send<'scroll-sync'>('scroll-sync', { firstLine, lastLine })
+    this._element.send<'scroll-sync'>('scroll-sync', { firstLine, lastLine })
   }
 
   public zoomIn() {
     this.zoomLevel += 0.1
-    this.element.setZoomLevel(this.zoomLevel)
+    this._element.setZoomLevel(this.zoomLevel)
   }
 
   public zoomOut() {
     this.zoomLevel -= 0.1
-    this.element.setZoomLevel(this.zoomLevel)
+    this._element.setZoomLevel(this.zoomLevel)
   }
 
   public resetZoom() {
     this.zoomLevel = 0
-    this.element.setZoomLevel(this.zoomLevel)
+    this._element.setZoomLevel(this.zoomLevel)
   }
 
   public print() {
-    this.element.print()
+    this._element.print()
   }
 
   public openDevTools() {
-    this.element.openDevTools()
+    this._element.openDevTools()
   }
 
   public async reload() {
     await this.runRequest('reload', {})
-    this.element.reload()
+    this._element.reload()
   }
 
   public error(msg: string) {
-    this.element.send<'error'>('error', { msg })
+    this._element.send<'error'>('error', { msg })
   }
 
   public async getTeXConfig() {
@@ -212,14 +216,14 @@ export class WebviewHandler {
     const id = this.replyCallbackId++
     return new Promise<RequestReplyMap[T]>((resolve) => {
       this.replyCallbacks.set(id, {
-        request: request as any,
+        request: request,
         callback: (result: RequestReplyMap[T]) => {
           this.replyCallbacks.delete(id)
           resolve(result)
         },
-      })
+      } as ReplyCallbackStruct<T>)
       const newargs = Object.assign({ id }, args)
-      this.element.send<T>(request, newargs)
+      this._element.send<T>(request, newargs)
     })
   }
 
@@ -228,6 +232,6 @@ export class WebviewHandler {
     for (const se of atom.styles.getStyleElements()) {
       styles.push(se.innerHTML)
     }
-    this.element.send<'style'>('style', { styles })
+    this._element.send<'style'>('style', { styles })
   }
 }
