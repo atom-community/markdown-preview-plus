@@ -9,7 +9,7 @@ import path = require('path')
 import CSON = require('season')
 import fs = require('fs')
 import { isFileSync } from './util'
-import { atomConfig } from './util'
+import { atomConfig } from '../src/util'
 
 const mjSrc = `${global.require.resolve(
   'mathjax',
