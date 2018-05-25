@@ -12,7 +12,7 @@ declare interface ChannelMap {
     mjrenderer: MathJaxRenderer
   }
   error: { msg: string }
-  init: { atomHome: string; numberEqns: boolean; mjxExtensions: string[]; mjxUndefinedFamily: string[] }
+  init: { atomHome: string; numberEqns: boolean; mjxTeXExtensions: string[]; mjxUndefinedFamily: string[] }
   'set-base-path': { path?: string }
   'set-source-map': {
     map: { [line: number]: Array<{ tag: string; index: number }> }

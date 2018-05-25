@@ -137,8 +137,8 @@ export class WebviewHandler {
   }
 
   public init(atomHome: string, numberEqns: boolean,
-    mjxExtensions: string[], mjxUndefinedFamily: string[]) {
-    this._element.send<'init'>('init', { atomHome, numberEqns, mjxExtensions, mjxUndefinedFamily })
+    mjxTeXExtensions: string[], mjxUndefinedFamily: string[]) {
+    this._element.send<'init'>('init', { atomHome, numberEqns, mjxTeXExtensions, mjxUndefinedFamily })
   }
 
   public updateImages(oldSource: string, version: number | false) {

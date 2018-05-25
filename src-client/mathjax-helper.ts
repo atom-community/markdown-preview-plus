@@ -77,7 +77,7 @@ export async function jaxTeXConfig() {
   const numberEqns = await window.atomVars.numberEqns
 
   return {
-    extensions: await window.atomVars.mjxExtensions,
+    extensions: await window.atomVars.mjxTeXExtensions,
     Macros: userMacros,
     equationNumbers: numberEqns
       ? {

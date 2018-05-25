@@ -191,8 +191,8 @@ export const config: IConfig = {
         default: false,
         order: 10,
       },
-      mjxExtensions: {
-        title: 'MathJax extensions',
+      mjxTeXExtensions: {
+        title: 'MathJax TeX extensions',
         type: 'array',
         default: [
             'AMSmath.js',
@@ -431,7 +431,7 @@ declare module 'atom' {
       enableLatexRenderingByDefault: boolean
       latexRenderer: 'HTML-CSS' | 'SVG'
       numberEquations: boolean
-      mjxExtensions: string[]
+      mjxTeXExtensions: string[]
       mjxUndefinedFamily: string[]
     }
     'markdown-preview-plus.markdownItConfig.breakOnSingleNewline': boolean
@@ -520,7 +520,7 @@ declare module 'atom' {
         enableLatexRenderingByDefault: boolean
         latexRenderer: 'HTML-CSS' | 'SVG'
         numberEquations: boolean
-        mjxExtensions: string[]
+        mjxTeXExtensions: string[]
         mjxUndefinedFamily: string[]
       }
       'markdownItConfig.breakOnSingleNewline': boolean

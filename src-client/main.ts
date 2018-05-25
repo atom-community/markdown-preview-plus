@@ -16,16 +16,16 @@ function mkResPromise<T>(): ResolvablePromise<T> {
 window.atomVars = {
   home: mkResPromise(),
   numberEqns: mkResPromise(),
-  mjxExtensions: mkResPromise(),
+  mjxTeXExtensions: mkResPromise(),
   mjxUndefinedFamily: mkResPromise(),
   sourceLineMap: new Map(),
   revSourceMap: new WeakMap(),
 }
 
-ipcRenderer.on<'init'>('init', (_evt, { atomHome, numberEqns, mjxExtensions, mjxUndefinedFamily }) => {
+ipcRenderer.on<'init'>('init', (_evt, { atomHome, numberEqns, mjxTeXExtensions, mjxUndefinedFamily }) => {
   window.atomVars.home.resolve(atomHome)
   window.atomVars.numberEqns.resolve(numberEqns)
-  window.atomVars.mjxExtensions.resolve(mjxExtensions)
+  window.atomVars.mjxTeXExtensions.resolve(mjxTeXExtensions)
   window.atomVars.mjxUndefinedFamily.resolve(mjxUndefinedFamily)
 })
 
