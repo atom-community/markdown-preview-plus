@@ -9,7 +9,6 @@ import path = require('path')
 import CSON = require('season')
 import fs = require('fs')
 import { isFileSync } from './util'
-import { atomConfig } from '../src/util'
 
 const mjSrc = `${global.require.resolve(
   'mathjax',
@@ -78,7 +77,7 @@ export async function jaxTeXConfig() {
   const numberEqns = await window.atomVars.numberEqns
 
   return {
-    extensions: await atomConfig().mathConfig.mjxExtensions,
+    extensions: await window.atomVars.mjxExtensions,
     Macros: userMacros,
     equationNumbers: numberEqns
       ? {
@@ -187,7 +186,7 @@ async function configureMathJax() {
       webFont: 'TeX',
       imageFont: null as any, // TODO: complain on DT
       mtextFontInherit: true,
-      undefinedFamily: await atomConfig().mathConfig.mjxUndefinedFamily
+      undefinedFamily: await window.atomVars.mjxUndefinedFamily,
     },
     messageStyle: 'none',
     showMathMenu: false,

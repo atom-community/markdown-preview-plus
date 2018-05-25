@@ -49,6 +49,8 @@ export abstract class MarkdownPreviewView {
         this.handler.init(
           atom.getConfigDirPath(),
           atomConfig().mathConfig.numberEquations,
+          atomConfig().mathConfig.mjxExtensions,
+          atomConfig().mathConfig.mjxUndefinedFamily,
         )
         // TODO: observe
         this.handler.setUseGitHubStyle(

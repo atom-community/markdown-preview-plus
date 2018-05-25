@@ -206,8 +206,8 @@ export const config: IConfig = {
         title: 'MathJax undefined font family',
         description:
           'Sets MathJax undefinedFamily option.',
-        type: 'string',
-        default: 'serif',
+        type: 'array',
+        default: ['serif'],
         order: 20,
       },
     },
@@ -431,6 +431,8 @@ declare module 'atom' {
       enableLatexRenderingByDefault: boolean
       latexRenderer: 'HTML-CSS' | 'SVG'
       numberEquations: boolean
+      mjxExtensions: string[]
+      mjxUndefinedFamily: string[]
     }
     'markdown-preview-plus.markdownItConfig.breakOnSingleNewline': boolean
     'markdown-preview-plus.markdownItConfig.useLazyHeaders': boolean
@@ -518,6 +520,8 @@ declare module 'atom' {
         enableLatexRenderingByDefault: boolean
         latexRenderer: 'HTML-CSS' | 'SVG'
         numberEquations: boolean
+        mjxExtensions: string[]
+        mjxUndefinedFamily: string[]
       }
       'markdownItConfig.breakOnSingleNewline': boolean
       'markdownItConfig.useLazyHeaders': boolean
