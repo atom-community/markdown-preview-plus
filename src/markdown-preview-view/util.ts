@@ -148,7 +148,7 @@ function mathJaxScript(texConfig: MathJax.TeXInputProcessor) {
         availableFonts: [],
         webFont: 'TeX',
         mtextFontInherit: true,
-        undefinedFamily: "'${cfg.mathConfig.mjxUndefinedFamily.join("', '")}'",
+        undefinedFamily: "${cfg.mathConfig.mjxUndefinedFamily.join(", ")}",
       },
     showMathMenu: true
   });
