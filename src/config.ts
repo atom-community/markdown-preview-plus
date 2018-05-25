@@ -191,6 +191,25 @@ export const config: IConfig = {
         default: false,
         order: 10,
       },
+      mjxExtensions: {
+        title: 'MathJax extensions',
+        type: 'array',
+        default: [
+            'AMSmath.js',
+            'AMSsymbols.js',
+            'noErrors.js',
+            'noUndefined.js'
+        ],
+        order: 15,
+      },
+      mjxUndefinedFamily: {
+        title: 'MathJax undefined font family',
+        description:
+          'Sets MathJax undefinedFamily option.',
+        type: 'string',
+        default: 'serif',
+        order: 20,
+      },
     },
   },
   markdownItConfig: {
