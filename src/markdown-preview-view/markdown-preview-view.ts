@@ -146,7 +146,7 @@ export abstract class MarkdownPreviewView {
             html,
             this.renderLaTeX,
             atom.config.get('markdown-preview-plus.useGitHubStyle'),
-            await this.handler.getTeXConfig(),
+            await this.handler.getTeXConfig()
           )
 
           fs.writeFileSync(filePath, fullHtml)

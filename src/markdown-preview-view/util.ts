@@ -137,12 +137,19 @@ export function buildLineMap(tokens: ReadonlyArray<Readonly<Token>>) {
 }
 
 function mathJaxScript(texConfig: MathJax.TeXInputProcessor) {
+  const cfg = atom.config.get('markdown-preview-plus')
   return `\
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     jax: ["input/TeX","output/HTML-CSS"],
     extensions: ["[a11y]/accessibility-menu.js"],
     TeX: ${JSON.stringify(texConfig, undefined, 2)},
+    'HTML-CSS': {
+        availableFonts: [],
+        webFont: 'TeX',
+        mtextFontInherit: true,
+        undefinedFamily: ${cfg.mjxUndefinedFamily},
+      },
     showMathMenu: true
   });
 </script>
