@@ -15,3 +15,7 @@
   'ctrl--': 'markdown-preview-plus:zoom-out'
   'ctrl-_': 'markdown-preview-plus:zoom-out'
   'ctrl-0': 'markdown-preview-plus:reset-zoom'
+
+'webview.markdown-preview-plus.native-key-bindings':
+  'pageup': 'native!'
+  'pagedown': 'native!'
