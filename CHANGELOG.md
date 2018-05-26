@@ -1,3 +1,32 @@
+## 3.2.2
+
+### Fixes
+
+-   Add native PgUP\/PgDN keybindings to webview
+
+    Atom doesn't bind Page Up and Page Down keys to native handler
+    by default, consequently those keys didn't scroll the preview.
+    The bindings were added, so Page Up and Page Down now should
+    scroll the preview as you would expect.
+
+-   Fixup keybindings
+
+    Not all default keybindings were bound to correct scopes, and hence
+    some of those didn't work. This was fixed.
+
+-   Fix long copy rendering on atom-beta
+
+    Atom 1.28 updated to Electron 2.0 which changed some rules, and some
+    tricks used in offscreen MathJax rendering stopeed working. This was
+    fixed.
+
+### Maintenence
+
+-   Fix flaky test
+-   Clean-up webview-handler
+-   Stronger typing in WebviewHandler.runRequest
+-   Refactor
+
 ## 3.2.1
 
 -   Wrap code block lines in print media
