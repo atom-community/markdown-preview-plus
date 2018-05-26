@@ -48,9 +48,7 @@ export abstract class MarkdownPreviewView {
       this.handler = new WebviewHandler(() => {
         this.handler.init(
           atom.getConfigDirPath(),
-          atomConfig().mathConfig.numberEquations,
-          atomConfig().mathConfig.mjxTeXExtensions,
-          atomConfig().mathConfig.mjxUndefinedFamily,
+          atomConfig().mathConfig,
         )
         // TODO: observe
         this.handler.setUseGitHubStyle(
@@ -146,7 +144,7 @@ export abstract class MarkdownPreviewView {
             html,
             this.renderLaTeX,
             atom.config.get('markdown-preview-plus.useGitHubStyle'),
-            await this.handler.getTeXConfig()
+            await this.handler.getTeXConfig(),
           )
 
           fs.writeFileSync(filePath, fullHtml)

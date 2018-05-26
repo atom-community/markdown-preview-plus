@@ -191,7 +191,7 @@ export const config: IConfig = {
         default: false,
         order: 10,
       },
-      mjxTeXExtensions: {
+      texExtensions: {
         title: 'MathJax TeX extensions',
         type: 'array',
         default: [
@@ -202,12 +202,10 @@ export const config: IConfig = {
         ],
         order: 15,
       },
-      mjxUndefinedFamily: {
-        title: 'MathJax undefined font family',
-        description:
-          'Sets MathJax undefinedFamily option.',
-        type: 'array',
-        default: ['serif'],
+      undefinedFamily: {
+        title: "MathJax 'undefinedFamily' (font family)",
+        type: 'string',
+        default: 'serif',
         order: 20,
       },
     },
@@ -427,12 +425,14 @@ declare module 'atom' {
     'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault': boolean
     'markdown-preview-plus.mathConfig.latexRenderer': 'HTML-CSS' | 'SVG'
     'markdown-preview-plus.mathConfig.numberEquations': boolean
+    'markdown-preview-plus.mathConfig.texExtensions': string[]
+    'markdown-preview-plus.mathConfig.undefinedFamily': string
     'markdown-preview-plus.mathConfig': {
       enableLatexRenderingByDefault: boolean
       latexRenderer: 'HTML-CSS' | 'SVG'
       numberEquations: boolean
-      mjxTeXExtensions: string[]
-      mjxUndefinedFamily: string[]
+      texExtensions: string[]
+      undefinedFamily: string
     }
     'markdown-preview-plus.markdownItConfig.breakOnSingleNewline': boolean
     'markdown-preview-plus.markdownItConfig.useLazyHeaders': boolean
@@ -516,12 +516,14 @@ declare module 'atom' {
       'mathConfig.enableLatexRenderingByDefault': boolean
       'mathConfig.latexRenderer': 'HTML-CSS' | 'SVG'
       'mathConfig.numberEquations': boolean
+      'mathConfig.texExtensions': string[]
+      'mathConfig.undefinedFamily': string
       mathConfig: {
         enableLatexRenderingByDefault: boolean
         latexRenderer: 'HTML-CSS' | 'SVG'
         numberEquations: boolean
-        mjxTeXExtensions: string[]
-        mjxUndefinedFamily: string[]
+        texExtensions: string[]
+        undefinedFamily: string
       }
       'markdownItConfig.breakOnSingleNewline': boolean
       'markdownItConfig.useLazyHeaders': boolean

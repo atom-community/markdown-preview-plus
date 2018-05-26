@@ -136,9 +136,8 @@ export class WebviewHandler {
     this._element.send<'set-base-path'>('set-base-path', { path })
   }
 
-  public init(atomHome: string, numberEqns: boolean,
-    mjxTeXExtensions: string[], mjxUndefinedFamily: string[]) {
-    this._element.send<'init'>('init', { atomHome, numberEqns, mjxTeXExtensions, mjxUndefinedFamily })
+  public init(atomHome: string, mathJaxConfig: MathJaxConfig) {
+    this._element.send<'init'>('init', { atomHome, mathJaxConfig })
   }
 
   public updateImages(oldSource: string, version: number | false) {

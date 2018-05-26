@@ -15,18 +15,14 @@ function mkResPromise<T>(): ResolvablePromise<T> {
 
 window.atomVars = {
   home: mkResPromise(),
-  numberEqns: mkResPromise(),
-  mjxTeXExtensions: mkResPromise(),
-  mjxUndefinedFamily: mkResPromise(),
+  mathJaxConfig: mkResPromise(),
   sourceLineMap: new Map(),
   revSourceMap: new WeakMap(),
 }
 
-ipcRenderer.on<'init'>('init', (_evt, { atomHome, numberEqns, mjxTeXExtensions, mjxUndefinedFamily }) => {
+ipcRenderer.on<'init'>('init', (_evt, { atomHome, mathJaxConfig }) => {
   window.atomVars.home.resolve(atomHome)
-  window.atomVars.numberEqns.resolve(numberEqns)
-  window.atomVars.mjxTeXExtensions.resolve(mjxTeXExtensions)
-  window.atomVars.mjxUndefinedFamily.resolve(mjxUndefinedFamily)
+  window.atomVars.mathJaxConfig.resolve(mathJaxConfig)
 })
 
 ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {

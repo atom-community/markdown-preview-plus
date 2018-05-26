@@ -2,7 +2,7 @@ import { TextEditor, StyleManager } from 'atom'
 import * as path from 'path'
 import * as fs from 'fs'
 import { Token } from 'markdown-it'
-import { handlePromise } from '../util'
+import { handlePromise, atomConfig } from '../util'
 
 export function editorForId(editorId: number): TextEditor | undefined {
   for (const editor of atom.workspace.getTextEditors()) {
@@ -137,19 +137,18 @@ export function buildLineMap(tokens: ReadonlyArray<Readonly<Token>>) {
 }
 
 function mathJaxScript(texConfig: MathJax.TeXInputProcessor) {
-  const cfg = atom.config.get('markdown-preview-plus')
   return `\
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     jax: ["input/TeX","output/HTML-CSS"],
     extensions: ["[a11y]/accessibility-menu.js"],
-    TeX: ${JSON.stringify(texConfig, undefined, 2)},
     'HTML-CSS': {
-        availableFonts: [],
-        webFont: 'TeX',
-        mtextFontInherit: true,
-        undefinedFamily: "${cfg.mathConfig.mjxUndefinedFamily.join(", ")}",
-      },
+      availableFonts: [],
+      webFont: 'TeX',
+      undefinedFamily: "${atomConfig().mathConfig.undefinedFamily}",
+      mtextFontInherit: true,
+    },
+    TeX: ${JSON.stringify(texConfig, undefined, 2)},
     showMathMenu: true
   });
 </script>

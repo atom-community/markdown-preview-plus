@@ -43,8 +43,7 @@ export async function copyHtml(
   renderLaTeX: boolean,
 ): Promise<void> {
   const view = new WebviewHandler(async () => {
-    view.init(atom.getConfigDirPath(), atomConfig().mathConfig.numberEquations,
-      atomConfig().mathConfig.mjxTeXExtensions, atomConfig().mathConfig.mjxUndefinedFamily)
+    view.init(atom.getConfigDirPath(), atomConfig().mathConfig)
     view.setUseGitHubStyle(
       atom.config.get('markdown-preview-plus.useGitHubStyle'),
     )
