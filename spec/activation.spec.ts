@@ -2,6 +2,9 @@ import * as path from 'path'
 import { expect } from 'chai'
 
 describe('Markdown preview plus package activation', function() {
+  beforeEach(function() {
+    expect(atom.packages.isPackageActive('markdown-preview-plus')).to.be.false
+  })
   afterEach(async function() {
     await atom.packages.deactivatePackage('markdown-preview-plus')
   })
