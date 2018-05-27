@@ -4,7 +4,12 @@ import * as cson from 'season'
 import * as markdownIt from '../lib/markdown-it-helper'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import * as sinon from 'sinon'
-import { waitsFor, expectPreviewInSplitPane, previewFragment } from './util'
+import {
+  waitsFor,
+  expectPreviewInSplitPane,
+  previewFragment,
+  activateMe,
+} from './util'
 import { expect } from 'chai'
 import { Token } from 'markdown-it'
 import * as previewUtil from '../lib/markdown-preview-view/util'
@@ -22,7 +27,7 @@ describe('Syncronization of source and preview', function() {
   let fixturesPath: string
   let stub: sinon.SinonStub
 
-  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
   beforeEach(async function() {

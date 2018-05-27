@@ -13,6 +13,7 @@ import {
   previewText,
   previewFragment,
   previewHTML,
+  activateMe,
 } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -23,7 +24,7 @@ describe('Markdown preview plus package', function() {
   let tempPath: string
 
   before(async function() {
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
+    await activateMe()
     await atom.packages.activatePackage('language-gfm')
   })
 

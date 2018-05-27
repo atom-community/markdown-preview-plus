@@ -5,7 +5,7 @@ import * as wrench from 'fs-extra'
 import pandocHelper = require('../lib/pandoc-helper')
 import { expect } from 'chai'
 
-import './util'
+import { activateMe } from './util'
 
 const bibFile = 'test.bib'
 const cslFile = 'foo.csl'
@@ -14,9 +14,7 @@ let tempPath: string
 let file: string
 
 describe('Markdown preview plus pandoc helper', function() {
-  before(async function() {
-    await atom.packages.activatePackage(path.join(__dirname, '..'))
-  })
+  before(async () => activateMe())
 
   after(async function() {
     await atom.packages.deactivatePackage('markdown-preview-plus')

@@ -3,7 +3,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
-import { waitsFor } from './util'
+import { waitsFor, activateMe } from './util'
 import { expect } from 'chai'
 global.require = require
 import * as mathjaxHelper from '../src-client/mathjax-helper'
@@ -33,9 +33,7 @@ describe('MathJax helper module', () =>
     let macros: { [key: string]: any }
     let spans = [] as Element[]
 
-    before(async () => {
-      await atom.packages.activatePackage(path.join(__dirname, '..'))
-    })
+    before(async () => activateMe())
     after(async () => {
       await atom.packages.deactivatePackage('markdown-preview-plus')
     })

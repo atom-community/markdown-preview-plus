@@ -17,6 +17,7 @@ import {
   expectPreviewInSplitPane,
   previewText,
   previewFragment,
+  activateMe,
 } from './util'
 import { TextEditorElement, TextEditor } from 'atom'
 import { PlaceholderView } from '../lib/placeholder-view'
@@ -42,7 +43,7 @@ describe('MarkdownPreviewView', function() {
     return mpv
   }
 
-  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
   beforeEach(async function() {
