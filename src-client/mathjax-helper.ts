@@ -177,16 +177,16 @@ function valueMatchesPattern(value: any) {
 // a few unnecessary features stripped away
 //
 async function configureMathJax() {
-  const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig  // test with this commented out
+  const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig
   MathJax.Hub.Config({
     jax: ['input/TeX', `output/${defaultRenderer}`],
-    extensions: ["[a11y]/accessibility-menu.js"],
+    extensions: ['[a11y]/accessibility-menu.js'],
     TeX: await jaxTeXConfig(),
     'HTML-CSS': {
       availableFonts: [],
       webFont: 'TeX',
       imageFont: null as any, // TODO: complain on DT
-      undefinedFamily: mathJaxConfig.undefinedFamily,  // it's a bug in MathJax, test with commented out
+      undefinedFamily: mathJaxConfig.undefinedFamily as any, // TODO: complain on DT
       mtextFontInherit: true,
     },
     messageStyle: 'none',

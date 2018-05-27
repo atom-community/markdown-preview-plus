@@ -46,10 +46,7 @@ export abstract class MarkdownPreviewView {
   ) {
     this.renderPromise = new Promise((resolve) => {
       this.handler = new WebviewHandler(() => {
-        this.handler.init(
-          atom.getConfigDirPath(),
-          atomConfig().mathConfig,
-        )
+        this.handler.init(atom.getConfigDirPath(), atomConfig().mathConfig)
         // TODO: observe
         this.handler.setUseGitHubStyle(
           atom.config.get('markdown-preview-plus.useGitHubStyle'),
