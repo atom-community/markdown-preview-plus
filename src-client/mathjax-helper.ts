@@ -180,7 +180,7 @@ async function configureMathJax() {
   const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig
   MathJax.Hub.Config({
     jax: ['input/TeX', `output/${defaultRenderer}`],
-    extensions: ['[a11y]/accessibility-menu.js'],
+    extensions: [],
     TeX: await jaxTeXConfig(),
     'HTML-CSS': {
       availableFonts: [],

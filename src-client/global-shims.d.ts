@@ -10,9 +10,3 @@ interface Window {
     revSourceMap: WeakMap<Element, number[]>
   }
 }
-
-interface MathJaxConfig {
-  numberEquations: boolean
-  texExtensions: string[]
-  undefinedFamily: string
-}

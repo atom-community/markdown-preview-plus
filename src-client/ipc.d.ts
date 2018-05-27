@@ -70,4 +70,10 @@ declare global {
   }
 
   type MathJaxRenderer = 'SVG' | 'HTML-CSS'
+
+  interface MathJaxConfig {
+    numberEquations: boolean
+    texExtensions: string[]
+    undefinedFamily: string
+  }
 }
