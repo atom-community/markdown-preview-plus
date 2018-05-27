@@ -201,6 +201,7 @@ export const config: IConfig = {
           'noUndefined.js',
         ],
         order: 15,
+        items: { type: 'string' },
       },
       undefinedFamily: {
         title: "MathJax 'undefinedFamily' (font family)",
@@ -425,13 +426,13 @@ declare module 'atom' {
     'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault': boolean
     'markdown-preview-plus.mathConfig.latexRenderer': 'HTML-CSS' | 'SVG'
     'markdown-preview-plus.mathConfig.numberEquations': boolean
-    'markdown-preview-plus.mathConfig.texExtensions': any[]
+    'markdown-preview-plus.mathConfig.texExtensions': string[]
     'markdown-preview-plus.mathConfig.undefinedFamily': string
     'markdown-preview-plus.mathConfig': {
       enableLatexRenderingByDefault: boolean
       latexRenderer: 'HTML-CSS' | 'SVG'
       numberEquations: boolean
-      texExtensions: any[]
+      texExtensions: string[]
       undefinedFamily: string
     }
     'markdown-preview-plus.markdownItConfig.breakOnSingleNewline': boolean
@@ -516,13 +517,13 @@ declare module 'atom' {
       'mathConfig.enableLatexRenderingByDefault': boolean
       'mathConfig.latexRenderer': 'HTML-CSS' | 'SVG'
       'mathConfig.numberEquations': boolean
-      'mathConfig.texExtensions': any[]
+      'mathConfig.texExtensions': string[]
       'mathConfig.undefinedFamily': string
       mathConfig: {
         enableLatexRenderingByDefault: boolean
         latexRenderer: 'HTML-CSS' | 'SVG'
         numberEquations: boolean
-        texExtensions: any[]
+        texExtensions: string[]
         undefinedFamily: string
       }
       'markdownItConfig.breakOnSingleNewline': boolean
