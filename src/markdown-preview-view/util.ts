@@ -145,7 +145,9 @@ function mathJaxScript(texConfig: MathJax.TeXInputProcessor) {
     'HTML-CSS': {
       availableFonts: [],
       webFont: 'TeX',
-      undefinedFamily: ${JSON.stringify(atomConfig().mathConfig.undefinedFamily)},
+      undefinedFamily: ${JSON.stringify(
+        atomConfig().mathConfig.undefinedFamily,
+      )},
       mtextFontInherit: true,
     },
     TeX: ${JSON.stringify(texConfig, undefined, 2)},
