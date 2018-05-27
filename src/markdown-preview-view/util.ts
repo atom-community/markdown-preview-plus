@@ -2,7 +2,7 @@ import { TextEditor, StyleManager } from 'atom'
 import * as path from 'path'
 import * as fs from 'fs'
 import { Token } from 'markdown-it'
-import { handlePromise } from '../util'
+import { handlePromise, atomConfig } from '../util'
 
 export function editorForId(editorId: number): TextEditor | undefined {
   for (const editor of atom.workspace.getTextEditors()) {
@@ -142,6 +142,14 @@ function mathJaxScript(texConfig: MathJax.TeXInputProcessor) {
   MathJax.Hub.Config({
     jax: ["input/TeX","output/HTML-CSS"],
     extensions: ["[a11y]/accessibility-menu.js"],
+    'HTML-CSS': {
+      availableFonts: [],
+      webFont: 'TeX',
+      undefinedFamily: ${JSON.stringify(
+        atomConfig().mathConfig.undefinedFamily,
+      )},
+      mtextFontInherit: true,
+    },
     TeX: ${JSON.stringify(texConfig, undefined, 2)},
     showMathMenu: true
   });

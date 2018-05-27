@@ -12,7 +12,7 @@ declare interface ChannelMap {
     mjrenderer: MathJaxRenderer
   }
   error: { msg: string }
-  init: { atomHome: string; numberEqns: boolean }
+  init: { atomHome: string; mathJaxConfig: MathJaxConfig }
   'set-base-path': { path?: string }
   'set-source-map': {
     map: { [line: number]: Array<{ tag: string; index: number }> }
@@ -70,4 +70,10 @@ declare global {
   }
 
   type MathJaxRenderer = 'SVG' | 'HTML-CSS'
+
+  interface MathJaxConfig {
+    numberEquations: boolean
+    texExtensions: string[]
+    undefinedFamily: string
+  }
 }

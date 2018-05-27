@@ -191,6 +191,24 @@ export const config: IConfig = {
         default: false,
         order: 10,
       },
+      texExtensions: {
+        title: 'MathJax TeX extensions',
+        type: 'array',
+        default: [
+          'AMSmath.js',
+          'AMSsymbols.js',
+          'noErrors.js',
+          'noUndefined.js',
+        ],
+        order: 15,
+        items: { type: 'string' },
+      },
+      undefinedFamily: {
+        title: "MathJax 'undefinedFamily' (font family)",
+        type: 'string',
+        default: 'serif',
+        order: 20,
+      },
     },
   },
   markdownItConfig: {
@@ -408,10 +426,14 @@ declare module 'atom' {
     'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault': boolean
     'markdown-preview-plus.mathConfig.latexRenderer': 'HTML-CSS' | 'SVG'
     'markdown-preview-plus.mathConfig.numberEquations': boolean
+    'markdown-preview-plus.mathConfig.texExtensions': string[]
+    'markdown-preview-plus.mathConfig.undefinedFamily': string
     'markdown-preview-plus.mathConfig': {
       enableLatexRenderingByDefault: boolean
       latexRenderer: 'HTML-CSS' | 'SVG'
       numberEquations: boolean
+      texExtensions: string[]
+      undefinedFamily: string
     }
     'markdown-preview-plus.markdownItConfig.breakOnSingleNewline': boolean
     'markdown-preview-plus.markdownItConfig.useLazyHeaders': boolean
@@ -495,10 +517,14 @@ declare module 'atom' {
       'mathConfig.enableLatexRenderingByDefault': boolean
       'mathConfig.latexRenderer': 'HTML-CSS' | 'SVG'
       'mathConfig.numberEquations': boolean
+      'mathConfig.texExtensions': string[]
+      'mathConfig.undefinedFamily': string
       mathConfig: {
         enableLatexRenderingByDefault: boolean
         latexRenderer: 'HTML-CSS' | 'SVG'
         numberEquations: boolean
+        texExtensions: string[]
+        undefinedFamily: string
       }
       'markdownItConfig.breakOnSingleNewline': boolean
       'markdownItConfig.useLazyHeaders': boolean

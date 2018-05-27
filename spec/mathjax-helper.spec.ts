@@ -18,6 +18,14 @@ declare global {
   }
 }
 
+function resolve<T>(v: T): ResolvablePromise<T> {
+  const res = Promise.resolve(v) as ResolvablePromise<T>
+  res.resolve = function() {
+    /*noop*/
+  }
+  return res
+}
+
 describe('MathJax helper module', () =>
   describe('loading MathJax TeX macros', function() {
     let configDirPath: string
@@ -37,8 +45,12 @@ describe('MathJax helper module', () =>
       macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
 
       window.atomVars = {
-        home: Promise.resolve(configDirPath) as any,
-        numberEqns: Promise.resolve(false) as any,
+        home: resolve(configDirPath),
+        mathJaxConfig: resolve({
+          numberEquations: false,
+          texExtensions: [] as string[],
+          undefinedFamily: '',
+        }),
         revSourceMap: new WeakMap(),
         sourceLineMap: new Map(),
       }

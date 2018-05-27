@@ -74,17 +74,12 @@ export async function jaxTeXConfig() {
   } else {
     userMacros = {}
   }
-  const numberEqns = await window.atomVars.numberEqns
+  const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig
 
   return {
-    extensions: [
-      'AMSmath.js',
-      'AMSsymbols.js',
-      'noErrors.js',
-      'noUndefined.js',
-    ],
+    extensions: mathJaxConfig.texExtensions,
     Macros: userMacros,
-    equationNumbers: numberEqns
+    equationNumbers: mathJaxConfig.numberEquations
       ? {
           autoNumber: 'AMS',
           useLabelIds: false,
@@ -182,6 +177,7 @@ function valueMatchesPattern(value: any) {
 // a few unnecessary features stripped away
 //
 async function configureMathJax() {
+  const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig
   MathJax.Hub.Config({
     jax: ['input/TeX', `output/${defaultRenderer}`],
     extensions: [],
@@ -190,6 +186,8 @@ async function configureMathJax() {
       availableFonts: [],
       webFont: 'TeX',
       imageFont: null as any, // TODO: complain on DT
+      undefinedFamily: mathJaxConfig.undefinedFamily as any, // TODO: complain on DT
+      mtextFontInherit: true,
     },
     messageStyle: 'none',
     showMathMenu: false,
@@ -227,11 +225,11 @@ async function queueTypeset(domElement: Node, renderer: MathJaxRenderer) {
     document.querySelectorAll('script[type^="math/tex"]'),
   ).some((x) => !x.id)
   if (!hasUnprocessedMath) return
-  const numberEqns = await window.atomVars.numberEqns
+  const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig
   return new Promise<void>((resolve) => {
     if (MathJax.InputJax.TeX) {
       MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])
-      if (numberEqns) {
+      if (mathJaxConfig.numberEquations) {
         MathJax.Hub.Queue(['PreProcess', MathJax.Hub])
         MathJax.Hub.Queue(['Reprocess', MathJax.Hub])
       }
