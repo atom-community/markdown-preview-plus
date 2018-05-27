@@ -10,7 +10,7 @@ import pandocHelper = require('../lib/pandoc-helper')
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 
-import { waitsFor, previewFragment } from './util'
+import { waitsFor, previewFragment, activateMe } from './util'
 
 describe('MarkdownPreviewView when Pandoc is enabled', function() {
   let html: string
@@ -26,7 +26,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
     return mpv
   }
 
-  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
   beforeEach(async function() {

@@ -1,14 +1,19 @@
 import * as path from 'path'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
 import { TextEditor } from 'atom'
-import { expectPreviewInSplitPane, waitsFor, previewFragment } from './util'
+import {
+  expectPreviewInSplitPane,
+  waitsFor,
+  previewFragment,
+  activateMe,
+} from './util'
 import { expect } from 'chai'
 
 describe('the difference algorithm that updates the preview', function() {
   let editor: TextEditor
   let preview: MarkdownPreviewView
 
-  before(async () => atom.packages.activatePackage(path.join(__dirname, '..')))
+  before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
   beforeEach(async function() {

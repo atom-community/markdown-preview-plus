@@ -108,3 +108,19 @@ export async function previewFragment(preview: MarkdownPreviewView) {
   const dom = new DOMParser()
   return dom.parseFromString(html, 'text/html')
 }
+
+declare module 'atom' {
+  interface PackageManager {
+    loadPackage(path: string): Package
+  }
+}
+
+import * as path from 'path'
+import { Package } from 'atom'
+export async function activateMe(): Promise<Package> {
+  const pkg = atom.packages.loadPackage(path.join(__dirname, '..'))
+  // TODO: Hack to work around Atom issue with fsevents
+  // tslint:disable-next-line:totality-check
+  if (process.platform === 'darwin') pkg.isCompatible = () => true
+  return atom.packages.activatePackage(pkg.name)
+}
