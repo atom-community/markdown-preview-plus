@@ -129,6 +129,75 @@ export const config: IConfig = {
         enum: ['html', 'pdf'],
         default: 'html',
       },
+      saveToPDFOptions: {
+        title: 'Save to PDF options',
+        type: 'object',
+        order: 25,
+        properties: {
+          /**
+           * Specifies the type of margins to use. Uses 0 for default margin, 1 for no
+           * margin, and 2 for minimum margin.
+           */
+          marginsType: {
+            title: 'Margins Type',
+            type: 'integer',
+            enum: [
+              { value: 0, description: 'Default margins' },
+              { value: 1, description: 'No margins' },
+              { value: 2, description: 'Minimum margins' },
+            ],
+            default: 0,
+            order: 10,
+          },
+          pageSize: {
+            title: 'Page Size',
+            enum: ['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid'],
+            type: 'string',
+            default: 'A4',
+            order: 20,
+          },
+          customPageSize: {
+            title: 'Custom Page Size',
+            description:
+              'Overrides Page Size if not empty. Specified as ' +
+              '"&lt;width&gt;x&lt;height&gt;", where &lt;height&gt; and &lt;width&gt; are ' +
+              'floating-point numbers with "." as decimal separator, no thousands separator, ' +
+              'and with optional "cm", "mm" or "in" suffix to indicate units, default is "mm". ' +
+              'For example, A4 is "8.3in x 11.7in" or "210mm x 297mm" or "210 x 297". ' +
+              'Whitespace is ignored.',
+            type: 'string',
+            default: '',
+            order: 25,
+          },
+          /**
+           * Whether to print CSS backgrounds.
+           */
+          printBackground: {
+            title: 'Print background',
+            type: 'boolean',
+            default: false,
+            order: 30,
+          },
+          /**
+           * Whether to print selection only.
+           */
+          printSelectionOnly: {
+            title: 'Print only selection',
+            type: 'boolean',
+            default: false,
+            order: 40,
+          },
+          /**
+           * true for landscape, false for portrait.
+           */
+          landscape: {
+            title: 'Landscape orientation',
+            type: 'boolean',
+            default: false,
+            order: 50,
+          },
+        },
+      },
     },
   },
   syncConfig: {
@@ -383,15 +452,8 @@ declare module 'atom' {
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
-    'markdown-preview-plus.previewConfig.previewSplitPaneDir':
-      | 'down'
-      | 'right'
-      | 'none'
-    'markdown-preview-plus.previewConfig.previewDock':
-      | 'left'
-      | 'right'
-      | 'bottom'
-      | 'center'
+    'markdown-preview-plus.previewConfig.previewSplitPaneDir': 'down' | 'right' | 'none'
+    'markdown-preview-plus.previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
     'markdown-preview-plus.previewConfig.closePreviewWithEditor': boolean
     'markdown-preview-plus.previewConfig.activatePreviewWithEditor': boolean
     'markdown-preview-plus.previewConfig': {
@@ -401,19 +463,41 @@ declare module 'atom' {
       closePreviewWithEditor: boolean
       activatePreviewWithEditor: boolean
     }
-    'markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour':
-      | 'relativized'
-      | 'absolutized'
-      | 'untouched'
-    'markdown-preview-plus.saveConfig.mediaOnCopyAsHTMLBehaviour':
-      | 'relativized'
-      | 'absolutized'
-      | 'untouched'
+    'markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour': 'relativized' | 'absolutized' | 'untouched'
+    'markdown-preview-plus.saveConfig.mediaOnCopyAsHTMLBehaviour': 'relativized' | 'absolutized' | 'untouched'
     'markdown-preview-plus.saveConfig.defaultSaveFormat': 'html' | 'pdf'
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.marginsType': 0 | 1 | 2
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.pageSize': 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.customPageSize': string
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.printBackground': boolean
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.printSelectionOnly': boolean
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.landscape': boolean
+    'markdown-preview-plus.saveConfig.saveToPDFOptions': {
+      marginsType: 0 | 1 | 2
+      pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+      customPageSize: string
+      printBackground: boolean
+      printSelectionOnly: boolean
+      landscape: boolean
+    }
     'markdown-preview-plus.saveConfig': {
       mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
       mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
       defaultSaveFormat: 'html' | 'pdf'
+      'saveToPDFOptions.marginsType': 0 | 1 | 2
+      'saveToPDFOptions.pageSize': 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+      'saveToPDFOptions.customPageSize': string
+      'saveToPDFOptions.printBackground': boolean
+      'saveToPDFOptions.printSelectionOnly': boolean
+      'saveToPDFOptions.landscape': boolean
+      'saveToPDFOptions': {
+        marginsType: 0 | 1 | 2
+        pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+        customPageSize: string
+        printBackground: boolean
+        printSelectionOnly: boolean
+        landscape: boolean
+      }
     }
     'markdown-preview-plus.syncConfig.syncPreviewOnChange': boolean
     'markdown-preview-plus.syncConfig.syncPreviewOnEditorScroll': boolean
@@ -485,31 +569,53 @@ declare module 'atom' {
       'previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
       'previewConfig.closePreviewWithEditor': boolean
       'previewConfig.activatePreviewWithEditor': boolean
-      previewConfig: {
+      'previewConfig': {
         liveUpdate: boolean
         previewSplitPaneDir: 'down' | 'right' | 'none'
         previewDock: 'left' | 'right' | 'bottom' | 'center'
         closePreviewWithEditor: boolean
         activatePreviewWithEditor: boolean
       }
-      'saveConfig.mediaOnSaveAsHTMLBehaviour':
-        | 'relativized'
-        | 'absolutized'
-        | 'untouched'
-      'saveConfig.mediaOnCopyAsHTMLBehaviour':
-        | 'relativized'
-        | 'absolutized'
-        | 'untouched'
+      'saveConfig.mediaOnSaveAsHTMLBehaviour': 'relativized' | 'absolutized' | 'untouched'
+      'saveConfig.mediaOnCopyAsHTMLBehaviour': 'relativized' | 'absolutized' | 'untouched'
       'saveConfig.defaultSaveFormat': 'html' | 'pdf'
-      saveConfig: {
+      'saveConfig.saveToPDFOptions.marginsType': 0 | 1 | 2
+      'saveConfig.saveToPDFOptions.pageSize': 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+      'saveConfig.saveToPDFOptions.customPageSize': string
+      'saveConfig.saveToPDFOptions.printBackground': boolean
+      'saveConfig.saveToPDFOptions.printSelectionOnly': boolean
+      'saveConfig.saveToPDFOptions.landscape': boolean
+      'saveConfig.saveToPDFOptions': {
+        marginsType: 0 | 1 | 2
+        pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+        customPageSize: string
+        printBackground: boolean
+        printSelectionOnly: boolean
+        landscape: boolean
+      }
+      'saveConfig': {
         mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         defaultSaveFormat: 'html' | 'pdf'
+        'saveToPDFOptions.marginsType': 0 | 1 | 2
+        'saveToPDFOptions.pageSize': 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+        'saveToPDFOptions.customPageSize': string
+        'saveToPDFOptions.printBackground': boolean
+        'saveToPDFOptions.printSelectionOnly': boolean
+        'saveToPDFOptions.landscape': boolean
+        'saveToPDFOptions': {
+          marginsType: 0 | 1 | 2
+          pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+          customPageSize: string
+          printBackground: boolean
+          printSelectionOnly: boolean
+          landscape: boolean
+        }
       }
       'syncConfig.syncPreviewOnChange': boolean
       'syncConfig.syncPreviewOnEditorScroll': boolean
       'syncConfig.syncEditorOnPreviewScroll': boolean
-      syncConfig: {
+      'syncConfig': {
         syncPreviewOnChange: boolean
         syncPreviewOnEditorScroll: boolean
         syncEditorOnPreviewScroll: boolean
@@ -519,7 +625,7 @@ declare module 'atom' {
       'mathConfig.numberEquations': boolean
       'mathConfig.texExtensions': string[]
       'mathConfig.undefinedFamily': string
-      mathConfig: {
+      'mathConfig': {
         enableLatexRenderingByDefault: boolean
         latexRenderer: 'HTML-CSS' | 'SVG'
         numberEquations: boolean
@@ -533,7 +639,7 @@ declare module 'atom' {
       'markdownItConfig.useToc': boolean
       'markdownItConfig.inlineMathSeparators': string[]
       'markdownItConfig.blockMathSeparators': string[]
-      markdownItConfig: {
+      'markdownItConfig': {
         breakOnSingleNewline: boolean
         useLazyHeaders: boolean
         useCheckBoxes: boolean
@@ -553,7 +659,7 @@ declare module 'atom' {
       'pandocConfig.pandocBIBFileFallback': string
       'pandocConfig.pandocCSLFile': string
       'pandocConfig.pandocCSLFileFallback': string
-      pandocConfig: {
+      'pandocConfig': {
         useNativePandocCodeStyles: boolean
         pandocPath: string
         pandocFilters: string[]

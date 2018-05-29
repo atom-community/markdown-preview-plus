@@ -3,7 +3,7 @@ import { Emitter, CompositeDisposable } from 'atom'
 import { WebviewTag, shell } from 'electron'
 import fileUriToPath = require('file-uri-to-path')
 
-import { handlePromise } from '../util'
+import { handlePromise, atomConfig } from '../util'
 import { RequestReplyMap, ChannelMap } from '../../src-client/ipc'
 
 export type ReplyCallbackStruct<
@@ -148,17 +148,23 @@ export class WebviewHandler {
   }
 
   public saveToPDF(filePath: string) {
-    this._element.printToPDF({}, (error, data) => {
-      if (error) {
-        atom.notifications.addError('Failed saving to PDF', {
-          description: error.toString(),
-          dismissable: true,
-          stack: error.stack,
-        })
-        return
-      }
-      fs.writeFileSync(filePath, data)
-    })
+    const opts = atomConfig().saveConfig.saveToPDFOptions
+    const customPageSize = parsePageSize(opts.customPageSize)
+    // TODO: Complain on Electron
+    this._element.printToPDF(
+      { ...opts, pageSize: customPageSize || opts.pageSize } as any,
+      (error, data) => {
+        if (error) {
+          atom.notifications.addError('Failed saving to PDF', {
+            description: error.toString(),
+            dismissable: true,
+            stack: error.stack,
+          })
+          return
+        }
+        fs.writeFileSync(filePath, data)
+      },
+    )
   }
 
   public sync(line: number) {
@@ -233,5 +239,40 @@ export class WebviewHandler {
       styles.push(se.innerHTML)
     }
     this._element.send<'style'>('style', { styles })
+  }
+}
+
+type Unit = 'mm' | 'cm' | 'in'
+
+function parsePageSize(size: string) {
+  if (!size) return undefined
+  const rx = /^([\d.,]+)(cm|mm|in)?x([\d.,]+)(cm|mm|in)?$/i
+  const res = size.replace(/\s*/g, '').match(rx)
+  if (res) {
+    const width = parseFloat(res[1])
+    const wunit = res[2] as Unit | undefined
+    const height = parseFloat(res[3])
+    const hunit = res[4] as Unit | undefined
+    return {
+      width: convert(width, wunit),
+      height: convert(height, hunit),
+    }
+  } else {
+    return undefined
+  }
+}
+
+function convert(val: number, unit?: Unit) {
+  return val * unitInMicrons(unit)
+}
+
+function unitInMicrons(unit: Unit = 'mm') {
+  switch (unit) {
+    case 'mm':
+      return 1000
+    case 'cm':
+      return 10000
+    case 'in':
+      return 25400
   }
 }
