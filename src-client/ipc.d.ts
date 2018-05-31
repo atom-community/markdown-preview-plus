@@ -9,10 +9,13 @@ declare interface ChannelMap {
     id: number
     html: string
     renderLaTeX: boolean
-    mjrenderer: MathJaxRenderer
   }
   error: { msg: string }
-  init: { atomHome: string; mathJaxConfig: MathJaxConfig }
+  init: {
+    atomHome: string
+    mathJaxConfig: MathJaxConfig
+    mathJaxRenderer: MathJaxRenderer
+  }
   'set-base-path': { path?: string }
   'set-source-map': {
     map: { [line: number]: Array<{ tag: string; index: number }> }

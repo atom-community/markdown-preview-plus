@@ -253,7 +253,9 @@ export abstract class MarkdownPreviewView {
       }),
       atom.config.onDidChange(
         'markdown-preview-plus.mathConfig.latexRenderer',
-        this.changeHandler,
+        () => {
+          handlePromise(this.handler.reload())
+        },
       ),
       atom.config.onDidChange(
         'markdown-preview-plus.mathConfig.numberEquations',
@@ -306,7 +308,6 @@ export abstract class MarkdownPreviewView {
         this.handler.update(
           domDocument.documentElement.outerHTML,
           this.renderLaTeX,
-          atomConfig().mathConfig.latexRenderer,
         ),
       )
       this.handler.setSourceMap(

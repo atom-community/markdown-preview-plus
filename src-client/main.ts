@@ -20,10 +20,16 @@ window.atomVars = {
   revSourceMap: new WeakMap(),
 }
 
-ipcRenderer.on<'init'>('init', (_evt, { atomHome, mathJaxConfig }) => {
-  window.atomVars.home.resolve(atomHome)
-  window.atomVars.mathJaxConfig.resolve(mathJaxConfig)
-})
+ipcRenderer.on<'init'>(
+  'init',
+  (_evt, { atomHome, mathJaxConfig, mathJaxRenderer }) => {
+    window.atomVars.home.resolve(atomHome)
+    window.atomVars.mathJaxConfig.resolve({
+      ...mathJaxConfig,
+      renderer: mathJaxRenderer,
+    })
+  },
+)
 
 ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
   const root = document.querySelector('div.update-preview')
@@ -137,7 +143,7 @@ let updatePreview: UpdatePreview | undefined
 
 ipcRenderer.on<'update-preview'>(
   'update-preview',
-  (_event, { id, html, renderLaTeX, mjrenderer }) => {
+  (_event, { id, html, renderLaTeX }) => {
     // div.update-preview created after constructor st UpdatePreview cannot
     // be instanced in the constructor
     const preview = document.querySelector('div.update-preview')
@@ -148,15 +154,13 @@ ipcRenderer.on<'update-preview'>(
     const parser = new DOMParser()
     const domDocument = parser.parseFromString(html, 'text/html')
     util.handlePromise(
-      updatePreview
-        .update(domDocument.body, renderLaTeX, mjrenderer)
-        .then(async () => {
-          ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-            id,
-            request: 'update-preview',
-            result: await processHTMLString(preview),
-          })
-        }),
+      updatePreview.update(domDocument.body, renderLaTeX).then(async () => {
+        ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+          id,
+          request: 'update-preview',
+          result: await processHTMLString(preview),
+        })
+      }),
     )
     const doc = document
     if (doc && domDocument.head.hasChildNodes) {

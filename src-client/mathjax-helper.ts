@@ -13,7 +13,6 @@ import { isFileSync } from './util'
 const mjSrc = `${global.require.resolve(
   'mathjax',
 )}?delayStartupUntil=configured`
-const defaultRenderer: MathJaxRenderer = 'HTML-CSS'
 
 //
 // Process DOM elements for LaTeX equations with MathJax
@@ -22,12 +21,9 @@ const defaultRenderer: MathJaxRenderer = 'HTML-CSS'
 //   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
 //   details on DOM elements.
 //
-export async function mathProcessor(
-  domElement: Node,
-  renderer: MathJaxRenderer,
-) {
+export async function mathProcessor(domElement: Node) {
   await loadMathJax()
-  await queueTypeset(domElement, renderer)
+  await queueTypeset(domElement)
 }
 
 //
@@ -177,9 +173,9 @@ function valueMatchesPattern(value: any) {
 // a few unnecessary features stripped away
 //
 async function configureMathJax() {
-  const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig
+  const mathJaxConfig = await window.atomVars.mathJaxConfig
   MathJax.Hub.Config({
-    jax: ['input/TeX', `output/${defaultRenderer}`],
+    jax: ['input/TeX', `output/${mathJaxConfig.renderer}`],
     extensions: [],
     TeX: await jaxTeXConfig(),
     'HTML-CSS': {
@@ -220,7 +216,7 @@ async function injectScript(scriptSrc: string) {
   })
 }
 
-async function queueTypeset(domElement: Node, renderer: MathJaxRenderer) {
+async function queueTypeset(domElement: Node) {
   const hasUnprocessedMath = Array.from(
     document.querySelectorAll('script[type^="math/tex"]'),
   ).some((x) => !x.id)
@@ -235,9 +231,7 @@ async function queueTypeset(domElement: Node, renderer: MathJaxRenderer) {
       }
     }
 
-    MathJax.Hub.Queue(['setRenderer', MathJax.Hub, renderer])
     MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElement])
-    MathJax.Hub.Queue(['setRenderer', MathJax.Hub, defaultRenderer])
     MathJax.Hub.Queue([resolve])
   })
 }

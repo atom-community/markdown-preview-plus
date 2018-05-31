@@ -48,6 +48,7 @@ describe('MathJax helper module', () =>
           numberEquations: false,
           texExtensions: [] as string[],
           undefinedFamily: '',
+          renderer: 'SVG' as 'SVG',
         }),
         revSourceMap: new WeakMap(),
         sourceLineMap: new Map(),
@@ -73,7 +74,7 @@ describe('MathJax helper module', () =>
       span.appendChild(equation)
       atom.views.getView(atom.workspace).appendChild(span)
       spans.push(span)
-      await mathjaxHelper.mathProcessor(span, 'SVG')
+      await mathjaxHelper.mathProcessor(span)
 
       macros = await waitsFor.msg('MathJax macros to be defined', function() {
         try {

@@ -43,7 +43,7 @@ export async function copyHtml(
   renderLaTeX: boolean,
 ): Promise<void> {
   const view = new WebviewHandler(async () => {
-    view.init(atom.getConfigDirPath(), atomConfig().mathConfig)
+    view.init(atom.getConfigDirPath(), atomConfig().mathConfig, 'SVG')
     view.setUseGitHubStyle(
       atom.config.get('markdown-preview-plus.useGitHubStyle'),
     )
@@ -59,7 +59,6 @@ export async function copyHtml(
     const res = await view.update(
       domDocument.documentElement.outerHTML,
       renderLaTeX,
-      'SVG',
     )
     if (res) atom.clipboard.write(res)
     view.destroy()

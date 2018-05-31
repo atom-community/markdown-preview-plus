@@ -109,16 +109,11 @@ export class WebviewHandler {
     this._element.remove()
   }
 
-  public async update(
-    html: string,
-    renderLaTeX: boolean,
-    mjrenderer: MathJaxRenderer,
-  ) {
+  public async update(html: string, renderLaTeX: boolean) {
     if (this.destroyed) return undefined
     return this.runRequest('update-preview', {
       html,
       renderLaTeX,
-      mjrenderer,
     })
   }
 
@@ -136,8 +131,16 @@ export class WebviewHandler {
     this._element.send<'set-base-path'>('set-base-path', { path })
   }
 
-  public init(atomHome: string, mathJaxConfig: MathJaxConfig) {
-    this._element.send<'init'>('init', { atomHome, mathJaxConfig })
+  public init(
+    atomHome: string,
+    mathJaxConfig: MathJaxConfig,
+    mathJaxRenderer = atomConfig().mathConfig.latexRenderer,
+  ) {
+    this._element.send<'init'>('init', {
+      atomHome,
+      mathJaxConfig,
+      mathJaxRenderer,
+    })
   }
 
   public updateImages(oldSource: string, version: number | false) {
