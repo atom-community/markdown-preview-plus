@@ -43,6 +43,17 @@ export async function processHTMLString(element: Element) {
   }
 }
 
+export async function rerenderMath() {
+  if (MathJax) {
+    return new Promise<void>((resolve) => {
+      MathJax.Hub.Queue(['Rerender', MathJax.Hub])
+      MathJax.Hub.Queue([resolve])
+    })
+  } else {
+    return
+  }
+}
+
 //
 // Load MathJax environment
 //

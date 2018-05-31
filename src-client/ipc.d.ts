@@ -25,6 +25,7 @@ declare interface ChannelMap {
   'get-tex-config': { id: number }
   'sync-source': { id: number }
   reload: { id: number }
+  'set-width': { id: number; width: number | undefined }
 }
 declare interface ReplyMap {
   'zoom-in': void
@@ -38,6 +39,7 @@ declare interface RequestReplyMap {
   'get-tex-config': MathJax.TeXInputProcessor
   reload: void
   'sync-source': number | undefined
+  'set-width': void
 }
 declare type RequestReplyType = {
   [K in keyof RequestReplyMap]: {

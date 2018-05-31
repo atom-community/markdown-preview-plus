@@ -132,7 +132,13 @@ export abstract class MarkdownPreviewView {
     const { name, ext } = path.parse(filePath)
 
     if (ext === '.pdf') {
-      this.handler.saveToPDF(filePath)
+      this.handler.saveToPDF(filePath).catch((error: Error) => {
+        atom.notifications.addError('Failed saving to PDF', {
+          description: error.toString(),
+          dismissable: true,
+          stack: error.stack,
+        })
+      })
     } else {
       handlePromise(
         this.getHTMLToSave(filePath).then(async (html) => {

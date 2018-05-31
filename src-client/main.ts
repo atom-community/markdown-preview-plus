@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
 import { UpdatePreview } from './update-preview'
-import { processHTMLString, jaxTeXConfig } from './mathjax-helper'
+import { processHTMLString, jaxTeXConfig, rerenderMath } from './mathjax-helper'
 import * as util from './util'
 import { getMedia } from '../src/util-common'
 
@@ -261,5 +261,23 @@ ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
     id,
     request: 'get-tex-config',
     result: await jaxTeXConfig(),
+  })
+})
+
+ipcRenderer.on<'set-width'>('set-width', async (_, { id, width }) => {
+  if (width === undefined) {
+    document.documentElement.style.removeProperty('width')
+  } else {
+    document.documentElement.style.setProperty(
+      'width',
+      `${width}mm`,
+      'important',
+    )
+  }
+  await rerenderMath()
+  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+    id,
+    request: 'set-width',
+    result: undefined,
   })
 })

@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import { Emitter, CompositeDisposable } from 'atom'
+import { Emitter, CompositeDisposable, ConfigValues } from 'atom'
 import { WebviewTag, shell } from 'electron'
 import fileUriToPath = require('file-uri-to-path')
 
@@ -150,24 +150,34 @@ export class WebviewHandler {
     })
   }
 
-  public saveToPDF(filePath: string) {
+  public async saveToPDF(filePath: string) {
     const opts = atomConfig().saveConfig.saveToPDFOptions
     const customPageSize = parsePageSize(opts.customPageSize)
-    // TODO: Complain on Electron
-    this._element.printToPDF(
-      { ...opts, pageSize: customPageSize || opts.pageSize } as any,
-      (error, data) => {
-        if (error) {
-          atom.notifications.addError('Failed saving to PDF', {
-            description: error.toString(),
-            dismissable: true,
-            stack: error.stack,
-          })
-          return
-        }
-        fs.writeFileSync(filePath, data)
-      },
-    )
+    const newOpts = { ...opts, pageSize: customPageSize || opts.pageSize }
+    await this.prepareSaveToPDF(newOpts)
+    try {
+      const data = await new Promise<Buffer>((resolve, reject) => {
+        // TODO: Complain on Electron
+        this._element.printToPDF(newOpts as any, (error, data) => {
+          if (error) {
+            reject(error)
+            return
+          }
+          resolve(data)
+        })
+      })
+      await new Promise<void>((resolve, reject) => {
+        fs.writeFile(filePath, data, (error) => {
+          if (error) {
+            reject(error)
+            return
+          }
+          resolve()
+        })
+      })
+    } finally {
+      handlePromise(this.finishSaveToPDF())
+    }
   }
 
   public sync(line: number) {
@@ -236,6 +246,20 @@ export class WebviewHandler {
     })
   }
 
+  private async prepareSaveToPDF(opts: {
+    pageSize: PageSize
+    landscape: boolean
+  }): Promise<void> {
+    const [width, height] = getPageWidth(opts.pageSize)
+    return this.runRequest('set-width', {
+      width: opts.landscape ? height : width,
+    })
+  }
+
+  private async finishSaveToPDF(): Promise<void> {
+    return this.runRequest('set-width', { width: undefined })
+  }
+
   private updateStyles() {
     const styles: string[] = []
     for (const se of atom.styles.getStyleElements()) {
@@ -265,6 +289,10 @@ function parsePageSize(size: string) {
   }
 }
 
+type PageSize =
+  | ConfigValues['markdown-preview-plus.saveConfig.saveToPDFOptions.pageSize']
+  | { width: number; height: number }
+
 function convert(val: number, unit?: Unit) {
   return val * unitInMicrons(unit)
 }
@@ -277,5 +305,24 @@ function unitInMicrons(unit: Unit = 'mm') {
       return 10000
     case 'in':
       return 25400
+  }
+}
+
+function getPageWidth(pageSize: PageSize) {
+  switch (pageSize) {
+    case 'A3':
+      return [297, 420]
+    case 'A4':
+      return [210, 297]
+    case 'A5':
+      return [148, 210]
+    case 'Legal':
+      return [216, 356]
+    case 'Letter':
+      return [216, 279]
+    case 'Tabloid':
+      return [279, 432]
+    default:
+      return [pageSize.width / 1000, pageSize.height / 1000]
   }
 }
