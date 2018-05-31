@@ -151,7 +151,7 @@ export const config: IConfig = {
           },
           pageSize: {
             title: 'Page Size',
-            enum: ['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid'],
+            enum: ['A3', 'A4', 'A5', 'Legal', 'Letter', 'Tabloid', 'Custom'],
             type: 'string',
             default: 'A4',
             order: 20,
@@ -159,7 +159,7 @@ export const config: IConfig = {
           customPageSize: {
             title: 'Custom Page Size',
             description:
-              'Overrides Page Size if not empty. Specified as ' +
+              'Takes effect when Page Size is set to "Custom". Specified as ' +
               '"&lt;width&gt;x&lt;height&gt;", where &lt;height&gt; and &lt;width&gt; are ' +
               'floating-point numbers with "." as decimal separator, no thousands separator, ' +
               'and with optional "cm", "mm" or "in" suffix to indicate units, default is "mm". ' +
@@ -487,13 +487,14 @@ declare module 'atom' {
       | 'Legal'
       | 'Letter'
       | 'Tabloid'
+      | 'Custom'
     'markdown-preview-plus.saveConfig.saveToPDFOptions.customPageSize': string
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printBackground': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printSelectionOnly': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions.landscape': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions': {
       marginsType: 0 | 1 | 2
-      pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+      pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
       customPageSize: string
       printBackground: boolean
       printSelectionOnly: boolean
@@ -511,13 +512,14 @@ declare module 'atom' {
         | 'Legal'
         | 'Letter'
         | 'Tabloid'
+        | 'Custom'
       'saveToPDFOptions.customPageSize': string
       'saveToPDFOptions.printBackground': boolean
       'saveToPDFOptions.printSelectionOnly': boolean
       'saveToPDFOptions.landscape': boolean
       saveToPDFOptions: {
         marginsType: 0 | 1 | 2
-        pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+        pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
         customPageSize: string
         printBackground: boolean
         printSelectionOnly: boolean
@@ -618,13 +620,14 @@ declare module 'atom' {
         | 'Legal'
         | 'Letter'
         | 'Tabloid'
+        | 'Custom'
       'saveConfig.saveToPDFOptions.customPageSize': string
       'saveConfig.saveToPDFOptions.printBackground': boolean
       'saveConfig.saveToPDFOptions.printSelectionOnly': boolean
       'saveConfig.saveToPDFOptions.landscape': boolean
       'saveConfig.saveToPDFOptions': {
         marginsType: 0 | 1 | 2
-        pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+        pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
         customPageSize: string
         printBackground: boolean
         printSelectionOnly: boolean
@@ -642,13 +645,21 @@ declare module 'atom' {
           | 'Legal'
           | 'Letter'
           | 'Tabloid'
+          | 'Custom'
         'saveToPDFOptions.customPageSize': string
         'saveToPDFOptions.printBackground': boolean
         'saveToPDFOptions.printSelectionOnly': boolean
         'saveToPDFOptions.landscape': boolean
         saveToPDFOptions: {
           marginsType: 0 | 1 | 2
-          pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid'
+          pageSize:
+            | 'A3'
+            | 'A4'
+            | 'A5'
+            | 'Legal'
+            | 'Letter'
+            | 'Tabloid'
+            | 'Custom'
           customPageSize: string
           printBackground: boolean
           printSelectionOnly: boolean

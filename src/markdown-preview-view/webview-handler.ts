@@ -153,7 +153,16 @@ export class WebviewHandler {
   public async saveToPDF(filePath: string) {
     const opts = atomConfig().saveConfig.saveToPDFOptions
     const customPageSize = parsePageSize(opts.customPageSize)
-    const newOpts = { ...opts, pageSize: customPageSize || opts.pageSize }
+    const pageSize = opts.pageSize === 'Custom' ? customPageSize : opts.pageSize
+    if (pageSize === undefined) {
+      throw new Error(
+        `Failed to parse custom page size: ${opts.customPageSize}`,
+      )
+    }
+    const newOpts = {
+      ...opts,
+      pageSize,
+    }
     await this.prepareSaveToPDF(newOpts)
     try {
       const data = await new Promise<Buffer>((resolve, reject) => {
@@ -290,7 +299,10 @@ function parsePageSize(size: string) {
 }
 
 type PageSize =
-  | ConfigValues['markdown-preview-plus.saveConfig.saveToPDFOptions.pageSize']
+  | Exclude<
+      ConfigValues['markdown-preview-plus.saveConfig.saveToPDFOptions.pageSize'],
+      'Custom'
+    >
   | { width: number; height: number }
 
 function convert(val: number, unit?: Unit) {
