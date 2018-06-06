@@ -51,12 +51,14 @@ export class UpdatePreview {
         return mscr.innerHTML === scr.innerHTML && mscr.type === scr.type
       }
     }
+    for (const m of Array.from(newDom.querySelectorAll('li'))) {
+      m.isSameNode = function() {
+        return false
+      }
+    }
 
     morph(this.dom, newDom, {
       childrenOnly: true,
-      onElUpdated: function(el) {
-        if (el.tagName === 'LI') el.innerHTML = el.innerHTML // force re-render
-      },
     })
 
     if (renderLaTeX) {
