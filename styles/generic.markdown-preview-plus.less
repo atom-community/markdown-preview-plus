@@ -41,8 +41,12 @@ markdown-preview-plus-view {
   }
 
   atom-text-editor {
-    flex-direction: column;
+    display: block;
     overflow: auto;
+    white-space: pre-line;
+    .line {
+      display: inline;
+    }
   }
 
   @media print {
