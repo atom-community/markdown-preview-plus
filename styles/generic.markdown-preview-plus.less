@@ -69,4 +69,34 @@ markdown-preview-plus-view {
       }
     }
   }
+
+  span.critic.comment {
+    &::before {
+      content: '\1f4ac';
+      position: initial;
+    }
+    & > span {
+      display: none;
+    }
+    &:hover > span {
+      display: initial;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      border: 1px solid;
+      border-radius: 5px;
+      max-height: 4em;
+      overflow: auto;
+    }
+    &:focus > span {
+      display: initial;
+      text-decoration: underline;
+      position: initial;
+      top: auto;
+      left: auto;
+      border: initial;
+      border-radius: initial;
+    }
+    position: relative;
+  }
 }

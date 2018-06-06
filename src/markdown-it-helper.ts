@@ -34,6 +34,7 @@ function currentConfig(rL: boolean) {
     toc: config.useToc,
     emoji: config.useEmoji,
     breaks: config.breakOnSingleNewline,
+    criticMarkup: config.useCriticMarkup,
     imsize: config.useImsize,
     inlineMathSeparators: config.inlineMathSeparators,
     blockMathSeparators: config.blockMathSeparators,
@@ -76,6 +77,9 @@ function init(initState: InitState): markdownItModule.MarkdownIt {
     }
   }
 
+  if (initState.criticMarkup) {
+    markdownIt.use(require('./markdown-it-criticmarkup').critcmarkup_plugin)
+  }
   if (initState.imsize) markdownIt.use(require('markdown-it-imsize'))
 
   return markdownIt

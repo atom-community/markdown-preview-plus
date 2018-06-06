@@ -22,6 +22,10 @@ markdown-preview-plus-view:not([data-use-github-style]) {
   color: @fg;
   background-color: @bg;
 
+  span.critic.comment > span {
+    background-color: @bg;
+  }
+
   & > :first-child {
     margin-top: 0;
   }
@@ -36,7 +40,7 @@ markdown-preview-plus-view:not([data-use-github-style]) {
   h6 {
     line-height: 1.2;
     margin-top: @margin;
-    margin-bottom: @margin/3;
+    margin-bottom: @margin / 3;
     color: @fg-strong;
   }
 
