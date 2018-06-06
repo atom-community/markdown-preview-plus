@@ -1,3 +1,63 @@
+## 3.3.0
+
+### Fixes
+
+-   Fixed disappearing empty lines in code blocks
+
+    Empty lines in code blocks were not rendered in preview  in some
+    cases due to somewhat broken CSS styles. This was fixed.
+
+-   Re-render li elements completely
+
+    This is a tweak to rendering fix implemented in v3.2.0. Re-rendering
+    could sometimes confuse MathJax into inserting rendered math into the
+    page several times. Re-rendering li elements completely from the ground
+    up fixes this problem at the cost of degraded performance for long list
+    items.
+
+-   Re-render when math changes from display to inline and vice versa
+
+    Since 3.0.1 and up until this release, math wouldn't be re-rendered when
+    changed from inline to display or vice versa.
+
+-   Resize page to paper width when saving to PDF
+
+    When saving to PDF via 'Save As...' menu item or `core:save` command,
+    page will be resized to paper size and math will be re-rendered before
+    saving. This should make PDF export more robust.
+
+### New features
+
+-   Added basic support for Critic Markup in markdown-it renderer. Disabled by
+    default.
+
+-   Added support for specifying image size in markdown-it renderer via
+    non-standard syntax `![alt](src "optional title" =<width>x<height>)`, e.g.
+    `![A nice picture](image.png =800x600)`.
+
+-   'Save to PDF' feature can be configured in package settings. In particular:
+
+    -   Margins size (default, minimal, or none)
+    -   Page size (the usual international and american sizes, or custom size)
+    -   Whether to honor or ignore CSS backgrounds
+    -   Landscape or portrait orientation
+    -   Option to only save selected document fragment to PDF (experimental)
+
+-   Adding two new MathJax options to Atom GUI (#391) (kiwi0fruit)
+
+    Adds options controlling MathJax extensions and `undefinedFamily` parameter
+    for HTML-CSS renderer. The latter one controls which CSS font MathJax
+    will use for characters that don't have glyphs in MathJax's math fonts.
+
+### Maintenence
+
+-   Only set latex renderer on init
+-   Clean-up client html
+-   Wrap preview in atom-workspace to ensure CSS variable inheritance
+-   Update config descriptions
+-   Check if package is not active before tests in activation spec
+-   Add hack to force spec package activation on OSX
+
 ## 3.2.2
 
 ### Fixes
