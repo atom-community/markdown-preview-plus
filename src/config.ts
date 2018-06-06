@@ -159,11 +159,11 @@ export const config: IConfig = {
           customPageSize: {
             title: 'Custom Page Size',
             description:
-              'Takes effect when Page Size is set to "Custom". Specified as ' +
-              '"&lt;width&gt;x&lt;height&gt;", where &lt;height&gt; and &lt;width&gt; are ' +
-              'floating-point numbers with "." as decimal separator, no thousands separator, ' +
-              'and with optional "cm", "mm" or "in" suffix to indicate units, default is "mm". ' +
-              'For example, A4 is "8.3in x 11.7in" or "210mm x 297mm" or "210 x 297". ' +
+              'Takes effect when Page Size is set to `Custom`. Specified as ' +
+              '`<width>x<height>`, where `<height>` and `<width>` are ' +
+              'floating-point numbers with `.` (dot) as decimal separator, no thousands separator, ' +
+              'and with optional `cm`, `mm` or `in` suffix to indicate units, default is `mm`. ' +
+              'For example, A4 is `8.3in x 11.7in` or `210mm x 297mm` or `210 x 297`. ' +
               'Whitespace is ignored.',
             type: 'string',
             default: '',
@@ -273,7 +273,7 @@ export const config: IConfig = {
         items: { type: 'string' },
       },
       undefinedFamily: {
-        title: "MathJax 'undefinedFamily' (font family)",
+        title: 'MathJax `undefinedFamily` (font family)',
         type: 'string',
         default: 'serif',
         order: 20,
@@ -319,13 +319,23 @@ export const config: IConfig = {
         default: true,
         order: 20,
       },
+      useImsize: {
+        title: 'Allow specifying image size in image title',
+        description:
+          'Allow non-standard syntax for specifying image size via ' +
+          'appending `=<width>x<height>` to image spacification, ' +
+          'f.ex. `![test](image.png =100x200)`',
+        type: 'boolean',
+        default: false,
+        order: 25,
+      },
       inlineMathSeparators: {
         title: 'Inline math separators',
         description:
           'List of inline math separators in pairs -- first opening, then closing',
         type: 'array',
         default: ['$', '$', '\\(', '\\)'],
-        order: 25,
+        order: 110,
         items: {
           type: 'string',
         },
@@ -336,7 +346,7 @@ export const config: IConfig = {
           'List of block math separators in pairs -- first opening, then closing',
         type: 'array',
         default: ['$$', '$$', '\\[', '\\]'],
-        order: 30,
+        order: 120,
         items: {
           type: 'string',
         },
@@ -551,6 +561,7 @@ declare module 'atom' {
     'markdown-preview-plus.markdownItConfig.useCheckBoxes': boolean
     'markdown-preview-plus.markdownItConfig.useEmoji': boolean
     'markdown-preview-plus.markdownItConfig.useToc': boolean
+    'markdown-preview-plus.markdownItConfig.useImsize': boolean
     'markdown-preview-plus.markdownItConfig.inlineMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig.blockMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig': {
@@ -559,6 +570,7 @@ declare module 'atom' {
       useCheckBoxes: boolean
       useEmoji: boolean
       useToc: boolean
+      useImsize: boolean
       inlineMathSeparators: string[]
       blockMathSeparators: string[]
     }
@@ -691,6 +703,7 @@ declare module 'atom' {
       'markdownItConfig.useCheckBoxes': boolean
       'markdownItConfig.useEmoji': boolean
       'markdownItConfig.useToc': boolean
+      'markdownItConfig.useImsize': boolean
       'markdownItConfig.inlineMathSeparators': string[]
       'markdownItConfig.blockMathSeparators': string[]
       markdownItConfig: {
@@ -699,6 +712,7 @@ declare module 'atom' {
         useCheckBoxes: boolean
         useEmoji: boolean
         useToc: boolean
+        useImsize: boolean
         inlineMathSeparators: string[]
         blockMathSeparators: string[]
       }
