@@ -78,7 +78,7 @@ function init(initState: InitState): markdownItModule.MarkdownIt {
   }
 
   if (initState.criticMarkup) {
-    markdownIt.use(require('./markdown-it-criticmarkup').critcmarkup_plugin)
+    markdownIt.use(require('./markdown-it-criticmarkup'))
   }
   if (initState.imsize) markdownIt.use(require('markdown-it-imsize'))
 

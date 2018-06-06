@@ -74,11 +74,7 @@ function criticRender(tokens: mdIt.Token[], idx: number) {
   }
 }
 
-export function critcmarkup_plugin(md: mdIt.MarkdownIt) {
+export = function(md: mdIt.MarkdownIt) {
   md.inline.ruler.before('strikethrough', 'critic-markup', criticInline as any)
-
-  /**
-   * CriticMarkup renderer
-   */
   md.renderer.rules['critic-markup'] = criticRender
 }
