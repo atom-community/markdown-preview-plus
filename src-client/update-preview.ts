@@ -48,7 +48,7 @@ export class UpdatePreview {
         if (!el.classList.contains('math')) return false
         const scr = el.querySelector('script')
         if (!scr) return false
-        return mscr.innerHTML === scr.innerHTML
+        return mscr.innerHTML === scr.innerHTML && mscr.type === scr.type
       }
     }
 
