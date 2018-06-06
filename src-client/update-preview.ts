@@ -38,15 +38,17 @@ export class UpdatePreview {
         if (!el.classList.contains('math')) return false
         const scr = el.querySelector('script')
         if (!scr) return false
-        return mscr.innerHTML === scr.innerHTML
+        return mscr.innerHTML === scr.innerHTML && mscr.type === scr.type
+      }
+    }
+    for (const m of Array.from(newDom.querySelectorAll('li'))) {
+      m.isSameNode = function() {
+        return false
       }
     }
 
     morph(this.dom, newDom, {
       childrenOnly: true,
-      onElUpdated: function(el) {
-        if (el.tagName === 'LI') el.innerHTML = el.innerHTML // force re-render
-      },
     })
 
     if (renderLaTeX) {
