@@ -159,11 +159,11 @@ export const config: IConfig = {
           customPageSize: {
             title: 'Custom Page Size',
             description:
-              'Takes effect when Page Size is set to "Custom". Specified as ' +
-              '"&lt;width&gt;x&lt;height&gt;", where &lt;height&gt; and &lt;width&gt; are ' +
-              'floating-point numbers with "." as decimal separator, no thousands separator, ' +
-              'and with optional "cm", "mm" or "in" suffix to indicate units, default is "mm". ' +
-              'For example, A4 is "8.3in x 11.7in" or "210mm x 297mm" or "210 x 297". ' +
+              'Takes effect when Page Size is set to `Custom`. Specified as ' +
+              '`<width>x<height>`, where `<height>` and `<width>` are ' +
+              'floating-point numbers with `.` (dot) as decimal separator, no thousands separator, ' +
+              'and with optional `cm`, `mm` or `in` suffix to indicate units, default is `mm`. ' +
+              'For example, A4 is `8.3in x 11.7in` or `210mm x 297mm` or `210 x 297`. ' +
               'Whitespace is ignored.',
             type: 'string',
             default: '',
@@ -273,7 +273,7 @@ export const config: IConfig = {
         items: { type: 'string' },
       },
       undefinedFamily: {
-        title: "MathJax 'undefinedFamily' (font family)",
+        title: 'MathJax `undefinedFamily` (font family)',
         type: 'string',
         default: 'serif',
         order: 20,
@@ -323,7 +323,8 @@ export const config: IConfig = {
         title: 'Allow specifying image size in image title',
         description:
           'Allow non-standard syntax for specifying image size via ' +
-          'abusing image title, f.ex. <pre>![test](image.png =100x200)</pre>',
+          'appending `=<width>x<height>` to image spacification, ' +
+          'f.ex. `![test](image.png =100x200)`',
         type: 'boolean',
         default: false,
         order: 25,
