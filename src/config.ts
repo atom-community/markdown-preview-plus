@@ -326,7 +326,7 @@ export const config: IConfig = {
           'appending `=<width>x<height>` to image spacification, ' +
           'f.ex. `![test](image.png =100x200)`',
         type: 'boolean',
-        default: false,
+        default: true,
         order: 25,
       },
       useCriticMarkup: {
