@@ -837,6 +837,26 @@ var x = 0;
     })
   })
 
+  describe('imsize', function() {
+    beforeEach(() => {
+      atom.config.set('markdown-preview-plus.markdownItConfig.useImsize', true)
+    })
+    afterEach(() => {
+      atom.config.unset('markdown-preview-plus.markdownItConfig.useImsize')
+    })
+    it('allows specifying image size', async function() {
+      const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor
+      editor.setText(`![Some Image](img.png "title" =100x200)`)
+      const pv = await createMarkdownPreviewViewEditor(editor)
+      const [height, width, title] = await pv.runJS<[number, number, string]>(
+        `{ let img = document.querySelector('img'); [img.height, img.width, img.title]; }`,
+      )
+      expect(width).to.equal(100)
+      expect(height).to.equal(200)
+      expect(title).to.equal('title')
+    })
+  })
+
   describe('table alignment', function() {
     it('realigns table if markdown changed', async function() {
       const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor
