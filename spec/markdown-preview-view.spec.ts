@@ -857,6 +857,38 @@ var x = 0;
     })
   })
 
+  describe('Critic Markup', function() {
+    beforeEach(() => {
+      atom.config.set(
+        'markdown-preview-plus.markdownItConfig.useCriticMarkup',
+        true,
+      )
+    })
+    afterEach(() => {
+      atom.config.unset(
+        'markdown-preview-plus.markdownItConfig.useCriticMarkup',
+      )
+    })
+    it('renders it', async function() {
+      const pv = await createMarkdownPreviewViewFile(
+        path.join(tempPath, 'subdir/criticMarkup.md'),
+      )
+      const html = await pv.runJS<string>(
+        `document.querySelector('markdown-preview-plus-view > div').innerHTML`,
+      )
+      expect(html).to.equal(
+        '<p>Don’t go around saying<del> to people that</del> the' +
+          ' world owes you a living. The world owes you nothing. ' +
+          'It was here first. <del>One</del><ins>Only one</ins> thing ' +
+          'is impossible for God: To find <ins>any</ins> sense in any ' +
+          'copyright law on the planet. <mark>Truth is stranger than ' +
+          'fiction</mark><span tabindex="-1" class="critic comment">' +
+          '<span>strange but true</span></span>, but it is because ' +
+          'Fiction is obliged to stick to possibilities; Truth isn’t.</p>\n',
+      )
+    })
+  })
+
   describe('table alignment', function() {
     it('realigns table if markdown changed', async function() {
       const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor

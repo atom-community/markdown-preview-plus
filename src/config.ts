@@ -329,6 +329,13 @@ export const config: IConfig = {
         default: false,
         order: 25,
       },
+      useCriticMarkup: {
+        title: 'Enable CriticMarkup syntax support',
+        description: 'Support is limited to inline only',
+        type: 'boolean',
+        default: false,
+        order: 40,
+      },
       inlineMathSeparators: {
         title: 'Inline math separators',
         description:
@@ -562,6 +569,7 @@ declare module 'atom' {
     'markdown-preview-plus.markdownItConfig.useEmoji': boolean
     'markdown-preview-plus.markdownItConfig.useToc': boolean
     'markdown-preview-plus.markdownItConfig.useImsize': boolean
+    'markdown-preview-plus.markdownItConfig.useCriticMarkup': boolean
     'markdown-preview-plus.markdownItConfig.inlineMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig.blockMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig': {
@@ -571,6 +579,7 @@ declare module 'atom' {
       useEmoji: boolean
       useToc: boolean
       useImsize: boolean
+      useCriticMarkup: boolean
       inlineMathSeparators: string[]
       blockMathSeparators: string[]
     }
@@ -704,6 +713,7 @@ declare module 'atom' {
       'markdownItConfig.useEmoji': boolean
       'markdownItConfig.useToc': boolean
       'markdownItConfig.useImsize': boolean
+      'markdownItConfig.useCriticMarkup': boolean
       'markdownItConfig.inlineMathSeparators': string[]
       'markdownItConfig.blockMathSeparators': string[]
       markdownItConfig: {
@@ -713,6 +723,7 @@ declare module 'atom' {
         useEmoji: boolean
         useToc: boolean
         useImsize: boolean
+        useCriticMarkup: boolean
         inlineMathSeparators: string[]
         blockMathSeparators: string[]
       }
