@@ -222,8 +222,8 @@ export abstract class MarkdownPreviewView {
       atom.commands.add(this.element, {
         'core:move-up': () => this.element.scrollBy({ top: -10 }),
         'core:move-down': () => this.element.scrollBy({ top: 10 }),
-        'core:copy': (event: CommandEvent) => {
-          if (this.copyToClipboard()) event.stopPropagation()
+        'core:copy': () => {
+          handlePromise(this.copyToClipboard())
         },
         'markdown-preview-plus:open-dev-tools': () => {
           this.handler.openDevTools()
@@ -340,31 +340,12 @@ export abstract class MarkdownPreviewView {
     this.handler.error(error.message)
   }
 
-  private copyToClipboard() {
-    if (this.loading) {
-      return false
-    }
-
-    const selection = window.getSelection()
-    const selectedText = selection.toString()
-    const selectedNode = selection.baseNode as HTMLElement
-
+  private async copyToClipboard(): Promise<void> {
+    await this.renderPromise
+    const selection = await this.handler.getSelection()
     // Use default copy event handler if there is selected text inside this view
-    if (
-      selectedText &&
-      // tslint:disable-next-line:strict-type-predicates //TODO: complain on TS
-      selectedNode != null // &&
-      // (this.preview === selectedNode || this.preview.contains(selectedNode))
-    ) {
-      return false
-    }
-
-    handlePromise(
-      this.getMarkdownSource().then(async (src) =>
-        copyHtml(src, this.getPath(), this.renderLaTeX),
-      ),
-    )
-
-    return true
+    if (selection !== undefined) return
+    const src = await this.getMarkdownSource()
+    await copyHtml(src, this.getPath(), this.renderLaTeX)
   }
 }

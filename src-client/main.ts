@@ -281,3 +281,15 @@ ipcRenderer.on<'set-width'>('set-width', async (_, { id, width }) => {
     result: undefined,
   })
 })
+
+ipcRenderer.on<'get-selection'>('get-selection', async (_, { id }) => {
+  const selection = window.getSelection()
+  const selectedText = selection.toString()
+  const selectedNode = selection.baseNode
+
+  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+    id,
+    request: 'get-selection',
+    result: selectedText && selectedNode ? selectedText : undefined,
+  })
+})

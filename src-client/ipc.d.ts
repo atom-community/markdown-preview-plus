@@ -26,6 +26,7 @@ declare interface ChannelMap {
   'sync-source': { id: number }
   reload: { id: number }
   'set-width': { id: number; width: number | undefined }
+  'get-selection': { id: number }
 }
 declare interface ReplyMap {
   'zoom-in': void
@@ -40,6 +41,7 @@ declare interface RequestReplyMap {
   reload: void
   'sync-source': number | undefined
   'set-width': void
+  'get-selection': string | undefined
 }
 declare type RequestReplyType = {
   [K in keyof RequestReplyMap]: {

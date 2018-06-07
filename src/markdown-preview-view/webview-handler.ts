@@ -237,6 +237,10 @@ export class WebviewHandler {
     return this.runRequest('get-tex-config', {})
   }
 
+  public async getSelection() {
+    return this.runRequest('get-selection', {})
+  }
+
   protected async runRequest<T extends keyof RequestReplyMap>(
     request: T,
     args: { [K in Exclude<keyof ChannelMap[T], 'id'>]: ChannelMap[T][K] },
