@@ -26,6 +26,11 @@
     page will be resized to paper size and math will be re-rendered before
     saving. This should make PDF export more robust.
 
+-   Fix copy-html when selection is not empty
+
+    Restored the old behaviour where `core:copy` command on the preview
+    copied full preview HTML only if there was no selection inside the preview.
+
 ### New features
 
 -   Added basic support for Critic Markup in markdown-it renderer. Disabled by
