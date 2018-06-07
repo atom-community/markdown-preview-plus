@@ -159,9 +159,12 @@ export class WebviewHandler {
         `Failed to parse custom page size: ${opts.customPageSize}`,
       )
     }
+    const selection = await this.getSelection()
+    const printSelectionOnly = selection ? opts.printSelectionOnly : false
     const newOpts = {
       ...opts,
       pageSize,
+      printSelectionOnly,
     }
     await this.prepareSaveToPDF(newOpts)
     try {
