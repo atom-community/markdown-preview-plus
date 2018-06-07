@@ -62,6 +62,7 @@
 -   Update config descriptions
 -   Check if package is not active before tests in activation spec
 -   Add hack to force spec package activation on OSX
+-   Bump twemoji dependency
 
 ## 3.2.2
 
