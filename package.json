@@ -37,7 +37,7 @@
     "mathjax": "https://github.com/atom-community/MathJax/archive/2.7.4-electron.0.1.0.tar.gz",
     "morphdom": "^2.3.3",
     "season": "^6.0",
-    "twemoji": "^2.5.1"
+    "twemoji": "^11"
   },
   "devDependencies": {
     "@types/atom": "~1.26.0",
