@@ -134,10 +134,6 @@ export const config: IConfig = {
         type: 'object',
         order: 25,
         properties: {
-          /**
-           * Specifies the type of margins to use. Uses 0 for default margin, 1 for no
-           * margin, and 2 for minimum margin.
-           */
           marginsType: {
             title: 'Margins Type',
             type: 'integer',
@@ -169,32 +165,29 @@ export const config: IConfig = {
             default: '',
             order: 25,
           },
-          /**
-           * Whether to print CSS backgrounds.
-           */
+          landscape: {
+            title: 'Page orientation',
+            type: 'boolean',
+            enum: [
+              { value: false, description: 'Portrait' },
+              { value: true, description: 'Landscape' },
+            ],
+            default: false,
+            order: 26,
+          },
           printBackground: {
-            title: 'Print background',
+            title: 'Render background',
+            description: 'Whether to render CSS backgrounds in PDF',
             type: 'boolean',
             default: false,
             order: 30,
           },
-          /**
-           * Whether to print selection only.
-           */
           printSelectionOnly: {
-            title: 'Print only selection',
+            title: 'Render only selection',
+            description: 'Only render selected document fragment. Experimental',
             type: 'boolean',
             default: false,
             order: 40,
-          },
-          /**
-           * true for landscape, false for portrait.
-           */
-          landscape: {
-            title: 'Landscape orientation',
-            type: 'boolean',
-            default: false,
-            order: 50,
           },
         },
       },
@@ -506,16 +499,16 @@ declare module 'atom' {
       | 'Tabloid'
       | 'Custom'
     'markdown-preview-plus.saveConfig.saveToPDFOptions.customPageSize': string
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.landscape': false | true
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printBackground': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printSelectionOnly': boolean
-    'markdown-preview-plus.saveConfig.saveToPDFOptions.landscape': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions': {
       marginsType: 0 | 1 | 2
       pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
       customPageSize: string
+      landscape: false | true
       printBackground: boolean
       printSelectionOnly: boolean
-      landscape: boolean
     }
     'markdown-preview-plus.saveConfig': {
       mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
@@ -531,16 +524,16 @@ declare module 'atom' {
         | 'Tabloid'
         | 'Custom'
       'saveToPDFOptions.customPageSize': string
+      'saveToPDFOptions.landscape': false | true
       'saveToPDFOptions.printBackground': boolean
       'saveToPDFOptions.printSelectionOnly': boolean
-      'saveToPDFOptions.landscape': boolean
       saveToPDFOptions: {
         marginsType: 0 | 1 | 2
         pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
         customPageSize: string
+        landscape: false | true
         printBackground: boolean
         printSelectionOnly: boolean
-        landscape: boolean
       }
     }
     'markdown-preview-plus.syncConfig.syncPreviewOnChange': boolean
@@ -643,16 +636,16 @@ declare module 'atom' {
         | 'Tabloid'
         | 'Custom'
       'saveConfig.saveToPDFOptions.customPageSize': string
+      'saveConfig.saveToPDFOptions.landscape': false | true
       'saveConfig.saveToPDFOptions.printBackground': boolean
       'saveConfig.saveToPDFOptions.printSelectionOnly': boolean
-      'saveConfig.saveToPDFOptions.landscape': boolean
       'saveConfig.saveToPDFOptions': {
         marginsType: 0 | 1 | 2
         pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
         customPageSize: string
+        landscape: false | true
         printBackground: boolean
         printSelectionOnly: boolean
-        landscape: boolean
       }
       saveConfig: {
         mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
@@ -668,9 +661,9 @@ declare module 'atom' {
           | 'Tabloid'
           | 'Custom'
         'saveToPDFOptions.customPageSize': string
+        'saveToPDFOptions.landscape': false | true
         'saveToPDFOptions.printBackground': boolean
         'saveToPDFOptions.printSelectionOnly': boolean
-        'saveToPDFOptions.landscape': boolean
         saveToPDFOptions: {
           marginsType: 0 | 1 | 2
           pageSize:
@@ -682,9 +675,9 @@ declare module 'atom' {
             | 'Tabloid'
             | 'Custom'
           customPageSize: string
+          landscape: false | true
           printBackground: boolean
           printSelectionOnly: boolean
-          landscape: boolean
         }
       }
       'syncConfig.syncPreviewOnChange': boolean

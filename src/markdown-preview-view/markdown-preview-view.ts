@@ -1,11 +1,5 @@
 import path = require('path')
-import {
-  CommandEvent,
-  Emitter,
-  Disposable,
-  CompositeDisposable,
-  Grammar,
-} from 'atom'
+import { Emitter, Disposable, CompositeDisposable, Grammar } from 'atom'
 import _ = require('lodash')
 import fs = require('fs')
 
