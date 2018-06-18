@@ -1,3 +1,9 @@
+## 3.3.1
+
+-   A very specific fix for extra empty line in list items
+-   Set charset in preview HTML
+-   Bump dependencies
+
 ## 3.3.0
 
 ### Fixes
