@@ -1,3 +1,10 @@
+## 3.3.2
+
+-   Do not include display-only CSS into exported HTML
+
+    Fixes indentation display in
+    code blocks in exported HTML
+
 ## 3.3.1
 
 -   A very specific fix for extra empty line in list items
