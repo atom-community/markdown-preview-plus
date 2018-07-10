@@ -22,42 +22,6 @@ markdown-preview-plus-view {
     top: 50%;
   }
 
-  .flash {
-    -webkit-animation: flash 1s ease-out;
-    -webkit-animation-iteration-count: 1;
-    outline: 1px solid rgba(255, 0, 0, 0);
-  }
-
-  @-webkit-keyframes flash {
-    0% {
-      outline-color: rgba(255, 0, 0, 0);
-    }
-    50% {
-      outline-color: rgba(255, 0, 0, 1);
-    }
-    100% {
-      outline-color: rgba(255, 0, 0, 0);
-    }
-  }
-
-  atom-text-editor {
-    display: block;
-    overflow: auto;
-    white-space: pre-line;
-    .line {
-      display: inline;
-    }
-  }
-
-  @media print {
-    atom-text-editor {
-      overflow: visible !important;
-      .line {
-        white-space: pre-wrap !important;
-      }
-    }
-  }
-
   ul.contains-task-list {
     li.task-list-item {
       position: relative;
