@@ -27,7 +27,7 @@ function findFileRecursive(filePath: string, fileName: string): string | false {
     return bibFile
   } else {
     const newPath = path.join(bibFile, '..')
-    if (newPath !== filePath && !_.includes(atom.project.getPaths(), newPath)) {
+    if (newPath !== filePath && !atom.project.getPaths().includes(newPath)) {
       return findFileRecursive(newPath, fileName)
     } else {
       return false
