@@ -1,3 +1,9 @@
+## 3.3.3
+
+-   Display atom-text-editors in preview via flexbox
+
+    Fixes extraneous empty lines in code blocks with long lines
+
 ## 3.3.2
 
 -   Do not include display-only CSS into exported HTML
