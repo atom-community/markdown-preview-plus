@@ -2,7 +2,7 @@ import * as MarkdownIt from 'markdown-it'
 
 declare interface ChannelMap {
   style: { styles: string[] }
-  'update-images': { oldsrc: string; v: number | false }
+  'update-images': { oldsrc: string; v: number | undefined }
   sync: { line: number }
   'use-github-style': { value: boolean }
   'update-preview': {

@@ -1,91 +1,70 @@
-import _ = require('lodash')
-import { MarkdownPreviewView } from './markdown-preview-view'
 import { CompositeDisposable, File } from 'atom'
-import { handlePromise, isFileSync } from './util'
+import { isFileSync } from './util'
 
 interface ImageRegisterRec {
   version: number
   watcher: CompositeDisposable
-  files: string[]
-  watched: boolean
-  path: string
 }
 
-let imageRegister: {
-  [key: string]: ImageRegisterRec | undefined
-} = {}
+export class ImageWatcher {
+  private registry = new Map<string, ImageRegisterRec>()
+  private disposed = false
 
-const refreshImages = _.debounce(async function(src: string) {
-  for (const item of atom.workspace.getPaneItems()) {
-    if (item instanceof MarkdownPreviewView) {
-      // TODO: check against imageRegister[src].version.files
-      await item.refreshImages(src)
-    }
-  }
-}, 250)
+  constructor(private callback: (src: string, version?: number) => void) {}
 
-function srcClosure(src: string, event: 'change' | 'delete' | 'rename') {
-  return function() {
-    const i = imageRegister[src]
-    if (!i) return
-    if (event === 'change' && isFileSync(src)) {
-      i.version = Date.now()
-    } else {
-      i.watcher.dispose()
-      delete imageRegister[src]
-    }
-    handlePromise(refreshImages(src))
-  }
-}
-
-export function removeFile(file: string) {
-  imageRegister = _.mapValues(imageRegister, function(image) {
-    if (!image) return image
-    image.files = _.without(image.files, file)
-    image.files = _.filter(image.files, isFileSync)
-    if (_.isEmpty(image.files)) {
-      image.watched = false
-      image.watcher.dispose()
-    }
-    return image
-  })
-}
-
-export async function getVersion(image: string, file?: string) {
-  let version
-  const i = imageRegister[image]
-  if (!i) {
-    if (isFileSync(image)) {
-      version = Date.now()
+  public watch(image: string): number | undefined {
+    const i = this.registry.get(image)
+    if (!i && isFileSync(image)) {
+      const version = Date.now()
       const watcher = new CompositeDisposable()
       const af = new File(image)
       watcher.add(
-        af.onDidChange(srcClosure(image, 'change')),
-        af.onDidDelete(srcClosure(image, 'delete')),
-        af.onDidRename(srcClosure(image, 'rename')),
+        af.onDidChange(this.srcClosure(image, 'change')),
+        af.onDidDelete(this.srcClosure(image, 'delete')),
+        af.onDidRename(this.srcClosure(image, 'rename')),
       )
-      imageRegister[image] = {
-        path: image,
-        watched: true,
-        files: file ? [file] : [],
+      this.registry.set(image, {
         version,
         watcher,
-      }
+      })
       return version
+    } else if (i) {
+      return i.version
     } else {
-      return false
+      return undefined
     }
   }
 
-  const files: string[] = i.files
-  if (file && !files.includes(file)) {
-    i.files.push(file)
+  public dispose(): void {
+    if (this.disposed) return
+    this.clear()
+    this.disposed = true
   }
 
-  version = i.version
-  if (!version && isFileSync(image)) {
-    version = Date.now()
-    i.version = version
+  public clear(): void {
+    for (const v of this.registry.values()) {
+      v.watcher.dispose()
+    }
+    this.registry.clear()
   }
-  return version
+
+  private srcClosure(src: string, event: 'change' | 'delete' | 'rename') {
+    return () => {
+      const i = this.registry.get(src)
+      if (!i) return
+      if (event === 'change' && isFileSync(src)) {
+        i.version = Date.now()
+        this.refreshImages(src, i.version)
+      } else {
+        i.watcher.dispose()
+        this.registry.delete(src)
+        this.refreshImages(src)
+      }
+    }
+  }
+
+  private refreshImages(src: string, version?: number) {
+    if (this.disposed) return
+    this.callback(src, version)
+  }
 }

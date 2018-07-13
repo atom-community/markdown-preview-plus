@@ -143,7 +143,7 @@ export class WebviewHandler {
     })
   }
 
-  public updateImages(oldSource: string, version: number | false) {
+  public updateImages(oldSource: string, version: number | undefined) {
     this._element.send<'update-images'>('update-images', {
       oldsrc: oldSource,
       v: version,

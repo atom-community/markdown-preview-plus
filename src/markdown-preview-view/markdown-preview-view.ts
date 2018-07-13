@@ -5,10 +5,10 @@ import fs = require('fs')
 
 import renderer = require('../renderer')
 import markdownIt = require('../markdown-it-helper')
-import imageWatcher = require('../image-watch-helper')
 import { handlePromise, copyHtml, atomConfig } from '../util'
 import * as util from './util'
 import { WebviewHandler } from './webview-handler'
+import { ImageWatcher } from '../image-watch-helper'
 
 export interface SerializedMPV {
   deserializer: 'markdown-preview-plus/MarkdownPreviewView'
@@ -32,6 +32,7 @@ export abstract class MarkdownPreviewView {
   protected disposables = new CompositeDisposable()
   protected destroyed = false
   private loading: boolean = true
+  private imageWatcher!: ImageWatcher
 
   protected constructor(
     private defaultRenderMode: Exclude<renderer.RenderMode, 'save'> = 'normal',
@@ -49,6 +50,9 @@ export abstract class MarkdownPreviewView {
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())
       })
+      this.imageWatcher = new ImageWatcher(
+        this.handler.updateImages.bind(this.handler),
+      )
       MarkdownPreviewView.elementMap.set(this.element, this)
     })
     this.runJS = this.handler.runJS.bind(this.handler)
@@ -67,8 +71,7 @@ export abstract class MarkdownPreviewView {
   public destroy() {
     if (this.destroyed) return
     this.destroyed = true
-    const path = this.getPath()
-    path && imageWatcher.removeFile(path)
+    this.imageWatcher.dispose()
     this.disposables.dispose()
     this.handler.destroy()
     MarkdownPreviewView.elementMap.delete(this.element)
@@ -85,11 +88,6 @@ export abstract class MarkdownPreviewView {
   public toggleRenderLatex() {
     this.renderLaTeX = !this.renderLaTeX
     this.changeHandler()
-  }
-
-  public async refreshImages(oldsrc: string): Promise<void> {
-    const v = await imageWatcher.getVersion(oldsrc, this.getPath())
-    this.handler.updateImages(oldsrc, v)
   }
 
   public abstract getTitle(): string
@@ -210,9 +208,6 @@ export abstract class MarkdownPreviewView {
           handlePromise(this.renderMarkdown())
         }, 250),
       ),
-    )
-
-    this.disposables.add(
       atom.commands.add(this.element, {
         'core:move-up': () => this.element.scrollBy({ top: -10 }),
         'core:move-down': () => this.element.scrollBy({ top: 10 }),
@@ -242,9 +237,6 @@ export abstract class MarkdownPreviewView {
           this.openSource(line)
         },
       }),
-    )
-
-    this.disposables.add(
       atom.config.onDidChange('markdown-preview-plus.markdownItConfig', () => {
         if (atomConfig().renderer === 'markdown-it') this.changeHandler()
       }),
@@ -283,25 +275,27 @@ export abstract class MarkdownPreviewView {
 
   private async getHTMLToSave(savePath: string) {
     const source = await this.getMarkdownSource()
-    return renderer.render(
-      source,
-      this.getPath(),
-      this.getGrammar(),
-      this.renderLaTeX,
-      'save',
+    return renderer.render({
+      text: source,
+      filePath: this.getPath(),
+      grammar: this.getGrammar(),
+      renderLaTeX: this.renderLaTeX,
+      mode: 'save',
       savePath,
-    )
+    })
   }
 
   private async renderMarkdownText(text: string): Promise<void> {
     try {
-      const domDocument = await renderer.render(
+      const domDocument = await renderer.render({
         text,
-        this.getPath(),
-        this.getGrammar(),
-        this.renderLaTeX,
-        this.defaultRenderMode,
-      )
+        filePath: this.getPath(),
+        grammar: this.getGrammar(),
+        renderLaTeX: this.renderLaTeX,
+        mode: this.defaultRenderMode,
+        imageWatcher: this.imageWatcher,
+      })
+
       if (this.destroyed) return
       this.loading = false
       handlePromise(

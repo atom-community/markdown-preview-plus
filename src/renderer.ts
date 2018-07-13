@@ -3,33 +3,43 @@ import highlight = require('atom-highlight')
 import pandocHelper = require('./pandoc-helper')
 import markdownIt = require('./markdown-it-helper') // Defer until used
 import { scopeForFenceName } from './extension-helper'
-import imageWatcher = require('./image-watch-helper')
-import { Grammar, ConfigValues } from 'atom'
+import { Grammar } from 'atom'
 import { isFileSync, atomConfig } from './util'
 import { getMedia } from './util-common'
+import { ImageWatcher } from './image-watch-helper'
 
 const { resourcePath } = atom.getLoadSettings()
 const packagePath = path.dirname(__dirname)
 
 export type RenderMode = 'normal' | 'copy' | 'save'
 
-export async function render(
-  text: string,
-  filePath: string | undefined,
-  grammar: Grammar | undefined,
-  renderLaTeX: boolean,
-  mode: RenderMode,
-  savePath?: string,
-): Promise<HTMLDocument> {
+export interface CommonRenderOptions<T extends RenderMode> {
+  text: string
+  filePath: string | undefined
+  grammar?: Grammar
+  renderLaTeX: boolean
+  mode: T
+}
+
+export type RenderOptions =
+  | (CommonRenderOptions<'normal' | 'copy'> & { imageWatcher: ImageWatcher })
+  | (CommonRenderOptions<'save'> & { savePath: string })
+  | (CommonRenderOptions<'copy'>)
+
+export async function render(options: RenderOptions): Promise<HTMLDocument> {
   // Remove the <!doctype> since otherwise marked will escape it
   // https://github.com/chjj/marked/issues/354
-  text = text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
+  const text = options.text.replace(/^\s*<!doctype(\s+.*)?>\s*/i, '')
 
   let html
   let error
   if (atomConfig().renderer === 'pandoc') {
     try {
-      html = await pandocHelper.renderPandoc(text, filePath, renderLaTeX)
+      html = await pandocHelper.renderPandoc(
+        text,
+        options.filePath,
+        options.renderLaTeX,
+      )
     } catch (err) {
       const e = err as Error & { html?: string }
       if (e.html === undefined) throw e
@@ -37,33 +47,44 @@ export async function render(
       html = e.html as string
     }
   } else {
-    html = markdownIt.render(text, renderLaTeX)
+    html = markdownIt.render(text, options.renderLaTeX)
   }
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
   sanitize(doc)
-  if (mode === 'normal') {
-    await resolveImagePaths(doc, filePath, {
-      version: true,
-      relativize: false,
-    })
+  if (options.mode === 'normal') {
+    options.imageWatcher.clear()
+    resolveImagePaths(
+      doc,
+      options.filePath,
+      false,
+      undefined,
+      options.imageWatcher,
+    )
   } else {
-    let behaviour: ConfigValues['markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour']
-    switch (mode) {
+    switch (options.mode) {
       case 'save':
-        behaviour = atomConfig().saveConfig.mediaOnSaveAsHTMLBehaviour
+        handleImages({
+          doc,
+          filePath: options.filePath,
+          savePath: options.savePath,
+          behaviour: atomConfig().saveConfig.mediaOnSaveAsHTMLBehaviour,
+        })
         break
       case 'copy':
-        behaviour = atomConfig().saveConfig.mediaOnCopyAsHTMLBehaviour
+        handleImages({
+          doc,
+          filePath: options.filePath,
+          behaviour: atomConfig().saveConfig.mediaOnCopyAsHTMLBehaviour,
+        })
         break
       default:
-        throw invalidMode(mode)
+        throw invalidMode(options.mode)
     }
-    await handleImages({ doc, filePath, savePath, behaviour })
   }
   let defaultCodeLanguage: string = 'text'
   // Default code blocks to be coffee in Literate CoffeeScript files
-  if ((grammar && grammar.scopeName) === 'source.litcoffee') {
+  if ((options.grammar && options.grammar.scopeName) === 'source.litcoffee') {
     defaultCodeLanguage = 'coffee'
   }
   if (
@@ -72,7 +93,7 @@ export async function render(
       atomConfig().pandocConfig.useNativePandocCodeStyles
     )
   ) {
-    highlightCodeBlocks(doc, defaultCodeLanguage, mode !== 'normal')
+    highlightCodeBlocks(doc, defaultCodeLanguage, options.mode !== 'normal')
   }
   if (error) {
     const errd = doc.createElement('div')
@@ -85,7 +106,7 @@ export async function render(
 }
 
 function invalidMode(mode: never) {
-  return new Error(`Invalid render mode ${mode}`)
+  return new Error(`Invalid render mode ${JSON.stringify(mode)}`)
 }
 
 function sanitize(doc: HTMLDocument) {
@@ -124,7 +145,7 @@ function sanitize(doc: HTMLDocument) {
   )
 }
 
-async function handleImages(opts: {
+function handleImages(opts: {
   behaviour: 'relativized' | 'absolutized' | 'untouched'
   doc: HTMLDocument
   filePath?: string
@@ -134,85 +155,70 @@ async function handleImages(opts: {
   switch (opts.behaviour) {
     case 'relativized':
     case 'absolutized':
-      await resolveImagePaths(
-        opts.doc,
-        opts.filePath,
-        {
-          version: false,
-          relativize,
-        },
-        opts.savePath,
-      )
+      resolveImagePaths(opts.doc, opts.filePath, relativize, opts.savePath)
       break
     case 'untouched':
     /* noop */
   }
 }
 
-async function resolveImagePaths(
+function resolveImagePaths(
   doc: HTMLDocument,
   filePath: string | undefined,
-  options: Record<'version' | 'relativize', boolean>,
+  relativize: boolean,
   savePath?: string,
+  imageWatcher?: ImageWatcher,
 ) {
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
   const media = getMedia(doc)
-  await Promise.all(
-    Array.from(media).map(async function(img) {
-      let src = img.getAttribute('src')
-      if (src) {
-        if (atomConfig().renderer !== 'pandoc') {
-          src = decodeURI(src)
-        }
-
-        if (src.match(/^(https?|atom|data):/)) {
-          return
-        }
-        if (process.resourcesPath && src.startsWith(process.resourcesPath)) {
-          return
-        }
-        if (src.startsWith(resourcePath)) {
-          return
-        }
-        if (src.startsWith(packagePath)) {
-          return
-        }
-
-        if (src[0] === '/') {
-          if (!isFileSync(src)) {
-            try {
-              if (rootDirectory !== null) {
-                src = path.join(rootDirectory, src.substring(1))
-              }
-            } catch (e) {
-              // noop
-            }
-          }
-        } else if (filePath) {
-          src = path.resolve(path.dirname(filePath), src)
-        }
-
-        if (
-          options.relativize &&
-          (filePath !== undefined || savePath !== undefined)
-        ) {
-          const fp = savePath !== undefined ? savePath : filePath!
-          src = path.relative(path.dirname(fp), src)
-        }
-
-        // Use most recent version of image
-        if (options.version) {
-          const v = await imageWatcher.getVersion(src, filePath)
-          if (v) {
-            src = `${src}?v=${v}`
-          }
-        }
-
-        img.src = src
+  Array.from(media).map(function(img) {
+    let src = img.getAttribute('src')
+    if (src) {
+      if (atomConfig().renderer !== 'pandoc') {
+        src = decodeURI(src)
       }
-      return
-    }),
-  )
+
+      if (src.match(/^(https?|atom|data):/)) {
+        return
+      }
+      if (process.resourcesPath && src.startsWith(process.resourcesPath)) {
+        return
+      }
+      if (src.startsWith(resourcePath)) {
+        return
+      }
+      if (src.startsWith(packagePath)) {
+        return
+      }
+
+      if (src[0] === '/') {
+        if (!isFileSync(src)) {
+          try {
+            if (rootDirectory !== null) {
+              src = path.join(rootDirectory, src.substring(1))
+            }
+          } catch (e) {
+            // noop
+          }
+        }
+      } else if (filePath) {
+        src = path.resolve(path.dirname(filePath), src)
+      }
+
+      if (relativize && (filePath !== undefined || savePath !== undefined)) {
+        const fp = savePath !== undefined ? savePath : filePath!
+        src = path.relative(path.dirname(fp), src)
+      }
+
+      // Watch image for changes
+      if (imageWatcher) {
+        const v = imageWatcher.watch(src)
+        if (v !== undefined) src = `${src}?v=${v}`
+      }
+
+      img.src = src
+    }
+  })
 }
 
 function highlightCodeBlocks(

@@ -49,13 +49,12 @@ export async function copyHtml(
     )
     view.setBasePath(filePath)
 
-    const domDocument = await renderer.render(
+    const domDocument = await renderer.render({
       text,
       filePath,
-      undefined,
       renderLaTeX,
-      'copy',
-    )
+      mode: 'copy',
+    })
     const res = await view.update(
       domDocument.documentElement.outerHTML,
       renderLaTeX,
