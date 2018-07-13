@@ -1,6 +1,6 @@
 import path = require('path')
 import { Emitter, Disposable, CompositeDisposable, Grammar } from 'atom'
-import _ = require('lodash')
+import { debounce } from 'lodash'
 import fs = require('fs')
 
 import renderer = require('../renderer')
@@ -201,12 +201,12 @@ export abstract class MarkdownPreviewView {
   private handleEvents() {
     this.disposables.add(
       atom.grammars.onDidAddGrammar(() =>
-        _.debounce(() => {
+        debounce(() => {
           handlePromise(this.renderMarkdown())
         }, 250),
       ),
       atom.grammars.onDidUpdateGrammar(
-        _.debounce(() => {
+        debounce(() => {
           handlePromise(this.renderMarkdown())
         }, 250),
       ),

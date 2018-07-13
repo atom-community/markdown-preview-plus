@@ -2,7 +2,7 @@ import markdownItModule = require('markdown-it')
 import * as twemoji from 'twemoji'
 import * as path from 'path'
 import { pairUp, atomConfig } from './util'
-import * as _ from 'lodash'
+import { isEqual } from 'lodash'
 
 type InitState = Readonly<ReturnType<typeof currentConfig>>
 
@@ -90,7 +90,7 @@ function wrapInitIfNeeded(initf: typeof init): typeof init {
   let initState: InitState | null = null
 
   return function(newState: InitState) {
-    if (markdownIt === null || !_.isEqual(initState, newState)) {
+    if (markdownIt === null || !isEqual(initState, newState)) {
       initState = newState
       markdownIt = initf(newState)
     }
