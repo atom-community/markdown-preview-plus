@@ -78,7 +78,7 @@ export async function getVersion(image: string, file?: string) {
   }
 
   const files: string[] = i.files
-  if (file && !_.includes(files, file)) {
+  if (file && !files.includes(file)) {
     i.files.push(file)
   }
 
