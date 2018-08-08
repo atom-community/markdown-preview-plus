@@ -122,8 +122,8 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
           this.text = text
           this.changeHandler()
         },
-        syncPreview: (pos) => {
-          this.syncPreview(pos)
+        syncPreview: ({ pos, flash }) => {
+          this.syncPreview(pos, flash)
         },
         changePath: ({ title, path }) => {
           this.title = title

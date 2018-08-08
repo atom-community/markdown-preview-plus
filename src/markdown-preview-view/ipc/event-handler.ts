@@ -1,7 +1,7 @@
 import { remote } from 'electron'
 
 export interface IPCEvents {
-  syncPreview: number
+  syncPreview: { pos: number; flash: boolean }
   scrollSync: [number, number]
   destroy: void
   changeGrammar: string
