@@ -1,3 +1,11 @@
+## 3.3.4
+
+-   Do not flash synced element when syncing on change
+-   Update generated sources
+-   Rework image watcher
+-   Reduce dependency on lodash
+-   Use native Array.includes instead of lodash.includes
+
 ## 3.3.3
 
 -   Display atom-text-editors in preview via flexbox
