@@ -177,8 +177,8 @@ export abstract class MarkdownPreviewView {
     )
   }
 
-  protected syncPreview(line: number) {
-    this.handler.sync(line)
+  protected syncPreview(line: number, flash: boolean) {
+    this.handler.sync(line, flash)
   }
 
   protected openNewWindow() {

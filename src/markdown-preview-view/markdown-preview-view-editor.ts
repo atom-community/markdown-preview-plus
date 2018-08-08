@@ -1,7 +1,7 @@
 import { TextEditor, Grammar, Range } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
-import { handlePromise, atomConfig } from '../util'
+import { atomConfig } from '../util'
 import { MarkdownPreviewViewEditorRemote } from './markdown-preview-view-editor-remote'
 
 export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
@@ -110,7 +110,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
           this.changeHandler()
         }
         if (atomConfig().syncConfig.syncPreviewOnChange) {
-          handlePromise(this.syncPreviewHelper())
+          this.syncPreviewHelper(false)
         }
       }),
       this.editor.onDidChangePath(() => {
@@ -140,14 +140,16 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         )
       }),
       atom.commands.add(atom.views.getView(this.editor), {
-        'markdown-preview-plus:sync-preview': this.syncPreviewHelper,
+        'markdown-preview-plus:sync-preview': () => {
+          this.syncPreviewHelper(true)
+        },
       }),
     )
   }
 
-  private syncPreviewHelper = async () => {
+  private syncPreviewHelper(flash: boolean) {
     const pos = this.editor.getCursorBufferPosition().row
-    this.syncPreview(pos)
+    this.syncPreview(pos, flash)
   }
 
   private shouldScrollSync(whatScrolled: 'editor' | 'preview') {

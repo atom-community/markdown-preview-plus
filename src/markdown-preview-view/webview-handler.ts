@@ -192,8 +192,8 @@ export class WebviewHandler {
     }
   }
 
-  public sync(line: number) {
-    this._element.send<'sync'>('sync', { line })
+  public sync(line: number, flash: boolean) {
+    this._element.send<'sync'>('sync', { line, flash })
   }
 
   public async syncSource() {

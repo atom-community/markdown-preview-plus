@@ -108,7 +108,10 @@ export class RemoteEditorServer {
           this.emit('changeText', this.editor.getText())
         }
         if (atomConfig().syncConfig.syncPreviewOnChange) {
-          this.emit('syncPreview', this.editor.getCursorBufferPosition().row)
+          this.emit('syncPreview', {
+            pos: this.editor.getCursorBufferPosition().row,
+            flash: false,
+          })
         }
       }),
       this.editor.onDidChangePath(() => {
@@ -145,7 +148,10 @@ export class RemoteEditorServer {
       }),
       atom.commands.add(atom.views.getView(this.editor), {
         'markdown-preview-plus:sync-preview': () => {
-          this.emit('syncPreview', this.editor.getCursorBufferPosition().row)
+          this.emit('syncPreview', {
+            pos: this.editor.getCursorBufferPosition().row,
+            flash: true,
+          })
         },
       }),
     )

@@ -108,7 +108,7 @@ ipcRenderer.on<'update-images'>('update-images', (_event, { oldsrc, v }) => {
   }
 })
 
-ipcRenderer.on<'sync'>('sync', (_event, { line }) => {
+ipcRenderer.on<'sync'>('sync', (_event, { line, flash }) => {
   const root = document.querySelector('div.update-preview')
   if (!root) return
 
@@ -125,8 +125,10 @@ ipcRenderer.on<'sync'>('sync', (_event, { line }) => {
 
   element.scrollIntoViewIfNeeded(true)
 
-  element.classList.add('flash')
-  setTimeout(() => element!.classList.remove('flash'), 1000)
+  if (flash) {
+    element.classList.add('flash')
+    setTimeout(() => element!.classList.remove('flash'), 1000)
+  }
 })
 
 ipcRenderer.on<'use-github-style'>('use-github-style', (_event, { value }) => {
