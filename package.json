@@ -13,7 +13,7 @@
   "repository": "https://github.com/atom-community/markdown-preview-plus",
   "license": "MIT",
   "engines": {
-    "atom": ">=1.26.0 <2.0.0"
+    "atom": ">=1.28.0 <2.0.0"
   },
   "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "scripts": {
