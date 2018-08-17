@@ -413,6 +413,41 @@ var x = y;
   describe('when markdown-preview-plus:copy-html is triggered', function() {
     const clipboard = stubClipboard()
 
+    describe('when rich clipboard is disabled', function() {
+      let clipboard = ''
+      let stub: sinon.SinonStub
+      before(function() {
+        atom.config.set('markdown-preview-plus.richClipboard', false)
+        stub = sinon
+          .stub(atom.clipboard, 'write')
+          .callsFake(function(arg: string) {
+            clipboard = arg
+          })
+      })
+      after(function() {
+        stub.restore()
+        atom.config.unset('markdown-preview-plus.richClipboard')
+      })
+
+      it('should use atom.clipboard', async function() {
+        const editor = await atom.workspace.open(
+          path.join(tempPath, 'subdir/simple.md'),
+        )
+
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:copy-html',
+        )
+
+        await waitsFor.msg(
+          'atom.clipboard.write to have been called',
+          () => stub.callCount === 1,
+        )
+
+        expect(clipboard).to.not.equal('')
+      })
+    })
+
     it('copies the HTML to the clipboard', async function() {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/simple.md'),
