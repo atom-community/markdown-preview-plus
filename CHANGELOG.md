@@ -1,3 +1,27 @@
+## 3.4.0
+
+### New features
+
+-   'Copy HTML' commands now copy rich text in addition to raw HTML
+    source. This can be disabled in settings by unticking 'Use rich
+    clipboard' or setting `markdown-preview-plus.richClipboard` to
+    `false`.
+
+    With rich clipboard enabled, targets that support rich text (
+    word processors, web browsers, etc) will properly format clipboard
+    contents on paste instead of pasting raw HTML verbatim.
+
+    Targets supporting only plain text (e.g. Atom) will still get raw
+    HTML source.
+
+    See [this comment](https://github.com/atom-community/markdown-preview-plus/pull/419#issuecomment-413947040) for a visual example.
+
+### Maintenence
+
+-   Update to TypeScript 3.0
+-   Bump dependencies
+-   Bump Atom version (minimal supported is 1.28)
+
 ## 3.3.4
 
 -   Do not flash synced element when syncing on change
