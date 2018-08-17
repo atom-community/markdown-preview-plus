@@ -37,6 +37,8 @@ export function isElement(node: Node): node is Element {
 
 import { WebviewHandler } from './markdown-preview-view/webview-handler'
 import * as renderer from './renderer'
+import clipboard = require('./clipboard')
+
 export async function copyHtml(
   text: string,
   filePath: string | undefined,
@@ -59,7 +61,7 @@ export async function copyHtml(
       domDocument.documentElement.outerHTML,
       renderLaTeX,
     )
-    if (res) atom.clipboard.write(res)
+    if (res) clipboard.write({ text: res, html: res })
     view.destroy()
   })
   view.element.style.pointerEvents = 'none'
