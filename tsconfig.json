@@ -26,8 +26,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "typeRoots": ["./typings", "./node_modules/@types"]
+    "noUnusedParameters": true
   },
   "exclude": ["node_modules", "spec"],
   "include": [
