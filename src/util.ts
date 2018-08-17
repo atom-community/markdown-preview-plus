@@ -59,7 +59,14 @@ export async function copyHtml(
       domDocument.documentElement.outerHTML,
       renderLaTeX,
     )
-    if (res) atom.clipboard.write(res)
+    if (res) {
+      if (atom.config.get('markdown-preview-plus.richClipboard')) {
+        const clipboard = await import('./clipboard')
+        clipboard.write({ text: res, html: res })
+      } else {
+        atom.clipboard.write(res)
+      }
+    }
     view.destroy()
   })
   view.element.style.pointerEvents = 'none'

@@ -54,6 +54,14 @@ export const config: IConfig = {
     enum: ['markdown-it', 'pandoc'],
     order: 3,
   },
+  richClipboard: {
+    type: 'boolean',
+    default: true,
+    title: 'Use rich clipboard',
+    description:
+      'Copy rich text to clipboard in addition to raw HTML when using copy html commands',
+    order: 4,
+  },
   previewConfig: {
     title: 'Preview Behaviour',
     order: 10,
@@ -461,6 +469,7 @@ declare module 'atom' {
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
+    'markdown-preview-plus.richClipboard': boolean
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
     'markdown-preview-plus.previewConfig.previewSplitPaneDir':
       | 'down'
@@ -605,6 +614,7 @@ declare module 'atom' {
       extensions: string[]
       useGitHubStyle: boolean
       renderer: 'markdown-it' | 'pandoc'
+      richClipboard: boolean
       'previewConfig.liveUpdate': boolean
       'previewConfig.previewSplitPaneDir': 'down' | 'right' | 'none'
       'previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
