@@ -14,6 +14,7 @@ import {
   previewFragment,
   previewHTML,
   activateMe,
+  stubClipboard,
 } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -410,19 +411,7 @@ var x = y;
     }))
 
   describe('when markdown-preview-plus:copy-html is triggered', function() {
-    let stub: sinon.SinonStub
-    let clipboardContents: string = ''
-    beforeEach(function() {
-      stub = sinon
-        .stub(atom.clipboard, 'write')
-        .callsFake(function(arg: string) {
-          clipboardContents = arg
-        })
-    })
-    afterEach(function() {
-      stub.restore()
-      clipboardContents = ''
-    })
+    const clipboard = stubClipboard()
 
     it('copies the HTML to the clipboard', async function() {
       const editor = await atom.workspace.open(
@@ -435,11 +424,11 @@ var x = y;
       )
 
       await waitsFor.msg(
-        'atom.clipboard.write to have been called',
-        () => stub.callCount === 1,
+        'clipboard.write to have been called',
+        () => clipboard.stub!.callCount === 1,
       )
 
-      expect(clipboardContents).to.equal(`\
+      expect(clipboard.contents).to.equal(`\
 <p><em>italic</em></p>
 <p><strong>bold</strong></p>
 <p>encoding \u2192 issue</p>
@@ -454,11 +443,11 @@ var x = y;
       )
 
       await waitsFor.msg(
-        'atom.clipboard.write to have been called',
-        () => stub.callCount === 2,
+        'clipboard.write to have been called',
+        () => clipboard.stub!.callCount === 2,
       )
 
-      expect(clipboardContents).to.equal(`\
+      expect(clipboard.contents).to.equal(`\
 <p><em>italic</em></p>
 `)
     })
@@ -479,11 +468,11 @@ var x = y;
         atom.commands.dispatch(ev, 'markdown-preview-plus:copy-html')
 
         await waitsFor.msg(
-          'atom.clipboard.write to have been called',
-          () => stub.callCount === 1,
+          'clipboard.write to have been called',
+          () => clipboard.stub!.called,
         )
 
-        element.innerHTML = clipboardContents
+        element.innerHTML = clipboard.contents
       })
 
       describe("when the code block's fence name has a matching grammar", function() {
@@ -539,31 +528,17 @@ var x = y;
   })
 
   describe('when main::copyHtml() is called directly', function() {
-    let stub: sinon.SinonStub
-    let clipboardContents: string = ''
-
-    beforeEach(function() {
-      stub = sinon
-        .stub(atom.clipboard, 'write')
-        .callsFake(function(arg: string) {
-          clipboardContents = arg
-        })
-    })
-
-    afterEach(function() {
-      stub.restore()
-      clipboardContents = ''
-    })
+    const clipboard = stubClipboard()
 
     async function copyHtml() {
-      stub.resetHistory()
+      clipboard.stub!.resetHistory()
       atom.commands.dispatch(
         atom.views.getView(atom.workspace.getActiveTextEditor()!),
         'markdown-preview-plus:copy-html',
       )
       await waitsFor.msg(
-        'atom.clipboard.write to have been called',
-        () => stub.called,
+        'clipboard.write to have been called',
+        () => clipboard.stub!.called,
       )
     }
 
@@ -572,7 +547,7 @@ var x = y;
 
       await copyHtml()
 
-      expect(clipboardContents).to.equal(`\
+      expect(clipboard.contents).to.equal(`\
 <p><em>italic</em></p>
 <p><strong>bold</strong></p>
 <p>encoding \u2192 issue</p>
@@ -583,7 +558,7 @@ var x = y;
         .setSelectedBufferRange([[0, 0], [1, 0]])
       await copyHtml()
 
-      expect(clipboardContents).to.equal(`\
+      expect(clipboard.contents).to.equal(`\
 <p><em>italic</em></p>
 `)
     })
@@ -603,12 +578,10 @@ var x = y;
       it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
         await copyHtml()
 
-        const clipboard = clipboardContents
-        expect(clipboard.match(/MathJax_SVG_Hidden/g)!.length).to.equal(1)
-        expect(
-          clipboard.match(/class="MathJax_SVG_Display"/g)!.length,
-        ).to.equal(1)
-        expect(clipboard.match(/class="MathJax_SVG"/g)!.length).to.equal(1)
+        const cb = clipboard.contents
+        expect(cb.match(/MathJax_SVG_Hidden/g)!.length).to.equal(1)
+        expect(cb.match(/class="MathJax_SVG_Display"/g)!.length).to.equal(1)
+        expect(cb.match(/class="MathJax_SVG"/g)!.length).to.equal(1)
       })
     })
   })
@@ -1011,25 +984,13 @@ world</p>
       })
     })
     describe('depending on mediaOnCopyAsHTMLBehaviour value', () => {
-      let clipboardContents: string = ''
-      let stub: sinon.SinonStub
-      before(() => {
-        stub = sinon
-          .stub(atom.clipboard, 'write')
-          .callsFake(function(val: string) {
-            clipboardContents = val
-          })
-      })
-      after(() => {
-        clipboardContents = ''
-        stub.restore()
-      })
+      const clipboard = stubClipboard()
       async function readHTML() {
-        stub.resetHistory()
+        clipboard.stub!.resetHistory()
         await atom.commands.dispatch(atom.views.getView(preview), 'core:copy')
-        await waitsFor(() => stub.called)
+        await waitsFor(() => clipboard.stub!.called)
         const dom = new DOMParser()
-        const doc = dom.parseFromString(clipboardContents, 'text/html')
+        const doc = dom.parseFromString(clipboard.contents, 'text/html')
         return doc
       }
       async function getImgs(

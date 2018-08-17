@@ -124,3 +124,27 @@ export async function activateMe(): Promise<Package> {
   if (process.platform === 'darwin') pkg.isCompatible = () => true
   return atom.packages.activatePackage(pkg.name)
 }
+
+import * as sinon from 'sinon'
+export function stubClipboard() {
+  const result: { stub?: sinon.SinonStub; contents: string } = {
+    stub: undefined,
+    contents: '',
+  }
+  const clipboard = require('../lib/clipboard')
+  before(function() {
+    result.stub = sinon
+      .stub(clipboard, 'write')
+      .callsFake(function(arg: { text: string }) {
+        result.contents = arg.text
+      })
+  })
+  after(function() {
+    result.stub && result.stub.restore()
+  })
+  afterEach(function() {
+    result.contents = ''
+    result.stub && result.stub.resetHistory()
+  })
+  return result
+}
