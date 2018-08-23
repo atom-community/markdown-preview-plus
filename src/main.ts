@@ -224,6 +224,10 @@ function registerGrammars(
         label: 'Sync Preview',
         command: 'markdown-preview-plus:sync-preview',
       },
+      {
+        label: 'Copy Markdown as HTML',
+        command: 'markdown-preview-plus:copy-html',
+      },
     ]
   }
 }
