@@ -177,16 +177,9 @@ describe('MarkdownPreviewView', function() {
         'atom-text-editor',
       ) as TextEditorElement
       expect(editor).to.exist
-      expect(editor.textContent).to.equal(`\
-
-     a
-    b
-   c
-  d
- e
-f
-\
-`)
+      expect(editor.textContent).to.equal(
+        ' \n     a\n    b\n   c\n  d\n e\nf\n ',
+      )
 
       newPreview.destroy()
     })
@@ -203,8 +196,7 @@ f
         expect(rubyEditor.textContent).to.equal(`\
 def func
   x = 1
-end
-`)
+end`)
 
         // nested in a list item
         const jsEditor = (await previewFragment(preview)).querySelector(
@@ -214,8 +206,7 @@ end
         expect(jsEditor.textContent).to.equal(`\
 if a === 3 {
   b = 5
-}
-`)
+}`)
       }))
 
     describe("when the code block's fence name doesn't have a matching grammar", function() {
@@ -227,8 +218,7 @@ if a === 3 {
         expect(plainEditor.textContent).to.equal(`\
 function f(x) {
   return x++;
-}
-`)
+}`)
       })
     })
 
@@ -256,7 +246,7 @@ var x = 0;
           ) as TextEditorElement,
       )
       expect(jsEditor).to.exist
-      expect(jsEditor.textContent).to.equal('var x = 0;\n')
+      expect(jsEditor.textContent).to.equal('var x = 0;')
       expect(jsEditor.querySelector('.syntax--source.syntax--js')!.className).to
         .be.ok
     })
@@ -763,10 +753,9 @@ var x = 0;
 
       expect(atom.clipboard.read()).to.equal(`\
 <h1>Code Block</h1>
-<pre class="editor-colors lang-javascript"><span class="syntax--source syntax--js"><span class="syntax--keyword syntax--control syntax--js"><span>if</span></span><span> a </span><span class="syntax--keyword syntax--operator syntax--comparison syntax--js"><span>===</span></span><span> </span><span class="syntax--constant syntax--numeric syntax--decimal syntax--js"><span>3</span></span><span> </span><span class="syntax--meta syntax--brace syntax--curly syntax--js"><span>{</span></span></span>
-<span class="syntax--source syntax--js"><span>  b </span><span class="syntax--keyword syntax--operator syntax--assignment syntax--js"><span>=</span></span><span> </span><span class="syntax--constant syntax--numeric syntax--decimal syntax--js"><span>5</span></span></span>
-<span class="syntax--source syntax--js"><span class="syntax--meta syntax--brace syntax--curly syntax--js"><span>}</span></span></span>
-</pre>
+<pre class="editor-colors lang-javascript"><span><span class="syntax--source syntax--js"><span class="syntax--keyword syntax--control syntax--js">if</span> a <span class="syntax--keyword syntax--operator syntax--comparison syntax--js">===</span> <span class="syntax--constant syntax--numeric syntax--decimal syntax--js">3</span> <span class="syntax--meta syntax--brace syntax--curly syntax--js">{</span></span></span>
+<span class=""><span class="syntax--source syntax--js"><span class="leading-whitespace">  </span>b <span class="syntax--keyword syntax--operator syntax--assignment syntax--js">=</span> <span class="syntax--constant syntax--numeric syntax--decimal syntax--js">5</span></span></span>
+<span><span class="syntax--source syntax--js"><span class="syntax--meta syntax--brace syntax--curly syntax--js">}</span></span></span></pre>
 <p>encoding → issue</p>
 `)
     }))
