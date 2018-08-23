@@ -1,3 +1,49 @@
+## 3.5.0
+
+### Compatibility considerations
+
+-   Tokenization for code blocks has changed slightly due to changes to
+    highlighting code. This is a side effect of ensuring compatibility
+    with the new Atom grammar parser subsystem.
+
+### Fixes
+
+-   Compatibility with Tree Sitter parsers
+
+    The old way of reusing Atom grammars to highlight code blocks doesn't
+    work with the new Tree Sitter parsers (experimental Atom feature).
+
+    This version updates the highlighting code to be compatible with
+    Tree Sitter.
+
+    Now the highlighting algorithm will always use the same tokenizer
+    as an editor.
+
+### New features
+
+-   New editor context menu item for copying selected Markdown as HTML (Jeremy John)
+
+    This is a simple menu item binding to `markdown-preview-plus:copy-html`
+    command. The menu item is called 'Copy Markdown as HTML'
+
+-   Option to enforce using external program to open certain file types
+
+    Until now, all links to local files would be opened in Atom. This
+    is obviously not a good idea for binary files. A setting
+    was added (`previewConfig.shellOpenFileExtensions`)
+    that will force OS default handler for certain files (based on
+    file name extension). The setting in question is under 'Preview Behaviour'.
+
+    Default value defines some common binary document types and archives.
+
+    Setting description:
+    > **Always open links to these file types externally**
+    >
+    > This is a comma-separated list of file name extensions that
+    > should always be opened with an external program.
+    > For example, if you want to always open PDF files (presumably named > `something.pdf`)
+    > in system PDF viewer, add `pdf` here
+
 ## 3.4.0
 
 ### New features
