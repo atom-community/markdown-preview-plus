@@ -64,7 +64,11 @@ export class WebviewHandler {
       },
     )
     this._element.addEventListener('will-navigate', async (e) => {
-      if (e.url.startsWith('file://')) {
+      const exts = atomConfig().previewConfig.shellOpenFileExtensions
+      const forceOpenExternal = exts.some((ext) =>
+        e.url.toLowerCase().endsWith(`.${ext.toLowerCase()}`),
+      )
+      if (e.url.startsWith('file://') && !forceOpenExternal) {
         handlePromise(atom.workspace.open(fileUriToPath(e.url)))
       } else {
         shell.openExternal(e.url)

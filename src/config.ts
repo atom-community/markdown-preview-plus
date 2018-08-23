@@ -99,6 +99,40 @@ export const config: IConfig = {
         default: false,
         order: 27,
       },
+      shellOpenFileExtensions: {
+        title: 'Always open links to these file types externally',
+        description:
+          'This is a comma-separated list of file name extensions that ' +
+          'should always be opened with an external program. ' +
+          'For example, if you want to always open PDF files (presumably named `something.pdf`) ' +
+          'in system PDF viewer, add `pdf` here.',
+        type: 'array',
+        default: [
+          'odt',
+          'doc',
+          'docx',
+          'ods',
+          'xls',
+          'xlsx',
+          'odp',
+          'ppt',
+          'pptx',
+          'zip',
+          'rar',
+          '7z',
+          'gz',
+          'xz',
+          'bz2',
+          'tar',
+          'tgz',
+          'txz',
+          'tbz2',
+        ],
+        order: 28,
+        items: {
+          type: 'string',
+        },
+      },
     },
   },
   saveConfig: {
@@ -482,12 +516,14 @@ declare module 'atom' {
       | 'center'
     'markdown-preview-plus.previewConfig.closePreviewWithEditor': boolean
     'markdown-preview-plus.previewConfig.activatePreviewWithEditor': boolean
+    'markdown-preview-plus.previewConfig.shellOpenFileExtensions': string[]
     'markdown-preview-plus.previewConfig': {
       liveUpdate: boolean
       previewSplitPaneDir: 'down' | 'right' | 'none'
       previewDock: 'left' | 'right' | 'bottom' | 'center'
       closePreviewWithEditor: boolean
       activatePreviewWithEditor: boolean
+      shellOpenFileExtensions: string[]
     }
     'markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour':
       | 'relativized'
@@ -620,12 +656,14 @@ declare module 'atom' {
       'previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
       'previewConfig.closePreviewWithEditor': boolean
       'previewConfig.activatePreviewWithEditor': boolean
+      'previewConfig.shellOpenFileExtensions': string[]
       previewConfig: {
         liveUpdate: boolean
         previewSplitPaneDir: 'down' | 'right' | 'none'
         previewDock: 'left' | 'right' | 'bottom' | 'center'
         closePreviewWithEditor: boolean
         activatePreviewWithEditor: boolean
+        shellOpenFileExtensions: string[]
       }
       'saveConfig.mediaOnSaveAsHTMLBehaviour':
         | 'relativized'
