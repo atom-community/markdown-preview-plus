@@ -21,4 +21,7 @@ declare module 'atom' {
   interface ThemeManager {
     loadStylesheet(path: string, importFallbackVariables?: boolean): string
   }
+  interface Package {
+    getStylesheetPaths(): string[]
+  }
 }

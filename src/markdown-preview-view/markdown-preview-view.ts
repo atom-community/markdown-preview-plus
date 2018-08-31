@@ -257,18 +257,9 @@ export abstract class MarkdownPreviewView {
       atom.config.onDidChange('markdown-preview-plus.useGitHubStyle', () => {
         this.handler.updateStyles()
       }),
-      atom.config.onDidChange(
-        'markdown-preview-plus.useGitHubStyleCodeBlocks',
-        () => {
-          this.handler.updateStyles()
-        },
-      ),
-      atom.config.onDidChange(
-        'markdown-preview-plus.darkenGitHubStyleCodeBlocks',
-        () => {
-          this.handler.updateStyles()
-        },
-      ),
+      atom.config.onDidChange('markdown-preview-plus.syntaxThemeName', () => {
+        this.handler.updateStyles()
+      }),
     )
   }
 

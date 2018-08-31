@@ -46,22 +46,36 @@ export function getUserStyles() {
   return [el.innerText]
 }
 
+function getSyntaxTheme(themeName: string): string[] {
+  if (themeName !== '') {
+    const themes = atom.themes.getLoadedThemes()
+    if (themes) {
+      const [theme] = themes.filter((x) => x.name === themeName)
+      if (theme) {
+        const stshts = theme
+          .getStylesheetPaths()
+          .map((p) => atom.themes.loadStylesheet(p))
+        return processEditorStyles(stshts)
+      }
+    }
+    atom.notifications.addWarning('Failed to load syntax theme', {
+      detail: `Markdown-preview-plus couldn't find '${themeName}'`,
+    })
+  }
+  // default
+  return processEditorStyles(getStyles('atom-text-editor'))
+}
+
 export function getPreviewStyles(display: boolean): string[] {
   if (getStylesOverride) return getStylesOverride(display)
   const styles = []
   styles.push(...processEditorStyles(getUserStyles()))
-  styles.push(...processEditorStyles(getStyles('atom-text-editor')))
+  styles.push(...getSyntaxTheme(atomConfig().syntaxThemeName))
 
   styles.push(getClientStyle('generic'))
   if (display) styles.push(getClientStyle('display'))
   if (atomConfig().useGitHubStyle) {
     styles.push(getClientStyle('github'))
-    if (atomConfig().useGitHubStyleCodeBlocks) {
-      styles.push(getClientStyle('github-code'))
-    }
-    if (atomConfig().darkenGitHubStyleCodeBlocks) {
-      styles.push(getClientStyle('github-code-darken'))
-    }
   } else {
     styles.push(getClientStyle('default'))
   }
