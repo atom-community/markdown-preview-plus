@@ -1,11 +1,11 @@
-declare module "atom-select-list" {
+declare module 'atom-select-list' {
   export = SelectListView
 }
 declare class SelectListView<T> {
   public element: HTMLElement
   constructor(props: Props<T>)
   public focus(): void
-  public update(props: Partial<IProps<T>>): Promise<void>
+  public update(props: Partial<Props<T>>): Promise<void>
   public getFilterQuery(): string
 }
 declare interface Props<T> {
