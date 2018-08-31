@@ -260,6 +260,12 @@ export abstract class MarkdownPreviewView {
       atom.config.onDidChange('markdown-preview-plus.syntaxThemeName', () => {
         this.handler.updateStyles()
       }),
+      atom.config.onDidChange(
+        'markdown-preview-plus.importPackageStyles',
+        () => {
+          this.handler.updateStyles()
+        },
+      ),
     )
   }
 

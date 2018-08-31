@@ -55,6 +55,18 @@ export const config: IConfig = {
     default: '',
     order: 2.5,
   },
+  importPackageStyles: {
+    title: 'Packages that can affect preview rendering',
+    description:
+      'A list of Atom package names that can affect preview style, comma-separated. ' +
+      'This does not affect exported HTML',
+    type: 'array',
+    items: {
+      type: 'string',
+    },
+    default: ['fonts'],
+    order: 2.6,
+  },
   renderer: {
     type: 'string',
     default: 'markdown-it',
@@ -511,11 +523,19 @@ declare module 'atom' {
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.syntaxThemeName': string
+    'markdown-preview-plus.importPackageStyles': string[]
     'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.richClipboard': boolean
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
-    'markdown-preview-plus.previewConfig.previewSplitPaneDir': 'down' | 'right' | 'none'
-    'markdown-preview-plus.previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
+    'markdown-preview-plus.previewConfig.previewSplitPaneDir':
+      | 'down'
+      | 'right'
+      | 'none'
+    'markdown-preview-plus.previewConfig.previewDock':
+      | 'left'
+      | 'right'
+      | 'bottom'
+      | 'center'
     'markdown-preview-plus.previewConfig.closePreviewWithEditor': boolean
     'markdown-preview-plus.previewConfig.activatePreviewWithEditor': boolean
     'markdown-preview-plus.previewConfig.shellOpenFileExtensions': string[]
@@ -527,11 +547,24 @@ declare module 'atom' {
       activatePreviewWithEditor: boolean
       shellOpenFileExtensions: string[]
     }
-    'markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour': 'relativized' | 'absolutized' | 'untouched'
-    'markdown-preview-plus.saveConfig.mediaOnCopyAsHTMLBehaviour': 'relativized' | 'absolutized' | 'untouched'
+    'markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour':
+      | 'relativized'
+      | 'absolutized'
+      | 'untouched'
+    'markdown-preview-plus.saveConfig.mediaOnCopyAsHTMLBehaviour':
+      | 'relativized'
+      | 'absolutized'
+      | 'untouched'
     'markdown-preview-plus.saveConfig.defaultSaveFormat': 'html' | 'pdf'
     'markdown-preview-plus.saveConfig.saveToPDFOptions.marginsType': 0 | 1 | 2
-    'markdown-preview-plus.saveConfig.saveToPDFOptions.pageSize': 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.pageSize':
+      | 'A3'
+      | 'A4'
+      | 'A5'
+      | 'Legal'
+      | 'Letter'
+      | 'Tabloid'
+      | 'Custom'
     'markdown-preview-plus.saveConfig.saveToPDFOptions.customPageSize': string
     'markdown-preview-plus.saveConfig.saveToPDFOptions.landscape': false | true
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printBackground': boolean
@@ -549,12 +582,19 @@ declare module 'atom' {
       mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
       defaultSaveFormat: 'html' | 'pdf'
       'saveToPDFOptions.marginsType': 0 | 1 | 2
-      'saveToPDFOptions.pageSize': 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
+      'saveToPDFOptions.pageSize':
+        | 'A3'
+        | 'A4'
+        | 'A5'
+        | 'Legal'
+        | 'Letter'
+        | 'Tabloid'
+        | 'Custom'
       'saveToPDFOptions.customPageSize': string
       'saveToPDFOptions.landscape': false | true
       'saveToPDFOptions.printBackground': boolean
       'saveToPDFOptions.printSelectionOnly': boolean
-      'saveToPDFOptions': {
+      saveToPDFOptions: {
         marginsType: 0 | 1 | 2
         pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
         customPageSize: string
@@ -632,6 +672,7 @@ declare module 'atom' {
       extensions: string[]
       useGitHubStyle: boolean
       syntaxThemeName: string
+      importPackageStyles: string[]
       renderer: 'markdown-it' | 'pandoc'
       richClipboard: boolean
       'previewConfig.liveUpdate': boolean
@@ -640,7 +681,7 @@ declare module 'atom' {
       'previewConfig.closePreviewWithEditor': boolean
       'previewConfig.activatePreviewWithEditor': boolean
       'previewConfig.shellOpenFileExtensions': string[]
-      'previewConfig': {
+      previewConfig: {
         liveUpdate: boolean
         previewSplitPaneDir: 'down' | 'right' | 'none'
         previewDock: 'left' | 'right' | 'bottom' | 'center'
@@ -648,11 +689,24 @@ declare module 'atom' {
         activatePreviewWithEditor: boolean
         shellOpenFileExtensions: string[]
       }
-      'saveConfig.mediaOnSaveAsHTMLBehaviour': 'relativized' | 'absolutized' | 'untouched'
-      'saveConfig.mediaOnCopyAsHTMLBehaviour': 'relativized' | 'absolutized' | 'untouched'
+      'saveConfig.mediaOnSaveAsHTMLBehaviour':
+        | 'relativized'
+        | 'absolutized'
+        | 'untouched'
+      'saveConfig.mediaOnCopyAsHTMLBehaviour':
+        | 'relativized'
+        | 'absolutized'
+        | 'untouched'
       'saveConfig.defaultSaveFormat': 'html' | 'pdf'
       'saveConfig.saveToPDFOptions.marginsType': 0 | 1 | 2
-      'saveConfig.saveToPDFOptions.pageSize': 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
+      'saveConfig.saveToPDFOptions.pageSize':
+        | 'A3'
+        | 'A4'
+        | 'A5'
+        | 'Legal'
+        | 'Letter'
+        | 'Tabloid'
+        | 'Custom'
       'saveConfig.saveToPDFOptions.customPageSize': string
       'saveConfig.saveToPDFOptions.landscape': false | true
       'saveConfig.saveToPDFOptions.printBackground': boolean
@@ -665,19 +719,33 @@ declare module 'atom' {
         printBackground: boolean
         printSelectionOnly: boolean
       }
-      'saveConfig': {
+      saveConfig: {
         mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         defaultSaveFormat: 'html' | 'pdf'
         'saveToPDFOptions.marginsType': 0 | 1 | 2
-        'saveToPDFOptions.pageSize': 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
+        'saveToPDFOptions.pageSize':
+          | 'A3'
+          | 'A4'
+          | 'A5'
+          | 'Legal'
+          | 'Letter'
+          | 'Tabloid'
+          | 'Custom'
         'saveToPDFOptions.customPageSize': string
         'saveToPDFOptions.landscape': false | true
         'saveToPDFOptions.printBackground': boolean
         'saveToPDFOptions.printSelectionOnly': boolean
-        'saveToPDFOptions': {
+        saveToPDFOptions: {
           marginsType: 0 | 1 | 2
-          pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
+          pageSize:
+            | 'A3'
+            | 'A4'
+            | 'A5'
+            | 'Legal'
+            | 'Letter'
+            | 'Tabloid'
+            | 'Custom'
           customPageSize: string
           landscape: false | true
           printBackground: boolean
@@ -687,7 +755,7 @@ declare module 'atom' {
       'syncConfig.syncPreviewOnChange': boolean
       'syncConfig.syncPreviewOnEditorScroll': boolean
       'syncConfig.syncEditorOnPreviewScroll': boolean
-      'syncConfig': {
+      syncConfig: {
         syncPreviewOnChange: boolean
         syncPreviewOnEditorScroll: boolean
         syncEditorOnPreviewScroll: boolean
@@ -697,7 +765,7 @@ declare module 'atom' {
       'mathConfig.numberEquations': boolean
       'mathConfig.texExtensions': string[]
       'mathConfig.undefinedFamily': string
-      'mathConfig': {
+      mathConfig: {
         enableLatexRenderingByDefault: boolean
         latexRenderer: 'HTML-CSS' | 'SVG'
         numberEquations: boolean
@@ -713,7 +781,7 @@ declare module 'atom' {
       'markdownItConfig.useCriticMarkup': boolean
       'markdownItConfig.inlineMathSeparators': string[]
       'markdownItConfig.blockMathSeparators': string[]
-      'markdownItConfig': {
+      markdownItConfig: {
         breakOnSingleNewline: boolean
         useLazyHeaders: boolean
         useCheckBoxes: boolean
@@ -735,7 +803,7 @@ declare module 'atom' {
       'pandocConfig.pandocBIBFileFallback': string
       'pandocConfig.pandocCSLFile': string
       'pandocConfig.pandocCSLFileFallback': string
-      'pandocConfig': {
+      pandocConfig: {
         useNativePandocCodeStyles: boolean
         pandocPath: string
         pandocFilters: string[]

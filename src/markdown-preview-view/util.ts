@@ -46,7 +46,7 @@ export function getUserStyles() {
   return [el.innerText]
 }
 
-function getSyntaxTheme(themeName: string): string[] {
+function getSyntaxTheme(themeName: string): Iterable<string> {
   if (themeName !== '') {
     const themes = atom.themes.getLoadedThemes()
     if (themes) {
@@ -66,11 +66,35 @@ function getSyntaxTheme(themeName: string): string[] {
   return processEditorStyles(getStyles('atom-text-editor'))
 }
 
+function* getActivePackageStyles(
+  packageName: string,
+): IterableIterator<string> {
+  const pack = atom.packages.getActivePackage(packageName)
+  if (!pack) return undefined
+  const stylesheets = pack.getStylesheetPaths()
+  for (const ss of stylesheets) {
+    const element = atom.styles.styleElementsBySourcePath[ss]
+    if (element) yield element.innerText
+  }
+}
+
 export function getPreviewStyles(display: boolean): string[] {
   if (getStylesOverride) return getStylesOverride(display)
   const styles = []
   styles.push(...processEditorStyles(getUserStyles()))
   styles.push(...getSyntaxTheme(atomConfig().syntaxThemeName))
+  if (display) {
+    const packList = atomConfig().importPackageStyles
+    for (const pack of packList) {
+      styles.push(...processEditorStyles(getActivePackageStyles(pack)))
+    }
+    // explicit compatibility with the fonts package
+    if (packList.includes('fonts')) {
+      const fontsVar =
+        atom.styles.styleElementsBySourcePath['fonts-package-editorfont']
+      if (fontsVar) styles.push(...processEditorStyles([fontsVar.innerText]))
+    }
+  }
 
   styles.push(getClientStyle('generic'))
   if (display) styles.push(getClientStyle('display'))
@@ -82,10 +106,10 @@ export function getPreviewStyles(display: boolean): string[] {
   return styles
 }
 
-function processEditorStyles(styles: string[]) {
-  return styles.map((x) =>
-    x.replace(/\batom-text-editor\b/g, 'pre.editor-colors'),
-  )
+function* processEditorStyles(styles: Iterable<string>) {
+  for (const style of styles) {
+    yield style.replace(/\batom-text-editor\b/g, 'pre.editor-colors')
+  }
 }
 
 function getMarkdownPreviewCSS() {
