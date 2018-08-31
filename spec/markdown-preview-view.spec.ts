@@ -770,38 +770,6 @@ var x = 0;
 `)
     }))
 
-  describe('when maths rendering is enabled by default', function() {
-    xit('notifies the user MathJax is loading when first preview is opened', async function() {
-      preview.destroy()
-
-      await atom.packages.activatePackage('notifications')
-
-      const editor = await atom.workspace.open(filePath)
-
-      atom.config.set(
-        'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
-        true,
-      )
-      atom.commands.dispatch(
-        atom.views.getView(editor),
-        'markdown-preview-plus:toggle',
-      )
-
-      preview = await expectPreviewInSplitPane()
-
-      const workspaceElement = atom.views.getView(atom.workspace)
-
-      await waitsFor.msg('notification', () =>
-        workspaceElement.querySelector('atom-notification'),
-      )
-
-      const notification = workspaceElement.querySelector(
-        'atom-notification.info',
-      )
-      expect(notification).to.exist
-    })
-  })
-
   describe('checkbox lists', function() {
     it('renders checkbox lists', async function() {
       const checkBoxes = Array.from(
