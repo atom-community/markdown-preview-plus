@@ -46,6 +46,26 @@ export async function activate() {
     atom.commands.add('.markdown-preview-plus', {
       'markdown-preview-plus:toggle': close,
     }),
+    atom.commands.add('atom-workspace', {
+      'markdown-preview-plus:select-syntax-theme': async () => {
+        try {
+          const { selectListView } = await import('./select-list-view')
+          const themeNames = atom.themes.getLoadedThemeNames()
+          if (themeNames === undefined) return
+          const theme = await selectListView(
+            themeNames.filter((x) => x.match(/-syntax$/)),
+          )
+          if (theme === undefined) return
+          atom.config.set('markdown-preview-plus.syntaxThemeName', theme)
+        } catch (e) {
+          const err = e as Error
+          atom.notifications.addFatalError(err.name, {
+            detail: err.message,
+            stack: err.stack,
+          })
+        }
+      },
+    }),
     atom.commands.add('atom-text-editor', {
       'markdown-preview-plus:toggle-render-latex': (e) => {
         const editor = e.currentTarget.getModel()

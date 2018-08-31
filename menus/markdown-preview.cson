@@ -9,6 +9,9 @@
       }, {
         'label': 'Toggle LaTeX Rendering'
         'command': 'markdown-preview-plus:toggle-render-latex'
+      }, {
+        'label': 'Select preview syntax theme'
+        'command': 'markdown-preview-plus:select-syntax-theme'
       }
     ]
   ]
@@ -22,4 +25,5 @@
     {label: 'Print\u2026', command: 'markdown-preview-plus:print'}
     {label: 'Open in new window', command: 'markdown-preview-plus:new-window'}
     {label: 'Open Dev Tools', command: 'markdown-preview-plus:open-dev-tools'}
+    {label: 'Change syntax theme...', command: 'markdown-preview-plus:select-syntax-theme'}
   ]
