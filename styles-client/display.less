@@ -1,0 +1,25 @@
+.flash {
+  -webkit-animation: flash 1s ease-out;
+  -webkit-animation-iteration-count: 1;
+  outline: 1px solid rgba(255, 0, 0, 0);
+}
+
+@-webkit-keyframes flash {
+  0% {
+    outline-color: rgba(255, 0, 0, 0);
+  }
+  50% {
+    outline-color: rgba(255, 0, 0, 1);
+  }
+  100% {
+    outline-color: rgba(255, 0, 0, 0);
+  }
+}
+
+@media print {
+  pre.editor-colors {
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: break-word !important;
+  }
+}

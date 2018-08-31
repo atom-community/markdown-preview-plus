@@ -5,11 +5,8 @@
 
 @import (reference) '../assets/primer-markdown';
 
-body.markdown-preview-plus-view[data-use-github-style] {
+body {
   overflow: initial !important;
-}
-
-markdown-preview-plus-view[data-use-github-style] {
   // Includes GitHub.com styles from `../assets/primer-markdown.less`.
   // Source: https://github.com/primer/markdown/blob/master/components/markdown.scss
   .markdown-body();
@@ -20,26 +17,12 @@ markdown-preview-plus-view[data-use-github-style] {
   font-size: 16px;
   color: #333;
   background-color: #fff;
+}
 
-  span.critic.comment > span {
-    background-color: #fff;
-  }
+span.critic.comment > span {
+  background-color: #fff;
+}
 
-  a {
-    color: #337ab7;
-  }
-
-  pre,
-  code {
-    color: inherit;
-  }
-
-  pre,
-  atom-text-editor {
-    padding: 0.8em 1em;
-    margin-bottom: 1em;
-    font-size: 0.85em;
-    border-radius: 4px;
-    overflow: auto;
-  }
+a {
+  color: #337ab7;
 }

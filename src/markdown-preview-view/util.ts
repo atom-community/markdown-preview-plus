@@ -14,14 +14,13 @@ export function editorForId(editorId: number): TextEditor | undefined {
 }
 
 // this weirdness allows overriding in tests
-let getStylesOverride: typeof getStyles | undefined = undefined
+let getStylesOverride: typeof getPreviewStyles | undefined = undefined
 
-export function __setGetStylesOverride(f?: typeof getStyles) {
+export function __setGetStylesOverride(f?: typeof getPreviewStyles) {
   getStylesOverride = f
 }
 
-export function getStyles(context: string): string[] {
-  if (getStylesOverride) return getStylesOverride(context)
+function getStyles(context: string): string[] {
   const textEditorStyles = document.createElement(
     'atom-styles',
   ) as HTMLElement & { initialize(styles: StyleManager): void }
@@ -34,20 +33,52 @@ export function getStyles(context: string): string[] {
   )
 }
 
+function getClientStyle(file: string): string {
+  return atom.themes.loadStylesheet(
+    path.join(__dirname, '..', '..', 'styles-client', `${file}.less`),
+  )
+}
+
+export function getUserStyles() {
+  const el =
+    atom.styles.styleElementsBySourcePath[atom.styles.getUserStyleSheetPath()]
+  if (!el) return []
+  return [el.innerText]
+}
+
+export function getPreviewStyles(display: boolean): string[] {
+  if (getStylesOverride) return getStylesOverride(display)
+  const styles = []
+  styles.push(...processEditorStyles(getUserStyles()))
+  styles.push(...processEditorStyles(getStyles('atom-text-editor')))
+
+  styles.push(getClientStyle('generic'))
+  if (display) styles.push(getClientStyle('display'))
+  if (atomConfig().useGitHubStyle) {
+    styles.push(getClientStyle('github'))
+    if (atomConfig().useGitHubStyleCodeBlocks) {
+      styles.push(getClientStyle('github-code'))
+    }
+    if (atomConfig().darkenGitHubStyleCodeBlocks) {
+      styles.push(getClientStyle('github-code-darken'))
+    }
+  } else {
+    styles.push(getClientStyle('default'))
+  }
+  return styles
+}
+
+function processEditorStyles(styles: string[]) {
+  return styles.map((x) =>
+    x.replace(/\batom-text-editor\b/g, 'pre.editor-colors'),
+  )
+}
+
 function getMarkdownPreviewCSS() {
-  const markdowPreviewRules = ['body { padding: 0; margin: 0; }']
   const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
-  return markdowPreviewRules
-    .concat(getStyles('markdown-preview-plus'))
-    .concat(getStyles('atom-text-editor'))
+  return getPreviewStyles(false)
     .join('\n')
-    .replace(/\batom-text-editor\b/g, 'pre.editor-colors')
-    .replace(/\bmarkdown-preview-plus-view\b/g, '.markdown-preview-plus-view')
-    .replace(
-      /\b\.\.markdown-preview-plus-view\b/g,
-      '.markdown-preview-plus-view',
-    )
     .replace(cssUrlRefExp, function(
       _match,
       assetsName: string,
@@ -161,10 +192,8 @@ export function mkHtml(
   title: string,
   html: HTMLDocument,
   renderLaTeX: boolean,
-  useGithubStyle: boolean,
   texConfig: MathJax.TeXInputProcessor,
 ) {
-  const githubStyle = useGithubStyle ? ' data-use-github-style' : ''
   let maybeMathJaxScript: string
   if (renderLaTeX) {
     maybeMathJaxScript = mathJaxScript(texConfig)
@@ -180,7 +209,7 @@ export function mkHtml(
     <style>${getMarkdownPreviewCSS()}</style>
 ${html.head.innerHTML}
   </head>
-  <body class="markdown-preview-plus-view"${githubStyle}>
+  <body>
     ${html.body.innerHTML}
   </body>
 </html>

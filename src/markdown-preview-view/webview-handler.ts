@@ -5,6 +5,7 @@ import fileUriToPath = require('file-uri-to-path')
 
 import { handlePromise, atomConfig } from '../util'
 import { RequestReplyMap, ChannelMap } from '../../src-client/ipc'
+import { getPreviewStyles } from './util'
 
 export type ReplyCallbackStruct<
   T extends keyof RequestReplyMap = keyof RequestReplyMap
@@ -127,10 +128,6 @@ export class WebviewHandler {
     this._element.send<'set-source-map'>('set-source-map', { map })
   }
 
-  public setUseGitHubStyle(value: boolean) {
-    this._element.send<'use-github-style'>('use-github-style', { value })
-  }
-
   public setBasePath(path?: string) {
     this._element.send<'set-base-path'>('set-base-path', { path })
   }
@@ -248,6 +245,10 @@ export class WebviewHandler {
     return this.runRequest('get-selection', {})
   }
 
+  public updateStyles() {
+    this._element.send<'style'>('style', { styles: getPreviewStyles(true) })
+  }
+
   protected async runRequest<T extends keyof RequestReplyMap>(
     request: T,
     args: { [K in Exclude<keyof ChannelMap[T], 'id'>]: ChannelMap[T][K] },
@@ -278,14 +279,6 @@ export class WebviewHandler {
 
   private async finishSaveToPDF(): Promise<void> {
     return this.runRequest('set-width', { width: undefined })
-  }
-
-  private updateStyles() {
-    const styles: string[] = []
-    for (const se of atom.styles.getStyleElements()) {
-      styles.push(se.innerHTML)
-    }
-    this._element.send<'style'>('style', { styles })
   }
 }
 

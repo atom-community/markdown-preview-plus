@@ -44,9 +44,6 @@ export async function copyHtml(
 ): Promise<void> {
   const view = new WebviewHandler(async () => {
     view.init(atom.getConfigDirPath(), atomConfig().mathConfig, 'SVG')
-    view.setUseGitHubStyle(
-      atom.config.get('markdown-preview-plus.useGitHubStyle'),
-    )
     view.setBasePath(filePath)
 
     const domDocument = await renderer.render({

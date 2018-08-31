@@ -47,6 +47,22 @@ export const config: IConfig = {
     default: false,
     order: 2,
   },
+  useGitHubStyleCodeBlocks: {
+    title: 'Force GitHub.com style for code blocks',
+    description:
+      'Will force light background on code blocks when using GitHub style',
+    type: 'boolean',
+    default: false,
+    order: 2.5,
+  },
+  darkenGitHubStyleCodeBlocks: {
+    title: 'Also darken highligthing theme',
+    description:
+      'Will darken colours used for highlighting in code blocks when using GitHub style',
+    type: 'boolean',
+    default: false,
+    order: 2.6,
+  },
   renderer: {
     type: 'string',
     default: 'markdown-it',
@@ -502,6 +518,8 @@ declare module 'atom' {
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.useGitHubStyle': boolean
+    'markdown-preview-plus.useGitHubStyleCodeBlocks': boolean
+    'markdown-preview-plus.darkenGitHubStyleCodeBlocks': boolean
     'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.richClipboard': boolean
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
@@ -649,6 +667,8 @@ declare module 'atom' {
       grammars: string[]
       extensions: string[]
       useGitHubStyle: boolean
+      useGitHubStyleCodeBlocks: boolean
+      darkenGitHubStyleCodeBlocks: boolean
       renderer: 'markdown-it' | 'pandoc'
       richClipboard: boolean
       'previewConfig.liveUpdate': boolean
