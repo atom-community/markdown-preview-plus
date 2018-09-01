@@ -1,4 +1,4 @@
-import { TextEditor, StyleManager } from 'atom'
+import { TextEditor } from 'atom'
 import * as path from 'path'
 import * as fs from 'fs'
 import { Token } from 'markdown-it'
@@ -20,17 +20,14 @@ export function __setGetStylesOverride(f?: typeof getPreviewStyles) {
   getStylesOverride = f
 }
 
-function getStyles(context: string): string[] {
-  const textEditorStyles = document.createElement(
-    'atom-styles',
-  ) as HTMLElement & { initialize(styles: StyleManager): void }
-  textEditorStyles.initialize(atom.styles)
-  textEditorStyles.setAttribute('context', context)
+function* getStyles(context?: string | null): IterableIterator<string> {
+  const elements = atom.styles.getStyleElements()
 
-  // Extract style elements content
-  return Array.from(textEditorStyles.childNodes).map(
-    (styleElement) => (styleElement as HTMLStyleElement).innerText,
-  )
+  for (const element of elements) {
+    if (context === undefined || element.getAttribute('context') === context) {
+      yield element.innerText
+    }
+  }
 }
 
 function getClientStyle(file: string): string {
@@ -81,18 +78,21 @@ function* getActivePackageStyles(
 export function getPreviewStyles(display: boolean): string[] {
   if (getStylesOverride) return getStylesOverride(display)
   const styles = []
-  styles.push(...processEditorStyles(getUserStyles()))
-  styles.push(...getSyntaxTheme(atomConfig().syntaxThemeName))
   if (display) {
     const packList = atomConfig().importPackageStyles
-    for (const pack of packList) {
-      styles.push(...processEditorStyles(getActivePackageStyles(pack)))
-    }
-    // explicit compatibility with the fonts package
-    if (packList.includes('fonts')) {
-      const fontsVar =
-        atom.styles.styleElementsBySourcePath['fonts-package-editorfont']
-      if (fontsVar) styles.push(...processEditorStyles([fontsVar.innerText]))
+    if (packList.includes('*')) {
+      styles.push(...processEditorStyles(getStyles()))
+      styles.push(getClientStyle('patch'))
+    } else {
+      for (const pack of packList) {
+        styles.push(...processEditorStyles(getActivePackageStyles(pack)))
+      }
+      // explicit compatibility with the fonts package
+      if (packList.includes('fonts')) {
+        const fontsVar =
+          atom.styles.styleElementsBySourcePath['fonts-package-editorfont']
+        if (fontsVar) styles.push(...processEditorStyles([fontsVar.innerText]))
+      }
     }
   }
 
@@ -103,6 +103,8 @@ export function getPreviewStyles(display: boolean): string[] {
   } else {
     styles.push(getClientStyle('default'))
   }
+  styles.push(...getSyntaxTheme(atomConfig().syntaxThemeName))
+  styles.push(...processEditorStyles(getUserStyles()))
   return styles
 }
 

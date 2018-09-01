@@ -59,7 +59,8 @@ export const config: IConfig = {
     title: 'Packages that can affect preview rendering',
     description:
       'A list of Atom package names that can affect preview style, comma-separated. ' +
-      'This does not affect exported HTML',
+      'A special value of `*` (star) will import all Atom styles into the preview, ' +
+      'use with care. This does not affect exported HTML',
     type: 'array',
     items: {
       type: 'string',
