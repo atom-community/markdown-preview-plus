@@ -1,3 +1,54 @@
+## 3.6.0
+
+See also: Pull request [\#426](https://github.com/atom-community/markdown-preview-plus/pull/426)
+
+### Changes
+
+-   Preview and HTML export layouts and styles are unified as much as
+    possible. Exported HTML should look and feel exactly as the preview
+    does (within reason, also see below under Caveats)
+-   Got rid of `.markdown-preview-plus` class on `body` in exported HTML
+-   Got rid of `data-use-github-style` attribute, now style switching is
+    done via loading different stylesheets
+-   Styles that are only relevant for the preview are now only imported
+    in the preview sandbox, not auto-loaded by Atom
+-   Only a limited subset of all styles loaded in Atom is passed through
+    to the preview sandbox. See below (under Caveats) for details.
+
+### Fixes
+
+-   Code blocks in PDF now break words if necessary for line wrapping
+-   Code block style is the same in preview and exported HTML
+
+### New features
+
+-   New config option `markdown-preview-plus.syntaxThemeName` (called
+    'Syntax theme for code blocks' in settings GUI), which allows
+    specifying a highlighting theme different from the currently active
+    Atom syntax theme
+-   `markdown-preview-plus:select-syntax-theme` command which presents a
+    menu for setting said config option on the fly
+-   New config option `markdown-preview-plus.importPackageStyles`
+    (called 'Packages that can affect preview rendering' in settings
+    GUI), which allows to explicitly override preview style isolation on
+    a per-package basis. See below.
+
+### Caveats
+
+-   Styles not in `atom-text-editor` context and not in user stylesheet
+    are not passed through to preview by default. This might lead to
+    unexpected interactions (or, more likely, lack thereof) with other
+    packages. It's possible to explicitly whitelist a package in
+    settings. Examples of packages that might affect preview style
+    include: `fonts` package, `language-babel` package,
+    `atom-typescript` package, etc. The `fonts` package is whitelisted
+    by default. A special value of `*` will pass all
+    Atom workspace styles through to the preview and apply some tweaks
+    to keep it presentable -- use this at your own risk, however, it's
+    impossible to offer any guarantees. Note that HTML export is never
+    affected by third-party packages.
+
+
 ## 3.5.0
 
 ### Compatibility considerations
