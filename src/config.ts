@@ -47,6 +47,27 @@ export const config: IConfig = {
     default: false,
     order: 2,
   },
+  syntaxThemeName: {
+    title: 'Syntax theme for code blocks',
+    description:
+      'If not empty, will try to use the given syntax theme for code blocks in preview',
+    type: 'string',
+    default: '',
+    order: 2.5,
+  },
+  importPackageStyles: {
+    title: 'Packages that can affect preview rendering',
+    description:
+      'A list of Atom package names that can affect preview style, comma-separated. ' +
+      'A special value of `*` (star) will import all Atom styles into the preview, ' +
+      'use with care. This does not affect exported HTML',
+    type: 'array',
+    items: {
+      type: 'string',
+    },
+    default: ['fonts'],
+    order: 2.6,
+  },
   renderer: {
     type: 'string',
     default: 'markdown-it',
@@ -502,6 +523,8 @@ declare module 'atom' {
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.useGitHubStyle': boolean
+    'markdown-preview-plus.syntaxThemeName': string
+    'markdown-preview-plus.importPackageStyles': string[]
     'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.richClipboard': boolean
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
@@ -649,6 +672,8 @@ declare module 'atom' {
       grammars: string[]
       extensions: string[]
       useGitHubStyle: boolean
+      syntaxThemeName: string
+      importPackageStyles: string[]
       renderer: 'markdown-it' | 'pandoc'
       richClipboard: boolean
       'previewConfig.liveUpdate': boolean

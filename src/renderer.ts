@@ -92,11 +92,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
       atomConfig().pandocConfig.useNativePandocCodeStyles
     )
   ) {
-    await highlightCodeBlocks(
-      doc,
-      defaultCodeLanguage,
-      options.mode !== 'normal',
-    )
+    await highlightCodeBlocks(doc, defaultCodeLanguage)
   }
   if (error) {
     const errd = doc.createElement('div')
@@ -227,7 +223,6 @@ function resolveImagePaths(
 async function highlightCodeBlocks(
   domFragment: Document,
   defaultLanguage: string,
-  copyHTML: boolean,
 ) {
   const fontFamily = atom.config.get('editor.fontFamily')
   if (fontFamily) {
@@ -269,16 +264,9 @@ async function highlightCodeBlocks(
         ed.setText(codeBlock.textContent!.replace(/\r?\n$/, ''))
         await editorTokenized(ed)
         const html = Array.from(el.querySelectorAll('.line:not(.dummy)'))
-        if (copyHTML) {
-          preElement.classList.add('editor-colors')
-          preElement.innerHTML = html.map((x) => x.innerHTML).join('\n')
-          if (fenceName) preElement.classList.add(`lang-${fenceName}`)
-        } else {
-          const cls = fenceName ? ` class="lang-${fenceName}"` : ''
-          preElement.outerHTML = `<atom-text-editor${cls}>${html
-            .map((x) => `<div class="line">${x.innerHTML}</div>`)
-            .join('\n')}</atom-text-editor>`
-        }
+        preElement.classList.add('editor-colors')
+        preElement.innerHTML = html.map((x) => x.innerHTML).join('\n')
+        if (fenceName) preElement.classList.add(`lang-${fenceName}`)
       } finally {
         el.remove()
       }

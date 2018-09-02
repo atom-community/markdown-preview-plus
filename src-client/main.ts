@@ -131,16 +131,6 @@ ipcRenderer.on<'sync'>('sync', (_event, { line, flash }) => {
   }
 })
 
-ipcRenderer.on<'use-github-style'>('use-github-style', (_event, { value }) => {
-  const elem = document.querySelector('markdown-preview-plus-view')
-  if (!elem) throw new Error(`Can't find MPP-view`)
-  if (value) {
-    elem.setAttribute('data-use-github-style', '')
-  } else {
-    elem.removeAttribute('data-use-github-style')
-  }
-})
-
 let updatePreview: UpdatePreview | undefined
 
 ipcRenderer.on<'update-preview'>(

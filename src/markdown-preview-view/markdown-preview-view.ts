@@ -42,10 +42,6 @@ export abstract class MarkdownPreviewView {
     this.renderPromise = new Promise((resolve) => {
       this.handler = new WebviewHandler(() => {
         this.handler.init(atom.getConfigDirPath(), atomConfig().mathConfig)
-        // TODO: observe
-        this.handler.setUseGitHubStyle(
-          atom.config.get('markdown-preview-plus.useGitHubStyle'),
-        )
         this.handler.setBasePath(this.getPath())
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())
@@ -138,7 +134,6 @@ export abstract class MarkdownPreviewView {
             name,
             html,
             this.renderLaTeX,
-            atom.config.get('markdown-preview-plus.useGitHubStyle'),
             await this.handler.getTeXConfig(),
           )
 
@@ -259,10 +254,16 @@ export abstract class MarkdownPreviewView {
         'markdown-preview-plus.renderer',
         this.changeHandler,
       ),
+      atom.config.onDidChange('markdown-preview-plus.useGitHubStyle', () => {
+        this.handler.updateStyles()
+      }),
+      atom.config.onDidChange('markdown-preview-plus.syntaxThemeName', () => {
+        this.handler.updateStyles()
+      }),
       atom.config.onDidChange(
-        'markdown-preview-plus.useGitHubStyle',
-        ({ newValue }) => {
-          this.handler.setUseGitHubStyle(newValue)
+        'markdown-preview-plus.importPackageStyles',
+        () => {
+          this.handler.updateStyles()
         },
       ),
     )

@@ -1,4 +1,4 @@
-import { TextEditor, StyleManager } from 'atom'
+import { TextEditor } from 'atom'
 import * as path from 'path'
 import * as fs from 'fs'
 import { Token } from 'markdown-it'
@@ -14,40 +14,111 @@ export function editorForId(editorId: number): TextEditor | undefined {
 }
 
 // this weirdness allows overriding in tests
-let getStylesOverride: typeof getStyles | undefined = undefined
+let getStylesOverride: typeof getPreviewStyles | undefined = undefined
 
-export function __setGetStylesOverride(f?: typeof getStyles) {
+export function __setGetStylesOverride(f?: typeof getPreviewStyles) {
   getStylesOverride = f
 }
 
-export function getStyles(context: string): string[] {
-  if (getStylesOverride) return getStylesOverride(context)
-  const textEditorStyles = document.createElement(
-    'atom-styles',
-  ) as HTMLElement & { initialize(styles: StyleManager): void }
-  textEditorStyles.initialize(atom.styles)
-  textEditorStyles.setAttribute('context', context)
+function* getStyles(context?: string | null): IterableIterator<string> {
+  const elements = atom.styles.getStyleElements()
 
-  // Extract style elements content
-  return Array.from(textEditorStyles.childNodes).map(
-    (styleElement) => (styleElement as HTMLStyleElement).innerText,
+  for (const element of elements) {
+    if (context === undefined || element.getAttribute('context') === context) {
+      yield element.innerText
+    }
+  }
+}
+
+function getClientStyle(file: string): string {
+  return atom.themes.loadStylesheet(
+    path.join(__dirname, '..', '..', 'styles-client', `${file}.less`),
   )
 }
 
+export function getUserStyles() {
+  const el =
+    atom.styles.styleElementsBySourcePath[atom.styles.getUserStyleSheetPath()]
+  if (!el) return []
+  return [el.innerText]
+}
+
+function getSyntaxTheme(themeName: string): Iterable<string> {
+  if (themeName !== '') {
+    const themes = atom.themes.getLoadedThemes()
+    if (themes) {
+      const [theme] = themes.filter((x) => x.name === themeName)
+      if (theme) {
+        const stshts = theme
+          .getStylesheetPaths()
+          .map((p) => atom.themes.loadStylesheet(p))
+        return processEditorStyles(stshts)
+      }
+    }
+    atom.notifications.addWarning('Failed to load syntax theme', {
+      detail: `Markdown-preview-plus couldn't find '${themeName}'`,
+    })
+  }
+  // default
+  return processEditorStyles(getStyles('atom-text-editor'))
+}
+
+function* getActivePackageStyles(
+  packageName: string,
+): IterableIterator<string> {
+  const pack = atom.packages.getActivePackage(packageName)
+  if (!pack) return undefined
+  const stylesheets = pack.getStylesheetPaths()
+  for (const ss of stylesheets) {
+    const element = atom.styles.styleElementsBySourcePath[ss]
+    if (element) yield element.innerText
+  }
+}
+
+export function getPreviewStyles(display: boolean): string[] {
+  if (getStylesOverride) return getStylesOverride(display)
+  const styles = []
+  if (display) {
+    const packList = atomConfig().importPackageStyles
+    if (packList.includes('*')) {
+      styles.push(...processEditorStyles(getStyles()))
+      styles.push(getClientStyle('patch'))
+    } else {
+      for (const pack of packList) {
+        styles.push(...processEditorStyles(getActivePackageStyles(pack)))
+      }
+      // explicit compatibility with the fonts package
+      if (packList.includes('fonts')) {
+        const fontsVar =
+          atom.styles.styleElementsBySourcePath['fonts-package-editorfont']
+        if (fontsVar) styles.push(...processEditorStyles([fontsVar.innerText]))
+      }
+    }
+  }
+
+  styles.push(getClientStyle('generic'))
+  if (display) styles.push(getClientStyle('display'))
+  if (atomConfig().useGitHubStyle) {
+    styles.push(getClientStyle('github'))
+  } else {
+    styles.push(getClientStyle('default'))
+  }
+  styles.push(...getSyntaxTheme(atomConfig().syntaxThemeName))
+  styles.push(...processEditorStyles(getUserStyles()))
+  return styles
+}
+
+function* processEditorStyles(styles: Iterable<string>) {
+  for (const style of styles) {
+    yield style.replace(/\batom-text-editor\b/g, 'pre.editor-colors')
+  }
+}
+
 function getMarkdownPreviewCSS() {
-  const markdowPreviewRules = ['body { padding: 0; margin: 0; }']
   const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
-  return markdowPreviewRules
-    .concat(getStyles('markdown-preview-plus'))
-    .concat(getStyles('atom-text-editor'))
+  return getPreviewStyles(false)
     .join('\n')
-    .replace(/\batom-text-editor\b/g, 'pre.editor-colors')
-    .replace(/\bmarkdown-preview-plus-view\b/g, '.markdown-preview-plus-view')
-    .replace(
-      /\b\.\.markdown-preview-plus-view\b/g,
-      '.markdown-preview-plus-view',
-    )
     .replace(cssUrlRefExp, function(
       _match,
       assetsName: string,
@@ -161,10 +232,8 @@ export function mkHtml(
   title: string,
   html: HTMLDocument,
   renderLaTeX: boolean,
-  useGithubStyle: boolean,
   texConfig: MathJax.TeXInputProcessor,
 ) {
-  const githubStyle = useGithubStyle ? ' data-use-github-style' : ''
   let maybeMathJaxScript: string
   if (renderLaTeX) {
     maybeMathJaxScript = mathJaxScript(texConfig)
@@ -180,7 +249,7 @@ export function mkHtml(
     <style>${getMarkdownPreviewCSS()}</style>
 ${html.head.innerHTML}
   </head>
-  <body class="markdown-preview-plus-view"${githubStyle}>
+  <body>
     ${html.body.innerHTML}
   </body>
 </html>

@@ -18,6 +18,7 @@ import {
   previewText,
   previewFragment,
   activateMe,
+  previewHTML,
 } from './util'
 import { TextEditorElement, TextEditor } from 'atom'
 import { PlaceholderView } from '../lib/placeholder-view'
@@ -168,13 +169,13 @@ describe('MarkdownPreviewView', function() {
     })
   })
 
-  describe('code block conversion to atom-text-editor tags', function() {
+  describe('code block conversion to pre tags', function() {
     it('removes a trailing newline but preserves remaining leading and trailing whitespace', async function() {
       const newFilePath = path.join(tempPath, 'subdir/trim-nl.md')
       const newPreview = await createMarkdownPreviewViewFile(newFilePath)
 
       const editor = (await previewFragment(newPreview)).querySelector(
-        'atom-text-editor',
+        'pre.editor-colors',
       ) as TextEditorElement
       expect(editor).to.exist
       expect(editor.textContent).to.equal(
@@ -185,11 +186,11 @@ describe('MarkdownPreviewView', function() {
     })
 
     describe("when the code block's fence name has a matching grammar", () =>
-      it('assigns the grammar on the atom-text-editor', async function() {
+      it('assigns the grammar on the element', async function() {
         const rubyEditor = await waitsFor(
           async () =>
             (await previewFragment(preview)).querySelector(
-              'atom-text-editor.lang-ruby',
+              'pre.editor-colors.lang-ruby',
             ) as TextEditorElement,
         )
         expect(rubyEditor).to.exist
@@ -200,7 +201,7 @@ end`)
 
         // nested in a list item
         const jsEditor = (await previewFragment(preview)).querySelector(
-          'atom-text-editor.lang-javascript',
+          'pre.editor-colors.lang-javascript',
         ) as TextEditorElement
         expect(jsEditor).to.exist
         expect(jsEditor.textContent).to.equal(`\
@@ -212,7 +213,7 @@ if a === 3 {
     describe("when the code block's fence name doesn't have a matching grammar", function() {
       it('does not assign a specific grammar', async function() {
         const plainEditor = (await previewFragment(preview)).querySelector(
-          'atom-text-editor.lang-text',
+          'pre.editor-colors.lang-text',
         ) as TextEditorElement
         expect(plainEditor).to.exist
         expect(plainEditor.textContent).to.equal(`\
@@ -242,7 +243,7 @@ var x = 0;
       const jsEditor = await waitsFor(
         async () =>
           (await previewFragment(pv)).querySelector(
-            'atom-text-editor',
+            'pre.editor-colors',
           ) as TextEditorElement,
       )
       expect(jsEditor).to.exist
@@ -655,13 +656,10 @@ var x = 0;
       const expectedOutput = fs.readFileSync(expectedFilePath).toString()
       const expectedOutputArr = expectedOutput.split('\n')
 
-      const markdownPreviewStyles = [
-        'markdown-preview-plus-view { color: orange; }',
-      ]
-
-      const atomTextEditorStyles = [
-        'atom-text-editor .line { color: brown; }\natom-text-editor .number { color: cyan; }',
-        'atom-text-editor .hr { background: url(atom://markdown-preview-plus/assets/hr.png); }',
+      const styles = [
+        'body { color: orange; }',
+        'pre.editor-colors .line { color: brown; }\npre.editor-colors .number { color: cyan; }',
+        'pre.editor-colors .hr { background: url(atom://markdown-preview-plus/assets/hr.png); }',
       ]
 
       expect(fs.existsSync(outputPath)).to.be.false
@@ -686,26 +684,25 @@ var x = 0;
             return outputPath
           }),
       )
-      previewUtil.__setGetStylesOverride((context: string) => {
-        if (context === 'markdown-preview-plus') return markdownPreviewStyles
-        else if (context === 'atom-text-editor') return atomTextEditorStyles
-        else throw new Error(`Unknown style context: ${context}`)
-      })
-      atom.commands.dispatch(preview.element, 'core:save-as')
+      previewUtil.__setGetStylesOverride(() => styles)
+      try {
+        atom.commands.dispatch(preview.element, 'core:save-as')
 
-      await openedPromise
+        await openedPromise
 
-      expect(fs.existsSync(outputPath)).to.be.true
-      expect(fs.realpathSync(textEditor!.getPath()!)).to.equal(
-        fs.realpathSync(outputPath),
-      )
-      const savedHTML: string = textEditor!.getText()
-      savedHTML.split('\n').forEach((s, i) => {
-        expect(s).to.equal(expectedOutputArr[i])
-      })
-      expect(savedHTML).to.equal(expectedOutput)
-      stubs.forEach((stub) => stub.restore())
-      previewUtil.__setGetStylesOverride()
+        expect(fs.existsSync(outputPath)).to.be.true
+        expect(fs.realpathSync(textEditor!.getPath()!)).to.equal(
+          fs.realpathSync(outputPath),
+        )
+        const savedHTML: string = textEditor!.getText()
+        savedHTML.split('\n').forEach((s, i) => {
+          expect(s).to.equal(expectedOutputArr[i])
+        })
+        expect(savedHTML).to.equal(expectedOutput)
+        stubs.forEach((stub) => stub.restore())
+      } finally {
+        previewUtil.__setGetStylesOverride()
+      }
     })
     // fs.writeFileSync(expectedFilePath, savedHTML, encoding: 'utf8')
 
@@ -713,21 +710,34 @@ var x = 0;
       let extractedStyles: string[]
 
       const textEditorStyle = '.editor-style .extraction-test { color: blue; }'
+      const replacementTextEditorStyle =
+        'atom-text-editor .extraction-test { color: green; }'
+      const replacementTextEditorStyleExpected =
+        'pre.editor-colors .extraction-test { color: green; }'
       const unrelatedStyle = '.something else { color: red; }'
 
       beforeEach(function() {
         atom.styles.addStyleSheet(textEditorStyle, {
           context: 'atom-text-editor',
         })
+        atom.styles.addStyleSheet(replacementTextEditorStyle, {
+          context: 'atom-text-editor',
+        })
         atom.styles.addStyleSheet(unrelatedStyle, {
           context: 'unrelated-context',
         })
 
-        extractedStyles = previewUtil.getStyles('atom-text-editor')
+        extractedStyles = previewUtil.getPreviewStyles(false)
       })
 
       it('returns an array containing atom-text-editor css style strings', function() {
         expect(extractedStyles.indexOf(textEditorStyle)).to.be.greaterThan(-1)
+      })
+
+      it('replaces atom-text-editor selector with pre.editor-colors', function() {
+        expect(
+          extractedStyles.indexOf(replacementTextEditorStyleExpected),
+        ).to.be.greaterThan(-1)
       })
 
       it('does not return other styles', function() {
@@ -759,38 +769,6 @@ var x = 0;
 <p>encoding → issue</p>
 `)
     }))
-
-  describe('when maths rendering is enabled by default', function() {
-    xit('notifies the user MathJax is loading when first preview is opened', async function() {
-      preview.destroy()
-
-      await atom.packages.activatePackage('notifications')
-
-      const editor = await atom.workspace.open(filePath)
-
-      atom.config.set(
-        'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
-        true,
-      )
-      atom.commands.dispatch(
-        atom.views.getView(editor),
-        'markdown-preview-plus:toggle',
-      )
-
-      preview = await expectPreviewInSplitPane()
-
-      const workspaceElement = atom.views.getView(atom.workspace)
-
-      await waitsFor.msg('notification', () =>
-        workspaceElement.querySelector('atom-notification'),
-      )
-
-      const notification = workspaceElement.querySelector(
-        'atom-notification.info',
-      )
-      expect(notification).to.exist
-    })
-  })
 
   describe('checkbox lists', function() {
     it('renders checkbox lists', async function() {
@@ -862,9 +840,7 @@ var x = 0;
       const pv = await createMarkdownPreviewViewFile(
         path.join(tempPath, 'subdir/criticMarkup.md'),
       )
-      const html = await pv.runJS<string>(
-        `document.querySelector('markdown-preview-plus-view > div').innerHTML`,
-      )
+      const html = await previewHTML(pv)
       expect(html).to.equal(
         '<p>Don’t go around saying<del> to people that</del> the' +
           ' world owes you a living. The world owes you nothing. ' +

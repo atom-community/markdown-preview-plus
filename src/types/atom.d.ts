@@ -15,4 +15,13 @@ declare module 'atom' {
   interface TextEditorElement {
     setUpdatedSynchronously(val: boolean): void
   }
+  interface StyleManager {
+    styleElementsBySourcePath: { [key: string]: HTMLStyleElement | undefined }
+  }
+  interface ThemeManager {
+    loadStylesheet(path: string, importFallbackVariables?: boolean): string
+  }
+  interface Package {
+    getStylesheetPaths(): string[]
+  }
 }

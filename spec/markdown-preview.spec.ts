@@ -304,9 +304,9 @@ var x = y;
           'markdown to be rendered after its text changed',
           async () => {
             const ed = (await previewFragment(preview)).querySelector(
-              'atom-text-editor',
+              'pre.editor-colors',
             ) as HTMLElement
-            return ed && ed.className === 'lang-javascript'
+            return ed && ed.classList.contains('lang-javascript')
           },
         )
 
@@ -324,7 +324,7 @@ var x = y;
           'markdown to be rendered after grammar was added',
           async () => {
             const el = (await previewFragment(preview)).querySelector(
-              'atom-text-editor',
+              'pre.editor-colors',
             ) as TextEditorElement
             return el && el.dataset.grammar !== 'text plain null-grammar'
           },
@@ -688,15 +688,20 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect((await previewFragment(preview)).querySelector('atom-text-editor'))
-        .to.exist
+      expect(
+        (await previewFragment(preview)).querySelector('pre.editor-colors'),
+      ).to.exist
     }))
 
-  // WARNING If focus is given to this spec alone your `config.cson` may be
-  // overwritten. Please ensure that you have yours backed up :D
   describe('GitHub style markdown preview', function() {
     beforeEach(() =>
       atom.config.set('markdown-preview-plus.useGitHubStyle', false))
+
+    async function usesGithubStyle(preview: MarkdownPreviewView) {
+      return preview.runJS<boolean>(
+        `window.getComputedStyle(document.body).backgroundColor === 'rgb(255, 255, 255)'`,
+      )
+    }
 
     it('renders markdown using the default style when GitHub styling is disabled', async function() {
       const editor = await atom.workspace.open(
@@ -711,11 +716,7 @@ world</p>
 
       await preview.renderPromise
 
-      expect(
-        await preview.runJS<boolean>(
-          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
-        ),
-      ).to.be.false
+      expect(await usesGithubStyle(preview)).to.be.false
     })
 
     it('renders markdown using the GitHub styling when enabled', async function() {
@@ -731,11 +732,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(
-        await preview.runJS<boolean>(
-          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
-        ),
-      ).to.be.true
+      expect(await usesGithubStyle(preview)).to.be.true
     })
 
     it('updates the rendering style immediately when the configuration is changed', async function() {
@@ -749,25 +746,13 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      expect(
-        await preview.runJS<boolean>(
-          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
-        ),
-      ).not.to.be.true
+      expect(await usesGithubStyle(preview)).to.be.false
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', true)
-      expect(
-        await preview.runJS<boolean>(
-          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
-        ),
-      ).to.be.true
+      expect(await usesGithubStyle(preview)).to.be.true
 
       atom.config.set('markdown-preview-plus.useGitHubStyle', false)
-      expect(
-        await preview.runJS<boolean>(
-          `document.querySelector('markdown-preview-plus-view').hasAttribute('data-use-github-style')`,
-        ),
-      ).not.to.be.true
+      expect(await usesGithubStyle(preview)).to.be.false
     })
   })
 

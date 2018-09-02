@@ -93,13 +93,13 @@ export async function expectPreviewInSplitPane() {
 
 export async function previewText(preview: MarkdownPreviewView) {
   return preview.runJS<string>(
-    `document.querySelector('markdown-preview-plus-view > div').innerText`,
+    `document.querySelector('body > div.update-preview').innerText`,
   )
 }
 
 export async function previewHTML(preview: MarkdownPreviewView) {
   return preview.runJS<string>(
-    `document.querySelector('markdown-preview-plus-view > div').innerHTML`,
+    `document.querySelector('body > div.update-preview').innerHTML`,
   )
 }
 
