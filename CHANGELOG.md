@@ -1,3 +1,32 @@
+## 3.6.1
+
+-   Respect core editor-font setting in preview code blocks
+
+    v3.6.0 came with an unfortunate side effect of ignoring
+    `editor.fontFamily` global config parameter. This patch amends
+    that. Bear in mind it does not affect exported HTML (because
+    actually supporting arbitrary fonts is very tricky).
+
+    Also note that user stylesheet *is* included with exported
+    HTML, so if you really want to force a font (or other style),
+    you can do so by specifying it in the user stylesheet directly
+    via
+
+    ```less
+    atom-text-editor {
+      font-family: "My Awesome Font Name, Fallback Font Name";
+    }
+    ```
+
+    or, if you want to target Markdown Preview Plus code blocks
+    specifically, you can use `pre.editor-colors` selector.
+
+-   Fix Pandoc code block non-standard syntax detection
+
+    At some point, Pandoc changed how it assigns class to code
+    blocks having syntax class Pandoc doesn't recognize. This
+    change updates MPP's highlighting code to respect that.
+
 ## 3.6.0
 
 See also: Pull request [\#426](https://github.com/atom-community/markdown-preview-plus/pull/426)
