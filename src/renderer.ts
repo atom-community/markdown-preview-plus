@@ -239,7 +239,7 @@ async function highlightCodeBlocks(
         preElement.firstElementChild !== null
           ? preElement.firstElementChild
           : preElement
-      const cbClass = codeBlock.className
+      const cbClass = codeBlock.className || preElement.className
       const fenceName = cbClass
         ? cbClass.replace(/^(lang-|sourceCode )/, '')
         : defaultLanguage
