@@ -79,6 +79,14 @@ export function getPreviewStyles(display: boolean): string[] {
   if (getStylesOverride) return getStylesOverride(display)
   const styles = []
   if (display) {
+    // global editor styles
+    const globalStyles =
+      atom.styles.styleElementsBySourcePath['global-text-editor-styles']
+    if (globalStyles) {
+      styles.push(...processWorkspaceStyles([globalStyles.innerText]))
+    }
+    styles.push(getClientStyle('editor-global-font'))
+    // package styles
     const packList = atomConfig().importPackageStyles
     if (packList.includes('*')) {
       styles.push(...processEditorStyles(getStyles()))
@@ -111,6 +119,12 @@ export function getPreviewStyles(display: boolean): string[] {
 function* processEditorStyles(styles: Iterable<string>) {
   for (const style of styles) {
     yield style.replace(/\batom-text-editor\b/g, 'pre.editor-colors')
+  }
+}
+
+function* processWorkspaceStyles(styles: Iterable<string>) {
+  for (const style of styles) {
+    yield style.replace(/\batom-workspace\b/g, ':root')
   }
 }
 
