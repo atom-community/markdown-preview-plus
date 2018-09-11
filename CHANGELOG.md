@@ -1,3 +1,7 @@
+## 3.6.2
+
+-   Fix PDF export when math rendering is disabled
+
 ## 3.6.1
 
 -   Respect core editor-font setting in preview code blocks
