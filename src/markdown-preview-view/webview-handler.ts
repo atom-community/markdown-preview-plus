@@ -51,6 +51,21 @@ export class WebviewHandler {
           case 'did-scroll-preview':
             this.emitter.emit('did-scroll-preview', e.args[0])
             break
+          case 'uncaught-error': {
+            const err = e.args[0]
+            const newErr = new Error()
+            atom.notifications.addFatalError(
+              `Uncaught error ${
+                err.name
+              } in markdown-preview-plus webview client`,
+              {
+                dismissable: true,
+                stack: newErr.stack,
+                detail: `${err.message}\n\nstack:\n${err.stack}`,
+              },
+            )
+            break
+          }
           // replies
           case 'request-reply': {
             const { id, request, result } = e.args[0]

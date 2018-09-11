@@ -30,6 +30,7 @@ declare interface ChannelMap {
 declare interface ReplyMap {
   'zoom-in': void
   'zoom-out': void
+  'uncaught-error': { message: string; name: string; stack?: string }
   'did-scroll-preview': { max: number; min: number }
   // actual replies
   'request-reply': RequestReplyType[keyof RequestReplyMap]

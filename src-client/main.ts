@@ -4,6 +4,24 @@ import { processHTMLString, jaxTeXConfig, rerenderMath } from './mathjax-helper'
 import * as util from './util'
 import { getMedia } from '../src/util-common'
 
+window.addEventListener('error', (e) => {
+  const err = e.error as Error
+  ipcRenderer.sendToHost<'uncaught-error'>('uncaught-error', {
+    message: err.message,
+    name: err.name,
+    stack: err.stack,
+  })
+})
+
+window.addEventListener('unhandledrejection', (evt) => {
+  const err = (evt as any).reason as Error
+  ipcRenderer.sendToHost<'uncaught-error'>('uncaught-error', {
+    message: err.message,
+    name: err.name,
+    stack: err.stack,
+  })
+})
+
 function mkResPromise<T>(): ResolvablePromise<T> {
   let resFn: (value?: T | PromiseLike<T> | undefined) => void
   const p = new Promise<T>((resolve) => (resFn = resolve)) as ResolvablePromise<
