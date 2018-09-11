@@ -44,7 +44,8 @@ export async function processHTMLString(element: Element) {
 }
 
 export async function rerenderMath() {
-  if (MathJax) {
+  if (mjPromise !== undefined) {
+    await mjPromise
     return new Promise<void>((resolve) => {
       MathJax.Hub.Queue(['Rerender', MathJax.Hub])
       MathJax.Hub.Queue([resolve])
@@ -56,10 +57,6 @@ export async function rerenderMath() {
 
 //
 // Load MathJax environment
-//
-// @param listener method to call when the MathJax script was been
-//   loaded to the window. The method is passed no arguments.
-//
 let mjPromise: Promise<void> | undefined
 async function loadMathJax(): Promise<void> {
   if (mjPromise) return mjPromise
