@@ -1,3 +1,8 @@
+## 3.6.3
+
+-   Fix table cell spacing
+-   Report uncaught errors in client code
+
 ## 3.6.2
 
 -   Fix PDF export when math rendering is disabled
