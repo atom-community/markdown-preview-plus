@@ -1,3 +1,9 @@
+## 3.7.0
+
+-   Specs for tab width option
+-   Add tab width option for code blocks; use Atom setting by default
+-   Added "toggle math rendering" to context menu
+
 ## 3.6.3
 
 -   Fix table cell spacing
