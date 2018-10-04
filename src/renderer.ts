@@ -244,10 +244,12 @@ async function highlightCodeBlocks(
         ? cbClass.replace(/^(lang-|sourceCode )/, '')
         : defaultLanguage
 
+      const ctw = atomConfig().codeTabWidth
       const ed = new TextEditor({
         readonly: true,
         keyboardInputEnabled: false,
         showInvisibles: false,
+        tabLength: ctw === 0 ? atom.config.get('editor.tabLength') : ctw,
       })
       const el = atom.views.getView(ed)
       try {

@@ -6,6 +6,8 @@ export interface IConfig {
     description?: string
     properties?: IConfig
     default?: any
+    minimum?: any
+    maximum?: any
     enum?: any[]
     items?: {
       type: string
@@ -67,6 +69,16 @@ export const config: IConfig = {
     },
     default: ['fonts'],
     order: 2.6,
+  },
+  codeTabWidth: {
+    title: 'Tab width for code blocks',
+    description:
+      'How to render tab character in code blocks;' +
+      ' 0 means use Atom global setting',
+    type: 'integer',
+    default: 0,
+    minimum: 0,
+    order: 2.7,
   },
   renderer: {
     type: 'string',
@@ -525,6 +537,7 @@ declare module 'atom' {
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.syntaxThemeName': string
     'markdown-preview-plus.importPackageStyles': string[]
+    'markdown-preview-plus.codeTabWidth': number
     'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.richClipboard': boolean
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
@@ -674,6 +687,7 @@ declare module 'atom' {
       useGitHubStyle: boolean
       syntaxThemeName: string
       importPackageStyles: string[]
+      codeTabWidth: number
       renderer: 'markdown-it' | 'pandoc'
       richClipboard: boolean
       'previewConfig.liveUpdate': boolean
