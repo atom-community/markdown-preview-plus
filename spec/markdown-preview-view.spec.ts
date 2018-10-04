@@ -980,4 +980,67 @@ $$
       })
     })
   })
+
+  describe('configurable tab width', function() {
+    let pv: MarkdownPreviewView
+    let ed: TextEditor
+    beforeEach(async function() {
+      ed = (await atom.workspace.open()) as TextEditor
+      ed.setText('```\ndef func():\n\treturn\n```')
+      atom.grammars.assignLanguageMode(ed.getBuffer(), 'source.python')
+      pv = await createMarkdownPreviewViewEditor(ed)
+    })
+    afterEach(async function() {
+      pv.destroy()
+      const pane = atom.workspace.paneForItem(ed)
+      if (pane) {
+        await pane.destroyItem(ed, true)
+      }
+    })
+    async function checkTabWidth(expectedWidth: number) {
+      const frag = await previewFragment(pv)
+      console.log(frag)
+      const tab: HTMLSpanElement | null = frag.querySelector('.hard-tab')
+      if (!tab) throw new Error('No hard tab found')
+      expect(tab.innerText.length).to.equal(expectedWidth)
+    }
+    it('by default uses 2-space tabs', async function() {
+      await checkTabWidth(2)
+    })
+    describe('When Atom core setting changed', function() {
+      before(function() {
+        atom.config.set('editor.tabLength', 4)
+      })
+      after(function() {
+        atom.config.unset('editor.tabLength')
+      })
+      it('respects that', async function() {
+        await checkTabWidth(4)
+      })
+    })
+    describe('When MPP setting changed', function() {
+      before(function() {
+        atom.config.set('markdown-preview-plus.codeTabWidth', 8)
+      })
+      after(function() {
+        atom.config.unset('markdown-preview-plus.codeTabWidth')
+      })
+      it('respects that', async function() {
+        await checkTabWidth(8)
+      })
+    })
+    describe('When both settings changed', function() {
+      before(function() {
+        atom.config.set('editor.tabLength', 4)
+        atom.config.set('markdown-preview-plus.codeTabWidth', 8)
+      })
+      after(function() {
+        atom.config.unset('markdown-preview-plus.codeTabWidth')
+        atom.config.unset('editor.tabLength')
+      })
+      it('MPP overrides', async function() {
+        await checkTabWidth(8)
+      })
+    })
+  })
 })
