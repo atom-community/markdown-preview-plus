@@ -19,6 +19,7 @@ import {
   previewFragment,
   activateMe,
   previewHTML,
+  previewHeadHTML,
 } from './util'
 import { TextEditorElement, TextEditor } from 'atom'
 import { PlaceholderView } from '../lib/placeholder-view'
@@ -598,6 +599,82 @@ var x = 0;
         const newImageVer = getImageVersion(img1Path, imageURL)
         expect(parseInt(newImageVer, 10)).to.be.greaterThan(
           parseInt(imageVer, 10),
+        )
+      }))
+  })
+
+  describe('css modification', function() {
+    let dirPath: string
+    let css1path: string
+
+    beforeEach(function() {
+      preview.destroy()
+
+      dirPath = temp.mkdirSync('atom')
+      filePath = path.join(dirPath, 'css-modification.md')
+      css1path = path.join(dirPath, 'theme.css')
+
+      fs.writeFileSync(
+        filePath,
+        '<link rel="stylesheet" type="text/css" href="theme.css"><div class="test">Test</div>',
+      )
+      fs.writeFileSync(css1path, '.test { text-decoration: underline; }')
+    })
+
+    const getMediaVersion = function(
+      imagePath: string,
+      imageURL: string,
+    ): string {
+      expect(imageURL).to.startWith(`${imagePath}?v=`)
+      return imageURL.split('?v=')[1]
+    }
+
+    describe('when a local image is modified during a preview #notwercker', () =>
+      it('rerenders the image with a more recent timestamp query', async function() {
+        let mediaURL: string
+        let mediaVer: string
+
+        const editor = await atom.workspace.open(filePath)
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
+        preview = await expectPreviewInSplitPane()
+
+        mediaURL = (await previewFragment(preview, previewHeadHTML))
+          .querySelector('link')!
+          .getAttribute('href')!
+        expect(mediaURL).to.exist
+        mediaVer = getMediaVersion(css1path, mediaURL)
+        console.log(mediaVer)
+        expect(mediaVer).not.to.equal('deleted')
+
+        expect(
+          await preview.runJS<string>(
+            `window.getComputedStyle(document.querySelector('div.test')).textDecoration`,
+          ),
+        ).to.startWith('underline ')
+
+        fs.writeFileSync(css1path, '.test { text-decoration: none; }')
+
+        await waitsFor.msg('link href attribute to update', async function() {
+          mediaURL = (await previewFragment(preview, previewHeadHTML))
+            .querySelector('link')!
+            .getAttribute('href')!
+          console.log(mediaURL)
+          return !mediaURL.endsWith(mediaVer)
+        })
+
+        expect(
+          await preview.runJS<string>(
+            `window.getComputedStyle(document.querySelector('div.test')).textDecoration`,
+          ),
+        ).to.startWith('none ')
+
+        const newImageVer = getMediaVersion(css1path, mediaURL)
+        expect(newImageVer).not.to.equal('deleted')
+        expect(parseInt(newImageVer, 10)).to.be.greaterThan(
+          parseInt(mediaVer, 10),
         )
       }))
   })

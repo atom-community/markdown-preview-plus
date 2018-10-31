@@ -171,7 +171,10 @@ function resolveImagePaths(
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
   const media = getMedia(doc)
   Array.from(media).map(function(img) {
-    let src = img.getAttribute('src')
+    let attrName: 'href' | 'src'
+    if (img.tagName === 'LINK') attrName = 'href'
+    else attrName = 'src'
+    let src = img.getAttribute(attrName)
     if (src) {
       if (atomConfig().renderer !== 'pandoc') {
         src = decodeURI(src)
@@ -215,7 +218,7 @@ function resolveImagePaths(
         if (v !== undefined) src = `${src}?v=${v}`
       }
 
-      img.src = src
+      img[attrName] = src
     }
   })
 }
