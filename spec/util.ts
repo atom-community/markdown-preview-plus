@@ -103,8 +103,17 @@ export async function previewHTML(preview: MarkdownPreviewView) {
   )
 }
 
-export async function previewFragment(preview: MarkdownPreviewView) {
-  const html = await previewHTML(preview)
+export async function previewHeadHTML(preview: MarkdownPreviewView) {
+  return preview.runJS<string>(
+    `document.querySelector('head > original-elements').innerHTML`,
+  )
+}
+
+export async function previewFragment(
+  preview: MarkdownPreviewView,
+  func = previewHTML,
+) {
+  const html = await func(preview)
   const dom = new DOMParser()
   return dom.parseFromString(html, 'text/html')
 }

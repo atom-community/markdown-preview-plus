@@ -116,12 +116,15 @@ ipcRenderer.on<'update-images'>('update-images', (_event, { oldsrc, v }) => {
   for (const img of Array.from(imgs)) {
     let ovs: string | undefined
     let ov: number | undefined
-    let src = img.getAttribute('src')!
+    let attrName: 'href' | 'src'
+    if (img.tagName === 'LINK') attrName = 'href'
+    else attrName = 'src'
+    let src = img.getAttribute(attrName)!
     const match = src.match(/^(.*)\?v=(\d+)$/)
     if (match) [, src, ovs] = match
     if (src === oldsrc) {
       if (ovs !== undefined) ov = parseInt(ovs, 10)
-      if (v !== ov) img.src = v ? `${src}?v=${v}` : `${src}`
+      if (v !== ov) img[attrName] = v ? `${src}?v=${v}` : `${src}`
     }
   }
 })
