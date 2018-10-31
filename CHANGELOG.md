@@ -1,3 +1,8 @@
+## 3.7.1
+
+-   Watch media in link tags
+-   Tweak spec for Atom 1.32
+
 ## 3.7.0
 
 -   Specs for tab width option
