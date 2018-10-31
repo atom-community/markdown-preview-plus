@@ -512,11 +512,8 @@ var x = y;
 
       describe("when the code block's fence name has a matching grammar", function() {
         it('tokenizes the code block with the grammar', function() {
-          expect(
-            element.querySelector(
-              'pre span.syntax--entity.syntax--name.syntax--function.syntax--ruby',
-            ),
-          ).to.exist
+          expect(element.querySelector('pre.lang-ruby span.syntax--control')).to
+            .exist
         })
       })
 
