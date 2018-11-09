@@ -41,7 +41,7 @@ export function processHTMLString(element: Element) {
   const msvgh = document.getElementById('MathJax_SVG_Hidden')
   const svgGlyphs = msvgh && msvgh.parentElement
   if (svgGlyphs !== null) {
-    return svgGlyphs.innerHTML + element.innerHTML
+    return svgGlyphs.outerHTML + element.innerHTML
   } else {
     return element.innerHTML
   }

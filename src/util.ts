@@ -61,11 +61,12 @@ export async function copyHtml(
       renderLaTeX,
     )
     if (res) {
+      const html = res.replace(/"file:\/\/[^"#]*/g, '"')
       if (atom.config.get('markdown-preview-plus.richClipboard')) {
         const clipboard = await import('./clipboard')
-        clipboard.write({ text: res, html: res })
+        clipboard.write({ text: html, html })
       } else {
-        atom.clipboard.write(res)
+        atom.clipboard.write(html)
       }
     }
     view.destroy()
