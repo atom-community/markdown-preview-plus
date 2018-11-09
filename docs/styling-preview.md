@@ -54,13 +54,9 @@ rendering of math in copied HTML. For instance, to force display math width,
 you could do something like this:
 ```less
 html[data-markdown-preview-plus-context="copy-html"] {
-  span.math { /* force display math container width to 10cm */
+  span.display-math { /* force display math container width to 10cm */
     display: block;
     width: 10cm;
-  }
-  p > span.math { /* leave inline math alone */
-    display: inline;
-    max-width: none;
   }
 }
 ```
