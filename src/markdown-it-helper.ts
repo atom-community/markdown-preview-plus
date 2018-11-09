@@ -7,11 +7,11 @@ import { isEqual } from 'lodash'
 type InitState = Readonly<ReturnType<typeof currentConfig>>
 
 function mathInline(text: string) {
-  return `<span class='math'><script type='math/tex'>${text}</script></span>`
+  return `<span class='math inline-math'><script type='math/tex'>${text}</script></span>`
 }
 
 function mathBlock(text: string) {
-  return `<span class='math'><script type='math/tex; mode=display'>${text}</script></span>`
+  return `<span class='math display-math'><script type='math/tex; mode=display'>${text}</script></span>`
 }
 
 function getOptions(breaks: boolean) {
