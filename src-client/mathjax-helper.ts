@@ -24,7 +24,7 @@ const mjSrc = `${global.require.resolve(
 export async function mathProcessor(
   domElement: Node,
   atomHome: string,
-  config: MathJaxConfigWithRenderer,
+  config: MathJaxConfig,
 ) {
   await loadMathJax(atomHome, config)
   await queueTypeset(config, domElement)
@@ -64,7 +64,7 @@ export async function rerenderMath() {
 let mjPromise: Promise<void> | undefined
 async function loadMathJax(
   atomHome: string,
-  config: MathJaxConfigWithRenderer,
+  config: MathJaxConfig,
 ): Promise<void> {
   if (mjPromise) return mjPromise
   mjPromise = attachMathJax(atomHome, config)
@@ -187,7 +187,7 @@ function valueMatchesPattern(value: any) {
 //
 async function attachMathJax(
   atomHome: string,
-  mathJaxConfig: MathJaxConfigWithRenderer,
+  mathJaxConfig: MathJaxConfig,
 ): Promise<void> {
   console.log('Loading maths rendering engine MathJax')
 
@@ -195,7 +195,7 @@ async function attachMathJax(
   await injectScript(mjSrc)
 
   MathJax.Hub.Config({
-    jax: ['input/TeX', `output/${mathJaxConfig.renderer}`],
+    jax: ['input/TeX', `output/${mathJaxConfig.latexRenderer}`],
     extensions: [],
     TeX: jaxTeXConfig(atomHome, mathJaxConfig),
     'HTML-CSS': {

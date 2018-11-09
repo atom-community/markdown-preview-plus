@@ -37,24 +37,18 @@ type ResolvablePromise<T> = Promise<T> & {
 
 const atomVars = {
   home: mkResPromise<string>(),
-  mathJaxConfig: mkResPromise<MathJaxConfigWithRenderer>(),
+  mathJaxConfig: mkResPromise<MathJaxConfig>(),
   sourceLineMap: new Map<number, Element>(),
   revSourceMap: new WeakMap<Element, number[]>(),
   defaultPreviewContext: 'live-preview' as 'live-preview' | 'copy-html',
 }
 
-ipcRenderer.on<'init'>(
-  'init',
-  (_evt, { atomHome, mathJaxConfig, mathJaxRenderer, context }) => {
-    atomVars.home.resolve(atomHome)
-    atomVars.mathJaxConfig.resolve({
-      ...mathJaxConfig,
-      renderer: mathJaxRenderer,
-    })
-    atomVars.defaultPreviewContext = context
-    document.documentElement!.dataset.markdownPreviewPlusContext = context
-  },
-)
+ipcRenderer.on<'init'>('init', (_evt, { atomHome, mathJaxConfig, context }) => {
+  atomVars.home.resolve(atomHome)
+  atomVars.mathJaxConfig.resolve(mathJaxConfig)
+  atomVars.defaultPreviewContext = context
+  document.documentElement!.dataset.markdownPreviewPlusContext = context
+})
 
 ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
   const root = document.querySelector('div.update-preview')

@@ -45,8 +45,7 @@ export async function copyHtml(
   const view = new WebviewHandler(async () => {
     view.init(
       atom.getConfigDirPath(),
-      atomConfig().mathConfig,
-      'SVG',
+      { ...atomConfig().mathConfig, latexRenderer: 'SVG' },
       'copy-html',
     )
     view.setBasePath(filePath)

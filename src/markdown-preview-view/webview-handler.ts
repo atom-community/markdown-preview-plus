@@ -150,13 +150,11 @@ export class WebviewHandler {
   public init(
     atomHome: string,
     mathJaxConfig: MathJaxConfig,
-    mathJaxRenderer: MathJaxRenderer,
     context: 'live-preview' | 'copy-html',
   ) {
     this._element.send<'init'>('init', {
       atomHome,
       mathJaxConfig,
-      mathJaxRenderer,
       context,
     })
   }

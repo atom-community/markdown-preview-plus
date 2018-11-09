@@ -45,7 +45,6 @@ export abstract class MarkdownPreviewView {
         this.handler.init(
           atom.getConfigDirPath(),
           config.mathConfig,
-          config.mathConfig.latexRenderer,
           'live-preview',
         )
         this.handler.setBasePath(this.getPath())

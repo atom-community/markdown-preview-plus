@@ -13,7 +13,6 @@ declare interface ChannelMap {
   init: {
     atomHome: string
     mathJaxConfig: MathJaxConfig
-    mathJaxRenderer: MathJaxRenderer
     context: 'live-preview' | 'copy-html'
   }
   'set-base-path': { path?: string }
@@ -88,9 +87,6 @@ declare global {
     numberEquations: boolean
     texExtensions: string[]
     undefinedFamily: string
-  }
-
-  interface MathJaxConfigWithRenderer extends MathJaxConfig {
-    renderer: MathJaxRenderer
+    latexRenderer: MathJaxRenderer
   }
 }

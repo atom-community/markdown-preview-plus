@@ -27,7 +27,7 @@ export class UpdatePreview {
   constructor(
     private dom: HTMLElement,
     private atomHome: string,
-    private mathJaxConfig: MathJaxConfigWithRenderer,
+    private mathJaxConfig: MathJaxConfig,
   ) {
     /* no-op */
   }
