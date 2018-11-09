@@ -83,4 +83,8 @@ declare global {
     texExtensions: string[]
     undefinedFamily: string
   }
+
+  interface MathJaxConfigWithRenderer extends MathJaxConfig {
+    renderer: MathJaxRenderer
+  }
 }

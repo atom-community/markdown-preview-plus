@@ -261,7 +261,7 @@ export function mkHtml(
     <meta charset="utf-8" />
     <title>${title}</title>${maybeMathJaxScript}
     <style>${getMarkdownPreviewCSS()}</style>
-${html.head.innerHTML}
+${html.head!.innerHTML}
   </head>
   <body>
     ${html.body.innerHTML}

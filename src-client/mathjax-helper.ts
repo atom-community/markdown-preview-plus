@@ -21,9 +21,13 @@ const mjSrc = `${global.require.resolve(
 //   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
 //   details on DOM elements.
 //
-export async function mathProcessor(domElement: Node) {
-  await loadMathJax()
-  await queueTypeset(domElement)
+export async function mathProcessor(
+  domElement: Node,
+  atomHome: string,
+  config: MathJaxConfigWithRenderer,
+) {
+  await loadMathJax(atomHome, config)
+  await queueTypeset(config, domElement)
 }
 
 //
@@ -33,7 +37,7 @@ export async function mathProcessor(domElement: Node) {
 // @param callback A callback method that accepts a single parameter, a HTML
 //   fragment string that is the result of html processed by MathJax
 //
-export async function processHTMLString(element: Element) {
+export function processHTMLString(element: Element) {
   const msvgh = document.getElementById('MathJax_SVG_Hidden')
   const svgGlyphs = msvgh && msvgh.parentElement
   if (svgGlyphs !== null) {
@@ -58,27 +62,29 @@ export async function rerenderMath() {
 //
 // Load MathJax environment
 let mjPromise: Promise<void> | undefined
-async function loadMathJax(): Promise<void> {
+async function loadMathJax(
+  atomHome: string,
+  config: MathJaxConfigWithRenderer,
+): Promise<void> {
   if (mjPromise) return mjPromise
-  mjPromise = attachMathJax()
+  mjPromise = attachMathJax(atomHome, config)
   return mjPromise
 }
 
 // for testing
 export function unloadMathJax(): void {
   mjPromise = undefined
-  const script = document.head.querySelector(`script[src='${mjSrc}']`)
+  const script = document.head!.querySelector(`script[src='${mjSrc}']`)
   if (script) script.remove()
 }
 
-export async function jaxTeXConfig() {
-  let userMacros = await loadUserMacros()
+export function jaxTeXConfig(atomHome: string, mathJaxConfig: MathJaxConfig) {
+  let userMacros = loadUserMacros(atomHome)
   if (userMacros) {
     userMacros = checkMacros(userMacros)
   } else {
     userMacros = {}
   }
-  const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig
 
   return {
     extensions: mathJaxConfig.texExtensions,
@@ -94,14 +100,13 @@ export async function jaxTeXConfig() {
 
 // private
 
-async function getUserMacrosPath(): Promise<string> {
-  const home = await window.atomVars.home
+function getUserMacrosPath(atomHome: string): string {
   const userMacrosPath: string | undefined | null = CSON.resolve(
-    path.join(home, 'markdown-preview-plus'),
+    path.join(atomHome, 'markdown-preview-plus'),
   )
   return userMacrosPath != null
     ? userMacrosPath
-    : path.join(home, 'markdown-preview-plus.cson')
+    : path.join(atomHome, 'markdown-preview-plus.cson')
 }
 
 function loadMacrosFile(filePath: string): object {
@@ -127,8 +132,8 @@ function loadMacrosFile(filePath: string): object {
   })
 }
 
-async function loadUserMacros() {
-  const userMacrosPath = await getUserMacrosPath()
+function loadUserMacros(atomHome: string) {
+  const userMacrosPath = getUserMacrosPath(atomHome)
   if (isFileSync(userMacrosPath)) {
     return loadMacrosFile(userMacrosPath)
   } else {
@@ -177,15 +182,22 @@ function valueMatchesPattern(value: any) {
   }
 }
 
-// Configure MathJax environment. Similar to the TeX-AMS_HTML configuration with
-// a few unnecessary features stripped away
 //
-async function configureMathJax() {
-  const mathJaxConfig = await window.atomVars.mathJaxConfig
+// Attach main MathJax script to the document
+//
+async function attachMathJax(
+  atomHome: string,
+  mathJaxConfig: MathJaxConfigWithRenderer,
+): Promise<void> {
+  console.log('Loading maths rendering engine MathJax')
+
+  // Attach MathJax script
+  await injectScript(mjSrc)
+
   MathJax.Hub.Config({
     jax: ['input/TeX', `output/${mathJaxConfig.renderer}`],
     extensions: [],
-    TeX: await jaxTeXConfig(),
+    TeX: jaxTeXConfig(atomHome, mathJaxConfig),
     'HTML-CSS': {
       availableFonts: [],
       webFont: 'TeX',
@@ -203,33 +215,21 @@ async function configureMathJax() {
   console.log('Loaded maths rendering engine MathJax')
 }
 
-//
-// Attach main MathJax script to the document
-//
-async function attachMathJax(): Promise<void> {
-  console.log('Loading maths rendering engine MathJax')
-
-  // Attach MathJax script
-  await Promise.all([injectScript(mjSrc)])
-  await configureMathJax()
-}
-
 async function injectScript(scriptSrc: string) {
   const script = document.createElement('script')
   script.src = scriptSrc
   script.type = 'text/javascript'
-  document.head.appendChild(script)
+  document.head!.appendChild(script)
   return new Promise<void>((resolve) => {
     script.addEventListener('load', () => resolve())
   })
 }
 
-async function queueTypeset(domElement: Node) {
+async function queueTypeset(mathJaxConfig: MathJaxConfig, domElement: Node) {
   const hasUnprocessedMath = Array.from(
     document.querySelectorAll('script[type^="math/tex"]'),
   ).some((x) => !x.id)
   if (!hasUnprocessedMath) return
-  const mathJaxConfig: MathJaxConfig = await window.atomVars.mathJaxConfig
   return new Promise<void>((resolve) => {
     if (MathJax.InputJax.TeX) {
       MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])

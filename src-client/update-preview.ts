@@ -24,7 +24,11 @@ import morph = require('morphdom')
 import MathJaxHelper = require('./mathjax-helper')
 
 export class UpdatePreview {
-  constructor(private dom: HTMLElement) {
+  constructor(
+    private dom: HTMLElement,
+    private atomHome: string,
+    private mathJaxConfig: MathJaxConfigWithRenderer,
+  ) {
     /* no-op */
   }
 
@@ -61,7 +65,11 @@ export class UpdatePreview {
     }
 
     if (renderLaTeX) {
-      return MathJaxHelper.mathProcessor(this.dom)
+      return MathJaxHelper.mathProcessor(
+        this.dom,
+        this.atomHome,
+        this.mathJaxConfig,
+      )
     }
   }
 }

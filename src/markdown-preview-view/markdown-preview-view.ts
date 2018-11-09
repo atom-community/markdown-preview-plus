@@ -301,7 +301,7 @@ export abstract class MarkdownPreviewView {
       this.loading = false
       handlePromise(
         this.handler.update(
-          domDocument.documentElement.outerHTML,
+          domDocument.documentElement!.outerHTML,
           this.renderLaTeX,
         ),
       )

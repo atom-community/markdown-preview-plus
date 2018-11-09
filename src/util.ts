@@ -53,7 +53,7 @@ export async function copyHtml(
       mode: 'copy',
     })
     const res = await view.update(
-      domDocument.documentElement.outerHTML,
+      domDocument.documentElement!.outerHTML,
       renderLaTeX,
     )
     if (res) {

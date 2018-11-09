@@ -31,18 +31,22 @@ function mkResPromise<T>(): ResolvablePromise<T> {
   return p
 }
 
-window.atomVars = {
-  home: mkResPromise(),
-  mathJaxConfig: mkResPromise(),
-  sourceLineMap: new Map(),
-  revSourceMap: new WeakMap(),
+type ResolvablePromise<T> = Promise<T> & {
+  resolve(val?: T | PromiseLike<T>): void
+}
+
+const atomVars = {
+  home: mkResPromise<string>(),
+  mathJaxConfig: mkResPromise<MathJaxConfigWithRenderer>(),
+  sourceLineMap: new Map<number, Element>(),
+  revSourceMap: new WeakMap<Element, number[]>(),
 }
 
 ipcRenderer.on<'init'>(
   'init',
-  (_evt, { atomHome, mathJaxConfig, mathJaxRenderer }) => {
-    window.atomVars.home.resolve(atomHome)
-    window.atomVars.mathJaxConfig.resolve({
+  (_evt, { atomHome, mathJaxConfig, mathJaxRenderer, context }) => {
+    atomVars.home.resolve(atomHome)
+    atomVars.mathJaxConfig.resolve({
       ...mathJaxConfig,
       renderer: mathJaxRenderer,
     })
@@ -65,15 +69,15 @@ ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
       else rsm.set(elem, [line])
     }
   }
-  window.atomVars.sourceLineMap = slsm
-  window.atomVars.revSourceMap = rsm
+  atomVars.sourceLineMap = slsm
+  atomVars.revSourceMap = rsm
 })
 
 ipcRenderer.on<'scroll-sync'>(
   'scroll-sync',
   (_evt, { firstLine, lastLine }) => {
     const mean = Math.floor(0.5 * (firstLine + lastLine))
-    const slm = window.atomVars.sourceLineMap
+    const slm = atomVars.sourceLineMap
     let topLine
     let topBound
     for (topLine = mean; topLine >= 0; topLine -= 1) {
@@ -93,8 +97,8 @@ ipcRenderer.on<'scroll-sync'>(
     const topScroll = topBound.getBoundingClientRect().top
     const bottomScroll = bottomBound.getBoundingClientRect().top
     const frac = (mean - firstLine) / (lastLine - firstLine)
-    const offset = document.documentElement.scrollTop
-    const clientHeight = document.documentElement.clientHeight
+    const offset = document.documentElement!.scrollTop
+    const clientHeight = document.documentElement!.clientHeight
     const top =
       offset - clientHeight / 2 + topScroll + frac * (bottomScroll - topScroll)
     window.scroll({ top })
@@ -102,11 +106,11 @@ ipcRenderer.on<'scroll-sync'>(
 )
 
 ipcRenderer.on<'style'>('style', (_event, { styles }) => {
-  let styleElem = document.head.querySelector('style#atom-styles')
+  let styleElem = document.head!.querySelector('style#atom-styles')
   if (!styleElem) {
     styleElem = document.createElement('style')
     styleElem.id = 'atom-styles'
-    document.head.appendChild(styleElem)
+    document.head!.appendChild(styleElem)
   }
   styleElem.innerHTML = styles.join('\n')
 })
@@ -133,11 +137,11 @@ ipcRenderer.on<'sync'>('sync', (_event, { line, flash }) => {
   const root = document.querySelector('div.update-preview')
   if (!root) return
 
-  let element = window.atomVars.sourceLineMap.get(line)
+  let element = atomVars.sourceLineMap.get(line)
 
   if (!element) {
     for (let i = line - 1; i >= 0; i -= 1) {
-      element = window.atomVars.sourceLineMap.get(line)
+      element = atomVars.sourceLineMap.get(line)
       if (element) break
     }
   }
@@ -156,42 +160,43 @@ let updatePreview: UpdatePreview | undefined
 
 ipcRenderer.on<'update-preview'>(
   'update-preview',
-  (_event, { id, html, renderLaTeX }) => {
+  async (_event, { id, html, renderLaTeX }) => {
     // div.update-preview created after constructor st UpdatePreview cannot
     // be instanced in the constructor
     const preview = document.querySelector('div.update-preview')
     if (!preview) return
     if (!updatePreview) {
-      updatePreview = new UpdatePreview(preview as HTMLElement)
+      updatePreview = new UpdatePreview(
+        preview as HTMLElement,
+        await atomVars.home,
+        await atomVars.mathJaxConfig,
+      )
     }
     const parser = new DOMParser()
     const domDocument = parser.parseFromString(html, 'text/html')
-    util.handlePromise(
-      updatePreview.update(domDocument.body, renderLaTeX).then(async () => {
-        ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-          id,
-          request: 'update-preview',
-          result: await processHTMLString(preview),
-        })
-      }),
-    )
     const doc = document
-    if (doc && domDocument.head.hasChildNodes) {
-      let container = doc.head.querySelector('original-elements')
+    if (doc && domDocument.head!.hasChildNodes) {
+      let container = doc.head!.querySelector('original-elements')
       if (!container) {
         container = doc.createElement('original-elements')
-        doc.head.appendChild(container)
+        doc.head!.appendChild(container)
       }
       container.innerHTML = ''
-      for (const headElement of Array.from(domDocument.head.childNodes)) {
+      for (const headElement of Array.from(domDocument.head!.childNodes)) {
         container.appendChild(headElement)
       }
     }
+    await updatePreview.update(domDocument.body, renderLaTeX)
+    ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+      id,
+      request: 'update-preview',
+      result: processHTMLString(preview),
+    })
   },
 )
 
 const baseElement = document.createElement('base')
-document.head.appendChild(baseElement)
+document.head!.appendChild(baseElement)
 
 ipcRenderer.on<'set-base-path'>('set-base-path', (_evt, { path }) => {
   if (path) baseElement.href = path
@@ -206,7 +211,7 @@ ipcRenderer.on<'error'>('error', (_evt, { msg }) => {
   preview.appendChild(errorDiv)
 })
 
-document.addEventListener('mousewheel', (event) => {
+document.addEventListener('wheel', (event) => {
   if (event.ctrlKey) {
     if (event.wheelDeltaY > 0) {
       ipcRenderer.sendToHost<'zoom-in'>('zoom-in', undefined)
@@ -219,9 +224,9 @@ document.addEventListener('mousewheel', (event) => {
 })
 
 document.addEventListener('scroll', (_event) => {
-  const el = document.documentElement
+  const el = document.documentElement!
   const height = el.clientHeight
-  const visible = Array.from(window.atomVars.sourceLineMap.entries())
+  const visible = Array.from(atomVars.sourceLineMap.entries())
     .filter(([_line, elem]) => {
       const { top, bottom } = elem.getBoundingClientRect()
       return top > 0 && bottom < height
@@ -240,7 +245,7 @@ document.addEventListener('contextmenu', (e) => {
 
 ipcRenderer.on<'sync-source'>('sync-source', (_, { id }) => {
   let element = lastContextMenuTarget
-  const rsm = window.atomVars.revSourceMap
+  const rsm = atomVars.revSourceMap
   let lines = rsm.get(element)
 
   while (!lines && element.parentElement) {
@@ -273,7 +278,7 @@ ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
   ipcRenderer.sendToHost<'request-reply'>('request-reply', {
     id,
     request: 'get-tex-config',
-    result: await jaxTeXConfig(),
+    result: jaxTeXConfig(await atomVars.home, await atomVars.mathJaxConfig),
   })
 })
 
