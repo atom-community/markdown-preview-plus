@@ -58,9 +58,6 @@ export abstract class MarkdownPreviewView {
     })
     this.runJS = this.handler.runJS.bind(this.handler)
     this.handleEvents()
-    this.handler.emitter.on('did-scroll-preview', ({ min, max }) => {
-      this.didScrollPreview(min, max)
-    })
   }
 
   public static viewForElement(element: HTMLElement) {
@@ -198,6 +195,7 @@ export abstract class MarkdownPreviewView {
 
   private handleEvents() {
     this.disposables.add(
+      // atom events
       atom.grammars.onDidAddGrammar(() =>
         debounce(() => {
           handlePromise(this.renderMarkdown())
@@ -271,6 +269,11 @@ export abstract class MarkdownPreviewView {
           this.handler.updateStyles()
         },
       ),
+
+      // webview events
+      this.handler.emitter.on('did-scroll-preview', ({ min, max }) => {
+        this.didScrollPreview(min, max)
+      }),
     )
   }
 
