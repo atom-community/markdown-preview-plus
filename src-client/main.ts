@@ -40,6 +40,7 @@ const atomVars = {
   mathJaxConfig: mkResPromise<MathJaxConfigWithRenderer>(),
   sourceLineMap: new Map<number, Element>(),
   revSourceMap: new WeakMap<Element, number[]>(),
+  defaultPreviewContext: 'live-preview' as 'live-preview' | 'copy-html',
 }
 
 ipcRenderer.on<'init'>(
@@ -50,6 +51,8 @@ ipcRenderer.on<'init'>(
       ...mathJaxConfig,
       renderer: mathJaxRenderer,
     })
+    atomVars.defaultPreviewContext = context
+    document.documentElement!.dataset.markdownPreviewPlusContext = context
   },
 )
 
@@ -282,23 +285,38 @@ ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
   })
 })
 
-ipcRenderer.on<'set-width'>('set-width', async (_, { id, width }) => {
-  if (width === undefined) {
-    document.documentElement.style.removeProperty('width')
-  } else {
-    document.documentElement.style.setProperty(
+ipcRenderer.on<'prepare-pdf-export'>(
+  'prepare-pdf-export',
+  async (_, { id, width }) => {
+    document.documentElement!.style.setProperty(
       'width',
       `${width}mm`,
       'important',
     )
-  }
-  await rerenderMath()
-  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-    id,
-    request: 'set-width',
-    result: undefined,
-  })
-})
+    document.documentElement!.dataset.markdownPreviewPlusContext = 'pdf-export'
+    await rerenderMath()
+    ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+      id,
+      request: 'prepare-pdf-export',
+      result: undefined,
+    })
+  },
+)
+
+ipcRenderer.on<'finished-pdf-export'>(
+  'finished-pdf-export',
+  async (_, { id }) => {
+    document.documentElement!.style.removeProperty('width')
+    document.documentElement!.dataset.markdownPreviewPlusContext =
+      atomVars.defaultPreviewContext
+    await rerenderMath()
+    ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+      id,
+      request: 'finished-pdf-export',
+      result: undefined,
+    })
+  },
+)
 
 ipcRenderer.on<'get-selection'>('get-selection', async (_, { id }) => {
   const selection = window.getSelection()

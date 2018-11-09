@@ -41,7 +41,13 @@ export abstract class MarkdownPreviewView {
   ) {
     this.renderPromise = new Promise((resolve) => {
       this.handler = new WebviewHandler(() => {
-        this.handler.init(atom.getConfigDirPath(), atomConfig().mathConfig)
+        const config = atomConfig()
+        this.handler.init(
+          atom.getConfigDirPath(),
+          config.mathConfig,
+          config.mathConfig.latexRenderer,
+          'live-preview',
+        )
         this.handler.setBasePath(this.getPath())
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())

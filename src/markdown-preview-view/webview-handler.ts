@@ -150,12 +150,14 @@ export class WebviewHandler {
   public init(
     atomHome: string,
     mathJaxConfig: MathJaxConfig,
-    mathJaxRenderer = atomConfig().mathConfig.latexRenderer,
+    mathJaxRenderer: MathJaxRenderer,
+    context: 'live-preview' | 'copy-html',
   ) {
     this._element.send<'init'>('init', {
       atomHome,
       mathJaxConfig,
       mathJaxRenderer,
+      context,
     })
   }
 
@@ -287,13 +289,13 @@ export class WebviewHandler {
     landscape: boolean
   }): Promise<void> {
     const [width, height] = getPageWidth(opts.pageSize)
-    return this.runRequest('set-width', {
+    await this.runRequest('prepare-pdf-export', {
       width: opts.landscape ? height : width,
     })
   }
 
   private async finishSaveToPDF(): Promise<void> {
-    return this.runRequest('set-width', { width: undefined })
+    return this.runRequest('finished-pdf-export', {})
   }
 }
 

@@ -256,7 +256,7 @@ export function mkHtml(
   }
   return `\
 <!DOCTYPE html>
-<html>
+<html data-markdown-preview-plus-context="html-export">
   <head>
     <meta charset="utf-8" />
     <title>${title}</title>${maybeMathJaxScript}
