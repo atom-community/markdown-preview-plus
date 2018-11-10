@@ -10,6 +10,16 @@ import CSON = require('season')
 import fs = require('fs')
 import { isFileSync } from './util'
 
+export function processHTMLString(element: Element) {
+  const msvgh = document.getElementById('MathJax_SVG_Hidden')
+  const svgGlyphs = msvgh && msvgh.parentElement
+  if (svgGlyphs !== null) {
+    return svgGlyphs.outerHTML + element.innerHTML
+  } else {
+    return element.innerHTML
+  }
+}
+
 export class MathJaxController {
   private static mjSrc = `${global.require.resolve(
     'mathjax',
@@ -27,16 +37,6 @@ export class MathJaxController {
     const controller = new MathJaxController(atomHome, mathJaxConfig)
     await controller.readyPromise
     return controller
-  }
-
-  public processHTMLString(element: Element) {
-    const msvgh = document.getElementById('MathJax_SVG_Hidden')
-    const svgGlyphs = msvgh && msvgh.parentElement
-    if (svgGlyphs !== null) {
-      return svgGlyphs.outerHTML + element.innerHTML
-    } else {
-      return element.innerHTML
-    }
   }
 
   public async rerenderMath() {

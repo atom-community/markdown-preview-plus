@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
 import { UpdatePreview } from './update-preview'
-import { MathJaxController } from './mathjax-helper'
+import { MathJaxController, processHTMLString } from './mathjax-helper'
 import * as util from './util'
 import { getMedia } from '../src/util-common'
 
@@ -180,7 +180,7 @@ ipcRenderer.on<'update-preview'>(
     ipcRenderer.sendToHost<'request-reply'>('request-reply', {
       id,
       request: 'update-preview',
-      result: (await atomVars.mathJax).processHTMLString(preview),
+      result: processHTMLString(preview),
     })
   },
 )
