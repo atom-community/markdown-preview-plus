@@ -307,11 +307,9 @@ export abstract class MarkdownPreviewView {
 
       if (this.destroyed) return
       this.loading = false
-      handlePromise(
-        this.handler.update(
-          domDocument.documentElement!.outerHTML,
-          this.renderLaTeX,
-        ),
+      await this.handler.update(
+        domDocument.documentElement!.outerHTML,
+        this.renderLaTeX,
       )
       this.handler.setSourceMap(
         util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),

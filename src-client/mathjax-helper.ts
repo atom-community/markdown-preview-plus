@@ -10,95 +10,116 @@ import CSON = require('season')
 import fs = require('fs')
 import { isFileSync } from './util'
 
-const mjSrc = `${global.require.resolve(
-  'mathjax',
-)}?delayStartupUntil=configured`
+export class MathJaxController {
+  private static mjSrc = `${global.require.resolve(
+    'mathjax',
+  )}?delayStartupUntil=configured`
+  private readonly readyPromise: Promise<void>
 
-//
-// Process DOM elements for LaTeX equations with MathJax
-//
-// @param domElements An array of DOM elements to be processed by MathJax. See
-//   [element](https://developer.mozilla.org/en-US/docs/Web/API/element) for
-//   details on DOM elements.
-//
-export async function mathProcessor(
-  domElement: Node,
-  atomHome: string,
-  config: MathJaxConfig,
-) {
-  await loadMathJax(atomHome, config)
-  await queueTypeset(config, domElement)
-}
-
-//
-// Process maths in HTML fragment with MathJax
-//
-// @param html A HTML fragment string
-// @param callback A callback method that accepts a single parameter, a HTML
-//   fragment string that is the result of html processed by MathJax
-//
-export function processHTMLString(element: Element) {
-  const msvgh = document.getElementById('MathJax_SVG_Hidden')
-  const svgGlyphs = msvgh && msvgh.parentElement
-  if (svgGlyphs !== null) {
-    return svgGlyphs.outerHTML + element.innerHTML
-  } else {
-    return element.innerHTML
+  private constructor(
+    private atomHome: string,
+    private mathJaxConfig: MathJaxConfig,
+  ) {
+    this.readyPromise = this.attachMathJax()
   }
-}
 
-export async function rerenderMath() {
-  if (mjPromise !== undefined) {
-    await mjPromise
+  public static async create(atomHome: string, mathJaxConfig: MathJaxConfig) {
+    const controller = new MathJaxController(atomHome, mathJaxConfig)
+    await controller.readyPromise
+    return controller
+  }
+
+  public processHTMLString(element: Element) {
+    const msvgh = document.getElementById('MathJax_SVG_Hidden')
+    const svgGlyphs = msvgh && msvgh.parentElement
+    if (svgGlyphs !== null) {
+      return svgGlyphs.outerHTML + element.innerHTML
+    } else {
+      return element.innerHTML
+    }
+  }
+
+  public async rerenderMath() {
     return new Promise<void>((resolve) => {
       MathJax.Hub.Queue(['Rerender', MathJax.Hub])
       MathJax.Hub.Queue([resolve])
     })
-  } else {
-    return
-  }
-}
-
-//
-// Load MathJax environment
-let mjPromise: Promise<void> | undefined
-async function loadMathJax(
-  atomHome: string,
-  config: MathJaxConfig,
-): Promise<void> {
-  if (mjPromise) return mjPromise
-  mjPromise = attachMathJax(atomHome, config)
-  return mjPromise
-}
-
-// for testing
-export function unloadMathJax(): void {
-  mjPromise = undefined
-  const script = document.head!.querySelector(`script[src='${mjSrc}']`)
-  if (script) script.remove()
-}
-
-export function jaxTeXConfig(atomHome: string, mathJaxConfig: MathJaxConfig) {
-  let userMacros = loadUserMacros(atomHome)
-  if (userMacros) {
-    userMacros = checkMacros(userMacros)
-  } else {
-    userMacros = {}
   }
 
-  return {
-    extensions: mathJaxConfig.texExtensions,
-    Macros: userMacros,
-    equationNumbers: mathJaxConfig.numberEquations
-      ? {
-          autoNumber: 'AMS',
-          useLabelIds: false,
+  // for testing
+  public dispose(): void {
+    const script = document.head!.querySelector(
+      `script[src='${MathJaxController.mjSrc}']`,
+    )
+    if (script) script.remove()
+  }
+
+  public jaxTeXConfig() {
+    let userMacros = loadUserMacros(this.atomHome)
+    if (userMacros) {
+      userMacros = checkMacros(userMacros)
+    } else {
+      userMacros = {}
+    }
+
+    return {
+      extensions: this.mathJaxConfig.texExtensions,
+      Macros: userMacros,
+      equationNumbers: this.mathJaxConfig.numberEquations
+        ? {
+            autoNumber: 'AMS',
+            useLabelIds: false,
+          }
+        : {},
+    }
+  }
+
+  public async queueTypeset(domElement: Node) {
+    const hasUnprocessedMath = Array.from(
+      document.querySelectorAll('script[type^="math/tex"]'),
+    ).some((x) => !x.id)
+    if (!hasUnprocessedMath) return
+    return new Promise<void>((resolve) => {
+      if (MathJax.InputJax.TeX) {
+        MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])
+        if (this.mathJaxConfig.numberEquations) {
+          MathJax.Hub.Queue(['PreProcess', MathJax.Hub])
+          MathJax.Hub.Queue(['Reprocess', MathJax.Hub])
         }
-      : {},
+      }
+
+      MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElement])
+      MathJax.Hub.Queue([resolve])
+    })
+  }
+
+  private async attachMathJax(): Promise<void> {
+    console.log('Loading maths rendering engine MathJax')
+
+    // Attach MathJax script
+    await injectScript(MathJaxController.mjSrc)
+
+    MathJax.Hub.Config({
+      jax: ['input/TeX', `output/${this.mathJaxConfig.latexRenderer}`],
+      extensions: [],
+      TeX: this.jaxTeXConfig(),
+      'HTML-CSS': {
+        availableFonts: [],
+        webFont: 'TeX',
+        imageFont: null as any, // TODO: complain on DT
+        undefinedFamily: this.mathJaxConfig.undefinedFamily as any, // TODO: complain on DT
+        mtextFontInherit: true,
+      },
+      messageStyle: 'none',
+      showMathMenu: false,
+      skipStartupTypeset: true,
+    })
+    MathJax.Hub.Configured()
+
+    // Notify user MathJax has loaded
+    console.log('Loaded maths rendering engine MathJax')
   }
 }
-
-// private
 
 function getUserMacrosPath(atomHome: string): string {
   const userMacrosPath: string | undefined | null = CSON.resolve(
@@ -182,39 +203,6 @@ function valueMatchesPattern(value: any) {
   }
 }
 
-//
-// Attach main MathJax script to the document
-//
-async function attachMathJax(
-  atomHome: string,
-  mathJaxConfig: MathJaxConfig,
-): Promise<void> {
-  console.log('Loading maths rendering engine MathJax')
-
-  // Attach MathJax script
-  await injectScript(mjSrc)
-
-  MathJax.Hub.Config({
-    jax: ['input/TeX', `output/${mathJaxConfig.latexRenderer}`],
-    extensions: [],
-    TeX: jaxTeXConfig(atomHome, mathJaxConfig),
-    'HTML-CSS': {
-      availableFonts: [],
-      webFont: 'TeX',
-      imageFont: null as any, // TODO: complain on DT
-      undefinedFamily: mathJaxConfig.undefinedFamily as any, // TODO: complain on DT
-      mtextFontInherit: true,
-    },
-    messageStyle: 'none',
-    showMathMenu: false,
-    skipStartupTypeset: true,
-  })
-  MathJax.Hub.Configured()
-
-  // Notify user MathJax has loaded
-  console.log('Loaded maths rendering engine MathJax')
-}
-
 async function injectScript(scriptSrc: string) {
   const script = document.createElement('script')
   script.src = scriptSrc
@@ -222,24 +210,5 @@ async function injectScript(scriptSrc: string) {
   document.head!.appendChild(script)
   return new Promise<void>((resolve) => {
     script.addEventListener('load', () => resolve())
-  })
-}
-
-async function queueTypeset(mathJaxConfig: MathJaxConfig, domElement: Node) {
-  const hasUnprocessedMath = Array.from(
-    document.querySelectorAll('script[type^="math/tex"]'),
-  ).some((x) => !x.id)
-  if (!hasUnprocessedMath) return
-  return new Promise<void>((resolve) => {
-    if (MathJax.InputJax.TeX) {
-      MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])
-      if (mathJaxConfig.numberEquations) {
-        MathJax.Hub.Queue(['PreProcess', MathJax.Hub])
-        MathJax.Hub.Queue(['Reprocess', MathJax.Hub])
-      }
-    }
-
-    MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElement])
-    MathJax.Hub.Queue([resolve])
   })
 }

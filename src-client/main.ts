@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
 import { UpdatePreview } from './update-preview'
-import { processHTMLString, jaxTeXConfig, rerenderMath } from './mathjax-helper'
+import { MathJaxController } from './mathjax-helper'
 import * as util from './util'
 import { getMedia } from '../src/util-common'
 
@@ -22,30 +22,24 @@ window.addEventListener('unhandledrejection', (evt) => {
   })
 })
 
-function mkResPromise<T>(): ResolvablePromise<T> {
+function mkResPromise<T>() {
   let resFn: (value?: T | PromiseLike<T> | undefined) => void
-  const p = new Promise<T>((resolve) => (resFn = resolve)) as ResolvablePromise<
-    T
-  >
+  const p = new Promise<T>((resolve) => (resFn = resolve)) as Promise<T> & {
+    resolve: typeof resFn
+  }
   p.resolve = resFn!
   return p
 }
 
-type ResolvablePromise<T> = Promise<T> & {
-  resolve(val?: T | PromiseLike<T>): void
-}
-
 const atomVars = {
-  home: mkResPromise<string>(),
-  mathJaxConfig: mkResPromise<MathJaxConfig>(),
+  mathJax: mkResPromise<MathJaxController>(),
   sourceLineMap: new Map<number, Element>(),
   revSourceMap: new WeakMap<Element, number[]>(),
   defaultPreviewContext: 'live-preview' as 'live-preview' | 'copy-html',
 }
 
 ipcRenderer.on<'init'>('init', (_evt, { atomHome, mathJaxConfig, context }) => {
-  atomVars.home.resolve(atomHome)
-  atomVars.mathJaxConfig.resolve(mathJaxConfig)
+  atomVars.mathJax.resolve(MathJaxController.create(atomHome, mathJaxConfig))
   atomVars.defaultPreviewContext = context
   document.documentElement!.dataset.markdownPreviewPlusContext = context
 })
@@ -165,8 +159,7 @@ ipcRenderer.on<'update-preview'>(
     if (!updatePreview) {
       updatePreview = new UpdatePreview(
         preview as HTMLElement,
-        await atomVars.home,
-        await atomVars.mathJaxConfig,
+        await atomVars.mathJax,
       )
     }
     const parser = new DOMParser()
@@ -187,7 +180,7 @@ ipcRenderer.on<'update-preview'>(
     ipcRenderer.sendToHost<'request-reply'>('request-reply', {
       id,
       request: 'update-preview',
-      result: processHTMLString(preview),
+      result: (await atomVars.mathJax).processHTMLString(preview),
     })
   },
 )
@@ -275,7 +268,7 @@ ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
   ipcRenderer.sendToHost<'request-reply'>('request-reply', {
     id,
     request: 'get-tex-config',
-    result: jaxTeXConfig(await atomVars.home, await atomVars.mathJaxConfig),
+    result: (await atomVars.mathJax).jaxTeXConfig(),
   })
 })
 
@@ -288,7 +281,7 @@ ipcRenderer.on<'prepare-pdf-export'>(
       'important',
     )
     document.documentElement!.dataset.markdownPreviewPlusContext = 'pdf-export'
-    await rerenderMath()
+    await (await atomVars.mathJax).rerenderMath()
     ipcRenderer.sendToHost<'request-reply'>('request-reply', {
       id,
       request: 'prepare-pdf-export',
@@ -303,7 +296,7 @@ ipcRenderer.on<'finished-pdf-export'>(
     document.documentElement!.style.removeProperty('width')
     document.documentElement!.dataset.markdownPreviewPlusContext =
       atomVars.defaultPreviewContext
-    await rerenderMath()
+    await (await atomVars.mathJax).rerenderMath()
     ipcRenderer.sendToHost<'request-reply'>('request-reply', {
       id,
       request: 'finished-pdf-export',

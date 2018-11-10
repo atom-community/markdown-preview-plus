@@ -5,7 +5,7 @@ import * as temp from 'temp'
 import { waitsFor, activateMe } from './util'
 import { expect } from 'chai'
 global.require = require
-import * as mathjaxHelper from '../src-client/mathjax-helper'
+import { MathJaxController } from '../src-client/mathjax-helper'
 
 temp.track()
 
@@ -23,19 +23,19 @@ describe('MathJax helper module', () =>
     let macrosPath: string
     let macros: { [key: string]: any }
     let spans = [] as Element[]
+    let mathJax: MathJaxController
 
-    before(async () => activateMe())
+    before(async () => {
+      await activateMe()
+      configDirPath = temp.mkdirSync('atom-config-dir-')
+      macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
+    })
     after(async () => {
       await atom.packages.deactivatePackage('markdown-preview-plus')
     })
 
-    beforeEach(async function() {
-      configDirPath = temp.mkdirSync('atom-config-dir-')
-      macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
-    })
-
     afterEach(function() {
-      mathjaxHelper.unloadMathJax()
+      mathJax.dispose()
       spans.forEach((x) => {
         x.remove()
       })
@@ -44,7 +44,6 @@ describe('MathJax helper module', () =>
 
     const waitsForMacrosToLoad = async function() {
       // Trigger MathJax TeX extension to load
-
       const span = document.createElement('span')
       const equation = document.createElement('script')
       equation.type = 'math/tex; mode=display'
@@ -52,43 +51,41 @@ describe('MathJax helper module', () =>
       span.appendChild(equation)
       atom.views.getView(atom.workspace).appendChild(span)
       spans.push(span)
-      await mathjaxHelper.mathProcessor(span, configDirPath, {
-        numberEquations: false,
-        texExtensions: [] as string[],
-        undefinedFamily: '',
-        renderer: 'SVG' as 'SVG',
-      })
+      await mathJax.queueTypeset(span)
 
       macros = await waitsFor.msg('MathJax macros to be defined', function() {
         try {
-          // tslint:disable-next-line:no-unsafe-any
-          return window.MathJax.InputJax.TeX.Definitions.macros as typeof macros
+          return MathJax.InputJax.TeX.Definitions.macros
         } catch {
           return undefined
         }
       })
-
-      await waitsFor.msg(
-        'MathJax to process span',
-        () => span.childElementCount === 2,
-      )
     }
 
     describe('when a macros file exists', function() {
-      beforeEach(function() {
+      before(async function() {
         const fixturesPath = path.join(__dirname, 'fixtures/macros.cson')
         const fixturesFile = fs.readFileSync(fixturesPath, 'utf8')
         fs.writeFileSync(macrosPath, fixturesFile)
+        mathJax = await MathJaxController.create(configDirPath, {
+          numberEquations: false,
+          texExtensions: [] as string[],
+          undefinedFamily: '',
+          latexRenderer: 'SVG' as 'SVG',
+        })
+        await waitsForMacrosToLoad()
+      })
+
+      after(function() {
+        fs.unlinkSync(macrosPath)
       })
 
       it('loads valid macros', async function() {
-        await waitsForMacrosToLoad()
         expect(macros.macroOne).to.exist
         expect(macros.macroParamOne).to.exist
       })
 
       it("doesn't load invalid macros", async function() {
-        await waitsForMacrosToLoad()
         expect(macros.macro1).to.be.undefined
         expect(macros.macroTwo).to.be.undefined
         expect(macros.macroParam1).to.be.undefined
@@ -96,10 +93,16 @@ describe('MathJax helper module', () =>
       })
     })
 
-    describe("when a macros file doesn't exist", () =>
+    describe("when a macros file doesn't exist", () => {
       it('creates a template macros file', async function() {
         expect(fs.existsSync(macrosPath)).to.be.false
-        await waitsForMacrosToLoad()
+        mathJax = await MathJaxController.create(configDirPath, {
+          numberEquations: false,
+          texExtensions: [] as string[],
+          undefinedFamily: '',
+          latexRenderer: 'SVG' as 'SVG',
+        })
         expect(fs.existsSync(macrosPath)).to.be.true
-      }))
+      })
+    })
   }))
