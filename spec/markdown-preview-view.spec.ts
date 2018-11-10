@@ -842,7 +842,7 @@ var x = 0;
 <h1>Code Block</h1>
 <pre class="editor-colors lang-javascript"><span><span class="syntax--source syntax--js"><span class="syntax--keyword syntax--control">if</span> a <span class="syntax--keyword syntax--operator syntax--js">===</span> <span class="syntax--constant syntax--numeric">3</span> <span class="syntax--punctuation syntax--definition syntax--function syntax--body syntax--begin syntax--bracket syntax--curly">{</span></span></span>
 <span class=""><span class="syntax--source syntax--js"><span class="leading-whitespace">  </span>b <span class="syntax--keyword syntax--operator syntax--js">=</span> <span class="syntax--constant syntax--numeric">5</span></span></span>
-<span><span class="syntax--source syntax--js"><span class="syntax--punctuation syntax--definition syntax--function syntax--body syntax--end syntax--bracket syntax--curly">}</span></span></span></pre>
+<span class=""><span class="syntax--source syntax--js"><span class="syntax--punctuation syntax--definition syntax--function syntax--body syntax--end syntax--bracket syntax--curly">}</span></span></span></pre>
 <p>encoding → issue</p>
 `)
     }))
@@ -892,11 +892,14 @@ var x = 0;
       const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor
       editor.setText(`![Some Image](img.png "title" =100x200)`)
       const pv = await createMarkdownPreviewViewEditor(editor)
+      console.log(await previewFragment(pv))
       const [height, width, title] = await pv.runJS<[number, number, string]>(
-        `{ let img = document.querySelector('img'); [img.height, img.width, img.title]; }`,
+        `{ let img = document.querySelector('img');
+          [img.getAttribute('height'), img.getAttribute('width'), img.getAttribute('title')];
+        }`,
       )
-      expect(width).to.equal(100)
-      expect(height).to.equal(200)
+      expect(width).to.equal('100')
+      expect(height).to.equal('200')
       expect(title).to.equal('title')
     })
   })
