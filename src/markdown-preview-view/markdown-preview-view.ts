@@ -35,7 +35,6 @@ export abstract class MarkdownPreviewView {
   private imageWatcher!: ImageWatcher
 
   protected constructor(
-    private defaultRenderMode: Exclude<renderer.RenderMode, 'save'> = 'normal',
     private renderLaTeX: boolean = atomConfig().mathConfig
       .enableLatexRenderingByDefault,
   ) {
@@ -301,7 +300,7 @@ export abstract class MarkdownPreviewView {
         filePath: this.getPath(),
         grammar: this.getGrammar(),
         renderLaTeX: this.renderLaTeX,
-        mode: this.defaultRenderMode,
+        mode: 'normal',
         imageWatcher: this.imageWatcher,
       })
 
