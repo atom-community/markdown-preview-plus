@@ -39,13 +39,6 @@ export class MathJaxController {
     return controller
   }
 
-  public async rerenderMath() {
-    return new Promise<void>((resolve) => {
-      MathJax.Hub.Queue(['Rerender', MathJax.Hub])
-      MathJax.Hub.Queue([resolve])
-    })
-  }
-
   // for testing
   public dispose(): void {
     const script = document.head!.querySelector(
