@@ -209,6 +209,15 @@ export const config: IConfig = {
         type: 'object',
         order: 25,
         properties: {
+          latexRenderer: {
+            title: 'Math Renderer',
+            description:
+              'LaTeX Math renderer for PDF export; HTML-CSS usually looks better',
+            type: 'string',
+            enum: ['Same as live preview', 'HTML-CSS', 'SVG'],
+            default: 'Same as live preview',
+            order: 5,
+          },
           marginsType: {
             title: 'Margins Type',
             type: 'integer',
@@ -570,6 +579,10 @@ declare module 'atom' {
       | 'absolutized'
       | 'untouched'
     'markdown-preview-plus.saveConfig.defaultSaveFormat': 'html' | 'pdf'
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.latexRenderer':
+      | 'Same as live preview'
+      | 'HTML-CSS'
+      | 'SVG'
     'markdown-preview-plus.saveConfig.saveToPDFOptions.marginsType': 0 | 1 | 2
     'markdown-preview-plus.saveConfig.saveToPDFOptions.pageSize':
       | 'A3'
@@ -584,6 +597,7 @@ declare module 'atom' {
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printBackground': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printSelectionOnly': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions': {
+      latexRenderer: 'Same as live preview' | 'HTML-CSS' | 'SVG'
       marginsType: 0 | 1 | 2
       pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
       customPageSize: string
@@ -595,6 +609,10 @@ declare module 'atom' {
       mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
       mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
       defaultSaveFormat: 'html' | 'pdf'
+      'saveToPDFOptions.latexRenderer':
+        | 'Same as live preview'
+        | 'HTML-CSS'
+        | 'SVG'
       'saveToPDFOptions.marginsType': 0 | 1 | 2
       'saveToPDFOptions.pageSize':
         | 'A3'
@@ -609,6 +627,7 @@ declare module 'atom' {
       'saveToPDFOptions.printBackground': boolean
       'saveToPDFOptions.printSelectionOnly': boolean
       saveToPDFOptions: {
+        latexRenderer: 'Same as live preview' | 'HTML-CSS' | 'SVG'
         marginsType: 0 | 1 | 2
         pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
         customPageSize: string
@@ -713,6 +732,10 @@ declare module 'atom' {
         | 'absolutized'
         | 'untouched'
       'saveConfig.defaultSaveFormat': 'html' | 'pdf'
+      'saveConfig.saveToPDFOptions.latexRenderer':
+        | 'Same as live preview'
+        | 'HTML-CSS'
+        | 'SVG'
       'saveConfig.saveToPDFOptions.marginsType': 0 | 1 | 2
       'saveConfig.saveToPDFOptions.pageSize':
         | 'A3'
@@ -727,6 +750,7 @@ declare module 'atom' {
       'saveConfig.saveToPDFOptions.printBackground': boolean
       'saveConfig.saveToPDFOptions.printSelectionOnly': boolean
       'saveConfig.saveToPDFOptions': {
+        latexRenderer: 'Same as live preview' | 'HTML-CSS' | 'SVG'
         marginsType: 0 | 1 | 2
         pageSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid' | 'Custom'
         customPageSize: string
@@ -738,6 +762,10 @@ declare module 'atom' {
         mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         defaultSaveFormat: 'html' | 'pdf'
+        'saveToPDFOptions.latexRenderer':
+          | 'Same as live preview'
+          | 'HTML-CSS'
+          | 'SVG'
         'saveToPDFOptions.marginsType': 0 | 1 | 2
         'saveToPDFOptions.pageSize':
           | 'A3'
@@ -752,6 +780,7 @@ declare module 'atom' {
         'saveToPDFOptions.printBackground': boolean
         'saveToPDFOptions.printSelectionOnly': boolean
         saveToPDFOptions: {
+          latexRenderer: 'Same as live preview' | 'HTML-CSS' | 'SVG'
           marginsType: 0 | 1 | 2
           pageSize:
             | 'A3'

@@ -28,9 +28,18 @@ export async function saveAsPDF(
     }
     const [width, height] = getPageWidth(newOpts.pageSize)
 
+    const pdfRenderer = atomConfig().saveConfig.saveToPDFOptions.latexRenderer
+    const renderer =
+      pdfRenderer === 'Same as live preview'
+        ? atomConfig().mathConfig.latexRenderer
+        : pdfRenderer
+
     view.init({
       atomHome: atom.getConfigDirPath(),
-      mathJaxConfig: { ...atomConfig().mathConfig },
+      mathJaxConfig: {
+        ...atomConfig().mathConfig,
+        latexRenderer: renderer,
+      },
       context: 'pdf-export',
       pdfExportOptions: { width: newOpts.landscape ? height : width },
     })
