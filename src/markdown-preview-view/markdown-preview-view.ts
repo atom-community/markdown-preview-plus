@@ -124,7 +124,13 @@ export abstract class MarkdownPreviewView {
     if (ext === '.pdf') {
       handlePromise(
         this.getMarkdownSource().then(async (mdSource) =>
-          saveAsPDF(mdSource, this.getPath(), this.renderLaTeX, filePath),
+          saveAsPDF(
+            mdSource,
+            this.getPath(),
+            this.getGrammar(),
+            this.renderLaTeX,
+            filePath,
+          ),
         ),
       )
     } else {

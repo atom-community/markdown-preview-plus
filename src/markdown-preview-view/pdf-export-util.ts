@@ -2,18 +2,21 @@ import { WebviewHandler } from './webview-handler'
 import { atomConfig } from '../util'
 import { render } from '../renderer'
 import { writeFile } from 'fs'
-import { ConfigValues } from 'atom'
+import { ConfigValues, Grammar } from 'atom'
 
 export async function saveAsPDF(
   text: string,
   filePath: string | undefined,
+  grammar: Grammar | undefined,
   renderLaTeX: boolean,
   saveFilePath: string,
 ): Promise<void> {
   const view = new WebviewHandler(async () => {
     const opts = atomConfig().saveConfig.saveToPDFOptions
-    const customPageSize = parsePageSize(opts.customPageSize)
-    const pageSize = opts.pageSize === 'Custom' ? customPageSize : opts.pageSize
+    const pageSize =
+      opts.pageSize === 'Custom'
+        ? parsePageSize(opts.customPageSize)
+        : opts.pageSize
     if (pageSize === undefined) {
       throw new Error(
         `Failed to parse custom page size: ${opts.customPageSize}`,
@@ -28,16 +31,17 @@ export async function saveAsPDF(
     }
     const [width, height] = getPageWidth(newOpts.pageSize)
 
+    const mathConfig = atomConfig().mathConfig
     const pdfRenderer = atomConfig().saveConfig.saveToPDFOptions.latexRenderer
     const renderer =
       pdfRenderer === 'Same as live preview'
-        ? atomConfig().mathConfig.latexRenderer
+        ? mathConfig.latexRenderer
         : pdfRenderer
 
     view.init({
       atomHome: atom.getConfigDirPath(),
       mathJaxConfig: {
-        ...atomConfig().mathConfig,
+        ...mathConfig,
         latexRenderer: renderer,
       },
       context: 'pdf-export',
@@ -48,8 +52,9 @@ export async function saveAsPDF(
     const domDocument = await render({
       text,
       filePath,
+      grammar,
       renderLaTeX,
-      mode: 'copy',
+      mode: 'normal',
     })
     await view.update(domDocument.documentElement!.outerHTML, renderLaTeX)
 
