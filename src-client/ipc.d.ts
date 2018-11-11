@@ -13,8 +13,9 @@ declare interface ChannelMap {
   init: {
     atomHome: string
     mathJaxConfig: MathJaxConfig
-    context: 'live-preview' | 'copy-html'
-  }
+  } & (
+    | { context: 'live-preview' | 'copy-html' }
+    | { context: 'pdf-export'; pdfExportOptions: { width: number } })
   'set-base-path': { path?: string }
   'set-source-map': {
     map: { [line: number]: Array<{ tag: string; index: number }> }
@@ -24,11 +25,6 @@ declare interface ChannelMap {
   'get-tex-config': { id: number }
   'sync-source': { id: number }
   reload: { id: number }
-  'prepare-pdf-export': {
-    id: number
-    width: number
-  }
-  'finished-pdf-export': { id: number }
   'get-selection': { id: number }
 }
 declare interface ReplyMap {
@@ -44,8 +40,6 @@ declare interface RequestReplyMap {
   'get-tex-config': MathJax.TeXInputProcessor
   reload: void
   'sync-source': number | undefined
-  'prepare-pdf-export': void
-  'finished-pdf-export': void
   'get-selection': string | undefined
 }
 declare type RequestReplyType = {

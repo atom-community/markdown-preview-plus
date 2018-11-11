@@ -9,6 +9,7 @@ import { handlePromise, copyHtml, atomConfig } from '../util'
 import * as util from './util'
 import { WebviewHandler } from './webview-handler'
 import { ImageWatcher } from '../image-watch-helper'
+import { saveAsPDF } from './pdf-export-util'
 
 export interface SerializedMPV {
   deserializer: 'markdown-preview-plus/MarkdownPreviewView'
@@ -41,11 +42,11 @@ export abstract class MarkdownPreviewView {
     this.renderPromise = new Promise((resolve) => {
       this.handler = new WebviewHandler(() => {
         const config = atomConfig()
-        this.handler.init(
-          atom.getConfigDirPath(),
-          config.mathConfig,
-          'live-preview',
-        )
+        this.handler.init({
+          atomHome: atom.getConfigDirPath(),
+          mathJaxConfig: config.mathConfig,
+          context: 'live-preview',
+        })
         this.handler.setBasePath(this.getPath())
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())
@@ -121,13 +122,11 @@ export abstract class MarkdownPreviewView {
     const { name, ext } = path.parse(filePath)
 
     if (ext === '.pdf') {
-      this.handler.saveToPDF(filePath).catch((error: Error) => {
-        atom.notifications.addError('Failed saving to PDF', {
-          description: error.toString(),
-          dismissable: true,
-          stack: error.stack,
-        })
-      })
+      handlePromise(
+        this.getMarkdownSource().then(async (mdSource) =>
+          saveAsPDF(mdSource, this.getPath(), this.renderLaTeX, filePath),
+        ),
+      )
     } else {
       handlePromise(
         this.getHTMLToSave(filePath).then(async (html) => {

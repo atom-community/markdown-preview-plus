@@ -35,13 +35,21 @@ const atomVars = {
   mathJax: mkResPromise<MathJaxController>(),
   sourceLineMap: new Map<number, Element>(),
   revSourceMap: new WeakMap<Element, number[]>(),
-  defaultPreviewContext: 'live-preview' as 'live-preview' | 'copy-html',
 }
 
-ipcRenderer.on<'init'>('init', (_evt, { atomHome, mathJaxConfig, context }) => {
-  atomVars.mathJax.resolve(MathJaxController.create(atomHome, mathJaxConfig))
-  atomVars.defaultPreviewContext = context
-  document.documentElement!.dataset.markdownPreviewPlusContext = context
+ipcRenderer.on<'init'>('init', (_evt, params) => {
+  atomVars.mathJax.resolve(
+    MathJaxController.create(params.atomHome, params.mathJaxConfig),
+  )
+  document.documentElement!.dataset.markdownPreviewPlusContext = params.context
+  // tslint:disable-next-line:totality-check
+  if (params.context === 'pdf-export') {
+    document.documentElement!.style.setProperty(
+      'width',
+      `${params.pdfExportOptions.width}mm`,
+      'important',
+    )
+  }
 })
 
 ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
@@ -271,39 +279,6 @@ ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
     result: (await atomVars.mathJax).jaxTeXConfig(),
   })
 })
-
-ipcRenderer.on<'prepare-pdf-export'>(
-  'prepare-pdf-export',
-  async (_, { id, width }) => {
-    document.documentElement!.style.setProperty(
-      'width',
-      `${width}mm`,
-      'important',
-    )
-    document.documentElement!.dataset.markdownPreviewPlusContext = 'pdf-export'
-    await (await atomVars.mathJax).rerenderMath()
-    ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-      id,
-      request: 'prepare-pdf-export',
-      result: undefined,
-    })
-  },
-)
-
-ipcRenderer.on<'finished-pdf-export'>(
-  'finished-pdf-export',
-  async (_, { id }) => {
-    document.documentElement!.style.removeProperty('width')
-    document.documentElement!.dataset.markdownPreviewPlusContext =
-      atomVars.defaultPreviewContext
-    await (await atomVars.mathJax).rerenderMath()
-    ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-      id,
-      request: 'finished-pdf-export',
-      result: undefined,
-    })
-  },
-)
 
 ipcRenderer.on<'get-selection'>('get-selection', async (_, { id }) => {
   const selection = window.getSelection()

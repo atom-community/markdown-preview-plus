@@ -43,11 +43,11 @@ export async function copyHtml(
   renderLaTeX: boolean,
 ): Promise<void> {
   const view = new WebviewHandler(async () => {
-    view.init(
-      atom.getConfigDirPath(),
-      { ...atomConfig().mathConfig, latexRenderer: 'SVG' },
-      'copy-html',
-    )
+    view.init({
+      atomHome: atom.getConfigDirPath(),
+      mathJaxConfig: { ...atomConfig().mathConfig, latexRenderer: 'SVG' },
+      context: 'copy-html',
+    })
     view.setBasePath(filePath)
 
     const domDocument = await renderer.render({
