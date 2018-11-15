@@ -113,6 +113,7 @@ export function getPreviewStyles(display: boolean): string[] {
   }
   styles.push(...getSyntaxTheme(atomConfig().syntaxThemeName))
   styles.push(...processEditorStyles(getUserStyles()))
+  styles.push(getClientStyle('less-api'))
   return styles
 }
 
