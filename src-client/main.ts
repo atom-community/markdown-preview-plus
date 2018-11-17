@@ -291,3 +291,16 @@ ipcRenderer.on<'get-selection'>('get-selection', async (_, { id }) => {
     result: selectedText && selectedNode ? selectedText : undefined,
   })
 })
+
+document.addEventListener('click', (event) => {
+  if (!event.target) return
+  const el = event.target as HTMLElement
+  if (el.tagName === 'A') {
+    const href = el.getAttribute('href')
+    if (href && href.startsWith('#')) {
+      event.preventDefault()
+      const anchor = document.querySelector(href)
+      if (anchor) anchor.scrollIntoView()
+    }
+  }
+})
