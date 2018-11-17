@@ -3,7 +3,7 @@
   "include": [
     "./**.ts",
     "./**.d.ts",
-    "../src-client/season.d.ts",
+    "../src/types/season.d.ts",
     "../lib/mathjax-stub.d.ts",
     "../src-client/ipc.d.ts",
     "../src/config.ts"

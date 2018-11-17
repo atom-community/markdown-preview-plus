@@ -10,6 +10,7 @@ import * as util from './util'
 import { WebviewHandler } from './webview-handler'
 import { ImageWatcher } from '../image-watch-helper'
 import { saveAsPDF } from './pdf-export-util'
+import { loadUserMacros } from '../macros-util'
 
 export interface SerializedMPV {
   deserializer: 'markdown-preview-plus/MarkdownPreviewView'
@@ -43,7 +44,7 @@ export abstract class MarkdownPreviewView {
       this.handler = new WebviewHandler(() => {
         const config = atomConfig()
         this.handler.init({
-          atomHome: atom.getConfigDirPath(),
+          userMacros: loadUserMacros(),
           mathJaxConfig: config.mathConfig,
           context: 'live-preview',
         })

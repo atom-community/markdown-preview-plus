@@ -39,7 +39,7 @@ const atomVars = {
 
 ipcRenderer.on<'init'>('init', (_evt, params) => {
   atomVars.mathJax.resolve(
-    MathJaxController.create(params.atomHome, params.mathJaxConfig),
+    MathJaxController.create(params.userMacros, params.mathJaxConfig),
   )
   document.documentElement!.dataset.markdownPreviewPlusContext = params.context
   // tslint:disable-next-line:totality-check

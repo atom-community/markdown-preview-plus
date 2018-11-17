@@ -6,6 +6,7 @@ import { waitsFor, activateMe } from './util'
 import { expect } from 'chai'
 global.require = require
 import { MathJaxController } from '../src-client/mathjax-helper'
+import { loadUserMacros } from '../lib/macros-util'
 
 temp.track()
 
@@ -67,12 +68,15 @@ describe('MathJax helper module', () =>
         const fixturesPath = path.join(__dirname, 'fixtures/macros.cson')
         const fixturesFile = fs.readFileSync(fixturesPath, 'utf8')
         fs.writeFileSync(macrosPath, fixturesFile)
-        mathJax = await MathJaxController.create(configDirPath, {
-          numberEquations: false,
-          texExtensions: [] as string[],
-          undefinedFamily: '',
-          latexRenderer: 'SVG' as 'SVG',
-        })
+        mathJax = await MathJaxController.create(
+          loadUserMacros(configDirPath),
+          {
+            numberEquations: false,
+            texExtensions: [] as string[],
+            undefinedFamily: '',
+            latexRenderer: 'SVG' as 'SVG',
+          },
+        )
         await waitsForMacrosToLoad()
       })
 
@@ -96,12 +100,15 @@ describe('MathJax helper module', () =>
     describe("when a macros file doesn't exist", () => {
       it('creates a template macros file', async function() {
         expect(fs.existsSync(macrosPath)).to.be.false
-        mathJax = await MathJaxController.create(configDirPath, {
-          numberEquations: false,
-          texExtensions: [] as string[],
-          undefinedFamily: '',
-          latexRenderer: 'SVG' as 'SVG',
-        })
+        mathJax = await MathJaxController.create(
+          loadUserMacros(configDirPath),
+          {
+            numberEquations: false,
+            texExtensions: [] as string[],
+            undefinedFamily: '',
+            latexRenderer: 'SVG' as 'SVG',
+          },
+        )
         expect(fs.existsSync(macrosPath)).to.be.true
       })
     })

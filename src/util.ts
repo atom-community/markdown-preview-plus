@@ -37,6 +37,7 @@ export function isElement(node: Node): node is Element {
 
 import { WebviewHandler } from './markdown-preview-view/webview-handler'
 import * as renderer from './renderer'
+import { loadUserMacros } from './macros-util'
 export async function copyHtml(
   text: string,
   filePath: string | undefined,
@@ -44,7 +45,7 @@ export async function copyHtml(
 ): Promise<void> {
   const view = new WebviewHandler(async () => {
     view.init({
-      atomHome: atom.getConfigDirPath(),
+      userMacros: loadUserMacros(),
       mathJaxConfig: { ...atomConfig().mathConfig, latexRenderer: 'SVG' },
       context: 'copy-html',
     })

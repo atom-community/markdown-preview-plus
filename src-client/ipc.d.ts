@@ -11,7 +11,7 @@ declare interface ChannelMap {
   }
   error: { msg: string }
   init: {
-    atomHome: string
+    userMacros: object
     mathJaxConfig: MathJaxConfig
   } & (
     | { context: 'live-preview' | 'copy-html' }

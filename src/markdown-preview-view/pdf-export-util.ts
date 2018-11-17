@@ -3,6 +3,7 @@ import { atomConfig } from '../util'
 import { render } from '../renderer'
 import { writeFile } from 'fs'
 import { ConfigValues, Grammar } from 'atom'
+import { loadUserMacros } from '../macros-util'
 
 export async function saveAsPDF(
   text: string,
@@ -39,7 +40,7 @@ export async function saveAsPDF(
         : pdfRenderer
 
     view.init({
-      atomHome: atom.getConfigDirPath(),
+      userMacros: loadUserMacros(),
       mathJaxConfig: {
         ...mathConfig,
         latexRenderer: renderer,
