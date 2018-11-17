@@ -64,7 +64,10 @@ function init(initState: InitState): markdownItModule.MarkdownIt {
 
   if (initState.lazyHeaders) markdownIt.use(require('markdown-it-lazy-headers'))
   if (initState.checkBoxes) markdownIt.use(require('markdown-it-task-lists'))
-  if (initState.toc) markdownIt.use(require('markdown-it-table-of-contents'))
+  if (initState.toc) {
+    markdownIt.use(require('markdown-it-anchor'))
+    markdownIt.use(require('markdown-it-table-of-contents'))
+  }
 
   if (initState.emoji) {
     markdownIt.use(require('markdown-it-emoji'))
