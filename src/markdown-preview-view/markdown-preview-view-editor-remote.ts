@@ -99,7 +99,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
 
   protected openSource(initialLine?: number) {
     this.ipc.openSource(initialLine).catch((e) => {
-      console.log(e)
+      console.error(e)
       const path = this.getPath()
       if (path) {
         handlePromise(
