@@ -22,7 +22,7 @@ export abstract class MarkdownPreviewView {
   private static elementMap = new WeakMap<HTMLElement, MarkdownPreviewView>()
 
   public readonly renderPromise: Promise<void>
-  public readonly runJS: MarkdownPreviewView['handler']['runJS']
+  public runJS!: MarkdownPreviewView['handler']['runJS']
   protected handler!: WebviewHandler
   public get element(): HTMLElement {
     return this.handler.element
@@ -52,12 +52,12 @@ export abstract class MarkdownPreviewView {
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())
       })
+      this.runJS = this.handler.runJS.bind(this.handler)
       this.imageWatcher = new ImageWatcher(
         this.handler.updateImages.bind(this.handler),
       )
       MarkdownPreviewView.elementMap.set(this.element, this)
     })
-    this.runJS = this.handler.runJS.bind(this.handler)
     this.handleEvents()
   }
 
