@@ -813,7 +813,7 @@ var x = 0;
           context: 'unrelated-context',
         })
 
-        extractedStyles = previewUtil.getPreviewStyles(false)
+        extractedStyles = previewUtil.getPreviewStyles('html')
       })
 
       it('returns an array containing atom-text-editor css style strings', function() {

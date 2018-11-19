@@ -19,10 +19,11 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
   let stub: sinon.SinonStub
   const previews: Set<MarkdownPreviewView> = new Set()
 
-  const createMarkdownPreviewViewFile = function(filePath: string) {
+  const createMarkdownPreviewViewFile = async function(filePath: string) {
     const mpv = new MarkdownPreviewViewFile(filePath)
     window.workspaceDiv.appendChild(mpv.element)
     previews.add(mpv)
+    await mpv.renderPromise
     return mpv
   }
 
@@ -39,7 +40,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
       .stub(pandocHelper, 'renderPandoc')
       .callsFake(async (_text, _filePath, _renderMath) => html)
 
-    preview = createMarkdownPreviewViewFile(filePath)
+    preview = await createMarkdownPreviewViewFile(filePath)
   })
 
   afterEach(async function() {
@@ -88,7 +89,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         <img src="${filePath}" alt="absolute"><p class="caption">absolute</p>
         </div>\
         `
-        preview = createMarkdownPreviewViewFile(filePath)
+        preview = await createMarkdownPreviewViewFile(filePath)
 
         await preview.renderPromise
 
