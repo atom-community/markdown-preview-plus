@@ -1,6 +1,6 @@
 import { Directory, CompositeDisposable, Disposable } from 'atom'
 import * as path from 'path'
-import { handlePromise } from '../util'
+import * as fs from 'fs'
 
 export class UserStylesManager {
   private static _instance?: UserStylesManager
@@ -10,13 +10,15 @@ export class UserStylesManager {
   private disposables = new CompositeDisposable()
   private fileDisposables = new CompositeDisposable()
   private subscribers = new Set<() => void>()
-  private files: string[]
+  private files: string[] = []
 
   private constructor() {
     this.configDir = new Directory(
       path.join(atom.getConfigDirPath(), 'markdown-preview-plus'),
     )
-    if (!this.configDir.existsSync()) handlePromise(this.configDir.create())
+    if (!this.configDir.existsSync()) {
+      fs.mkdirSync(this.configDir.getPath())
+    }
     this.disposables.add(
       this.fileDisposables,
       this.configDir.onDidChange(() => {
