@@ -3,6 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import Token = require('markdown-it/lib/token')
 import { handlePromise, atomConfig } from '../util'
+import { UserStylesManager } from './user-styles'
 
 export function editorForId(editorId: number): TextEditor | undefined {
   for (const editor of atom.workspace.getTextEditors()) {
@@ -75,10 +76,13 @@ function* getActivePackageStyles(
   }
 }
 
-export function getPreviewStyles(display: boolean): string[] {
-  if (getStylesOverride) return getStylesOverride(display)
+export function getPreviewStyles(
+  context: 'pdf' | 'copy' | 'html' | 'live',
+): string[] {
+  if (getStylesOverride) return getStylesOverride(context)
   const styles = []
-  if (display) {
+  // tslint:disable-next-line:totality-check
+  if (context === 'live') {
     // global editor styles
     const globalStyles =
       atom.styles.styleElementsBySourcePath['global-text-editor-styles']
@@ -105,7 +109,8 @@ export function getPreviewStyles(display: boolean): string[] {
   }
 
   styles.push(getClientStyle('generic'))
-  if (display) styles.push(getClientStyle('display'))
+  // tslint:disable-next-line:totality-check
+  if (context === 'live') styles.push(getClientStyle('display'))
   if (atomConfig().useGitHubStyle) {
     styles.push(getClientStyle('github'))
   } else {
@@ -113,6 +118,11 @@ export function getPreviewStyles(display: boolean): string[] {
   }
   styles.push(...getSyntaxTheme(atomConfig().syntaxThemeName))
   styles.push(...processEditorStyles(getUserStyles()))
+  styles.push(
+    ...UserStylesManager.getStyleFiles(context).map((f) =>
+      atom.themes.loadStylesheet(f),
+    ),
+  )
   return styles
 }
 
@@ -128,10 +138,10 @@ function* processWorkspaceStyles(styles: Iterable<string>) {
   }
 }
 
-function getMarkdownPreviewCSS() {
+function getMarkdownPreviewCSSForHTMLExport() {
   const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
-  return getPreviewStyles(false)
+  return getPreviewStyles('html')
     .join('\n')
     .replace(cssUrlRefExp, function(
       _match,
@@ -260,7 +270,7 @@ export function mkHtml(
   <head>
     <meta charset="utf-8" />
     <title>${title}</title>${maybeMathJaxScript}
-    <style>${getMarkdownPreviewCSS()}</style>
+    <style>${getMarkdownPreviewCSSForHTMLExport()}</style>
 ${html.head!.innerHTML}
   </head>
   <body>

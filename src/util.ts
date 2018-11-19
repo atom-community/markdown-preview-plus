@@ -43,7 +43,7 @@ export async function copyHtml(
   filePath: string | undefined,
   renderLaTeX: boolean,
 ): Promise<void> {
-  const view = new WebviewHandler(async () => {
+  const view = new WebviewHandler('copy', async () => {
     view.init({
       userMacros: loadUserMacros(),
       mathJaxConfig: { ...atomConfig().mathConfig, latexRenderer: 'SVG' },

@@ -5,6 +5,7 @@ import fileUriToPath = require('file-uri-to-path')
 import { handlePromise, atomConfig } from '../util'
 import { RequestReplyMap, ChannelMap } from '../../src-client/ipc'
 import { getPreviewStyles } from './util'
+import { UserStylesManager } from './user-styles'
 
 export type ReplyCallbackStruct<
   T extends keyof RequestReplyMap = keyof RequestReplyMap
@@ -61,7 +62,10 @@ export class WebviewHandler {
   private replyCallbacks = new Map<number, ReplyCallbackStruct>()
   private replyCallbackId = 0
 
-  constructor(init: () => void) {
+  constructor(
+    private context: 'pdf' | 'copy' | 'html' | 'live',
+    init: () => void,
+  ) {
     this._element = document.createElement('webview')
     this._element.classList.add('markdown-preview-plus', 'native-key-bindings')
     this._element.disablewebsecurity = 'true'
@@ -132,6 +136,7 @@ export class WebviewHandler {
       atom.styles.onDidUpdateStyleElement(() => {
         this.updateStyles()
       }),
+      UserStylesManager.subscribe(() => this.updateStyles()),
     )
 
     const onload = () => {
@@ -255,7 +260,9 @@ export class WebviewHandler {
   }
 
   public updateStyles() {
-    this._element.send<'style'>('style', { styles: getPreviewStyles(true) })
+    this._element.send<'style'>('style', {
+      styles: getPreviewStyles(this.context),
+    })
   }
 
   protected async runRequest<T extends keyof RequestReplyMap>(

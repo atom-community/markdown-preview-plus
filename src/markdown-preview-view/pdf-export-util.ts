@@ -12,7 +12,7 @@ export async function saveAsPDF(
   renderLaTeX: boolean,
   saveFilePath: string,
 ): Promise<void> {
-  const view = new WebviewHandler(async () => {
+  const view = new WebviewHandler('pdf', async () => {
     const opts = atomConfig().saveConfig.saveToPDFOptions
     const pageSize =
       opts.pageSize === 'Custom'

@@ -41,7 +41,7 @@ export abstract class MarkdownPreviewView {
       .enableLatexRenderingByDefault,
   ) {
     this.renderPromise = new Promise((resolve) => {
-      this.handler = new WebviewHandler(() => {
+      this.handler = new WebviewHandler('live', () => {
         const config = atomConfig()
         this.handler.init({
           userMacros: loadUserMacros(),
