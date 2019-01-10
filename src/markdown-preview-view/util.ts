@@ -1,7 +1,7 @@
 import { TextEditor } from 'atom'
 import * as path from 'path'
 import * as fs from 'fs'
-import { Token } from 'markdown-it'
+import Token = require('markdown-it/lib/token')
 import { handlePromise, atomConfig } from '../util'
 
 export function editorForId(editorId: number): TextEditor | undefined {
@@ -67,7 +67,7 @@ function* getActivePackageStyles(
   packageName: string,
 ): IterableIterator<string> {
   const pack = atom.packages.getActivePackage(packageName)
-  if (!pack) return undefined
+  if (!pack) return
   const stylesheets = pack.getStylesheetPaths()
   for (const ss of stylesheets) {
     const element = atom.styles.styleElementsBySourcePath[ss]

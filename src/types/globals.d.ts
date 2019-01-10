@@ -1,4 +1,4 @@
-interface Function {
+interface CallableFunction {
   bind<T>(this: T, thisArg: any): T
 }
 

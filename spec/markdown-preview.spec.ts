@@ -15,6 +15,7 @@ import {
   previewHTML,
   activateMe,
   stubClipboard,
+  sinonPrivateSpy,
 } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -343,7 +344,10 @@ var x = y;
       preview = atom.workspace.getActivePaneItem() as any
       expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewFile')
 
-      const spy = sinon.spy<any>(preview, 'renderMarkdownText')
+      const spy = sinonPrivateSpy<typeof preview['renderMarkdownText']>(
+        preview,
+        'renderMarkdownText',
+      )
       fs.writeFileSync(filePath, fs.readFileSync(filePath).toString('utf8'))
 
       await waitsFor.msg(

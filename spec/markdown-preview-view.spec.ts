@@ -20,9 +20,18 @@ import {
   activateMe,
   previewHTML,
   previewHeadHTML,
+  sinonPrivateSpy,
 } from './util'
 import { TextEditorElement, TextEditor } from 'atom'
 import { PlaceholderView } from '../lib/placeholder-view'
+
+declare module 'atom' {
+  interface AtomEnvironment {
+    applicationDelegate: {
+      showSaveDialog(options: {}, callback: Function): void
+    }
+  }
+}
 
 describe('MarkdownPreviewView', function() {
   let filePath: string
@@ -755,7 +764,7 @@ var x = 0;
       const stubs = []
       stubs.push(
         sinon
-          .stub((atom as any).applicationDelegate, 'showSaveDialog')
+          .stub(atom.applicationDelegate, 'showSaveDialog')
           .callsFake((_options, callback: Function) => {
             if (callback) callback(outputPath)
             return outputPath
@@ -952,7 +961,10 @@ var x = 0;
       expect(ths[0].style.textAlign).to.equal('left')
       expect(ths[1].style.textAlign).to.equal('center')
       expect(ths[2].style.textAlign).to.equal('right')
-      const spy = sinon.spy<any>(pv, 'renderMarkdown')
+      const spy = sinonPrivateSpy<typeof pv['renderMarkdown']>(
+        pv,
+        'renderMarkdown',
+      )
       editor.setText(`\
 | Tables        |      Are      |  Cool |
 |:--------------|:-------------:|:------|

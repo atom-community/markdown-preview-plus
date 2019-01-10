@@ -211,9 +211,9 @@ ipcRenderer.on<'error'>('error', (_evt, { msg }) => {
 
 document.addEventListener('wheel', (event) => {
   if (event.ctrlKey) {
-    if (event.wheelDeltaY > 0) {
+    if (event.deltaY > 0) {
       ipcRenderer.sendToHost<'zoom-in'>('zoom-in', undefined)
-    } else if (event.wheelDeltaY < 0) {
+    } else if (event.deltaY < 0) {
       ipcRenderer.sendToHost<'zoom-out'>('zoom-out', undefined)
     }
     event.preventDefault()

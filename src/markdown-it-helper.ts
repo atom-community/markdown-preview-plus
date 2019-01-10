@@ -1,4 +1,5 @@
 import markdownItModule = require('markdown-it')
+import Token = require('markdown-it/lib/token')
 import * as twemoji from 'twemoji'
 import * as path from 'path'
 import { pairUp, atomConfig } from './util'
@@ -41,7 +42,7 @@ function currentConfig(rL: boolean) {
   }
 }
 
-function init(initState: InitState): markdownItModule.MarkdownIt {
+function init(initState: InitState): markdownItModule {
   const markdownIt = markdownItModule(getOptions(initState.breaks))
 
   if (initState.renderLaTeX) {
@@ -62,6 +63,7 @@ function init(initState: InitState): markdownItModule.MarkdownIt {
     })
   }
 
+  // tslint:disable:no-unsafe-any
   if (initState.lazyHeaders) markdownIt.use(require('markdown-it-lazy-headers'))
   if (initState.checkBoxes) markdownIt.use(require('markdown-it-task-lists'))
   if (initState.toc) {
@@ -84,12 +86,13 @@ function init(initState: InitState): markdownItModule.MarkdownIt {
     markdownIt.use(require('./markdown-it-criticmarkup'))
   }
   if (initState.imsize) markdownIt.use(require('markdown-it-imsize'))
+  // tslint:enable:no-unsafe-any
 
   return markdownIt
 }
 
 function wrapInitIfNeeded(initf: typeof init): typeof init {
-  let markdownIt: markdownItModule.MarkdownIt | null = null
+  let markdownIt: markdownItModule | null = null
   let initState: InitState | null = null
 
   return function(newState: InitState) {
@@ -108,7 +111,7 @@ export function render(text: string, rL: boolean) {
   return markdownIt.render(text)
 }
 
-export function getTokens(text: string, rL: boolean) {
+export function getTokens(text: string, rL: boolean): Token[] {
   const markdownIt = initIfNeeded(currentConfig(rL))
   return markdownIt!.parse(text, {})
 }

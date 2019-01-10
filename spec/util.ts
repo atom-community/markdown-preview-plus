@@ -2,6 +2,7 @@
 import { use, expect } from 'chai'
 import * as sinonChai from 'sinon-chai'
 import { MarkdownPreviewView } from '../lib/markdown-preview-view'
+import Clipboard = require('../lib/clipboard')
 
 use(sinonChai)
 
@@ -129,8 +130,7 @@ import { Package } from 'atom'
 export async function activateMe(): Promise<Package> {
   const pkg = atom.packages.loadPackage(path.join(__dirname, '..'))
   // TODO: Hack to work around Atom issue with fsevents
-  // tslint:disable-next-line:totality-check
-  if (process.platform === 'darwin') pkg.isCompatible = () => true
+  pkg.isCompatible = () => true
   return atom.packages.activatePackage(pkg.name)
 }
 
@@ -140,12 +140,12 @@ export function stubClipboard() {
     stub: undefined,
     contents: '',
   }
-  const clipboard = require('../lib/clipboard')
+  const clipboard = require('../lib/clipboard') as typeof Clipboard
   before(function() {
     result.stub = sinon
       .stub(clipboard, 'write')
-      .callsFake(function(arg: { text: string }) {
-        result.contents = arg.text
+      .callsFake(function(arg: { text?: string }) {
+        result.contents = arg.text || ''
       })
   })
   after(function() {
@@ -156,4 +156,14 @@ export function stubClipboard() {
     result.stub && result.stub.resetHistory()
   })
   return result
+}
+
+export type InferredSinonSpy<Callable> = Callable extends (
+  ...args: infer TArgs
+) => infer TReturnValue
+  ? sinon.SinonSpy<TArgs, TReturnValue>
+  : sinon.SinonSpy
+
+export function sinonPrivateSpy<T>(t: object, k: string) {
+  return sinon.spy<any, any>(t, k) as InferredSinonSpy<T>
 }
