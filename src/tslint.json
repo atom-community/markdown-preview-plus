@@ -1,5 +1,5 @@
 {
-  "extends": "atom-haskell-tslint-rules",
+  "extends": ["atom-haskell-tslint-rules", "tslint-use-atom-disposables"],
   "rules": {
     "align": false,
     "semicolon": false,
@@ -8,6 +8,7 @@
     "ter-no-sparse-arrays": false,
     "space-before-function-paren": false,
     "no-unsafe-any": true,
-    "ter-indent": false
+    "ter-indent": false,
+    "no-floating-promises": true
   }
 }

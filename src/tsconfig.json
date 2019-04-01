@@ -15,7 +15,7 @@
     "jsxFactory": "etch.dom",
     "preserveConstEnums": true,
     "suppressImplicitAnyIndexErrors": true,
-    "outDir": "lib",
+    "outDir": "../lib",
     "inlineSources": true,
     "inlineSourceMap": true,
     "strictNullChecks": true,
@@ -26,15 +26,10 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "plugins": [{ "name": "typescript-tslint-plugin" }]
   },
-  "exclude": ["node_modules", "spec"],
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.js",
-    "src-client/ipc.d.ts"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "../src-client/ipc.d.ts"],
   "compileOnSave": true,
   "experimentalDecorators": true
 }

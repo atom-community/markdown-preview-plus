@@ -2,6 +2,7 @@
 // tslint:disable:no-unsafe-any
 
 import * as mdIt from 'markdown-it'
+import Token = require('markdown-it/lib/token')
 import { makeTable } from './lib/table'
 
 function skipTextCommand(state: any, max: number) {
@@ -292,10 +293,10 @@ export interface RenderingOptions {
 
 function makeMathRenderer(renderingOptions: RenderingOptions = {}) {
   return renderingOptions.display === 'block'
-    ? function(tokens: mdIt.Token[], idx: number) {
+    ? function(tokens: Token[], idx: number) {
         return '<div class="math block">' + tokens[idx].content + '</div>\n'
       }
-    : function(tokens: mdIt.Token[], idx: number) {
+    : function(tokens: Token[], idx: number) {
         return '<span class="math inline">' + tokens[idx].content + '</span>'
       }
 }
@@ -308,19 +309,19 @@ export interface PluginOptions {
   renderingOptions?: RenderingOptions
 }
 
-export function math_plugin(md: mdIt.MarkdownIt, options: PluginOptions = {}) {
+export function math_plugin(md: mdIt, options: PluginOptions = {}) {
   // Default options
   const inlineDelim = options.inlineDelim || [['$$', '$$']]
   const blockDelim = options.blockDelim || [['$$$', '$$$']]
   const oInlineRenderer = options.inlineRenderer
   const oBlockRenderer = options.blockRenderer
   const inlineRenderer = oInlineRenderer
-    ? function(tokens: mdIt.Token[], idx: number) {
+    ? function(tokens: Token[], idx: number) {
         return oInlineRenderer(tokens[idx].content)
       }
     : makeMathRenderer(options.renderingOptions)
   const blockRenderer = oBlockRenderer
-    ? function(tokens: mdIt.Token[], idx: number) {
+    ? function(tokens: Token[], idx: number) {
         return oBlockRenderer(tokens[idx].content) + '\n'
       }
     : makeMathRenderer(
@@ -342,7 +343,7 @@ export function math_plugin(md: mdIt.MarkdownIt, options: PluginOptions = {}) {
     inlineDelim,
     blockDelim,
   })
-  md.block.ruler.at('table', tableBlock, {
+  md.block.ruler.at('table', tableBlock as any, {
     alt: ['paragraph', 'reference'],
   })
 }

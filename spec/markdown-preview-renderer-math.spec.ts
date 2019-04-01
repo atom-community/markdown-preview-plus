@@ -2,7 +2,7 @@ import markdownIt = require('../lib/markdown-it-helper')
 import { expect } from 'chai'
 let renderMath = false
 
-import './util'
+import { activateMe } from './util'
 
 const compareHTML = function(one: string, two: string) {
   one = markdownIt.render(one, renderMath)
@@ -13,6 +13,9 @@ const compareHTML = function(one: string, two: string) {
 
 describe('MarkdownItHelper (Math)', function() {
   let content: string | undefined
+
+  before(async () => activateMe())
+  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
   beforeEach(function() {
     content = undefined
@@ -35,12 +38,12 @@ _math $x^2$ in emphasis_
 `
 
     const result = `\
-<h1>Math <span class='math'><script type='math/tex'>x^2</script></span> in heading 1</h1>
-<p><em>math <span class='math'><script type='math/tex'>x^2</script></span> in emphasis</em></p>
-<p><strong>math <span class='math'><script type='math/tex'>x^2</script></span> in bold</strong></p>
-<p><a href="http://www.mathjax.org/">math <span class='math'><script type='math/tex'>x^2</script></span> in link</a></p>
+<h1>Math <span class='math inline-math'><script type='math/tex'>x^2</script></span> in heading 1</h1>
+<p><em>math <span class='math inline-math'><script type='math/tex'>x^2</script></span> in emphasis</em></p>
+<p><strong>math <span class='math inline-math'><script type='math/tex'>x^2</script></span> in bold</strong></p>
+<p><a href="http://www.mathjax.org/">math <span class='math inline-math'><script type='math/tex'>x^2</script></span> in link</a></p>
 <p><code>math $x^2$ in code</code></p>
-<p><s>math <span class='math'><script type='math/tex'>x^2</script></span> in strikethrough</s></p>\
+<p><s>math <span class='math inline-math'><script type='math/tex'>x^2</script></span> in strikethrough</s></p>\
 `
 
     compareHTML(content, result)
@@ -51,7 +54,7 @@ _math $x^2$ in emphasis_
       content = 'This $(f*g*h)(x)$ is no conflict'
 
       const result =
-        "<p>This <span class='math'><script type='math/tex'>(f*g*h)(x)</script></span> is no conflict</p>"
+        "<p>This <span class='math inline-math'><script type='math/tex'>(f*g*h)(x)</script></span> is no conflict</p>"
 
       compareHTML(content, result)
     })
@@ -60,7 +63,7 @@ _math $x^2$ in emphasis_
       content = 'This $x_1, x_2, \\dots, x_N$ is no conflict'
 
       const result =
-        "<p>This <span class='math'><script type='math/tex'>x_1, x_2, \\dots, x_N</script></span> is no conflict</p>"
+        "<p>This <span class='math inline-math'><script type='math/tex'>x_1, x_2, \\dots, x_N</script></span> is no conflict</p>"
 
       compareHTML(content, result)
     })
@@ -69,7 +72,7 @@ _math $x^2$ in emphasis_
       content = 'This $[a+b](c+d)$ is no conflict'
 
       const result =
-        "<p>This <span class='math'><script type='math/tex'>[a+b](c+d)</script></span> is no conflict</p>"
+        "<p>This <span class='math inline-math'><script type='math/tex'>[a+b](c+d)</script></span> is no conflict</p>"
 
       compareHTML(content, result)
     })
@@ -95,11 +98,11 @@ $$\
 `
 
       const result = `\
-<p><span class='math'><script type='math/tex'>k \\times k</script></span>, <span class='math'><script type='math/tex'>n \\times 2</script></span>, <span class='math'><script type='math/tex'>2 \\times n</script></span>, <span class='math'><script type='math/tex'>\\times</script></span></p>
-<p><span class='math'><script type='math/tex'>x \\cdot y</script></span>, <span class='math'><script type='math/tex'>\\cdot</script></span></p>
-<p><span class='math'><script type='math/tex'>\\sqrt{x^2+y^2+z^2}</script></span></p>
-<p><span class='math'><script type='math/tex'>\\alpha \\beta \\gamma</script></span></p>
-<span class='math'><script type='math/tex; mode=display'>\\begin{aligned}
+<p><span class='math inline-math'><script type='math/tex'>k \\times k</script></span>, <span class='math inline-math'><script type='math/tex'>n \\times 2</script></span>, <span class='math inline-math'><script type='math/tex'>2 \\times n</script></span>, <span class='math inline-math'><script type='math/tex'>\\times</script></span></p>
+<p><span class='math inline-math'><script type='math/tex'>x \\cdot y</script></span>, <span class='math inline-math'><script type='math/tex'>\\cdot</script></span></p>
+<p><span class='math inline-math'><script type='math/tex'>\\sqrt{x^2+y^2+z^2}</script></span></p>
+<p><span class='math inline-math'><script type='math/tex'>\\alpha \\beta \\gamma</script></span></p>
+<span class='math display-math'><script type='math/tex; mode=display'>\\begin{aligned}
 x\\ &= y\\\\
 mc^2\\ &= E
 \\end{aligned}
@@ -152,7 +155,7 @@ $$\
 `
 
         const result =
-          "<span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
+          "<span class='math display-math'><script type='math/tex; mode=display'>a+b</script></span>"
 
         compareHTML(content, result)
       })
@@ -161,7 +164,7 @@ $$\
         content = '$$a+b$$'
 
         const result =
-          "<span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
+          "<span class='math display-math'><script type='math/tex; mode=display'>a+b</script></span>"
 
         compareHTML(content, result)
       })
@@ -175,7 +178,7 @@ $$\
 `
 
         const result =
-          "<p>Test</p><span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
+          "<p>Test</p><span class='math display-math'><script type='math/tex; mode=display'>a+b</script></span>"
 
         compareHTML(content, result)
       })
@@ -188,7 +191,7 @@ a+b
 `
 
         const result =
-          "<span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
+          "<span class='math display-math'><script type='math/tex; mode=display'>a+b</script></span>"
 
         compareHTML(content, result)
       })
@@ -197,7 +200,7 @@ a+b
         content = '\\[a+b\\]'
 
         const result =
-          "<span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
+          "<span class='math display-math'><script type='math/tex; mode=display'>a+b</script></span>"
 
         compareHTML(content, result)
       })
@@ -211,7 +214,7 @@ a+b
 `
 
         const result =
-          "<p>Test</p><span class='math'><script type='math/tex; mode=display'>a+b</script></span>"
+          "<p>Test</p><span class='math display-math'><script type='math/tex; mode=display'>a+b</script></span>"
 
         compareHTML(content, result)
       })
@@ -248,7 +251,7 @@ $x$\
 <pre><code>$fgf</code></pre>
 <p>
   $ asd
-  <span class='math'>
+  <span class='math inline-math'>
     <script type='math/tex'>x</script>
   </span>
 </p>\
@@ -262,7 +265,7 @@ $x$\
 
       const result = `\
 <p>
- This should <span class='math'>
+ This should <span class='math inline-math'>
    <script type='math/tex'>x+y</script>
  </span> work.
 </p>\
@@ -276,7 +279,7 @@ $x$\
 
       const result = `\
 <p>
- An <span class='math'>
+ An <span class='math inline-math'>
    <script type='math/tex'>N\\times N</script>
  </span> grid.
 </p>\
@@ -296,7 +299,7 @@ $$\
 
       const result = `\
 <p>This is broken <code>$$</code></p>
-<span class='math'>
+<span class='math display-math'>
  <script type='math/tex; mode=display'>
    a+b
  </script>

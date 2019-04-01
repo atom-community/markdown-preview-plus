@@ -21,7 +21,7 @@ export interface CommonRenderOptions<T extends RenderMode> {
 }
 
 export type RenderOptions =
-  | (CommonRenderOptions<'normal' | 'copy'> & { imageWatcher: ImageWatcher })
+  | (CommonRenderOptions<'normal'> & { imageWatcher?: ImageWatcher })
   | (CommonRenderOptions<'save'> & { savePath: string })
   | (CommonRenderOptions<'copy'>)
 
@@ -52,7 +52,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
   const doc = parser.parseFromString(html, 'text/html')
   sanitize(doc)
   if (options.mode === 'normal') {
-    options.imageWatcher.clear()
+    if (options.imageWatcher) options.imageWatcher.clear()
     resolveImagePaths(
       doc,
       options.filePath,
@@ -78,7 +78,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
         })
         break
       default:
-        throw invalidMode(options.mode)
+        throw invalidMode(options)
     }
   }
   let defaultCodeLanguage: string = 'text'

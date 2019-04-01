@@ -3,6 +3,9 @@ declare module 'morphdom' {
     oldTree: Node,
     newTree: Node | string,
     options?: {
+      /// If true then only the children of the fromNode and toNode nodes will be
+      /// morphed (the containing element will be skipped). Defaults to false.
+      childrenOnly?: boolean
       /// Called to get the Node's unique identifier. This is used by morphdom to rearrange elements
       /// rather than creating and destroying an element that already exists. This defaults to using
       /// the Node's id attribute.
@@ -28,9 +31,6 @@ declare module 'morphdom' {
         fromEl: HTMLElement,
         toEl: HTMLElement,
       ): boolean
-      /// If true then only the children of the fromNode and toNode nodes will be
-      /// morphed (the containing element will be skipped). Defaults to false.
-      childrenOnly?: boolean
     },
   ): void
   export = morph

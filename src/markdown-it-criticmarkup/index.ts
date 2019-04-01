@@ -15,6 +15,7 @@
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import * as mdIt from 'markdown-it'
+import Token = require('markdown-it/lib/token')
 
 const specialChars = ['-', '+', '~', '=', '>']
 
@@ -33,7 +34,7 @@ function isOpening(str: string, pos: number): [string, string] | null {
 }
 
 function criticInline(
-  state: { src: string; pos: number; push: (token: string) => mdIt.Token },
+  state: { src: string; pos: number; push: (token: string) => Token },
   silent: boolean,
 ) {
   const { src, pos } = state
@@ -51,7 +52,7 @@ function criticInline(
   return true
 }
 
-function criticRender(tokens: mdIt.Token[], idx: number) {
+function criticRender(tokens: Token[], idx: number) {
   const token = tokens[idx]
   const tag = token.tag
   const content = token.content
@@ -74,7 +75,7 @@ function criticRender(tokens: mdIt.Token[], idx: number) {
   }
 }
 
-export = function(md: mdIt.MarkdownIt) {
+export = function(md: mdIt) {
   md.inline.ruler.before('strikethrough', 'critic-markup', criticInline as any)
   md.renderer.rules['critic-markup'] = criticRender
 }

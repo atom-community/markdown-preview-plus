@@ -9,9 +9,10 @@ import {
   expectPreviewInSplitPane,
   previewFragment,
   activateMe,
+  sinonPrivateSpy,
 } from './util'
 import { expect } from 'chai'
-import { Token } from 'markdown-it'
+import Token = require('markdown-it/lib/token')
 import * as previewUtil from '../lib/markdown-preview-view/util'
 import {} from 'electron'
 
@@ -112,7 +113,10 @@ describe('Syncronization of source and preview', function() {
         }
         const editor = atom.workspace.getActiveTextEditor()!
         editor.setCursorBufferPosition([sourceLine.line, 0])
-        const spy = sinon.spy<any>(preview, 'syncPreview')
+        const spy = sinonPrivateSpy<typeof preview['syncPreview']>(
+          preview,
+          'syncPreview',
+        )
         atom.commands.dispatch(
           atom.views.getView(editor),
           'markdown-preview-plus:sync-preview',
