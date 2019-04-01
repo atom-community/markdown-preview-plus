@@ -1,4 +1,6 @@
-language: generic
+language: node_js
+node_js:
+  - '10'
 
 notifications:
   email:
