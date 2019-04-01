@@ -282,8 +282,8 @@ ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
 
 ipcRenderer.on<'get-selection'>('get-selection', async (_, { id }) => {
   const selection = window.getSelection()
-  const selectedText = selection.toString()
-  const selectedNode = selection.baseNode
+  const selectedText = selection && selection.toString()
+  const selectedNode = selection && selection.anchorNode
 
   ipcRenderer.sendToHost<'request-reply'>('request-reply', {
     id,
