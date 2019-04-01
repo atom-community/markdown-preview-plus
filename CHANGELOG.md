@@ -1,3 +1,41 @@
+## 3.8.0
+
+### New features
+
+-   Added "preview context"
+
+    This basically adds `data-markdown-preview-plus-context` attribute to the root element of the preview and/or exported/copied html/pdf. The value of this attribute depends on what action is being performed; "live-preview" is the default preview status; "pdf-export" in case of PDF export, "html-export" in case of HTML export (this will be saved in exported HTML); "copy-html" when copying HTML (this won't be copied to clipboard, but may affect rendering). See [docs/styling-preview.md](https://github.com/atom-community/markdown-preview-plus/blob/master/docs/styling-preview.md) for more information.
+
+-   Added `display-math` and `inline-math` CSS classes to display and inline math containers respectively to simplify CSS selectors
+
+-   Added `saveConfig.saveToPDFOptions.latexRenderer` option ('Export Behaviour → Save to PDF options → Math Renderer' in the settings GUI) which allows setting LaTeX math renderer for PDF export independently of the live preview. By default, PDF export will use the same LaTeX math renderer as live preview.
+
+-   Anchor points will be automatically created for headers in markdown-it renderer, if table of contents plug-in is enabled (this was mostly an oversight); the table of contents plugin is now turned off by default to keep the output HTML consistent between versions;
+
+### Changes
+
+-   Save-to-PDF now runs in a separate webview context. This shouldn't affect the observable behaviour though.
+
+-   Table of contents markdown-it plugin is turned off by default to keep output HTML consistent between versions, since it now adds anchor points to headers.
+
+### Fixes
+
+-   Fixed math display in copied HTML
+-   Caught a few leaked disposables
+-   Update preview base path when editor path changes
+-   Fixed relative hash-links in preview (e.g. `[Link to some section inside the document](#section-slug)`)
+
+### Maintenance
+
+-   Got rid of `window.atomVars` global in the preview
+-   Added typescript-tslint-plugin to dev environment
+-   Updated dependencies
+-   Shuffled TS/TSLint configs around
+-   Added tslint rule to help catch leaked disposables
+-   Rework mathjax-helper to simplify state tracking
+-   Move macros-reading code out of webview client
+-   General code clean-up
+
 ## 3.7.1
 
 -   Watch media in link tags
