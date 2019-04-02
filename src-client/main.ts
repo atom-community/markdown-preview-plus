@@ -299,7 +299,7 @@ document.addEventListener('click', (event) => {
     const href = el.getAttribute('href')
     if (href && href.startsWith('#')) {
       event.preventDefault()
-      const anchor = document.querySelector(href)
+      const anchor = document.getElementById(decodeURIComponent(href).slice(1))
       if (anchor) anchor.scrollIntoView()
     }
   }
