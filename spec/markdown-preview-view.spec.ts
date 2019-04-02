@@ -961,13 +961,13 @@ var x = 0;
       expect(html).to.equal(
         '<p>The quick brown<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup> ' +
           'fox jumped over the lazy dogs.<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]' +
-          '</a></sup></p>\n<hr class="footnotes-sep">\n<section class="footnotes">' +
+          '</a></sup></p>\n<hr class="footnotes-sep">\n<section class="footnotes">\n' +
           '<ol class="footnotes-list">\n<li id="fn1" class="footnote-item">' +
           '<p>Actually the fox was kind of orange. ' +
-          '<a href="#fnref1" class="footnote-backref">↩︎</a></p>n\n</li>' +
+          '<a href="#fnref1" class="footnote-backref">↩︎</a></p>\n</li>\n' +
           '<li id="fn2" class="footnote-item"><p>Numbers of notes should not matter ' +
           'for display order. <a href="#fnref2" class="footnote-backref">↩︎</a></p>\n' +
-          '</li>\n\n</ol>\n</section>\n</div>',
+          '</li>\n</ol>\n</section>\n',
       )
     })
   })

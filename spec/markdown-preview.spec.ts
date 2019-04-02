@@ -658,7 +658,8 @@ world</p>
 
   describe('GitHub style markdown preview', function() {
     beforeEach(() =>
-      atom.config.set('markdown-preview-plus.useGitHubStyle', false))
+      atom.config.set('markdown-preview-plus.useGitHubStyle', false),
+    )
 
     async function usesGithubStyle(preview: MarkdownPreviewView) {
       return preview.runJS<boolean>(
