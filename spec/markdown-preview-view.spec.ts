@@ -943,6 +943,35 @@ var x = 0;
     })
   })
 
+  describe('Footnote Markup', function() {
+    beforeEach(() => {
+      atom.config.set(
+        'markdown-preview-plus.markdownItConfig.useFootnote',
+        true,
+      )
+    })
+    afterEach(() => {
+      atom.config.unset('markdown-preview-plus.markdownItConfig.useFootnote')
+    })
+    it('renders it', async function() {
+      const pv = await createMarkdownPreviewViewFile(
+        path.join(tempPath, 'subdir/footnote.md'),
+      )
+      const html = await previewHTML(pv)
+      expect(html).to.equal(
+        '<p>The quick brown<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup> ' +
+          'fox jumped over the lazy dogs.<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]' +
+          '</a></sup></p>\n<hr class="footnotes-sep">\n<section class="footnotes">' +
+          '<ol class="footnotes-list">\n<li id="fn1" class="footnote-item">' +
+          '<p>Actually the fox was kind of orange. ' +
+          '<a href="#fnref1" class="footnote-backref">↩︎</a></p>n\n</li>' +
+          '<li id="fn2" class="footnote-item"><p>Numbers of notes should not matter ' +
+          'for display order. <a href="#fnref2" class="footnote-backref">↩︎</a></p>\n' +
+          '</li>\n\n</ol>\n</section>\n</div>',
+      )
+    })
+  })
+
   describe('table alignment', function() {
     it('realigns table if markdown changed', async function() {
       const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor
