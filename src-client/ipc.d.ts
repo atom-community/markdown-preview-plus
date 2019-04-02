@@ -11,10 +11,11 @@ declare interface ChannelMap {
   }
   error: { msg: string }
   init: {
-    atomHome: string
+    userMacros: object
     mathJaxConfig: MathJaxConfig
-    mathJaxRenderer: MathJaxRenderer
-  }
+  } & (
+    | { context: 'live-preview' | 'copy-html' }
+    | { context: 'pdf-export'; pdfExportOptions: { width: number } })
   'set-base-path': { path?: string }
   'set-source-map': {
     map: { [line: number]: Array<{ tag: string; index: number }> }
@@ -24,7 +25,6 @@ declare interface ChannelMap {
   'get-tex-config': { id: number }
   'sync-source': { id: number }
   reload: { id: number }
-  'set-width': { id: number; width: number | undefined }
   'get-selection': { id: number }
 }
 declare interface ReplyMap {
@@ -40,7 +40,6 @@ declare interface RequestReplyMap {
   'get-tex-config': MathJax.TeXInputProcessor
   reload: void
   'sync-source': number | undefined
-  'set-width': void
   'get-selection': string | undefined
 }
 declare type RequestReplyType = {
@@ -82,5 +81,6 @@ declare global {
     numberEquations: boolean
     texExtensions: string[]
     undefinedFamily: string
+    latexRenderer: MathJaxRenderer
   }
 }

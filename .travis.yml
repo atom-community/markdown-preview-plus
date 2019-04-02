@@ -1,4 +1,6 @@
-language: generic
+language: node_js
+node_js:
+  - '10'
 
 notifications:
   email:
@@ -6,9 +8,10 @@ notifications:
     on_failure: change
 
 script:
-- curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh
-- npm run build
-- npm run test
+  - curl -s https://raw.githubusercontent.com/atom/ci/master/build-package.sh | sh
+  - npm install --only=dev
+  - npm run build
+  - npm run test
 
 git:
   depth: 10
@@ -31,10 +34,10 @@ env:
 addons:
   apt:
     packages:
-    - build-essential
-    - git
-    - libgnome-keyring-dev
-    - fakeroot
+      - build-essential
+      - git
+      - libgnome-keyring-dev
+      - fakeroot
 
 branches:
   only:

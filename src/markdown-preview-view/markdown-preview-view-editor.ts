@@ -114,6 +114,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       this.editor.onDidChangePath(() => {
+        this.handler.setBasePath(this.getPath())
         this.emitter.emit('did-change-title')
       }),
       this.editor.onDidDestroy(() => {

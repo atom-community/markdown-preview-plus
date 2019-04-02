@@ -9,6 +9,8 @@ import { handlePromise, copyHtml, atomConfig } from '../util'
 import * as util from './util'
 import { WebviewHandler } from './webview-handler'
 import { ImageWatcher } from '../image-watch-helper'
+import { saveAsPDF } from './pdf-export-util'
+import { loadUserMacros } from '../macros-util'
 
 export interface SerializedMPV {
   deserializer: 'markdown-preview-plus/MarkdownPreviewView'
@@ -20,7 +22,7 @@ export abstract class MarkdownPreviewView {
   private static elementMap = new WeakMap<HTMLElement, MarkdownPreviewView>()
 
   public readonly renderPromise: Promise<void>
-  public readonly runJS: MarkdownPreviewView['handler']['runJS']
+  public runJS!: MarkdownPreviewView['handler']['runJS']
   protected handler!: WebviewHandler
   public get element(): HTMLElement {
     return this.handler.element
@@ -35,27 +37,28 @@ export abstract class MarkdownPreviewView {
   private imageWatcher!: ImageWatcher
 
   protected constructor(
-    private defaultRenderMode: Exclude<renderer.RenderMode, 'save'> = 'normal',
     private renderLaTeX: boolean = atomConfig().mathConfig
       .enableLatexRenderingByDefault,
   ) {
     this.renderPromise = new Promise((resolve) => {
       this.handler = new WebviewHandler(() => {
-        this.handler.init(atom.getConfigDirPath(), atomConfig().mathConfig)
+        const config = atomConfig()
+        this.handler.init({
+          userMacros: loadUserMacros(),
+          mathJaxConfig: config.mathConfig,
+          context: 'live-preview',
+        })
         this.handler.setBasePath(this.getPath())
         this.emitter.emit('did-change-title')
         resolve(this.renderMarkdown())
       })
+      this.runJS = this.handler.runJS.bind(this.handler)
       this.imageWatcher = new ImageWatcher(
         this.handler.updateImages.bind(this.handler),
       )
       MarkdownPreviewView.elementMap.set(this.element, this)
     })
-    this.runJS = this.handler.runJS.bind(this.handler)
     this.handleEvents()
-    this.handler.emitter.on('did-scroll-preview', ({ min, max }) => {
-      this.didScrollPreview(min, max)
-    })
   }
 
   public static viewForElement(element: HTMLElement) {
@@ -120,13 +123,17 @@ export abstract class MarkdownPreviewView {
     const { name, ext } = path.parse(filePath)
 
     if (ext === '.pdf') {
-      this.handler.saveToPDF(filePath).catch((error: Error) => {
-        atom.notifications.addError('Failed saving to PDF', {
-          description: error.toString(),
-          dismissable: true,
-          stack: error.stack,
-        })
-      })
+      handlePromise(
+        this.getMarkdownSource().then(async (mdSource) =>
+          saveAsPDF(
+            mdSource,
+            this.getPath(),
+            this.getGrammar(),
+            this.renderLaTeX,
+            filePath,
+          ),
+        ),
+      )
     } else {
       handlePromise(
         this.getHTMLToSave(filePath).then(async (html) => {
@@ -193,6 +200,7 @@ export abstract class MarkdownPreviewView {
 
   private handleEvents() {
     this.disposables.add(
+      // atom events
       atom.grammars.onDidAddGrammar(() =>
         debounce(() => {
           handlePromise(this.renderMarkdown())
@@ -266,6 +274,11 @@ export abstract class MarkdownPreviewView {
           this.handler.updateStyles()
         },
       ),
+
+      // webview events
+      this.handler.emitter.on('did-scroll-preview', ({ min, max }) => {
+        this.didScrollPreview(min, max)
+      }),
     )
   }
 
@@ -293,17 +306,15 @@ export abstract class MarkdownPreviewView {
         filePath: this.getPath(),
         grammar: this.getGrammar(),
         renderLaTeX: this.renderLaTeX,
-        mode: this.defaultRenderMode,
+        mode: 'normal',
         imageWatcher: this.imageWatcher,
       })
 
       if (this.destroyed) return
       this.loading = false
-      handlePromise(
-        this.handler.update(
-          domDocument.documentElement.outerHTML,
-          this.renderLaTeX,
-        ),
+      await this.handler.update(
+        domDocument.documentElement!.outerHTML,
+        this.renderLaTeX,
       )
       this.handler.setSourceMap(
         util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),

@@ -37,13 +37,18 @@ export function isElement(node: Node): node is Element {
 
 import { WebviewHandler } from './markdown-preview-view/webview-handler'
 import * as renderer from './renderer'
+import { loadUserMacros } from './macros-util'
 export async function copyHtml(
   text: string,
   filePath: string | undefined,
   renderLaTeX: boolean,
 ): Promise<void> {
   const view = new WebviewHandler(async () => {
-    view.init(atom.getConfigDirPath(), atomConfig().mathConfig, 'SVG')
+    view.init({
+      userMacros: loadUserMacros(),
+      mathJaxConfig: { ...atomConfig().mathConfig, latexRenderer: 'SVG' },
+      context: 'copy-html',
+    })
     view.setBasePath(filePath)
 
     const domDocument = await renderer.render({
@@ -53,15 +58,16 @@ export async function copyHtml(
       mode: 'copy',
     })
     const res = await view.update(
-      domDocument.documentElement.outerHTML,
+      domDocument.documentElement!.outerHTML,
       renderLaTeX,
     )
     if (res) {
+      const html = res.replace(/"file:\/\/[^"#]*/g, '"')
       if (atom.config.get('markdown-preview-plus.richClipboard')) {
         const clipboard = await import('./clipboard')
-        clipboard.write({ text: res, html: res })
+        clipboard.write({ text: html, html })
       } else {
-        atom.clipboard.write(res)
+        atom.clipboard.write(html)
       }
     }
     view.destroy()

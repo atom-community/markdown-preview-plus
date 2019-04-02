@@ -1,12 +1,11 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../src/tsconfig.json",
   "include": [
     "./**.ts",
     "./**.d.ts",
     "../src/types/electron.d.ts",
     "../src/util-common.ts"
   ],
-  "exclude": ["../node_modules"],
   "compileOnSave": false,
   "compilerOptions": {
     "noEmit": true,

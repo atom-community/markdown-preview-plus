@@ -266,7 +266,7 @@ describe('the difference algorithm that updates the preview', function() {
         await preview.runJS<any>(`window.diffMath[0].tagName.toLowerCase()`),
       ).to.equal('span')
       expect(await preview.runJS<any>(`window.diffMath[0].className`)).to.equal(
-        'math',
+        'math display-math',
       )
       expect(
         await preview.runJS<any>(

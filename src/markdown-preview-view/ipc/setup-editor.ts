@@ -48,7 +48,7 @@ export class RemoteEditorServer {
       if (this.usageCounter <= 0) {
         this.resetTimeout()
         this.destroyTimeout = window.setTimeout(() => {
-          this.dispose()
+          this.destroy()
         }, this.destroyTimeoutLength)
       }
     },
@@ -89,7 +89,7 @@ export class RemoteEditorServer {
     return newRes
   }
 
-  public dispose() {
+  private destroy() {
     RemoteEditorServer.editorMap.delete(this.editor)
     this.disposables.dispose()
   }
@@ -124,7 +124,7 @@ export class RemoteEditorServer {
         this.emit('changeGrammar', grammar.scopeName)
       }),
       this.editor.onDidDestroy(() => {
-        this.dispose()
+        this.destroy()
         if (atomConfig().previewConfig.closePreviewWithEditor) {
           this.emit('destroy', undefined)
         }

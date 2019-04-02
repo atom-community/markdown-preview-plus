@@ -1,5 +1,4 @@
-import * as fs from 'fs'
-import { Emitter, CompositeDisposable, ConfigValues } from 'atom'
+import { Emitter, CompositeDisposable } from 'atom'
 import { WebviewTag, shell } from 'electron'
 import fileUriToPath = require('file-uri-to-path')
 
@@ -15,6 +14,38 @@ export type ReplyCallbackStruct<
     callback: (reply: RequestReplyMap[K]) => void
   }
 }[T]
+
+interface PrintToPDFOptionsReal {
+  /**
+   * Specifies the type of margins to use. Uses 0 for default margin, 1 for no
+   * margin, and 2 for minimum margin.
+   */
+  marginsType?: number
+  /**
+   * Specify page size of the generated PDF. Can be A3, A4, A5, Legal, Letter,
+   * Tabloid or an Object containing height and width in microns.
+   */
+  pageSize?:
+    | { width: number; height: number }
+    | 'A3'
+    | 'A4'
+    | 'A5'
+    | 'Legal'
+    | 'Letter'
+    | 'Tabloid'
+  /**
+   * Whether to print CSS backgrounds.
+   */
+  printBackground?: boolean
+  /**
+   * Whether to print selection only.
+   */
+  printSelectionOnly?: boolean
+  /**
+   * true for landscape, false for portrait.
+   */
+  landscape?: boolean
+}
 
 export class WebviewHandler {
   public readonly emitter = new Emitter<
@@ -147,16 +178,8 @@ export class WebviewHandler {
     this._element.send<'set-base-path'>('set-base-path', { path })
   }
 
-  public init(
-    atomHome: string,
-    mathJaxConfig: MathJaxConfig,
-    mathJaxRenderer = atomConfig().mathConfig.latexRenderer,
-  ) {
-    this._element.send<'init'>('init', {
-      atomHome,
-      mathJaxConfig,
-      mathJaxRenderer,
-    })
+  public init(params: ChannelMap['init']) {
+    this._element.send<'init'>('init', params)
   }
 
   public updateImages(oldSource: string, version: number | undefined) {
@@ -166,46 +189,17 @@ export class WebviewHandler {
     })
   }
 
-  public async saveToPDF(filePath: string) {
-    const opts = atomConfig().saveConfig.saveToPDFOptions
-    const customPageSize = parsePageSize(opts.customPageSize)
-    const pageSize = opts.pageSize === 'Custom' ? customPageSize : opts.pageSize
-    if (pageSize === undefined) {
-      throw new Error(
-        `Failed to parse custom page size: ${opts.customPageSize}`,
-      )
-    }
-    const selection = await this.getSelection()
-    const printSelectionOnly = selection ? opts.printSelectionOnly : false
-    const newOpts = {
-      ...opts,
-      pageSize,
-      printSelectionOnly,
-    }
-    await this.prepareSaveToPDF(newOpts)
-    try {
-      const data = await new Promise<Buffer>((resolve, reject) => {
-        // TODO: Complain on Electron
-        this._element.printToPDF(newOpts as any, (error, data) => {
-          if (error) {
-            reject(error)
-            return
-          }
-          resolve(data)
-        })
+  public async printToPDF(opts: PrintToPDFOptionsReal) {
+    return new Promise<Buffer>((resolve, reject) => {
+      // TODO: Complain on Electron
+      this._element.printToPDF(opts as any, (error, data) => {
+        if (error) {
+          reject(error)
+          return
+        }
+        resolve(data)
       })
-      await new Promise<void>((resolve, reject) => {
-        fs.writeFile(filePath, data, (error) => {
-          if (error) {
-            reject(error)
-            return
-          }
-          resolve()
-        })
-      })
-    } finally {
-      handlePromise(this.finishSaveToPDF())
-    }
+    })
   }
 
   public sync(line: number, flash: boolean) {
@@ -280,80 +274,5 @@ export class WebviewHandler {
       const newargs = Object.assign({ id }, args)
       this._element.send<T>(request, newargs)
     })
-  }
-
-  private async prepareSaveToPDF(opts: {
-    pageSize: PageSize
-    landscape: boolean
-  }): Promise<void> {
-    const [width, height] = getPageWidth(opts.pageSize)
-    return this.runRequest('set-width', {
-      width: opts.landscape ? height : width,
-    })
-  }
-
-  private async finishSaveToPDF(): Promise<void> {
-    return this.runRequest('set-width', { width: undefined })
-  }
-}
-
-type Unit = 'mm' | 'cm' | 'in'
-
-function parsePageSize(size: string) {
-  if (!size) return undefined
-  const rx = /^([\d.,]+)(cm|mm|in)?x([\d.,]+)(cm|mm|in)?$/i
-  const res = size.replace(/\s*/g, '').match(rx)
-  if (res) {
-    const width = parseFloat(res[1])
-    const wunit = res[2] as Unit | undefined
-    const height = parseFloat(res[3])
-    const hunit = res[4] as Unit | undefined
-    return {
-      width: convert(width, wunit),
-      height: convert(height, hunit),
-    }
-  } else {
-    return undefined
-  }
-}
-
-type PageSize =
-  | Exclude<
-      ConfigValues['markdown-preview-plus.saveConfig.saveToPDFOptions.pageSize'],
-      'Custom'
-    >
-  | { width: number; height: number }
-
-function convert(val: number, unit?: Unit) {
-  return val * unitInMicrons(unit)
-}
-
-function unitInMicrons(unit: Unit = 'mm') {
-  switch (unit) {
-    case 'mm':
-      return 1000
-    case 'cm':
-      return 10000
-    case 'in':
-      return 25400
-  }
-}
-
-function getPageWidth(pageSize: PageSize) {
-  switch (pageSize) {
-    case 'A3':
-      return [297, 420]
-    case 'A4':
-      return [210, 297]
-    case 'A5':
-      return [148, 210]
-    case 'Legal':
-      return [216, 356]
-    case 'Letter':
-      return [216, 279]
-    case 'Tabloid':
-      return [279, 432]
-    default:
-      return [pageSize.width / 1000, pageSize.height / 1000]
   }
 }

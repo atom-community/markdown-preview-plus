@@ -21,10 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import morph = require('morphdom')
-import MathJaxHelper = require('./mathjax-helper')
+import { MathJaxController } from './mathjax-helper'
 
 export class UpdatePreview {
-  constructor(private dom: HTMLElement) {
+  constructor(
+    private dom: HTMLElement,
+    private mjController: MathJaxController,
+  ) {
     /* no-op */
   }
 
@@ -61,7 +64,7 @@ export class UpdatePreview {
     }
 
     if (renderLaTeX) {
-      return MathJaxHelper.mathProcessor(this.dom)
+      return this.mjController.queueTypeset(this.dom)
     }
   }
 }

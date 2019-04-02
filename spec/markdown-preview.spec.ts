@@ -15,6 +15,7 @@ import {
   previewHTML,
   activateMe,
   stubClipboard,
+  sinonPrivateSpy,
 } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -343,7 +344,10 @@ var x = y;
       preview = atom.workspace.getActivePaneItem() as any
       expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewFile')
 
-      const spy = sinon.spy<any>(preview, 'renderMarkdownText')
+      const spy = sinonPrivateSpy<typeof preview['renderMarkdownText']>(
+        preview,
+        'renderMarkdownText',
+      )
       fs.writeFileSync(filePath, fs.readFileSync(filePath).toString('utf8'))
 
       await waitsFor.msg(
@@ -413,6 +417,18 @@ var x = y;
   describe('when markdown-preview-plus:copy-html is triggered', function() {
     const clipboard = stubClipboard()
 
+    async function copyHtml(editor: object) {
+      clipboard.stub!.resetHistory()
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:copy-html',
+      )
+      await waitsFor.msg(
+        'clipboard.write to have been called',
+        () => clipboard.stub!.called,
+      )
+    }
+
     describe('when rich clipboard is disabled', function() {
       let clipboard = ''
       let stub: sinon.SinonStub
@@ -453,15 +469,7 @@ var x = y;
         path.join(tempPath, 'subdir/simple.md'),
       )
 
-      atom.commands.dispatch(
-        atom.views.getView(editor),
-        'markdown-preview-plus:copy-html',
-      )
-
-      await waitsFor.msg(
-        'clipboard.write to have been called',
-        () => clipboard.stub!.callCount === 1,
-      )
+      await copyHtml(editor)
 
       expect(clipboard.contents).to.equal(`\
 <p><em>italic</em></p>
@@ -472,19 +480,36 @@ var x = y;
       atom.workspace
         .getActiveTextEditor()!
         .setSelectedBufferRange([[0, 0], [1, 0]])
-      atom.commands.dispatch(
-        atom.views.getView(editor),
-        'markdown-preview-plus:copy-html',
-      )
 
-      await waitsFor.msg(
-        'clipboard.write to have been called',
-        () => clipboard.stub!.callCount === 2,
-      )
+      await copyHtml(editor)
 
       expect(clipboard.contents).to.equal(`\
 <p><em>italic</em></p>
 `)
+    })
+
+    describe('when LaTeX rendering is enabled by default', function() {
+      beforeEach(async function() {
+        atom.config.set(
+          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
+          true,
+        )
+
+        const editor = (await atom.workspace.open(
+          path.join(tempPath, 'subdir/simple.md'),
+        )) as TextEditor
+
+        editor.setText('$$\\int_3^4$$')
+        await copyHtml(editor)
+      })
+
+      it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
+        const cb = clipboard.contents
+        expect(cb.match(/MathJax_SVG_Hidden/g)!.length).to.equal(1)
+        expect(cb.match(/class="MathJax_SVG_Display"/g)!.length).to.equal(1)
+        expect(cb.match(/class="MathJax_SVG"/g)!.length).to.equal(1)
+        expect(cb.match(/file:\/\//g)).to.equal(null, 'no references to files')
+      })
     })
 
     describe('code block tokenization', function() {
@@ -556,65 +581,6 @@ var x = y;
             ),
           ).to.contain('editor-colors')
         }))
-    })
-  })
-
-  describe('when main::copyHtml() is called directly', function() {
-    const clipboard = stubClipboard()
-
-    async function copyHtml() {
-      clipboard.stub!.resetHistory()
-      atom.commands.dispatch(
-        atom.views.getView(atom.workspace.getActiveTextEditor()!),
-        'markdown-preview-plus:copy-html',
-      )
-      await waitsFor.msg(
-        'clipboard.write to have been called',
-        () => clipboard.stub!.called,
-      )
-    }
-
-    it('copies the HTML to the clipboard by default', async function() {
-      await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
-
-      await copyHtml()
-
-      expect(clipboard.contents).to.equal(`\
-<p><em>italic</em></p>
-<p><strong>bold</strong></p>
-<p>encoding \u2192 issue</p>
-`)
-
-      atom.workspace
-        .getActiveTextEditor()!
-        .setSelectedBufferRange([[0, 0], [1, 0]])
-      await copyHtml()
-
-      expect(clipboard.contents).to.equal(`\
-<p><em>italic</em></p>
-`)
-    })
-
-    describe('when LaTeX rendering is enabled by default', function() {
-      beforeEach(async function() {
-        atom.config.set(
-          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
-          true,
-        )
-
-        await atom.workspace.open(path.join(tempPath, 'subdir/simple.md'))
-
-        atom.workspace.getActiveTextEditor()!.setText('$$\\int_3^4$$')
-      })
-
-      it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
-        await copyHtml()
-
-        const cb = clipboard.contents
-        expect(cb.match(/MathJax_SVG_Hidden/g)!.length).to.equal(1)
-        expect(cb.match(/class="MathJax_SVG_Display"/g)!.length).to.equal(1)
-        expect(cb.match(/class="MathJax_SVG"/g)!.length).to.equal(1)
-      })
     })
   })
 
@@ -692,7 +658,8 @@ world</p>
 
   describe('GitHub style markdown preview', function() {
     beforeEach(() =>
-      atom.config.set('markdown-preview-plus.useGitHubStyle', false))
+      atom.config.set('markdown-preview-plus.useGitHubStyle', false),
+    )
 
     async function usesGithubStyle(preview: MarkdownPreviewView) {
       return preview.runJS<boolean>(
