@@ -404,6 +404,13 @@ export const config: IConfig = {
         default: false,
         order: 40,
       },
+      useFootnote: {
+        title: 'Enable footnotes with markdown-it parser',
+        description: 'Render Markdown footnotes a little prettier.',
+        type: 'boolean',
+        default: false,
+        order: 45,
+      },
       inlineMathSeparators: {
         title: 'Inline math separators',
         description:
@@ -644,6 +651,7 @@ declare module 'atom' {
     'markdown-preview-plus.markdownItConfig.useToc': boolean
     'markdown-preview-plus.markdownItConfig.useImsize': boolean
     'markdown-preview-plus.markdownItConfig.useCriticMarkup': boolean
+    'markdown-preview-plus.markdownItConfig.useFootnote': boolean
     'markdown-preview-plus.markdownItConfig.inlineMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig.blockMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig': {
@@ -654,6 +662,7 @@ declare module 'atom' {
       useToc: boolean
       useImsize: boolean
       useCriticMarkup: boolean
+      useFootnote: boolean
       inlineMathSeparators: string[]
       blockMathSeparators: string[]
     }
@@ -794,6 +803,7 @@ declare module 'atom' {
       'markdownItConfig.useToc': boolean
       'markdownItConfig.useImsize': boolean
       'markdownItConfig.useCriticMarkup': boolean
+      'markdownItConfig.useFootnote': boolean
       'markdownItConfig.inlineMathSeparators': string[]
       'markdownItConfig.blockMathSeparators': string[]
       markdownItConfig: {
@@ -804,6 +814,7 @@ declare module 'atom' {
         useToc: boolean
         useImsize: boolean
         useCriticMarkup: boolean
+        useFootnote: boolean
         inlineMathSeparators: string[]
         blockMathSeparators: string[]
       }

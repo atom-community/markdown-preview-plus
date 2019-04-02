@@ -35,6 +35,7 @@ function currentConfig(rL: boolean) {
     emoji: config.useEmoji,
     breaks: config.breakOnSingleNewline,
     criticMarkup: config.useCriticMarkup,
+    footnote: config.useFootnote,
     imsize: config.useImsize,
     inlineMathSeparators: config.inlineMathSeparators,
     blockMathSeparators: config.blockMathSeparators,
@@ -79,6 +80,9 @@ function init(initState: InitState): markdownItModule.MarkdownIt {
 
   if (initState.criticMarkup) {
     markdownIt.use(require('./markdown-it-criticmarkup'))
+  }
+  if (initState.footnote) {
+    markdownIt.use(require('markdown-it-footnote'))
   }
   if (initState.imsize) markdownIt.use(require('markdown-it-imsize'))
 
