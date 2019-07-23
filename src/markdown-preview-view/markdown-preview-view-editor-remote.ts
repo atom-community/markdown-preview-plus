@@ -63,9 +63,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
   }
 
   public getURI() {
-    return `markdown-preview-plus://remote-editor/${this.windowId}/${
-      this.editorId
-    }`
+    return `markdown-preview-plus://remote-editor/${this.windowId}/${this.editorId}`
   }
 
   public getPath() {

@@ -86,9 +86,7 @@ export class WebviewHandler {
             const err = e.args[0]
             const newErr = new Error()
             atom.notifications.addFatalError(
-              `Uncaught error ${
-                err.name
-              } in markdown-preview-plus webview client`,
+              `Uncaught error ${err.name} in markdown-preview-plus webview client`,
               {
                 dismissable: true,
                 stack: newErr.stack,
@@ -264,15 +262,15 @@ export class WebviewHandler {
   ) {
     const id = this.replyCallbackId++
     return new Promise<RequestReplyMap[T]>((resolve) => {
-      this.replyCallbacks.set(id, {
+      this.replyCallbacks.set(id, ({
         request: request,
         callback: (result: RequestReplyMap[T]) => {
           this.replyCallbacks.delete(id)
           resolve(result)
         },
-      } as ReplyCallbackStruct<T>)
+      } as unknown) as ReplyCallbackStruct<T>)
       const newargs = Object.assign({ id }, args)
-      this._element.send<T>(request, newargs)
+      this._element.send<T>(request, newargs as ChannelMap[T])
     })
   }
 }
