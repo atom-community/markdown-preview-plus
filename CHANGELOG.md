@@ -1,3 +1,13 @@
+## 3.9.0
+
+### New features
+
+-   Added markdown-it-footnote support. (Joris van Zundert)
+
+### Maintenance
+
+-   Update dependencies
+
 ## 3.8.1
 
 -   Fix #452
