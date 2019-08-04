@@ -75,8 +75,6 @@ export class MathJaxController {
   }
 
   private async attachMathJax(): Promise<void> {
-    console.log('Loading maths rendering engine MathJax')
-
     // Attach MathJax script
     await injectScript(MathJaxController.mjSrc)
 
@@ -96,9 +94,6 @@ export class MathJaxController {
       skipStartupTypeset: true,
     })
     MathJax.Hub.Configured()
-
-    // Notify user MathJax has loaded
-    console.log('Loaded maths rendering engine MathJax')
   }
 }
 

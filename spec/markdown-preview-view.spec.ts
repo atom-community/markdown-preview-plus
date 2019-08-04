@@ -655,7 +655,6 @@ var x = 0;
           .getAttribute('href')!
         expect(mediaURL).to.exist
         mediaVer = getMediaVersion(css1path, mediaURL)
-        console.log(mediaVer)
         expect(mediaVer).not.to.equal('deleted')
 
         expect(
@@ -670,7 +669,6 @@ var x = 0;
           mediaURL = (await previewFragment(preview, previewHeadHTML))
             .querySelector('link')!
             .getAttribute('href')!
-          console.log(mediaURL)
           return !mediaURL.endsWith(mediaVer)
         })
 
@@ -901,7 +899,6 @@ var x = 0;
       const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor
       editor.setText(`![Some Image](img.png "title" =100x200)`)
       const pv = await createMarkdownPreviewViewEditor(editor)
-      console.log(await previewFragment(pv))
       const [height, width, title] = await pv.runJS<[number, number, string]>(
         `{ let img = document.querySelector('img');
           [img.getAttribute('height'), img.getAttribute('width'), img.getAttribute('title')];
@@ -1120,7 +1117,6 @@ $$
     })
     async function checkTabWidth(expectedWidth: number) {
       const frag = await previewFragment(pv)
-      console.log(frag)
       const tab: HTMLSpanElement | null = frag.querySelector('.hard-tab')
       if (!tab) throw new Error('No hard tab found')
       expect(tab.innerText.length).to.equal(expectedWidth)
