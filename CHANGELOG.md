@@ -1,3 +1,12 @@
+## 3.9.3
+
+-   Build
+-   Bump electron definitions
+-   Fix spec
+-   Remove extraneous console.logs
+-   Bump minimal Atom version to 1.39
+-   Changes to support Electron 3.1
+
 ## 3.9.2
 
 -   Revert "Changes to support Electron 3.1"
