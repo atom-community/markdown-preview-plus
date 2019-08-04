@@ -24,7 +24,4 @@ declare module 'atom' {
   interface Package {
     getStylesheetPaths(): string[]
   }
-  interface ContextMenuManager {
-    showForEvent: (ev: { target: HTMLElement }) => void
-  }
 }

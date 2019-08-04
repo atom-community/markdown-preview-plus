@@ -239,7 +239,6 @@ document.addEventListener('scroll', (_event) => {
 let lastContextMenuTarget: HTMLElement
 document.addEventListener('contextmenu', (e) => {
   lastContextMenuTarget = e.target as HTMLElement
-  ipcRenderer.sendToHost<'show-context-menu'>('show-context-menu', undefined)
 })
 
 ipcRenderer.on<'sync-source'>('sync-source', (_, { id }) => {

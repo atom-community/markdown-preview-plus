@@ -95,10 +95,6 @@ export class WebviewHandler {
             )
             break
           }
-          case 'show-context-menu': {
-            atom.contextMenu.showForEvent({ target: this._element })
-            break
-          }
           // replies
           case 'request-reply': {
             const { id, request, result } = e.args[0]
