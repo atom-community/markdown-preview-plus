@@ -32,6 +32,7 @@ declare interface ReplyMap {
   'zoom-out': void
   'uncaught-error': { message: string; name: string; stack?: string }
   'did-scroll-preview': { max: number; min: number }
+  'show-context-menu': void
   // actual replies
   'request-reply': RequestReplyType[keyof RequestReplyMap]
 }
