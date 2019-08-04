@@ -1,3 +1,7 @@
+## 3.9.2
+
+-   Revert "Changes to support Electron 3.1"
+
 ## 3.9.1
 
 -   Changes to support Electron 3.1
