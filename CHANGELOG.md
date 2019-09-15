@@ -1,3 +1,9 @@
+## 3.9.5
+
+-   Add twemoji assets as extra package
+
+    This should be a little more robust than bundling those in the repo.
+
 ## 3.9.4
 
 -   Bundle twemoji svgs
