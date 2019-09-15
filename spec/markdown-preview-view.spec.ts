@@ -881,7 +881,7 @@ var x = 0;
       expect(emojis).to.have.lengthOf(11)
       for (const i of emojis) {
         const p = path.normalize(i.getAttribute('src') || '')
-        expect(p.split(path.sep)).includes('twemoji')
+        expect(p.split(path.sep)).includes('twemoji-assets')
         expect(p.split(path.sep)).includes('svg')
         expect(p.endsWith('.svg')).to.be.true
       }
