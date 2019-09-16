@@ -274,6 +274,19 @@ function opener(uriToOpen: string) {
 
   if (uri.hostname === 'file') {
     return new MarkdownPreviewViewFile(pathname.slice(1))
+  } else if (uri.hostname === 'editor') {
+    const editorId = parseInt(pathname.slice(1), 10)
+    const editor = atom.workspace
+      .getTextEditors()
+      .find((ed) => ed.id === editorId)
+    if (editor === undefined) {
+      atom.notifications.addWarning(
+        'Markdown-preview-plus: Tried to open preview ' +
+          `for editor with id ${editorId}, which does not exist`,
+      )
+      return undefined
+    }
+    return MarkdownPreviewViewEditor.create(editor)
   } else if (uri.hostname === 'remote-editor') {
     const [windowId, editorId] = pathname
       .slice(1)
