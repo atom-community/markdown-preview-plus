@@ -1,3 +1,8 @@
+## 3.10.0
+
+-   Add a way to open preview for editor externally.
+-   Fix spec
+
 ## 3.9.5
 
 -   Add twemoji assets as extra package
