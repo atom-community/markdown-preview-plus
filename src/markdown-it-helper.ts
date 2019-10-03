@@ -69,7 +69,10 @@ function init(initState: InitState): markdownItModule {
   if (initState.checkBoxes) markdownIt.use(require('markdown-it-task-lists'))
   if (initState.toc) {
     markdownIt.use(require('markdown-it-anchor'))
-    markdownIt.use(require('markdown-it-table-of-contents'))
+    markdownIt.use(require('markdown-it-table-of-contents'), {
+        includeLevel: [1,2,3,4,5,6],
+        forceFullToc: true
+    })
   }
 
   if (initState.emoji) {
