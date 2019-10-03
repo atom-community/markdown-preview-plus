@@ -40,6 +40,8 @@ function currentConfig(rL: boolean) {
     imsize: config.useImsize,
     inlineMathSeparators: config.inlineMathSeparators,
     blockMathSeparators: config.blockMathSeparators,
+    forceFullToc: config.forceFullToc,
+    tocDepth: config.tocDepth,
   }
 }
 
@@ -69,9 +71,13 @@ function init(initState: InitState): markdownItModule {
   if (initState.checkBoxes) markdownIt.use(require('markdown-it-task-lists'))
   if (initState.toc) {
     markdownIt.use(require('markdown-it-anchor'))
+    const _includeLevels = []
+    for (let _i = 1; _i <= initState.tocDepth; _i++) {
+      _includeLevels.push(_i)
+    }
     markdownIt.use(require('markdown-it-table-of-contents'), {
-        includeLevel: [1,2,3,4,5,6],
-        forceFullToc: true
+      includeLevel: _includeLevels,
+      forceFullToc: initState.forceFullToc,
     })
   }
 
