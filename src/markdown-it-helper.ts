@@ -72,7 +72,7 @@ function init(initState: InitState): markdownItModule {
   if (initState.toc) {
     markdownIt.use(require('markdown-it-anchor'))
     markdownIt.use(require('markdown-it-table-of-contents'), {
-      includeLevel: Array.from({length: initState.tocDepth}, (x, i) => i + 1),
+      includeLevel: Array.from({ length: initState.tocDepth }, (_, i) => i + 1),
       forceFullToc: initState.forceFullToc,
     })
   }
