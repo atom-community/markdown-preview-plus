@@ -71,12 +71,8 @@ function init(initState: InitState): markdownItModule {
   if (initState.checkBoxes) markdownIt.use(require('markdown-it-task-lists'))
   if (initState.toc) {
     markdownIt.use(require('markdown-it-anchor'))
-    const _includeLevels = []
-    for (let _i = 1; _i <= initState.tocDepth; _i++) {
-      _includeLevels.push(_i)
-    }
     markdownIt.use(require('markdown-it-table-of-contents'), {
-      includeLevel: _includeLevels,
+      includeLevel: Array.from({length: initState.tocDepth}, (x, i) => i + 1),
       forceFullToc: initState.forceFullToc,
     })
   }
