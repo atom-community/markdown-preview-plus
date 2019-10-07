@@ -1,3 +1,8 @@
+## 3.11.0
+
+-   Bump dependencies
+-   Present certain TOC rendering options to the user through Atom config ([#469](https://github.com/atom-community/markdown-preview-plus/pull/469)) ([@tanhevg](https://github.com/tanhevg))
+
 ## 3.10.0
 
 -   Add a way to open preview for editor externally.
