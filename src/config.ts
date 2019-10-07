@@ -396,6 +396,21 @@ export const config: IConfig = {
         default: false,
         order: 20,
       },
+      forceFullToc: {
+        title: 'Force full table of contents',
+        description:
+          'Renders all the headers in TOC, even if they are in incorrect order',
+        type: 'boolean',
+        default: false,
+        order: 21,
+      },
+      tocDepth: {
+        title: 'Depth of Table of Contents',
+        description: 'Maximum header depth that will be included in TOC',
+        type: 'integer',
+        default: 2,
+        order: 22,
+      },
       useImsize: {
         title: 'Allow specifying image size in image title',
         description:
@@ -668,6 +683,8 @@ declare module 'atom' {
     'markdown-preview-plus.markdownItConfig.useCheckBoxes': boolean
     'markdown-preview-plus.markdownItConfig.useEmoji': boolean
     'markdown-preview-plus.markdownItConfig.useToc': boolean
+    'markdown-preview-plus.markdownItConfig.forceFullToc': boolean
+    'markdown-preview-plus.markdownItConfig.tocDepth': number
     'markdown-preview-plus.markdownItConfig.useImsize': boolean
     'markdown-preview-plus.markdownItConfig.useCriticMarkup': boolean
     'markdown-preview-plus.markdownItConfig.useFootnote': boolean
@@ -830,6 +847,8 @@ declare module 'atom' {
       'markdownItConfig.useCheckBoxes': boolean
       'markdownItConfig.useEmoji': boolean
       'markdownItConfig.useToc': boolean
+      'markdownItConfig.forceFullToc': boolean
+      'markdownItConfig.tocDepth': number
       'markdownItConfig.useImsize': boolean
       'markdownItConfig.useCriticMarkup': boolean
       'markdownItConfig.useFootnote': boolean
@@ -841,6 +860,8 @@ declare module 'atom' {
         useCheckBoxes: boolean
         useEmoji: boolean
         useToc: boolean
+        forceFullToc: boolean
+        tocDepth: number
         useImsize: boolean
         useCriticMarkup: boolean
         useFootnote: boolean
