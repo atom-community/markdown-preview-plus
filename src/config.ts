@@ -696,6 +696,8 @@ declare module 'atom' {
       useCheckBoxes: boolean
       useEmoji: boolean
       useToc: boolean
+      forceFullToc: boolean
+      tocDepth: number
       useImsize: boolean
       useCriticMarkup: boolean
       useFootnote: boolean
