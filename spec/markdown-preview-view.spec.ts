@@ -22,7 +22,7 @@ import {
   previewHeadHTML,
   sinonPrivateSpy,
 } from './util'
-import { TextEditorElement, TextEditor } from 'atom'
+import { TextEditorElement, TextEditor, ConfigValues } from 'atom'
 import { PlaceholderView } from '../lib/placeholder-view'
 
 declare module 'atom' {
@@ -885,6 +885,104 @@ var x = 0;
         expect(p.split(path.sep)).includes('svg')
         expect(p.endsWith('.svg')).to.be.true
       }
+    })
+  })
+
+  describe('toc', function() {
+    let preview: MarkdownPreviewViewFile
+    let config: Partial<ConfigValues['markdown-preview-plus.markdownItConfig']>
+    let toc: HTMLDivElement
+    let headers: string[]
+    before(() => {
+      config = {
+        useToc: true,
+      }
+    })
+    beforeEach(async () => {
+      atom.config.set('markdown-preview-plus.markdownItConfig', config as any)
+      preview = await createMarkdownPreviewViewFile(filePath)
+      // tslint:disable-next-line: variable-name
+      const toc_ = (await previewFragment(preview)).querySelector<
+        HTMLDivElement
+      >('div.table-of-contents')
+      expect(toc_).not.to.be.null
+      toc = toc_!
+      headers = Array.from(
+        toc.querySelectorAll<HTMLAnchorElement>('li > a'),
+      ).map((x) => x.innerText)
+    })
+    it('renders toc', async function() {
+      expect(Array.from(toc.querySelectorAll('ul'))).to.have.length(2)
+      expect(Array.from(toc.querySelectorAll('li'))).to.have.length(5)
+      expect(
+        Array.from(toc.querySelectorAll<HTMLAnchorElement>('li > a')).map(
+          (x) => x.innerText,
+        ),
+      ).to.include.all.members([
+        'File.markdown',
+        'Level two header with space',
+        'Level two header without space',
+        'Checkbox Lists',
+        'Emoji',
+      ])
+    })
+    describe('tocDepth option', () => {
+      describe('when enabled', () => {
+        before(() => {
+          config.tocDepth = 5
+        })
+        after(() => {
+          delete config.tocDepth
+        })
+        it('is respected', async () => {
+          expect(headers).to.include.all.members([
+            'Level three header',
+            'Level four header',
+            'Level five header',
+          ])
+          expect(headers).to.not.include.members(['Level six header'])
+        })
+      })
+      describe('when not enabled', () => {
+        it('does not affect output', async () => {
+          expect(headers).not.to.include.any.members([
+            'Level three header',
+            'Level four header',
+            'Level five header',
+            'Level six header',
+          ])
+        })
+      })
+    })
+    describe('foceFullToc option', () => {
+      describe('when enabled', () => {
+        before(() => {
+          config.forceFullToc = true
+          config.tocDepth = 6
+        })
+        after(() => {
+          delete config.forceFullToc
+          delete config.tocDepth
+        })
+        it('is respected', async () => {
+          expect(headers).to.include('Out of order header')
+          expect(headers).to.include('File.markdown')
+        })
+      })
+      describe('when disabled', () => {
+        before(() => {
+          config.forceFullToc = false
+          config.tocDepth = 6
+        })
+        after(() => {
+          delete config.forceFullToc
+          delete config.tocDepth
+        })
+        it('out of order headers break toc', async () => {
+          expect(headers).to.include('Out of order header')
+          expect(headers).to.not.include('File.markdown')
+        })
+      })
     })
   })
 
