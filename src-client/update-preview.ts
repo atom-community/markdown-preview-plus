@@ -47,6 +47,18 @@ export class UpdatePreview {
 
     morph(this.dom, newDom, {
       childrenOnly: true,
+      onBeforeElUpdated: function(fromEl, toEl) {
+        // do not recurse into element children if isEqualNode === true
+        // spec - https://dom.spec.whatwg.org/#concept-node-equals
+        return !fromEl.isEqualNode(toEl)
+      },
+      onBeforeElChildrenUpdated: function(fromEl, toEl) {
+        // force-redraw inline SVG
+        if (fromEl.nodeName === 'SVG' && toEl.nodeName === 'SVG') {
+          fromEl.innerHTML = '' // removes all children
+        }
+        return true
+      },
     })
 
     // A very specific fix for #386 and #406
