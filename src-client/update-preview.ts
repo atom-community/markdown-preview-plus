@@ -38,20 +38,6 @@ export class UpdatePreview {
       },
     })
 
-    // A very specific fix for #386 and #406
-    for (const li of this.dom.querySelectorAll('li')) {
-      if (
-        li.firstElementChild &&
-        li.firstElementChild === li.lastElementChild &&
-        li.firstElementChild.tagName === 'P' &&
-        li.firstChild &&
-        li.firstChild.nodeType === Node.TEXT_NODE &&
-        li.firstChild.textContent === '\n'
-      ) {
-        li.removeChild(li.firstChild)
-      }
-    }
-
     if (renderLaTeX) {
       return this.mjController.queueTypeset(this.dom)
     }
