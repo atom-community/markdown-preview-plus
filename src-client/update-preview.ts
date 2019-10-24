@@ -31,7 +31,7 @@ export class UpdatePreview {
         return !fromEl.isEqualNode(toEl)
       },
       getNodeKey: function(node: Element) {
-        if (node.closest && node.closest('svg') !== null) {
+        if (node.id && node.closest && node.closest('svg') !== null) {
           return '' // ignore SVG id
         }
         return node.id
