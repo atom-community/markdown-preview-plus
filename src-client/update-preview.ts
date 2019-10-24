@@ -52,12 +52,11 @@ export class UpdatePreview {
         // spec - https://dom.spec.whatwg.org/#concept-node-equals
         return !fromEl.isEqualNode(toEl)
       },
-      onBeforeElChildrenUpdated: function(fromEl, toEl) {
-        // force-redraw inline SVG
-        if (fromEl.nodeName === 'SVG' && toEl.nodeName === 'SVG') {
-          fromEl.innerHTML = '' // removes all children
+      getNodeKey: function(node: Element) {
+        if (node.closest && node.closest('svg') !== null) {
+          return '' // ignore SVG id
         }
-        return true
+        return node.id
       },
     })
 
