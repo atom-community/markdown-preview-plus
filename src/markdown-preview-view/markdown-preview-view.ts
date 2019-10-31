@@ -35,6 +35,7 @@ export abstract class MarkdownPreviewView {
   protected destroyed = false
   private loading: boolean = true
   private imageWatcher!: ImageWatcher
+  private updatePendingOnLoad = false
 
   protected constructor(
     private renderLaTeX: boolean = atomConfig().mathConfig
@@ -50,7 +51,11 @@ export abstract class MarkdownPreviewView {
         })
         this.handler.setBasePath(this.getPath())
         this.emitter.emit('did-change-title')
-        resolve(this.renderMarkdown())
+        resolve(
+          this.renderMarkdown().then(() => {
+            this.loading = false
+          }),
+        )
       })
       this.runJS = this.handler.runJS.bind(this.handler)
       this.imageWatcher = new ImageWatcher(
@@ -156,12 +161,20 @@ export abstract class MarkdownPreviewView {
   }
 
   protected changeHandler = () => {
-    handlePromise(this.renderMarkdown())
-
-    const pane = atom.workspace.paneForItem(this)
-    if (pane !== undefined && pane !== atom.workspace.getActivePane()) {
-      pane.activateItem(this)
+    if (this.loading) {
+      if (this.updatePendingOnLoad) return
+      else this.updatePendingOnLoad = true
     }
+    handlePromise(
+      this.renderPromise.then(async () => {
+        this.updatePendingOnLoad = false
+        await this.renderMarkdown()
+        const pane = atom.workspace.paneForItem(this)
+        if (pane !== undefined && pane !== atom.workspace.getActivePane()) {
+          pane.activateItem(this)
+        }
+      }),
+    )
   }
 
   protected abstract async getMarkdownSource(): Promise<string>
@@ -311,7 +324,6 @@ export abstract class MarkdownPreviewView {
       })
 
       if (this.destroyed) return
-      this.loading = false
       await this.handler.update(
         domDocument.documentElement!.outerHTML,
         this.renderLaTeX,
@@ -336,8 +348,19 @@ export abstract class MarkdownPreviewView {
         },
       )
       return
+    } else if (this.loading) {
+      atom.notifications.addFatalError(
+        'Error reported when Markdown Preview Plus view is loading',
+        {
+          dismissable: true,
+          stack: error.stack,
+          detail: error.message,
+        },
+      )
+      return
+    } else {
+      this.handler.error(error.message)
     }
-    this.handler.error(error.message)
   }
 
   private async copyToClipboard(): Promise<void> {
