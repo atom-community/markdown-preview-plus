@@ -196,7 +196,7 @@ export class WebviewHandler {
   public async printToPDF(opts: PrintToPDFOptionsReal) {
     return new Promise<Buffer>((resolve, reject) => {
       // TODO: Complain on Electron
-      this._element.printToPDF(opts as any, (error, data) => {
+      this._element.getWebContents().printToPDF(opts as any, (error, data) => {
         if (error) {
           reject(error)
           return
