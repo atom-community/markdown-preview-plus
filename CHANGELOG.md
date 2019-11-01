@@ -1,3 +1,8 @@
+## 3.11.3
+
+-   Fix save to PDF
+-   Force LF newlines in tsc output
+
 ## 3.11.2
 
 -   Second attempt at fixing #472
