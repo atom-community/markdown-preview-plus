@@ -27,7 +27,8 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "plugins": [{ "name": "typescript-tslint-plugin" }]
+    "plugins": [{ "name": "typescript-tslint-plugin" }],
+    "newLine": "LF"
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "../src-client/ipc.d.ts"],
   "compileOnSave": true,
