@@ -286,7 +286,6 @@ export class WebviewHandler {
     value: ChannelMap[T],
   ): Promise<void> {
     await this.initPromise
-    console.log('finished waiting for initPromise', this._element)
     this._element.send<T>(channel, value)
   }
 }

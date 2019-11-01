@@ -323,11 +323,11 @@ export abstract class MarkdownPreviewView {
       )
       this.emitter.emit('did-change-markdown')
     } catch (error) {
-      this.showError(error as Error)
+      await this.showError(error as Error)
     }
   }
 
-  private showError(error: Error) {
+  private async showError(error: Error) {
     if (this.destroyed) {
       atom.notifications.addFatalError(
         'Error reported on a destroyed Markdown Preview Plus view',
@@ -349,7 +349,7 @@ export abstract class MarkdownPreviewView {
       )
       return
     } else {
-      handlePromise(this.handler.error(error.message))
+      return this.handler.error(error.message)
     }
   }
 

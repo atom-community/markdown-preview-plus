@@ -91,7 +91,7 @@ describe('MarkdownPreviewView', function() {
   describe('::constructor', () =>
     it('shows an error message when there is an error', async function() {
       // tslint:disable-next-line: no-unsafe-any
-      ;(preview as any).showError(new Error('Not a real file'))
+      await (preview as any).showError(new Error('Not a real file'))
       expect(await previewText(preview)).to.contain('Failed')
     }))
 
