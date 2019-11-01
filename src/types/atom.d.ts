@@ -8,6 +8,7 @@ declare module 'atom' {
     bufferRowForScreenRow(row: number): number
     scrollToScreenRange(range: Range, options?: { center: boolean }): void
     onDidTokenize(callback: () => void): Disposable
+    isAlive(): boolean
   }
   interface TextBuffer {
     getLanguageMode(): { readonly fullyTokenized: boolean }

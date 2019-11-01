@@ -136,7 +136,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
           util.destroy(this)
         },
         scrollSync: ([firstLine, lastLine]) => {
-          this.handler.scrollSync(firstLine, lastLine)
+          handlePromise(this.handler.scrollSync(firstLine, lastLine))
         },
       }),
     )

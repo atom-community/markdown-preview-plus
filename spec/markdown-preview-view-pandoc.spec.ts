@@ -55,7 +55,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
   describe('image resolving', function() {
     beforeEach(async function() {
-      await preview.renderPromise
+      await preview.initialRenderPromise
     })
 
     describe('when the image uses a relative path', () =>
@@ -90,7 +90,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         `
         preview = createMarkdownPreviewViewFile(filePath)
 
-        await preview.renderPromise
+        await preview.initialRenderPromise
 
         await waitsFor(async () =>
           (await previewFragment(preview)).querySelector('img[alt=absolute]'),

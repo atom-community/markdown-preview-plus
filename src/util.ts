@@ -44,12 +44,12 @@ export async function copyHtml(
   renderLaTeX: boolean,
 ): Promise<void> {
   const view = new WebviewHandler(async () => {
-    view.init({
+    await view.init({
       userMacros: loadUserMacros(),
       mathJaxConfig: { ...atomConfig().mathConfig, latexRenderer: 'SVG' },
       context: 'copy-html',
     })
-    view.setBasePath(filePath)
+    await view.setBasePath(filePath)
 
     const domDocument = await renderer.render({
       text,

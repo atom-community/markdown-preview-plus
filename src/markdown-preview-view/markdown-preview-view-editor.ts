@@ -1,7 +1,7 @@
 import { TextEditor, Grammar, Range } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
-import { atomConfig } from '../util'
+import { atomConfig, handlePromise } from '../util'
 import { MarkdownPreviewViewEditorRemote } from './markdown-preview-view-editor-remote'
 
 export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
@@ -9,6 +9,8 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     TextEditor,
     MarkdownPreviewViewEditor
   >()
+
+  private lastRenderedMarkdownText = ''
 
   private constructor(private editor: TextEditor) {
     super()
@@ -53,7 +55,10 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   }
 
   protected async getMarkdownSource() {
-    return this.editor.getText()
+    if (this.editor.isAlive()) {
+      this.lastRenderedMarkdownText = this.editor.getText()
+    }
+    return this.lastRenderedMarkdownText
   }
 
   protected getGrammar(): Grammar {
@@ -114,7 +119,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       this.editor.onDidChangePath(() => {
-        this.handler.setBasePath(this.getPath())
+        handlePromise(this.handler.setBasePath(this.getPath()))
         this.emitter.emit('did-change-title')
       }),
       this.editor.onDidDestroy(() => {
@@ -135,9 +140,11 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
       atom.views.getView(this.editor).onDidChangeScrollTop(() => {
         if (!this.shouldScrollSync('editor')) return
         const [first, last] = this.editor.getVisibleRowRange()
-        this.handler.scrollSync(
-          this.editor.bufferRowForScreenRow(first),
-          this.editor.bufferRowForScreenRow(last),
+        handlePromise(
+          this.handler.scrollSync(
+            this.editor.bufferRowForScreenRow(first),
+            this.editor.bufferRowForScreenRow(last),
+          ),
         )
       }),
       atom.commands.add(atom.views.getView(this.editor), {

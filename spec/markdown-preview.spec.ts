@@ -683,7 +683,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      await preview.renderPromise
+      await preview.initialRenderPromise
 
       expect(await usesGithubStyle(preview)).to.be.false
     })
@@ -878,7 +878,7 @@ world</p>
       atom.views
         .getView(atom.workspace)
         .appendChild(atom.views.getView(preview))
-      await preview.renderPromise
+      await preview.initialRenderPromise
     })
     afterEach(() => {
       preview.destroy()

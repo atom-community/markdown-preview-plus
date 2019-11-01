@@ -39,7 +39,7 @@ export async function saveAsPDF(
         ? mathConfig.latexRenderer
         : pdfRenderer
 
-    view.init({
+    await view.init({
       userMacros: loadUserMacros(),
       mathJaxConfig: {
         ...mathConfig,
@@ -48,7 +48,7 @@ export async function saveAsPDF(
       context: 'pdf-export',
       pdfExportOptions: { width: newOpts.landscape ? height : width },
     })
-    view.setBasePath(filePath)
+    await view.setBasePath(filePath)
 
     const domDocument = await render({
       text,
