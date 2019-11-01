@@ -1,3 +1,7 @@
+## 3.11.2
+
+-   Second attempt at fixing #472
+
 ## 3.11.1
 
 -   First attempt at fixing #472
