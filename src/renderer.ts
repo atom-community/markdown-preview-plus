@@ -259,8 +259,9 @@ async function highlightCodeBlocks(
         el.setUpdatedSynchronously(true)
         el.style.pointerEvents = 'none'
         el.style.position = 'absolute'
-        el.style.width = '0px'
-        el.style.height = '1px'
+        el.style.visibility = 'hidden'
+        el.style.width = '100vw'
+        el.style.height = '100vh'
         atom.views.getView(atom.workspace).appendChild(el)
         atom.grammars.assignLanguageMode(
           ed.getBuffer(),
@@ -283,12 +284,14 @@ async function highlightCodeBlocks(
 
 async function editorTokenized(editor: TextEditor) {
   return new Promise((resolve) => {
-    if (editor.getBuffer().getLanguageMode().fullyTokenized) {
-      resolve()
+    const languageMode = editor.getBuffer().getLanguageMode()
+    const nextUpdatePromise = editor.component.getNextUpdatePromise()
+    if (languageMode.fullyTokenized || languageMode.tree) {
+      resolve(nextUpdatePromise)
     } else {
       const disp = editor.onDidTokenize(() => {
         disp.dispose()
-        resolve()
+        resolve(nextUpdatePromise)
       })
     }
   })
