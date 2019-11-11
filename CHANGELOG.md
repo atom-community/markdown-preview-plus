@@ -1,3 +1,7 @@
+## 3.11.4
+
+-   Attempt at fixing #474
+
 ## 3.11.3
 
 -   Fix save to PDF
