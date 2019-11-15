@@ -12,7 +12,6 @@ import {
   sinonPrivateSpy,
 } from './util'
 import { expect } from 'chai'
-import Token = require('markdown-it/lib/token')
 import * as previewUtil from '../lib/markdown-preview-view/util'
 import {} from 'electron'
 
@@ -81,7 +80,7 @@ describe('Syncronization of source and preview', function() {
 
   describe('Syncronizing preview with source', function() {
     let sourceMap: MyToken[]
-    let tokens: Token[]
+    let tokens: string
 
     beforeEach(function() {
       sourceMap = cson.readFileSync(
@@ -95,12 +94,23 @@ describe('Syncronization of source and preview', function() {
 
     it('identifies the correct HTMLElement path', () => {
       const elementPaths = previewUtil.buildLineMap(tokens)
+      // const out = []
+      // for (const [line, path] of Object.entries(elementPaths)) {
+      //   out.push({ line: parseInt(line, 10), path })
+      // }
+      // console.log(cson.stringify(out))
       for (const sourceLine of sourceMap) {
         if (sourceLine.path.length === 0) continue
         const elementPath = elementPaths[sourceLine.line]
         elementPath.forEach((_x, i) => {
-          expect(elementPath[i].tag).to.equal(sourceLine.path[i].tag)
-          expect(elementPath[i].index).to.equal(sourceLine.path[i].index)
+          expect(elementPath[i].tag).to.equal(
+            sourceLine.path[i].tag,
+            `On line ${sourceLine.line} expected tag at ${i} to match`,
+          )
+          expect(elementPath[i].index).to.equal(
+            sourceLine.path[i].index,
+            `On line ${sourceLine.line} expected index at ${i} to match`,
+          )
         })
       }
     })

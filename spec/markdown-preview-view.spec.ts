@@ -848,8 +848,8 @@ var x = 0;
       expect(atom.clipboard.read()).to.equal(`\
 <h1>Code Block</h1>
 <pre class="editor-colors lang-javascript"><span><span class="syntax--source syntax--js"><span class="syntax--keyword syntax--control">if</span> a <span class="syntax--keyword syntax--operator syntax--js">===</span> <span class="syntax--constant syntax--numeric">3</span> <span class="syntax--punctuation syntax--definition syntax--function syntax--body syntax--begin syntax--bracket syntax--curly">{</span></span></span>
-<span class=""><span class="syntax--source syntax--js"><span class="leading-whitespace">  </span>b <span class="syntax--keyword syntax--operator syntax--js">=</span> <span class="syntax--constant syntax--numeric">5</span></span></span>
-<span class=""><span class="syntax--source syntax--js"><span class="syntax--punctuation syntax--definition syntax--function syntax--body syntax--end syntax--bracket syntax--curly">}</span></span></span></pre>
+<span><span class="syntax--source syntax--js"><span class="leading-whitespace">  </span>b <span class="syntax--keyword syntax--operator syntax--js">=</span> <span class="syntax--constant syntax--numeric">5</span></span></span>
+<span><span class="syntax--source syntax--js"><span class="syntax--punctuation syntax--definition syntax--function syntax--body syntax--end syntax--bracket syntax--curly">}</span></span></span></pre>
 <p>encoding → issue</p>
 `)
     }))

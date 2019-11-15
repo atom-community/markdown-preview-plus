@@ -275,3 +275,21 @@ Now we'll consider embedding in lists.
   \[
   \int_{-\infty}^\infty e^{-x^2} = \sqrt{\pi}
   \]
+
+<div>
+
+paragraph 1
+
+paragraph 2
+
+</div>
+
+Issue happens in this line.(try: Rightclick here and click `Sync preview`)
+
+a
+
+look at me look at me look at me
+
+c
+
+**It works properly only when I remove the `<div>` tag**

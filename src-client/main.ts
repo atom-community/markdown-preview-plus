@@ -57,9 +57,8 @@ ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
   if (!root) throw new Error('No root element!')
   const slsm = new Map<number, Element>()
   const rsm = new WeakMap<Element, number[]>()
-  for (const lineS of Object.keys(map)) {
+  for (const [lineS, path] of Object.entries(map)) {
     const line = parseInt(lineS, 10)
-    const path = map[line]
     const elem = util.resolveElement(root, path)
     if (elem) {
       slsm.set(line, elem)

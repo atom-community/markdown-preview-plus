@@ -7,12 +7,41 @@ import { isEqual } from 'lodash'
 
 type InitState = Readonly<ReturnType<typeof currentConfig>>
 
-function mathInline(text: string) {
-  return `<span class='math inline-math'><script type='math/tex'>${text}</script></span>`
+function mathInline(tok: Token) {
+  return `<span class='math inline-math'><script type='math/tex'>${tok.content}</script></span>`
 }
 
-function mathBlock(text: string) {
-  return `<span class='math display-math'><script type='math/tex; mode=display'>${text}</script></span>`
+function mathBlock(tok: Token) {
+  let attrs = tok.attrs && tok.attrs.map(([n, v]) => `${n}="${v}"`).join(' ')
+  if (!attrs) attrs = ''
+  else attrs = ' ' + attrs
+  return `<span class='math display-math'${attrs}><script type='math/tex; mode=display'>${tok.content}</script></span>`
+}
+
+function addSourceMapData(token: Token) {
+  if (token.map && token.nesting >= 0) {
+    token.attrSet('data-source-lines', `${token.map[0]} ${token.map[1]}`)
+  }
+  return token
+}
+
+function recurseTokens(fn: (t: Token) => Token) {
+  const rf = function(token: Token) {
+    if (token.children) token.children = token.children.map(rf)
+    fn(token)
+    return token
+  }
+  return rf
+}
+
+function sourceLineData(md: markdownItModule) {
+  md.core.ruler.push('logger', function(state: any): any {
+    // tslint:disable-next-line: no-unsafe-any
+    if (!state.env.sourceMap) return state
+    // tslint:disable-next-line: no-unsafe-any
+    state.tokens = state.tokens.map(recurseTokens(addSourceMapData))
+    return state
+  })
 }
 
 function getOptions(breaks: boolean) {
@@ -65,6 +94,8 @@ function init(initState: InitState): markdownItModule {
       blockRenderer: mathBlock,
     })
   }
+
+  markdownIt.use(sourceLineData)
 
   // tslint:disable:no-unsafe-any
   if (initState.lazyHeaders) markdownIt.use(require('markdown-it-lazy-headers'))
@@ -120,7 +151,7 @@ export function render(text: string, rL: boolean) {
   return markdownIt.render(text)
 }
 
-export function getTokens(text: string, rL: boolean): Token[] {
+export function getTokens(text: string, rL: boolean) {
   const markdownIt = initIfNeeded(currentConfig(rL))
-  return markdownIt!.parse(text, {})
+  return markdownIt.render(text, { sourceMap: true })
 }

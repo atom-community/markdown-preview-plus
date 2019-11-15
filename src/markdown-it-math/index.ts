@@ -304,8 +304,8 @@ function makeMathRenderer(renderingOptions: RenderingOptions = {}) {
 export interface PluginOptions {
   inlineDelim?: [[string, string]]
   blockDelim?: [[string, string]]
-  inlineRenderer?: (data: string) => string
-  blockRenderer?: (data: string) => string
+  inlineRenderer?: (tok: Token, md: mdIt) => string
+  blockRenderer?: (tok: Token, md: mdIt) => string
   renderingOptions?: RenderingOptions
 }
 
@@ -317,12 +317,12 @@ export function math_plugin(md: mdIt, options: PluginOptions = {}) {
   const oBlockRenderer = options.blockRenderer
   const inlineRenderer = oInlineRenderer
     ? function(tokens: Token[], idx: number) {
-        return oInlineRenderer(tokens[idx].content)
+        return oInlineRenderer(tokens[idx], md)
       }
     : makeMathRenderer(options.renderingOptions)
   const blockRenderer = oBlockRenderer
     ? function(tokens: Token[], idx: number) {
-        return oBlockRenderer(tokens[idx].content) + '\n'
+        return oBlockRenderer(tokens[idx], md) + '\n'
       }
     : makeMathRenderer(
         Object.assign({ display: 'block' }, options.renderingOptions),

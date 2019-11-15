@@ -704,7 +704,7 @@ world</p>
       expect(await usesGithubStyle(preview)).to.be.true
     })
 
-    it.only('updates the rendering style immediately when the configuration is changed', async function() {
+    it('updates the rendering style immediately when the configuration is changed', async function() {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/simple.md'),
       )

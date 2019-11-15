@@ -82,11 +82,11 @@ describe('Rendering options', function() {
 describe('Renderer', function() {
   it('Should allow another renderer', function() {
     var md = require('markdown-it')().use(math_plugin, {
-      inlineRenderer: function(str) {
-        return `<inline>${str}</inline>`
+      inlineRenderer: function(tok) {
+        return `<inline>${tok.content}</inline>`
       },
-      blockRenderer: function(str) {
-        return `<display>${str}</display>`
+      blockRenderer: function(tok) {
+        return `<display>${tok.content}</display>`
       },
     })
 
