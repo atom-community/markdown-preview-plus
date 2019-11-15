@@ -1,3 +1,8 @@
+## 3.11.5
+
+-   Rework source map builder, update spec
+-   Tweak highlighter editor initialization
+
 ## 3.11.4
 
 -   Attempt at fixing #474
