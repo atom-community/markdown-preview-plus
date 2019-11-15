@@ -259,15 +259,14 @@ async function highlightCodeBlocks(
         el.setUpdatedSynchronously(true)
         el.style.pointerEvents = 'none'
         el.style.position = 'absolute'
-        el.style.visibility = 'hidden'
+        el.style.top = '100vh'
         el.style.width = '100vw'
-        el.style.height = '100vh'
-        atom.views.getView(atom.workspace).appendChild(el)
         atom.grammars.assignLanguageMode(
           ed.getBuffer(),
           scopeForFenceName(fenceName),
         )
         ed.setText(codeBlock.textContent!.replace(/\r?\n$/, ''))
+        atom.views.getView(atom.workspace).appendChild(el)
         await editorTokenized(ed)
         const html = Array.from(el.querySelectorAll('.line:not(.dummy)'))
         preElement.classList.add('editor-colors')
