@@ -1,6 +1,4 @@
-import * as MarkdownIt from 'markdown-it'
-
-declare interface ChannelMap {
+export interface ChannelMap {
   style: { styles: string[] }
   'update-images': { oldsrc: string; v: number | undefined }
   sync: { line: number; flash: boolean }
@@ -15,7 +13,8 @@ declare interface ChannelMap {
     mathJaxConfig: MathJaxConfig
   } & (
     | { context: 'live-preview' | 'copy-html' }
-    | { context: 'pdf-export'; pdfExportOptions: { width: number } })
+    | { context: 'pdf-export'; pdfExportOptions: { width: number } }
+  )
   'set-base-path': { path?: string }
   'set-source-map': {
     map: { [line: number]: Array<{ tag: string; index: number }> }
@@ -27,7 +26,7 @@ declare interface ChannelMap {
   reload: { id: number }
   'get-selection': { id: number }
 }
-declare interface ReplyMap {
+export interface ReplyMap {
   'zoom-in': void
   'zoom-out': void
   'uncaught-error': { message: string; name: string; stack?: string }
@@ -36,21 +35,21 @@ declare interface ReplyMap {
   // actual replies
   'request-reply': RequestReplyType[keyof RequestReplyMap]
 }
-declare interface RequestReplyMap {
+export interface RequestReplyMap {
   'update-preview': string
   'get-tex-config': MathJax.TeXInputProcessor
   reload: void
   'sync-source': number | undefined
   'get-selection': string | undefined
 }
-declare type RequestReplyType = {
+export type RequestReplyType = {
   [K in keyof RequestReplyMap]: {
     id: number
     request: K
     result: RequestReplyMap[K]
   }
 }
-declare type ReplyMapEvents = {
+export type ReplyMapEvents = {
   [K in keyof ReplyMap]: Electron.IpcMessageEventCustomFixed<K>
 }
 declare global {

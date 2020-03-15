@@ -436,7 +436,7 @@ var x = y;
 
     describe('when rich clipboard is disabled', function() {
       let clipboard = ''
-      let stub: sinon.SinonStub
+      let stub: sinon.SinonStub<any>
       before(function() {
         atom.config.set('markdown-preview-plus.richClipboard', false)
         stub = sinon
@@ -683,7 +683,7 @@ world</p>
       )
       preview = await expectPreviewInSplitPane()
 
-      await preview.initialRenderPromise
+      await preview.initialRenderPromise()
 
       expect(await usesGithubStyle(preview)).to.be.false
     })
@@ -728,7 +728,7 @@ world</p>
   })
 
   describe('Binding and unbinding based on config', function() {
-    let spy: sinon.SinonSpy
+    let spy: sinon.SinonSpy<any>
     before(async function() {
       await atom.packages.activatePackage('language-javascript')
       spy = sinon.spy(atom.commands, 'add')
@@ -880,7 +880,7 @@ world</p>
       atom.views
         .getView(atom.workspace)
         .appendChild(atom.views.getView(preview))
-      await preview.initialRenderPromise
+      await preview.initialRenderPromise()
     })
     afterEach(() => {
       preview.destroy()

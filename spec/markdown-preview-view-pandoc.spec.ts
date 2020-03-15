@@ -7,7 +7,7 @@ import {
   MarkdownPreviewView,
 } from '../lib/markdown-preview-view'
 import pandocHelper = require('../lib/pandoc-helper')
-import { expect } from 'chai'
+import { expect, assert } from 'chai'
 import * as sinon from 'sinon'
 
 import { waitsFor, previewFragment, activateMe } from './util'
@@ -16,12 +16,13 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
   let html: string
   let preview: MarkdownPreviewView
   let filePath: string
-  let stub: sinon.SinonStub
+  let stub: sinon.SinonStub<any>
   const previews: Set<MarkdownPreviewView> = new Set()
 
   const createMarkdownPreviewViewFile = function(filePath: string) {
     const mpv = new MarkdownPreviewViewFile(filePath)
-    window.workspaceDiv.appendChild(mpv.element)
+    assert(mpv.element !== undefined)
+    window.workspaceDiv.appendChild(mpv.element!)
     previews.add(mpv)
     return mpv
   }
@@ -55,7 +56,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
 
   describe('image resolving', function() {
     beforeEach(async function() {
-      await preview.initialRenderPromise
+      await preview.initialRenderPromise()
     })
 
     describe('when the image uses a relative path', () =>
@@ -90,7 +91,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         `
         preview = createMarkdownPreviewViewFile(filePath)
 
-        await preview.initialRenderPromise
+        await preview.initialRenderPromise()
 
         await waitsFor(async () =>
           (await previewFragment(preview)).querySelector('img[alt=absolute]'),

@@ -6,7 +6,7 @@ import {
   MarkdownPreviewViewFile,
   MarkdownPreviewViewEditor,
 } from '../lib/markdown-preview-view'
-import { expect } from 'chai'
+import { expect, assert } from 'chai'
 import * as sinon from 'sinon'
 import * as wrench from 'fs-extra'
 import * as previewUtil from '../lib/markdown-preview-view/util'
@@ -41,16 +41,18 @@ describe('MarkdownPreviewView', function() {
 
   const createMarkdownPreviewViewFile = async function(filePath: string) {
     const mpv = new MarkdownPreviewViewFile(filePath)
-    window.workspaceDiv.appendChild(mpv.element)
+    assert(mpv.element !== undefined)
+    window.workspaceDiv.appendChild(mpv.element!)
     previews.add(mpv)
-    await mpv.initialRenderPromise
+    await mpv.initialRenderPromise()
     return mpv
   }
   const createMarkdownPreviewViewEditor = async function(editor: TextEditor) {
     const mpv = MarkdownPreviewViewEditor.create(editor)
-    window.workspaceDiv.appendChild(mpv.element)
+    assert(mpv.element !== undefined)
+    window.workspaceDiv.appendChild(mpv.element!)
     previews.add(mpv)
-    await mpv.initialRenderPromise
+    await mpv.initialRenderPromise()
     return mpv
   }
 
@@ -106,9 +108,10 @@ describe('MarkdownPreviewView', function() {
       newPreview = atom.deserializers.deserialize(
         preview.serialize(),
       ) as MarkdownPreviewView
-      window.workspaceDiv.appendChild(newPreview.element)
+      assert(preview.element !== undefined)
+      window.workspaceDiv.appendChild(newPreview.element!)
       expect(newPreview.getPath()).to.equal(preview.getPath())
-      await newPreview.initialRenderPromise
+      await newPreview.initialRenderPromise()
     })
 
     it('does not recreate a preview when the file no longer exists', async function() {
@@ -143,9 +146,10 @@ describe('MarkdownPreviewView', function() {
       ) as PlaceholderView
       newPreview = await waitsFor(() => newPlaceholder.getView())
 
-      window.workspaceDiv.appendChild(newPreview.element)
+      assert(newPreview.element !== undefined)
+      window.workspaceDiv.appendChild(newPreview.element!)
       await waitsFor(() => newPreview.getPath() === preview.getPath())
-      await newPreview.initialRenderPromise
+      await newPreview.initialRenderPromise()
     })
   })
 
@@ -748,7 +752,7 @@ var x = 0;
 
       expect(fs.existsSync(outputPath)).to.be.false
 
-      await preview.initialRenderPromise
+      await preview.initialRenderPromise()
 
       let textEditor: TextEditor
       const openedPromise = new Promise(function(resolve) {
@@ -770,7 +774,8 @@ var x = 0;
       )
       previewUtil.__setGetStylesOverride(() => styles)
       try {
-        atom.commands.dispatch(preview.element, 'core:save-as')
+        assert(preview.element !== undefined)
+        atom.commands.dispatch(preview.element!, 'core:save-as')
 
         await openedPromise
 
@@ -839,7 +844,8 @@ var x = 0;
 
       atom.clipboard.write('initial clipboard content')
 
-      atom.commands.dispatch(preview.element, 'core:copy')
+      assert(preview.element !== undefined)
+      atom.commands.dispatch(preview.element!, 'core:copy')
 
       await waitsFor(
         () => atom.clipboard.read() !== 'initial clipboard content',

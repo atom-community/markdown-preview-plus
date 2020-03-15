@@ -5,6 +5,7 @@ import fileUriToPath = require('file-uri-to-path')
 import { handlePromise, atomConfig } from '../util'
 import { RequestReplyMap, ChannelMap } from '../../src-client/ipc'
 import { getPreviewStyles } from './util'
+import { ImageWatcher } from '../image-watch-helper'
 
 export type ReplyCallbackStruct<
   T extends keyof RequestReplyMap = keyof RequestReplyMap
@@ -54,6 +55,7 @@ export class WebviewHandler {
       'did-scroll-preview': { min: number; max: number }
     }
   >()
+  public readonly imageWatcher: ImageWatcher
   protected disposables = new CompositeDisposable()
   private readonly _element: WebviewTag
   private destroyed = false
@@ -145,6 +147,10 @@ export class WebviewHandler {
         handlePromise(this.updateStyles().then(init))
       })
     })
+
+    this.disposables.add(
+      (this.imageWatcher = new ImageWatcher(this.updateImages.bind(this))),
+    )
   }
 
   public get element(): HTMLElement {

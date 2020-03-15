@@ -25,7 +25,7 @@ interface MyToken {
 describe('Syncronization of source and preview', function() {
   let preview: MarkdownPreviewView
   let fixturesPath: string
-  let stub: sinon.SinonStub
+  let stub: sinon.SinonStub<[], any>
 
   before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
@@ -68,7 +68,8 @@ describe('Syncronization of source and preview', function() {
   })
 
   function findInPreview(token: MyToken) {
-    let el = preview.element.querySelector('.update-preview')
+    expect(preview.element).not.to.be.undefined
+    let el = preview.element!.querySelector('.update-preview')
     for (const element of token.path) {
       if (!el) {
         break
@@ -151,8 +152,9 @@ describe('Syncronization of source and preview', function() {
         if (!element) {
           continue
         }
+        expect(preview.element).not.to.be.undefined
         atom.commands.dispatch(
-          preview.element,
+          preview.element!,
           'markdown-preview-plus:sync-source',
         )
         const syncLine = atom.workspace

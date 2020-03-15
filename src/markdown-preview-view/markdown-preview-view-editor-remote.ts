@@ -21,7 +21,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
     super()
     this.ipc = new IPCCaller(windowId, editorId)
     this.disposables.add(this.ipc)
-    this.handleEditorEvents()
+    handlePromise(this.handleEditorEvents())
     this.ipc
       .init()
       .then((v) => {
@@ -113,7 +113,8 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
     })
   }
 
-  private handleEditorEvents() {
+  private async handleEditorEvents() {
+    const handler = await this.handler
     this.disposables.add(
       new EventHandler(this.windowId, this.editorId, {
         changeText: (text) => {
@@ -121,7 +122,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
           this.changeHandler()
         },
         syncPreview: ({ pos, flash }) => {
-          this.syncPreview(pos, flash)
+          handlePromise(this.syncPreview(pos, flash))
         },
         changePath: ({ title, path }) => {
           this.title = title
@@ -136,7 +137,7 @@ export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
           util.destroy(this)
         },
         scrollSync: ([firstLine, lastLine]) => {
-          handlePromise(this.handler.scrollSync(firstLine, lastLine))
+          handlePromise(handler.scrollSync(firstLine, lastLine))
         },
       }),
     )

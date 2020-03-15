@@ -81,14 +81,14 @@ export async function expectPreviewInSplitPane() {
     .getCenter()
     .getPanes()[1]
     .getActiveItem() as MarkdownPreviewView
-  await preview.initialRenderPromise
+  await preview.initialRenderPromise()
 
   expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewEditor')
   expect(preview.getPath()).to.equal(
     atom.workspace.getActiveTextEditor()!.getPath(),
   )
 
-  await preview.initialRenderPromise
+  await preview.initialRenderPromise()
   return preview
 }
 
@@ -146,7 +146,7 @@ export function stubClipboard() {
       .stub(clipboard, 'write')
       .callsFake(function(arg: { text?: string }) {
         result.contents = arg.text || ''
-      })
+      }) as any
   })
   after(function() {
     result.stub && result.stub.restore()

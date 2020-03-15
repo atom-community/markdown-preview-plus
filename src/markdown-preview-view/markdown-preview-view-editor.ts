@@ -14,7 +14,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
 
   private constructor(private editor: TextEditor) {
     super()
-    this.handleEditorEvents()
+    handlePromise(this.handleEditorEvents())
   }
 
   public static create(editor: TextEditor) {
@@ -97,7 +97,8 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     pane.activate()
   }
 
-  private handleEditorEvents() {
+  private async handleEditorEvents() {
+    const handler = await this.handler
     this.disposables.add(
       atom.workspace.onDidChangeActiveTextEditor((ed) => {
         if (atomConfig().previewConfig.activatePreviewWithEditor) {
@@ -119,7 +120,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       this.editor.onDidChangePath(() => {
-        handlePromise(this.handler.setBasePath(this.getPath()))
+        handlePromise(handler.setBasePath(this.getPath()))
         this.emitter.emit('did-change-title')
       }),
       this.editor.onDidDestroy(() => {
@@ -141,7 +142,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         if (!this.shouldScrollSync('editor')) return
         const [first, last] = this.editor.getVisibleRowRange()
         handlePromise(
-          this.handler.scrollSync(
+          handler.scrollSync(
             this.editor.bufferRowForScreenRow(first),
             this.editor.bufferRowForScreenRow(last),
           ),
@@ -157,7 +158,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
 
   private syncPreviewHelper(flash: boolean) {
     const pos = this.editor.getCursorBufferPosition().row
-    this.syncPreview(pos, flash)
+    handlePromise(this.syncPreview(pos, flash))
   }
 
   private shouldScrollSync(whatScrolled: 'editor' | 'preview') {
