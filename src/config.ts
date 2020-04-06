@@ -204,6 +204,25 @@ export const config: IConfig = {
         enum: ['html', 'pdf'],
         default: 'html',
       },
+      openOnSave: {
+        type: 'object',
+        title: 'Open after saving',
+        order: 21,
+        properties: {
+          html: {
+            title: 'HTML',
+            type: 'boolean',
+            default: true,
+            order: 10,
+          },
+          pdf: {
+            title: 'PDF',
+            type: 'boolean',
+            default: false,
+            order: 20,
+          },
+        },
+      },
       saveToPDFOptions: {
         title: 'Save to PDF options',
         type: 'object',
@@ -601,6 +620,12 @@ declare module 'atom' {
       | 'absolutized'
       | 'untouched'
     'markdown-preview-plus.saveConfig.defaultSaveFormat': 'html' | 'pdf'
+    'markdown-preview-plus.saveConfig.openOnSave.html': boolean
+    'markdown-preview-plus.saveConfig.openOnSave.pdf': boolean
+    'markdown-preview-plus.saveConfig.openOnSave': {
+      html: boolean
+      pdf: boolean
+    }
     'markdown-preview-plus.saveConfig.saveToPDFOptions.latexRenderer':
       | 'Same as live preview'
       | 'HTML-CSS'
@@ -631,6 +656,12 @@ declare module 'atom' {
       mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
       mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
       defaultSaveFormat: 'html' | 'pdf'
+      'openOnSave.html': boolean
+      'openOnSave.pdf': boolean
+      openOnSave: {
+        html: boolean
+        pdf: boolean
+      }
       'saveToPDFOptions.latexRenderer':
         | 'Same as live preview'
         | 'HTML-CSS'
@@ -760,6 +791,12 @@ declare module 'atom' {
         | 'absolutized'
         | 'untouched'
       'saveConfig.defaultSaveFormat': 'html' | 'pdf'
+      'saveConfig.openOnSave.html': boolean
+      'saveConfig.openOnSave.pdf': boolean
+      'saveConfig.openOnSave': {
+        html: boolean
+        pdf: boolean
+      }
       'saveConfig.saveToPDFOptions.latexRenderer':
         | 'Same as live preview'
         | 'HTML-CSS'
@@ -790,6 +827,12 @@ declare module 'atom' {
         mediaOnSaveAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         mediaOnCopyAsHTMLBehaviour: 'relativized' | 'absolutized' | 'untouched'
         defaultSaveFormat: 'html' | 'pdf'
+        'openOnSave.html': boolean
+        'openOnSave.pdf': boolean
+        openOnSave: {
+          html: boolean
+          pdf: boolean
+        }
         'saveToPDFOptions.latexRenderer':
           | 'Same as live preview'
           | 'HTML-CSS'

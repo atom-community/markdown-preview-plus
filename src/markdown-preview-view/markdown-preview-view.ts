@@ -127,15 +127,18 @@ export abstract class MarkdownPreviewView {
 
     if (ext === '.pdf') {
       handlePromise(
-        this.getMarkdownSource().then(async (mdSource) =>
-          saveAsPDF(
+        this.getMarkdownSource().then(async (mdSource) => {
+          await saveAsPDF(
             mdSource,
             this.getPath(),
             this.getGrammar(),
             this.renderLaTeX,
             filePath,
-          ),
-        ),
+          )
+          if (atomConfig().saveConfig.openOnSave.pdf) {
+            return atom.workspace.open(filePath)
+          } else return undefined
+        }),
       )
     } else {
       handlePromise(
@@ -148,7 +151,9 @@ export abstract class MarkdownPreviewView {
           )
 
           fs.writeFileSync(filePath, fullHtml)
-          return atom.workspace.open(filePath)
+          if (atomConfig().saveConfig.openOnSave.html) {
+            return atom.workspace.open(filePath)
+          } else return undefined
         }),
       )
     }
