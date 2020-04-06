@@ -157,6 +157,7 @@ export async function renderPandoc(
   text: string,
   filePath: string | undefined,
   renderMath: boolean,
+  showErrors: boolean,
 ): Promise<string> {
   const { args, opts } = setPandocOptions(filePath, renderMath)
   return new Promise<string>((resolve, reject) => {
@@ -173,7 +174,11 @@ export async function renderPandoc(
           reject(error)
         }
         try {
-          const result = handleResponse(stderr || '', stdout || '', renderMath)
+          const result = handleResponse(
+            showErrors ? stderr || '' : '',
+            stdout || '',
+            renderMath,
+          )
           resolve(result)
         } catch (e) {
           reject(e)

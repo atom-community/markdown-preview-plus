@@ -23,7 +23,7 @@ export interface CommonRenderOptions<T extends RenderMode> {
 export type RenderOptions =
   | (CommonRenderOptions<'normal'> & { imageWatcher?: ImageWatcher })
   | (CommonRenderOptions<'save'> & { savePath: string })
-  | (CommonRenderOptions<'copy'>)
+  | CommonRenderOptions<'copy'>
 
 export async function render(options: RenderOptions): Promise<HTMLDocument> {
   // Remove the <!doctype> since otherwise marked will escape it
@@ -38,6 +38,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
         text,
         options.filePath,
         options.renderLaTeX,
+        options.mode === 'normal',
       )
     } catch (err) {
       const e = err as Error & { html?: string }
