@@ -192,6 +192,30 @@ ipcRenderer.on<'update-preview'>(
   },
 )
 
+ipcRenderer.on<'await-fully-ready'>(
+  'await-fully-ready',
+  async (_event, { id }) => {
+    // tslint:disable-next-line: totality-check
+    if (document.readyState === 'complete') {
+      ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+        id,
+        request: 'await-fully-ready',
+        result: void 0,
+      })
+      return
+    }
+    function loaded() {
+      ipcRenderer.sendToHost<'request-reply'>('request-reply', {
+        id,
+        request: 'await-fully-ready',
+        result: void 0,
+      })
+      document.removeEventListener('load', loaded)
+    }
+    document.addEventListener('load', loaded)
+  },
+)
+
 const baseElement = document.createElement('base')
 document.head!.appendChild(baseElement)
 

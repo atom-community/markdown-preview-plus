@@ -59,6 +59,7 @@ export async function saveAsPDF(
       mode: 'normal',
     })
     await view.update(domDocument.documentElement!.outerHTML, renderLaTeX)
+    await view.fullyReady()
 
     try {
       const data = await view.printToPDF(newOpts)

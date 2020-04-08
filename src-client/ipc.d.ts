@@ -25,6 +25,7 @@ export interface ChannelMap {
   'sync-source': { id: number }
   reload: { id: number }
   'get-selection': { id: number }
+  'await-fully-ready': { id: number }
 }
 export interface ReplyMap {
   'zoom-in': void
@@ -39,6 +40,7 @@ export interface RequestReplyMap {
   'update-preview': string
   'get-tex-config': MathJax.TeXInputProcessor
   reload: void
+  'await-fully-ready': void
   'sync-source': number | undefined
   'get-selection': string | undefined
 }
