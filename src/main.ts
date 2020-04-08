@@ -13,6 +13,7 @@ import {
   CompositeDisposable,
   ContextMenuOptions,
 } from 'atom'
+import * as path from 'path'
 import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
 import { migrateConfig } from './migrate-config'
@@ -78,6 +79,9 @@ export async function activate() {
         const view = MarkdownPreviewView.viewForElement(e.currentTarget)
         if (view) view.toggleRenderLatex()
       },
+    }),
+    atom.commands.add('.tree-view', {
+      'markdown-preview-plus:preview-file': previewFile,
     }),
     atom.workspace.addOpener(opener),
     atom.config.observe(
@@ -147,9 +151,20 @@ async function addPreviewForEditor(editor: TextEditor) {
   return res
 }
 
-async function previewFile({ currentTarget }: CommandEvent): Promise<void> {
-  const filePath = (currentTarget as HTMLElement).dataset.path
+async function previewFile(evt: CommandEvent): Promise<void> {
+  const { currentTarget } = evt
+  const fileEntry = (currentTarget as HTMLElement).querySelector(
+    '.entry.file.selected .name',
+  )
+  const filePath = (fileEntry as HTMLElement).dataset.path
   if (!filePath) {
+    evt.abortKeyBinding()
+    return
+  }
+  const ext = path.extname(filePath).substr(1)
+  const exts = util.atomConfig().extensions
+  if (!exts.includes(ext)) {
+    evt.abortKeyBinding()
     return
   }
 
@@ -198,20 +213,9 @@ function configObserver<T>(
   }
 }
 
-function registerExtensions(
-  extensions: string[],
-  disp: CompositeDisposable,
-  cm: ContextMenu,
-) {
+function registerExtensions(extensions: string[], _: any, cm: ContextMenu) {
   for (const ext of extensions) {
     const selector = `.tree-view .file .name[data-name$=".${ext}"]`
-    disp.add(
-      atom.commands.add(
-        selector,
-        'markdown-preview-plus:preview-file',
-        previewFile,
-      ),
-    )
     cm[selector] = [
       {
         label: 'Markdown Preview',
