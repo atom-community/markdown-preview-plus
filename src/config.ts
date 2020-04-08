@@ -223,6 +223,12 @@ export const config: IConfig = {
           },
         },
       },
+      makePDFOverwrite: {
+        type: 'boolean',
+        title: '`Make PDF` on Tree View will overwrite files without prompt',
+        order: 22,
+        default: false,
+      },
       saveToPDFOptions: {
         title: 'Save to PDF options',
         type: 'object',
@@ -626,6 +632,7 @@ declare module 'atom' {
       html: boolean
       pdf: boolean
     }
+    'markdown-preview-plus.saveConfig.makePDFOverwrite': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions.latexRenderer':
       | 'Same as live preview'
       | 'HTML-CSS'
@@ -662,6 +669,7 @@ declare module 'atom' {
         html: boolean
         pdf: boolean
       }
+      makePDFOverwrite: boolean
       'saveToPDFOptions.latexRenderer':
         | 'Same as live preview'
         | 'HTML-CSS'
@@ -797,6 +805,7 @@ declare module 'atom' {
         html: boolean
         pdf: boolean
       }
+      'saveConfig.makePDFOverwrite': boolean
       'saveConfig.saveToPDFOptions.latexRenderer':
         | 'Same as live preview'
         | 'HTML-CSS'
@@ -833,6 +842,7 @@ declare module 'atom' {
           html: boolean
           pdf: boolean
         }
+        makePDFOverwrite: boolean
         'saveToPDFOptions.latexRenderer':
           | 'Same as live preview'
           | 'HTML-CSS'

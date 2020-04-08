@@ -12,6 +12,7 @@ import {
   CommandEvent,
   CompositeDisposable,
   ContextMenuOptions,
+  File,
 } from 'atom'
 import * as path from 'path'
 import * as util from './util'
@@ -82,6 +83,7 @@ export async function activate() {
     }),
     atom.commands.add('.tree-view', {
       'markdown-preview-plus:preview-file': previewFile,
+      'markdown-preview-plus:make-pdf': makePDF,
     }),
     atom.workspace.addOpener(opener),
     atom.config.observe(
@@ -221,6 +223,10 @@ function registerExtensions(extensions: string[], _: any, cm: ContextMenu) {
         label: 'Markdown Preview',
         command: 'markdown-preview-plus:preview-file',
       },
+      {
+        label: 'Make PDF',
+        command: 'markdown-preview-plus:make-pdf',
+      },
     ]
   }
 }
@@ -254,6 +260,49 @@ function registerGrammars(
       },
     ]
   }
+}
+
+async function makePDF(evt: CommandEvent): Promise<void> {
+  const { currentTarget } = evt
+  const fileEntries = (currentTarget as HTMLElement).querySelectorAll(
+    '.entry.file.selected .name',
+  )
+  async function go(filePath?: string) {
+    if (filePath === undefined) return
+    const f = new File(filePath)
+    const text = await f.read()
+    if (text === null) return
+    const savePath = filePath + '.pdf'
+    const saveFile = new File(savePath)
+    if (
+      (await saveFile.exists()) &&
+      !util.atomConfig().saveConfig.makePDFOverwrite
+    ) {
+      atom.notifications.addInfo(
+        `${saveFile.getBaseName()} exists, will not overwrite`,
+      )
+      return
+    }
+
+    const pdf = await import('./markdown-preview-view/pdf-export-util')
+    await pdf.saveAsPDF(
+      text,
+      filePath,
+      undefined,
+      util.atomConfig().mathConfig.enableLatexRenderingByDefault,
+      savePath,
+    )
+  }
+  const exts = util.atomConfig().extensions
+  const paths = Array.from(fileEntries)
+    .map((x) => (x as HTMLElement).dataset.path)
+    .filter((x) => x !== undefined && exts.includes(path.extname(x).substr(1)))
+    .map(go)
+  if (paths.length === 0) {
+    evt.abortKeyBinding()
+    return
+  }
+  await Promise.all(paths)
 }
 
 function opener(uriToOpen: string) {
