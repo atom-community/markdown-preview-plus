@@ -55,6 +55,7 @@ export async function copyHtml(
       text,
       filePath,
       renderLaTeX,
+      renderErrors: false,
       mode: 'copy',
     })
     const res = await view.update(

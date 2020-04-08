@@ -55,6 +55,7 @@ export async function saveAsPDF(
       filePath,
       grammar,
       renderLaTeX,
+      renderErrors: false,
       mode: 'normal',
     })
     await view.update(domDocument.documentElement!.outerHTML, renderLaTeX)

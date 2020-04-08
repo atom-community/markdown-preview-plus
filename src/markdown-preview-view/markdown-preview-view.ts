@@ -302,6 +302,7 @@ export abstract class MarkdownPreviewView {
       filePath: this.getPath(),
       grammar: this.getGrammar(),
       renderLaTeX: this.renderLaTeX,
+      renderErrors: false,
       mode: 'save',
       savePath,
     })
@@ -314,6 +315,7 @@ export abstract class MarkdownPreviewView {
         filePath: this.getPath(),
         grammar: this.getGrammar(),
         renderLaTeX: this.renderLaTeX,
+        renderErrors: true,
         mode: 'normal',
         imageWatcher: (await this.handler).imageWatcher,
       })

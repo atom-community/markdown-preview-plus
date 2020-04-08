@@ -17,6 +17,7 @@ export interface CommonRenderOptions<T extends RenderMode> {
   filePath: string | undefined
   grammar?: Grammar
   renderLaTeX: boolean
+  renderErrors: boolean
   mode: T
 }
 
@@ -38,7 +39,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
         text,
         options.filePath,
         options.renderLaTeX,
-        options.mode === 'normal',
+        options.renderErrors,
       )
     } catch (err) {
       const e = err as Error & { html?: string }
