@@ -20,6 +20,7 @@ export interface ChannelMap {
     map: { [line: number]: Array<{ tag: string; index: number }> }
   }
   'scroll-sync': { firstLine: number; lastLine: number }
+  'set-id': number
   // actual requests
   'get-tex-config': { id: number }
   'sync-source': { id: number }
@@ -28,13 +29,19 @@ export interface ChannelMap {
   'await-fully-ready': { id: number }
 }
 export interface ReplyMap {
-  'zoom-in': void
-  'zoom-out': void
-  'uncaught-error': { message: string; name: string; stack?: string }
-  'did-scroll-preview': { max: number; min: number }
-  'show-context-menu': void
+  'atom-markdown-preview-plus-ipc-zoom-in': []
+  'atom-markdown-preview-plus-ipc-zoom-out': []
+  'atom-markdown-preview-plus-ipc-uncaught-error': [
+    { message: string; name: string; stack?: string },
+  ]
+  'atom-markdown-preview-plus-ipc-did-scroll-preview': [
+    { max: number; min: number },
+  ]
+  'atom-markdown-preview-plus-ipc-show-context-menu': []
   // actual replies
-  'request-reply': RequestReplyType[keyof RequestReplyMap]
+  'atom-markdown-preview-plus-ipc-request-reply': [
+    RequestReplyType[keyof RequestReplyMap],
+  ]
 }
 export interface RequestReplyMap {
   'update-preview': string
@@ -61,19 +68,14 @@ declare global {
         channel: T,
         cb: (evt: Event, value: ChannelMap[T]) => void,
       ): IpcRenderer
-      sendToHost<T extends keyof ReplyMap>(ch: T, arg: ReplyMap[T]): void
-    }
-    interface WebviewTag {
-      send<T extends keyof ChannelMap>(channel: T, value: ChannelMap[T]): void
-      addEventListener(
-        s: 'ipc-message',
-        h: (e: IpcMessageEventCustom) => void,
+      send<T extends keyof ReplyMap>(
+        ch: T,
+        id: number,
+        ...args: ReplyMap[T]
       ): void
     }
-    type IpcMessageEventCustom = ReplyMapEvents[keyof ReplyMapEvents]
-    type IpcMessageEventCustomFixed<T extends keyof ReplyMap> = {
-      channel: T
-      args: [ReplyMap[T]]
+    interface WebContents {
+      send<T extends keyof ChannelMap>(channel: T, value: ChannelMap[T]): void
     }
   }
 

@@ -229,22 +229,22 @@ export abstract class MarkdownPreviewView {
           handlePromise(this.copyToClipboard())
         },
         'markdown-preview-plus:open-dev-tools': () => {
-          handler.openDevTools()
+          handlePromise(handler.openDevTools())
         },
         'markdown-preview-plus:new-window': () => {
           this.openNewWindow()
         },
         'markdown-preview-plus:print': () => {
-          handler.print()
+          handlePromise(handler.print())
         },
         'markdown-preview-plus:zoom-in': () => {
-          handler.zoomIn()
+          handlePromise(handler.zoomIn())
         },
         'markdown-preview-plus:zoom-out': () => {
-          handler.zoomOut()
+          handlePromise(handler.zoomOut())
         },
         'markdown-preview-plus:reset-zoom': () => {
-          handler.resetZoom()
+          handlePromise(handler.resetZoom())
         },
         'markdown-preview-plus:sync-source': async (_event) => {
           const line = await handler.syncSource()
