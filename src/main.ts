@@ -5,7 +5,6 @@ import {
   MarkdownPreviewViewEditor,
   MarkdownPreviewView,
 } from './markdown-preview-view'
-// import mathjaxHelper = require('./mathjax-helper')
 import {
   TextEditor,
   WorkspaceOpenOptions,
@@ -24,7 +23,7 @@ export { config } from './config'
 
 let disposables: CompositeDisposable | undefined
 
-export async function activate() {
+export function activate() {
   if (migrateConfig()) {
     atom.notifications.addInfo(
       'Markdown-Preivew-Plus has updated your config to a new format. ' +
@@ -34,7 +33,7 @@ export async function activate() {
     )
   }
   if (atom.packages.isPackageActive('markdown-preview')) {
-    await atom.packages.deactivatePackage('markdown-preview')
+    util.handlePromise(atom.packages.deactivatePackage('markdown-preview'))
   }
   if (!atom.packages.isPackageDisabled('markdown-preview')) {
     atom.packages.disablePackage('markdown-preview')
