@@ -1,6 +1,6 @@
-import CP = require('child_process')
-import fs = require('fs')
-import path = require('path')
+import * as CP from 'child_process'
+import * as fs from 'fs'
+import * as path from 'path'
 import { atomConfig } from './util'
 
 /**

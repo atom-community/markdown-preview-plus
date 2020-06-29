@@ -1,4 +1,4 @@
-import path = require('path')
+import * as path from 'path'
 import { File } from 'atom'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 

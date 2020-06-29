@@ -1,5 +1,5 @@
-import markdownItModule = require('markdown-it')
-import Token = require('markdown-it/lib/token')
+import markdownItModule from 'markdown-it'
+import Token from 'markdown-it/lib/token'
 import * as twemoji from 'twemoji'
 import * as path from 'path'
 import { pairUp, atomConfig } from './util'
@@ -120,12 +120,14 @@ function init(initState: InitState): markdownItModule {
   }
 
   if (initState.criticMarkup) {
-    markdownIt.use(require('./markdown-it-criticmarkup'))
+    markdownIt.use(require('./markdown-it-criticmarkup').criticMarkup)
   }
   if (initState.footnote) {
     markdownIt.use(require('markdown-it-footnote'))
   }
-  if (initState.imsize) markdownIt.use(require('markdown-it-imsize'))
+  if (initState.imsize) {
+    markdownIt.use(require('./markdown-it-imsize').imsize_plugin)
+  }
   // tslint:enable:no-unsafe-any
 
   return markdownIt

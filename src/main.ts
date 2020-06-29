@@ -1,4 +1,4 @@
-import url = require('url')
+import * as url from 'url'
 import {
   SerializedMPV,
   MarkdownPreviewViewFile,
@@ -19,6 +19,9 @@ import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
 import { migrateConfig } from './migrate-config'
 import { MarkdownPreviewViewEditorRemote } from './markdown-preview-view/markdown-preview-view-editor-remote'
+import { selectListView } from './select-list-view'
+import * as pdf from './markdown-preview-view/pdf-export-util'
+import { getUserMacrosPath } from './macros-util'
 
 export { config } from './config'
 
@@ -49,9 +52,13 @@ export async function activate() {
       'markdown-preview-plus:toggle': close,
     }),
     atom.commands.add('atom-workspace', {
+      'markdown-preview-plus:edit-macros': () => {
+        util.handlePromise(
+          atom.workspace.open(getUserMacrosPath(atom.getConfigDirPath())),
+        )
+      },
       'markdown-preview-plus:select-syntax-theme': async () => {
         try {
-          const { selectListView } = await import('./select-list-view')
           const themeNames = atom.themes.getLoadedThemeNames()
           if (themeNames === undefined) return
           const theme = await selectListView(
@@ -284,7 +291,6 @@ async function makePDF(evt: CommandEvent): Promise<void> {
       return
     }
 
-    const pdf = await import('./markdown-preview-view/pdf-export-util')
     await pdf.saveAsPDF(
       text,
       filePath,

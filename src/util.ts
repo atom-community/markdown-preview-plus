@@ -38,6 +38,8 @@ export function isElement(node: Node): node is Element {
 import { WebviewHandler } from './markdown-preview-view/webview-handler'
 import * as renderer from './renderer'
 import { loadUserMacros } from './macros-util'
+import * as clipboard from './clipboard'
+
 export async function copyHtml(
   text: string,
   filePath: string | undefined,
@@ -65,7 +67,6 @@ export async function copyHtml(
     if (res) {
       const html = res.replace(/"file:\/\/[^"#]*/g, '"')
       if (atom.config.get('markdown-preview-plus.richClipboard')) {
-        const clipboard = await import('./clipboard')
         clipboard.write({ text: html, html })
       } else {
         atom.clipboard.write(html)
@@ -83,4 +84,14 @@ export async function copyHtml(
 
 export function atomConfig() {
   return atom.config.get('markdown-preview-plus')
+}
+
+let memoizedPath: string | undefined
+export function packagePath() {
+  if (memoizedPath !== undefined) return memoizedPath
+  const pkg = atom.packages.getLoadedPackage('markdown-preview-plus')
+  if (!pkg) {
+    throw new Error('markdown-preview-plus is not loaded but is running')
+  }
+  return (memoizedPath = pkg.path)
 }

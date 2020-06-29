@@ -1,7 +1,8 @@
 {
   "name": "markdown-preview-plus",
   "version": "3.11.5",
-  "main": "./lib/main",
+  "main": "./dist/main.js",
+  "client": "./client/main.js",
   "description": "Markdown Preview + Community Features",
   "keywords": [
     "markdown",
@@ -17,29 +18,50 @@
   },
   "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "scripts": {
-    "build": "tsc -p src && node scripts/build-client.js",
+    "build": "npm run build-main && npm run build-client",
+    "build-main": "tsc -p src && npm run bundle-main",
+    "bundle-main": "parcel build --target main lib/main.js --no-scope-hoist",
+    "build-client": "tsc -p src-client && npm run bundle-client",
+    "bundle-client": "parcel build --target client lib-client/src-client/main.js",
     "prettier": "prettier --write 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "prettier-check": "prettier -l 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "typecheck": "tsc --noEmit -p src && tsc --noEmit -p src-client && tsc --noEmit -p spec",
     "lint": "tslint --project src && tslint --project src-client && tslint --project spec",
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
+  "targets": {
+    "main": {
+      "context": "electron-renderer",
+      "includeNodeModules": {
+        "atom": false,
+        "electron": false,
+        "mathjax": false,
+        "twemoji-assets": false,
+        "coffee-script": false
+      },
+      "outputFormat": "commonjs",
+      "isLibrary": true,
+      "sourceMap": {
+        "inlineSources": true
+      }
+    },
+    "client": {
+      "context": "electron-renderer",
+      "includeNodeModules": {
+        "atom": false,
+        "electron": false,
+        "mathjax": false,
+        "twemoji-assets": false
+      },
+      "outputFormat": "commonjs",
+      "isLibrary": true,
+      "sourceMap": {
+        "inlineSources": true
+      }
+    }
+  },
   "dependencies": {
-    "atom-select-list": "^0.7.2",
-    "file-uri-to-path": "^2.0.0",
-    "lodash": "^4.17.15",
-    "markdown-it": "^10.0.0",
-    "markdown-it-anchor": "^5.2.5",
-    "markdown-it-emoji": "^1.4.0",
-    "markdown-it-footnote": "^3.0.2",
-    "markdown-it-imsize": "^2.0.1",
-    "markdown-it-lazy-headers": "^0.1.3",
-    "markdown-it-table-of-contents": "^0.4.4",
-    "markdown-it-task-lists": "^2.1.1",
     "mathjax": "https://github.com/atom-community/MathJax/archive/2.7.4-electron.0.1.0.tar.gz",
-    "morphdom": "^2.5.12",
-    "season": "^6.0",
-    "twemoji": "^12.1.5",
     "twemoji-assets": "https://github.com/lierdakil/twemoji-assets/archive/v12.1.2-assets-0.1.0.tar.gz"
   },
   "devDependencies": {
@@ -54,21 +76,34 @@
     "@types/sinon-chai": "^3.2.3",
     "@types/temp": "^0.8.34",
     "atom-haskell-tslint-rules": "^0.2.2",
+    "atom-select-list": "^0.7.2",
     "atom-ts-spec-runner": "^1.1.1",
     "chai": "^4.2.0",
     "electron": "^4",
+    "file-uri-to-path": "^2.0.0",
     "fs-extra": "^8.1.0",
     "jasmine-tagged": "^1.1.4",
+    "lodash": "^4.17.15",
+    "markdown-it": "^10.0.0",
+    "markdown-it-anchor": "^5.2.5",
+    "markdown-it-emoji": "^1.4.0",
+    "markdown-it-footnote": "^3.0.2",
+    "markdown-it-lazy-headers": "^0.1.3",
+    "markdown-it-table-of-contents": "^0.4.4",
+    "markdown-it-task-lists": "^2.1.1",
     "markdown-it-testgen": "^0.1.6",
-    "parcel-bundler": "^1.12.4",
+    "morphdom": "^2.5.12",
+    "parcel": "^2.0.0-nightly.318",
     "prettier": "^1.19.1",
     "sinon": "^9.0.1",
     "sinon-chai": "^3.5.0",
     "temp": "^0.9.1",
     "tslint": "^6.1.0",
     "tslint-use-atom-disposables": "0.0.1",
+    "twemoji": "^12.1.5",
     "typescript": "^3.8.3",
-    "typescript-tslint-plugin": "0.5.5"
+    "typescript-tslint-plugin": "0.5.5",
+    "yaml": "^1.10.0"
   },
   "deserializers": {
     "markdown-preview-plus/MarkdownPreviewView": "createMarkdownPreviewView"

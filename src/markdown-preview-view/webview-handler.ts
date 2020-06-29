@@ -1,8 +1,8 @@
 import { Emitter, CompositeDisposable } from 'atom'
 import { WebviewTag, shell } from 'electron'
-import fileUriToPath = require('file-uri-to-path')
+import fileUriToPath from 'file-uri-to-path'
 
-import { handlePromise, atomConfig } from '../util'
+import { handlePromise, atomConfig, packagePath } from '../util'
 import { RequestReplyMap, ChannelMap } from '../../src-client/ipc'
 import { getPreviewStyles } from './util'
 import { ImageWatcher } from '../image-watch-helper'
@@ -69,7 +69,7 @@ export class WebviewHandler {
     this._element.classList.add('markdown-preview-plus', 'native-key-bindings')
     this._element.disablewebsecurity = 'true'
     this._element.nodeintegration = 'true'
-    this._element.src = `file:///${__dirname}/../../client/template.html`
+    this._element.src = `file:///${packagePath()}/client/template.html`
     this._element.style.width = '100%'
     this._element.style.height = '100%'
     this._element.addEventListener(

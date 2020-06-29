@@ -1,4 +1,4 @@
-import morph = require('morphdom')
+import morph from 'morphdom'
 import { MathJaxController } from './mathjax-helper'
 
 export class UpdatePreview {

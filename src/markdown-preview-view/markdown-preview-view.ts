@@ -1,10 +1,10 @@
-import path = require('path')
+import * as path from 'path'
 import { Emitter, Disposable, CompositeDisposable, Grammar } from 'atom'
 import { debounce } from 'lodash'
-import fs = require('fs')
+import * as fs from 'fs'
 
-import renderer = require('../renderer')
-import markdownIt = require('../markdown-it-helper')
+import * as renderer from '../renderer'
+import * as markdownIt from '../markdown-it-helper'
 import { handlePromise, copyHtml, atomConfig } from '../util'
 import * as util from './util'
 import { WebviewHandler } from './webview-handler'

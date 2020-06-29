@@ -1,6 +1,5 @@
 # You can place LaTeX Macros here.
-# They are written as coffeescript objects in CSON.
-# So don't forget to escape your backslashes!
+# They are written as objects in YAML.
 # Here are some examples to get you going:
 
 # A zero argument macro

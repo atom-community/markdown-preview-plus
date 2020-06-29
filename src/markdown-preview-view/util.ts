@@ -1,7 +1,7 @@
 import { TextEditor } from 'atom'
 import * as path from 'path'
 import * as fs from 'fs'
-import { handlePromise, atomConfig } from '../util'
+import { handlePromise, atomConfig, packagePath } from '../util'
 
 export function editorForId(editorId: number): TextEditor | undefined {
   for (const editor of atom.workspace.getTextEditors()) {
@@ -31,7 +31,7 @@ function* getStyles(context?: string | null): IterableIterator<string> {
 
 function getClientStyle(file: string): string {
   return atom.themes.loadStylesheet(
-    path.join(__dirname, '..', '..', 'styles-client', `${file}.less`),
+    path.join(packagePath(), 'styles-client', `${file}.less`),
   )
 }
 
@@ -139,7 +139,7 @@ function getMarkdownPreviewCSS() {
       _string,
     ) {
       // base64 encode assets
-      const assetPath = path.join(__dirname, '../../assets', assetsName)
+      const assetPath = path.join(packagePath(), 'assets', assetsName)
       const originalData = fs.readFileSync(assetPath, 'binary')
       const base64Data = new Buffer(originalData, 'binary').toString('base64')
       return `url('data:image/jpeg;base64,${base64Data}')`

@@ -2,7 +2,7 @@
 // tslint:disable:no-unsafe-any
 
 import * as mdIt from 'markdown-it'
-import Token = require('markdown-it/lib/token')
+import Token from 'markdown-it/lib/token'
 import { makeTable } from './lib/table'
 
 function skipTextCommand(state: any, max: number) {
