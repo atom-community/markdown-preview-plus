@@ -1,6 +1,6 @@
 node_modules
 MathJax
 npm-debug.log
-lib/**/*.d.ts
 client/**/*.d.ts
 .cache
+/lib
