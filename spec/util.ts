@@ -14,8 +14,8 @@ declare global {
   }
 }
 
-use(function(chai: any) {
-  const startsWithMethodWrapper = function(this: any, expected: string) {
+use(function (chai: any) {
+  const startsWithMethodWrapper = function (this: any, expected: string) {
     const actual = this._obj
 
     return this.assert(
@@ -44,14 +44,14 @@ export interface WaitsFor {
   ): Promise<T>
 }
 
-export const waitsFor = async function<T>(
+export const waitsFor = async function <T>(
   func: () => T | undefined | null | Promise<T | undefined | null>,
   timeout: number = 8000,
   intervalTime: number = 500,
   msg: string = func.toString(),
 ): Promise<T> {
-  return new Promise<T>(function(fufill, reject) {
-    const interval = setInterval(async function() {
+  return new Promise<T>(function (fufill, reject) {
+    const interval = setInterval(async function () {
       try {
         const res = await func()
         if (res) {
@@ -64,7 +64,7 @@ export const waitsFor = async function<T>(
       }
     }, intervalTime)
 
-    const timeoutId = setTimeout(function() {
+    const timeoutId = setTimeout(function () {
       clearInterval(interval)
       reject(new Error('Waits for condition never met: ' + msg))
     }, timeout)
@@ -139,16 +139,16 @@ export function stubClipboard() {
     stub: undefined,
     contents: '',
   }
-  before(function() {
-    result.stub = sinon.stub().callsFake(function(arg: { text?: string }) {
+  before(function () {
+    result.stub = sinon.stub().callsFake(function (arg: { text?: string }) {
       result.contents = arg.text || ''
     }) as any
     window['markdown-preview-plus-tests'] = { clipboardWrite: result.stub }
   })
-  after(function() {
+  after(function () {
     delete window['markdown-preview-plus-tests']
   })
-  afterEach(function() {
+  afterEach(function () {
     result.contents = ''
     result.stub && result.stub.resetHistory()
   })

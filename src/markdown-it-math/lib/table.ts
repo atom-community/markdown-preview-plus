@@ -45,7 +45,7 @@ function escapedSplit(
   ch = str.charCodeAt(pos)
 
   // Def map for matching open/close delimiter sequence with str@pos
-  delimMaskMap = function(e: string) {
+  delimMaskMap = function (e: string) {
     return str.substring(pos, pos + e.length) === e
   }
 

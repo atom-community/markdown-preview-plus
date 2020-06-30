@@ -9,20 +9,20 @@ import {
 } from './util'
 import { expect } from 'chai'
 
-describe('the difference algorithm that updates the preview', function() {
+describe('the difference algorithm that updates the preview', function () {
   let editor: TextEditor
   let preview: MarkdownPreviewView
 
   before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     await atom.workspace.open(path.join(__dirname, 'fixtures', 'sync.md'))
 
     editor = atom.workspace.getActiveTextEditor()!
   })
 
-  afterEach(async function() {
+  afterEach(async function () {
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
       const pane = atom.workspace.paneForItem(item)
@@ -38,12 +38,12 @@ describe('the difference algorithm that updates the preview', function() {
     preview = await expectPreviewInSplitPane()
   }
 
-  describe('updating ordered lists start number', function() {
+  describe('updating ordered lists start number', function () {
     let orderedLists: Element[]
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       await loadPreviewInSplitPane()
-      await waitsFor(async function() {
+      await waitsFor(async function () {
         orderedLists = Array.from(
           (await previewFragment(preview)).querySelectorAll('ol'),
         )
@@ -63,7 +63,7 @@ describe('the difference algorithm that updates the preview', function() {
       })
     }
 
-    it("sets the start attribute when the start number isn't 1", async function() {
+    it("sets the start attribute when the start number isn't 1", async function () {
       expectOrderedListsToStartAt(['1', '1', '1', '1', '1'])
 
       editor.setTextInBufferRange(
@@ -122,7 +122,7 @@ describe('the difference algorithm that updates the preview', function() {
       expectOrderedListsToStartAt(['2', '1', '2', '2', '1'])
     })
 
-    it('removes the start attribute when the start number is changed to 1', async function() {
+    it('removes the start attribute when the start number is changed to 1', async function () {
       editor.setTextInBufferRange(
         [
           [35, 0],
@@ -218,10 +218,10 @@ describe('the difference algorithm that updates the preview', function() {
     })
   })
 
-  describe('when a maths block is modified', function() {
+  describe('when a maths block is modified', function () {
     let mathBlocks: HTMLElement[]
 
-    beforeEach(async function() {
+    beforeEach(async function () {
       await waitsFor.msg('LaTeX rendering to be enabled', () =>
         atom.config.set(
           'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
@@ -233,7 +233,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'preview to update DOM with span.math containers',
-        async function() {
+        async function () {
           mathBlocks = Array.from(
             (await previewFragment(preview)).querySelectorAll(
               'script[type*="math/tex"]',
@@ -245,7 +245,7 @@ describe('the difference algorithm that updates the preview', function() {
 
       await waitsFor.msg(
         'Maths blocks to be processed by MathJax',
-        async function() {
+        async function () {
           mathBlocks = Array.from(
             (await previewFragment(preview)).querySelectorAll(
               'script[type*="math/tex"]',
@@ -259,7 +259,7 @@ describe('the difference algorithm that updates the preview', function() {
       )
     })
 
-    it('replaces the entire span.math container element', async function() {
+    it('replaces the entire span.math container element', async function () {
       await preview.runJS<void>(`
         window.mathSpans = document.querySelectorAll('span.math')
         `)
@@ -300,7 +300,7 @@ describe('the difference algorithm that updates the preview', function() {
       )
     })
 
-    it('subsequently only rerenders the maths block that was modified', async function() {
+    it('subsequently only rerenders the maths block that was modified', async function () {
       await preview.runJS<void>(`
         window.mathSpans = Array.from(document.querySelectorAll('span.math'))
         `)
@@ -343,7 +343,7 @@ describe('the difference algorithm that updates the preview', function() {
   })
 
   describe('when a code block is modified', () =>
-    it('updates contents and attributes', async function() {
+    it('updates contents and attributes', async function () {
       await loadPreviewInSplitPane()
 
       const f = await previewFragment(preview)

@@ -4,25 +4,25 @@ let renderMath = false
 
 import { activateMe } from './util'
 
-const compareHTML = function(one: string, two: string) {
+const compareHTML = function (one: string, two: string) {
   one = markdownIt.render(one, renderMath)
   one = one.replace(/\n\s*/g, '')
   two = two.replace(/\n\s*/g, '')
   expect(one).to.equal(two)
 }
 
-describe('MarkdownItHelper (Math)', function() {
+describe('MarkdownItHelper (Math)', function () {
   let content: string | undefined
 
   before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
-  beforeEach(function() {
+  beforeEach(function () {
     content = undefined
     renderMath = true
   })
 
-  it('Math in markdown inlines', function() {
+  it('Math in markdown inlines', function () {
     content = `\
 # Math $x^2$ in heading 1
 
@@ -49,8 +49,8 @@ _math $x^2$ in emphasis_
     compareHTML(content, result)
   })
 
-  describe('Interference with markdown syntax (from issue-18)', function() {
-    it('should not interfere with *', function() {
+  describe('Interference with markdown syntax (from issue-18)', function () {
+    it('should not interfere with *', function () {
       content = 'This $(f*g*h)(x)$ is no conflict'
 
       const result =
@@ -59,7 +59,7 @@ _math $x^2$ in emphasis_
       compareHTML(content, result)
     })
 
-    it('should not interfere with _', function() {
+    it('should not interfere with _', function () {
       content = 'This $x_1, x_2, \\dots, x_N$ is no conflict'
 
       const result =
@@ -68,7 +68,7 @@ _math $x^2$ in emphasis_
       compareHTML(content, result)
     })
 
-    it('should not interfere with link syntax', function() {
+    it('should not interfere with link syntax', function () {
       content = 'This $[a+b](c+d)$ is no conflict'
 
       const result =
@@ -78,8 +78,8 @@ _math $x^2$ in emphasis_
     })
   })
 
-  describe('Examples from stresstest document (issue-18)', function() {
-    it('several tex functions', function() {
+  describe('Examples from stresstest document (issue-18)', function () {
+    it('several tex functions', function () {
       content = `\
 $k \\times k$, $n \\times 2$, $2 \\times n$, $\\times$
 
@@ -112,8 +112,8 @@ mc^2\\ &= E
       compareHTML(content, result)
     })
 
-    describe('Escaped Math environments', function() {
-      it('Inline Math without proper opening and closing', function() {
+    describe('Escaped Math environments', function () {
+      it('Inline Math without proper opening and closing', function () {
         content = 'a $5, a $10 and a \\$100 Bill.'
 
         const result = '<p>a $5, a $10 and a $100 Bill.</p>'
@@ -121,7 +121,7 @@ mc^2\\ &= E
         compareHTML(content, result)
       })
 
-      it('Double escaped \\[ and \\(', function() {
+      it('Double escaped \\[ and \\(', function () {
         content = `\
 
 \\\\[
@@ -136,7 +136,7 @@ mc^2\\ &= E
         compareHTML(content, result)
       })
 
-      it('In inline code examples', function() {
+      it('In inline code examples', function () {
         content = '`\\$`, `\\[ \\]`, `$x$`'
 
         const result =
@@ -146,8 +146,8 @@ mc^2\\ &= E
       })
     })
 
-    describe('Math Blocks', function() {
-      it('$$ should work multiline', function() {
+    describe('Math Blocks', function () {
+      it('$$ should work multiline', function () {
         content = `\
 $$
 a+b
@@ -160,7 +160,7 @@ $$\
         compareHTML(content, result)
       })
 
-      it('$$ should work singeline', function() {
+      it('$$ should work singeline', function () {
         content = '$$a+b$$'
 
         const result =
@@ -169,7 +169,7 @@ $$\
         compareHTML(content, result)
       })
 
-      it('$$ should work directly after paragraph', function() {
+      it('$$ should work directly after paragraph', function () {
         content = `\
 Test
 $$
@@ -183,7 +183,7 @@ $$\
         compareHTML(content, result)
       })
 
-      it('\\[ should work multiline', function() {
+      it('\\[ should work multiline', function () {
         content = `\
 \\[
 a+b
@@ -196,7 +196,7 @@ a+b
         compareHTML(content, result)
       })
 
-      it('\\[ should work singeline', function() {
+      it('\\[ should work singeline', function () {
         content = '\\[a+b\\]'
 
         const result =
@@ -205,7 +205,7 @@ a+b
         compareHTML(content, result)
       })
 
-      it('\\[ should work directly after paragraph', function() {
+      it('\\[ should work directly after paragraph', function () {
         content = `\
 Test
 \\[
@@ -221,8 +221,8 @@ a+b
     })
   })
 
-  describe('Examples from issues', function() {
-    it('should respect escaped dollar inside code (issue-3)', function() {
+  describe('Examples from issues', function () {
+    it('should respect escaped dollar inside code (issue-3)', function () {
       content = `\
 \`\`\`
 \\$
@@ -234,7 +234,7 @@ a+b
       compareHTML(content, result)
     })
 
-    it('should respect escaped dollar inside code (mp-issue-116)', function() {
+    it('should respect escaped dollar inside code (mp-issue-116)', function () {
       content = `\
 start
 
@@ -260,7 +260,7 @@ $x$\
       compareHTML(content, result)
     })
 
-    it('should render inline math with \\( (issue-7)', function() {
+    it('should render inline math with \\( (issue-7)', function () {
       content = 'This should \\(x+y\\) work.'
 
       const result = `\
@@ -274,7 +274,7 @@ $x$\
       compareHTML(content, result)
     })
 
-    it('should render inline math with N\\times N (issue-17)', function() {
+    it('should render inline math with N\\times N (issue-17)', function () {
       content = 'An $N\\times N$ grid.'
 
       const result = `\
@@ -288,7 +288,7 @@ $x$\
       compareHTML(content, result)
     })
 
-    it('should respect inline code (issue-20)', function() {
+    it('should respect inline code (issue-20)', function () {
       content = `\
 This is broken \`$$\`
 

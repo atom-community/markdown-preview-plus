@@ -127,7 +127,7 @@ function getMarkdownPreviewCSS() {
 
   return getPreviewStyles(false)
     .join('\n')
-    .replace(cssUrlRefExp, function(
+    .replace(cssUrlRefExp, function (
       _match,
       assetsName: string,
       _offset,

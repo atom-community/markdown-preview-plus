@@ -26,7 +26,7 @@ function addSourceMapData(token: Token) {
 }
 
 function recurseTokens(fn: (t: Token) => Token) {
-  const rf = function(token: Token) {
+  const rf = function (token: Token) {
     if (token.children) token.children = token.children.map(rf)
     fn(token)
     return token
@@ -35,7 +35,7 @@ function recurseTokens(fn: (t: Token) => Token) {
 }
 
 function sourceLineData(md: markdownItModule) {
-  md.core.ruler.push('logger', function(state: any): any {
+  md.core.ruler.push('logger', function (state: any): any {
     // tslint:disable-next-line: no-unsafe-any
     if (!state.env.sourceMap) return state
     // tslint:disable-next-line: no-unsafe-any
@@ -110,7 +110,7 @@ function init(initState: InitState): markdownItModule {
 
   if (initState.emoji) {
     markdownIt.use(require('markdown-it-emoji'))
-    markdownIt.renderer.rules.emoji = function(token, idx) {
+    markdownIt.renderer.rules.emoji = function (token, idx) {
       return twemoji.parse(token[idx].content, {
         folder: path.join('assets', 'svg'),
         ext: '.svg',
@@ -137,7 +137,7 @@ function wrapInitIfNeeded(initf: typeof init): typeof init {
   let markdownIt: markdownItModule | null = null
   let initState: InitState | null = null
 
-  return function(newState: InitState) {
+  return function (newState: InitState) {
     if (markdownIt === null || !isEqual(initState, newState)) {
       initState = newState
       markdownIt = initf(newState)

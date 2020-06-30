@@ -3,15 +3,13 @@
 
 import { parseImageSize } from './parse_image_size'
 
-import * as mdIt from 'markdown-it'
-import StateCore from 'markdown-it/lib/rules_core/state_core'
+import mdIt from 'markdown-it'
+import { RuleInline } from 'markdown-it/lib/parser_inline'
 
 // tslint:disable: no-unsafe-any
 
-function image_with_size(
-  md: mdIt,
-): mdIt.Rule<StateCore & { pos: number; posMax: number }> {
-  return function(state, silent) {
+function image_with_size(md: mdIt): RuleInline {
+  return function (state, silent) {
     let attrs
     let code
     let label
@@ -200,8 +198,8 @@ function image_with_size(
 
       token = state.push('image', 'img', 0)
       token.attrs = attrs = [
-        ['src', href],
-        ['alt', ''],
+        ['src', href] as [string, string],
+        ['alt', ''] as [string, string],
       ]
       token.children = tokens
       if (title) {

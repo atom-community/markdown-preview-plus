@@ -33,13 +33,13 @@ declare module 'atom' {
   }
 }
 
-describe('MarkdownPreviewView', function() {
+describe('MarkdownPreviewView', function () {
   let filePath: string
   let preview: MarkdownPreviewView
   let tempPath: string
   const previews: Set<MarkdownPreviewView> = new Set()
 
-  const createMarkdownPreviewViewFile = async function(filePath: string) {
+  const createMarkdownPreviewViewFile = async function (filePath: string) {
     const mpv = new MarkdownPreviewViewFile(filePath)
     assert(mpv.element !== undefined)
     window.workspaceDiv.appendChild(mpv.element!)
@@ -47,7 +47,7 @@ describe('MarkdownPreviewView', function() {
     await mpv.initialRenderPromise()
     return mpv
   }
-  const createMarkdownPreviewViewEditor = async function(editor: TextEditor) {
+  const createMarkdownPreviewViewEditor = async function (editor: TextEditor) {
     const mpv = MarkdownPreviewViewEditor.create(editor)
     assert(mpv.element !== undefined)
     window.workspaceDiv.appendChild(mpv.element!)
@@ -59,7 +59,7 @@ describe('MarkdownPreviewView', function() {
   before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     await Promise.all([
       atom.packages.activatePackage('language-ruby'),
       atom.packages.activatePackage('language-javascript'),
@@ -78,7 +78,7 @@ describe('MarkdownPreviewView', function() {
     preview = await createMarkdownPreviewViewFile(filePath)
   })
 
-  afterEach(async function() {
+  afterEach(async function () {
     previews.forEach((pv) => pv.destroy())
     previews.clear()
     atom.config.unset('markdown-preview-plus')
@@ -91,20 +91,20 @@ describe('MarkdownPreviewView', function() {
   })
 
   describe('::constructor', () =>
-    it('shows an error message when there is an error', async function() {
+    it('shows an error message when there is an error', async function () {
       // tslint:disable-next-line: no-unsafe-any
       await (preview as any).showError(new Error('Not a real file'))
       expect(await previewText(preview)).to.contain('Failed')
     }))
 
-  describe('serialization', function() {
+  describe('serialization', function () {
     let newPreview: MarkdownPreviewView
 
-    afterEach(function() {
+    afterEach(function () {
       newPreview.destroy()
     })
 
-    it('recreates the preview when serialized/deserialized', async function() {
+    it('recreates the preview when serialized/deserialized', async function () {
       newPreview = atom.deserializers.deserialize(
         preview.serialize(),
       ) as MarkdownPreviewView
@@ -114,7 +114,7 @@ describe('MarkdownPreviewView', function() {
       await newPreview.initialRenderPromise()
     })
 
-    it('does not recreate a preview when the file no longer exists', async function() {
+    it('does not recreate a preview when the file no longer exists', async function () {
       filePath = path.join(temp.mkdirSync('markdown-preview-'), 'foo.md')
       fs.writeFileSync(filePath, '# Hi')
 
@@ -128,7 +128,7 @@ describe('MarkdownPreviewView', function() {
       expect(nonExistentPreview).to.not.exist
     })
 
-    it('serializes the editor id when opened for an editor', async function() {
+    it('serializes the editor id when opened for an editor', async function () {
       preview.destroy()
 
       await atom.workspace.open('new.markdown')
@@ -153,8 +153,8 @@ describe('MarkdownPreviewView', function() {
     })
   })
 
-  describe('header rendering', function() {
-    it('should render headings with and without space', async function() {
+  describe('header rendering', function () {
+    it('should render headings with and without space', async function () {
       const headlines = (await previewFragment(preview)).querySelectorAll('h2')
       expect(headlines.length).to.equal(2)
       expect(headlines[0].outerHTML).to.equal(
@@ -165,7 +165,7 @@ describe('MarkdownPreviewView', function() {
       )
     })
 
-    it('should render headings with and without space', async function() {
+    it('should render headings with and without space', async function () {
       atom.config.set(
         'markdown-preview-plus.markdownItConfig.useLazyHeaders',
         false,
@@ -183,8 +183,8 @@ describe('MarkdownPreviewView', function() {
     })
   })
 
-  describe('code block conversion to pre tags', function() {
-    it('removes a trailing newline but preserves remaining leading and trailing whitespace', async function() {
+  describe('code block conversion to pre tags', function () {
+    it('removes a trailing newline but preserves remaining leading and trailing whitespace', async function () {
       const newFilePath = path.join(tempPath, 'subdir/trim-nl.md')
       const newPreview = await createMarkdownPreviewViewFile(newFilePath)
 
@@ -200,7 +200,7 @@ describe('MarkdownPreviewView', function() {
     })
 
     describe("when the code block's fence name has a matching grammar", () =>
-      it('assigns the grammar on the element', async function() {
+      it('assigns the grammar on the element', async function () {
         const rubyEditor = await waitsFor(
           async () =>
             (await previewFragment(preview)).querySelector(
@@ -224,8 +224,8 @@ if a === 3 {
 }`)
       }))
 
-    describe("when the code block's fence name doesn't have a matching grammar", function() {
-      it('does not assign a specific grammar', async function() {
+    describe("when the code block's fence name doesn't have a matching grammar", function () {
+      it('does not assign a specific grammar', async function () {
         const plainEditor = (await previewFragment(preview)).querySelector(
           'pre.editor-colors.lang-text',
         ) as TextEditorElement
@@ -237,7 +237,7 @@ function f(x) {
       })
     })
 
-    it('ignores case of the fence name', async function() {
+    it('ignores case of the fence name', async function () {
       const ed = await atom.workspace.open()
       ed.setText(`\
 ~~~JavaScript
@@ -267,9 +267,9 @@ var x = 0;
     })
   })
 
-  describe('image resolving', function() {
+  describe('image resolving', function () {
     describe('when the image uses a relative path', () =>
-      it('resolves to a path relative to the file', async function() {
+      it('resolves to a path relative to the file', async function () {
         const image = (await previewFragment(preview)).querySelector(
           'img[alt=Image1]',
         )
@@ -279,7 +279,7 @@ var x = 0;
       }))
 
     describe('when the image uses an absolute path that does not exist', () =>
-      it('resolves to a path relative to the project root', async function() {
+      it('resolves to a path relative to the project root', async function () {
         const image = (await previewFragment(preview)).querySelector(
           'img[alt=Image2]',
         )
@@ -289,7 +289,7 @@ var x = 0;
       }))
 
     describe('when the image uses an absolute path that exists', () =>
-      it('adds a query to the URL', async function() {
+      it('adds a query to the URL', async function () {
         preview.destroy()
 
         filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
@@ -303,8 +303,8 @@ var x = 0;
         ).to.startWith(`${filePath}?v=`)
       }))
 
-    describe('when the image uses a URL', function() {
-      it("doesn't change the web URL", async function() {
+    describe('when the image uses a URL', function () {
+      it("doesn't change the web URL", async function () {
         const image = (await previewFragment(preview)).querySelector(
           'img[alt=Image3]',
         )
@@ -313,7 +313,7 @@ var x = 0;
         )
       })
 
-      it("doesn't change the data URL", async function() {
+      it("doesn't change the data URL", async function () {
         const image = (await previewFragment(preview)).querySelector(
           'img[alt=Image4]',
         )
@@ -324,11 +324,11 @@ var x = 0;
     })
   })
 
-  describe('image modification', function() {
+  describe('image modification', function () {
     let dirPath: string
     let img1Path: string
 
-    beforeEach(function() {
+    beforeEach(function () {
       preview.destroy()
 
       dirPath = temp.mkdirSync('atom')
@@ -339,7 +339,7 @@ var x = 0;
       fs.writeFileSync(img1Path, 'clearly not a png but good enough for tests')
     })
 
-    const getImageVersion = function(
+    const getImageVersion = function (
       imagePath: string,
       imageURL: string,
     ): string {
@@ -348,7 +348,7 @@ var x = 0;
     }
 
     describe('when a local image is previewed', () =>
-      it('adds a timestamp query to the URL', async function() {
+      it('adds a timestamp query to the URL', async function () {
         const editor = await atom.workspace.open(filePath)
         atom.commands.dispatch(
           atom.views.getView(editor),
@@ -364,7 +364,7 @@ var x = 0;
       }))
 
     describe('when a local image is modified during a preview #notwercker', () =>
-      it('rerenders the image with a more recent timestamp query', async function() {
+      it('rerenders the image with a more recent timestamp query', async function () {
         let imageURL: string
         let imageVer: string
 
@@ -384,7 +384,7 @@ var x = 0;
 
         fs.writeFileSync(img1Path, 'still clearly not a png ;D')
 
-        await waitsFor.msg('image src attribute to update', async function() {
+        await waitsFor.msg('image src attribute to update', async function () {
           imageURL = (await previewFragment(preview))
             .querySelector('img[alt=img1]')!
             .getAttribute('src')!
@@ -399,7 +399,7 @@ var x = 0;
       }))
 
     describe('when three images are previewed and all are modified #notwercker', () =>
-      it('rerenders the images with a more recent timestamp as they are modified', async function() {
+      it('rerenders the images with a more recent timestamp as they are modified', async function () {
         preview.destroy()
 
         const img2Path = path.join(dirPath, 'img2.png')
@@ -435,7 +435,7 @@ var x = 0;
             .getAttribute('src')!,
         ]
 
-        const expectQueryValues = async function(queryValues: {
+        const expectQueryValues = async function (queryValues: {
           [key: string]: null | undefined | string
         }) {
           const [img1URL, img2URL, img3URL] = await getImageElementsURL()
@@ -461,7 +461,7 @@ var x = 0;
 
         fs.writeFileSync(img1Path, 'still clearly not a png ;D')
 
-        await waitsFor.msg('img1 src attribute to update', async function() {
+        await waitsFor.msg('img1 src attribute to update', async function () {
           img1URL = (await previewFragment(preview))
             .querySelector('img[alt=img1]')!
             .getAttribute('src')!
@@ -482,7 +482,7 @@ var x = 0;
 
         fs.writeFileSync(img2Path, 'still clearly not a png either ;D')
 
-        await waitsFor.msg('img2 src attribute to update', async function() {
+        await waitsFor.msg('img2 src attribute to update', async function () {
           img2URL = (await previewFragment(preview))
             .querySelector('img[alt=img2]')!
             .getAttribute('src')!
@@ -503,7 +503,7 @@ var x = 0;
 
         fs.writeFileSync(img3Path, "you better believe i'm not a png ;D")
 
-        await waitsFor.msg('img3 src attribute to update', async function() {
+        await waitsFor.msg('img3 src attribute to update', async function () {
           img3URL = (await previewFragment(preview))
             .querySelector('img[alt=img3]')!
             .getAttribute('src')!
@@ -523,7 +523,7 @@ var x = 0;
       }))
 
     describe('when a previewed image is deleted then restored', () =>
-      it('removes the query timestamp and restores the timestamp after a rerender', async function() {
+      it('removes the query timestamp and restores the timestamp after a rerender', async function () {
         let imageURL: string
         let imageVer: string
 
@@ -542,7 +542,7 @@ var x = 0;
 
         fs.unlinkSync(img1Path)
 
-        await waitsFor.msg('image src attribute to update', async function() {
+        await waitsFor.msg('image src attribute to update', async function () {
           imageURL = (await previewFragment(preview))
             .querySelector('img[alt=img1]')!
             .getAttribute('src')!
@@ -563,7 +563,7 @@ var x = 0;
           '',
         )
 
-        await waitsFor.msg('image src attribute to update', async function() {
+        await waitsFor.msg('image src attribute to update', async function () {
           imageURL = (await previewFragment(preview))
             .querySelector('img[alt=img1]')!
             .getAttribute('src')!
@@ -577,7 +577,7 @@ var x = 0;
       }))
 
     describe('when a previewed image is renamed and then restored with its original name', () =>
-      it('removes the query timestamp and restores the timestamp after a rerender', async function() {
+      it('removes the query timestamp and restores the timestamp after a rerender', async function () {
         let imageURL: string
         let imageVer: string
 
@@ -596,7 +596,7 @@ var x = 0;
 
         fs.renameSync(img1Path, img1Path + 'trol')
 
-        await waitsFor.msg('image src attribute to update', async function() {
+        await waitsFor.msg('image src attribute to update', async function () {
           imageURL = (await previewFragment(preview))
             .querySelector('img[alt=img1]')!
             .getAttribute('src')!
@@ -614,7 +614,7 @@ var x = 0;
           '',
         )
 
-        await waitsFor.msg('image src attribute to update', async function() {
+        await waitsFor.msg('image src attribute to update', async function () {
           imageURL = (await previewFragment(preview))
             .querySelector('img[alt=img1]')!
             .getAttribute('src')!
@@ -628,11 +628,11 @@ var x = 0;
       }))
   })
 
-  describe('css modification', function() {
+  describe('css modification', function () {
     let dirPath: string
     let css1path: string
 
-    beforeEach(function() {
+    beforeEach(function () {
       preview.destroy()
 
       dirPath = temp.mkdirSync('atom')
@@ -646,7 +646,7 @@ var x = 0;
       fs.writeFileSync(css1path, '.test { text-decoration: underline; }')
     })
 
-    const getMediaVersion = function(
+    const getMediaVersion = function (
       imagePath: string,
       imageURL: string,
     ): string {
@@ -655,7 +655,7 @@ var x = 0;
     }
 
     describe('when a local image is modified during a preview #notwercker', () =>
-      it('rerenders the image with a more recent timestamp query', async function() {
+      it('rerenders the image with a more recent timestamp query', async function () {
         let mediaURL: string
         let mediaVer: string
 
@@ -681,7 +681,7 @@ var x = 0;
 
         fs.writeFileSync(css1path, '.test { text-decoration: none; }')
 
-        await waitsFor.msg('link href attribute to update', async function() {
+        await waitsFor.msg('link href attribute to update', async function () {
           mediaURL = (await previewFragment(preview, previewHeadHTML))
             .querySelector('link')!
             .getAttribute('href')!
@@ -702,9 +702,9 @@ var x = 0;
       }))
   })
 
-  describe('gfm newlines', function() {
+  describe('gfm newlines', function () {
     describe('when gfm newlines are not enabled', () =>
-      it('creates a single paragraph with <br>', async function() {
+      it('creates a single paragraph with <br>', async function () {
         atom.config.set(
           'markdown-preview-plus.markdownItConfig.breakOnSingleNewline',
           false,
@@ -723,7 +723,7 @@ var x = 0;
       }))
 
     describe('when gfm newlines are enabled', () =>
-      it('creates a single paragraph with no <br>', async function() {
+      it('creates a single paragraph with no <br>', async function () {
         atom.config.set(
           'markdown-preview-plus.markdownItConfig.breakOnSingleNewline',
           true,
@@ -742,15 +742,15 @@ var x = 0;
       }))
   })
 
-  describe('when core:save-as is triggered', function() {
-    beforeEach(async function() {
+  describe('when core:save-as is triggered', function () {
+    beforeEach(async function () {
       filePath = path.join(tempPath, 'subdir', 'code-block.md')
       preview = (await atom.workspace.open(
         `markdown-preview-plus://file/${filePath}`,
       )) as MarkdownPreviewView
     })
 
-    it('saves the rendered HTML and opens it', async function() {
+    it('saves the rendered HTML and opens it', async function () {
       const outputPath = path.join(tempPath, 'subdir', 'code-block.html')
       const expectedFilePath = path.join(tempPath, 'saved-html.html')
       const expectedOutput = fs.readFileSync(expectedFilePath).toString()
@@ -767,8 +767,8 @@ var x = 0;
       await preview.initialRenderPromise()
 
       let textEditor: TextEditor
-      const openedPromise = new Promise(function(resolve) {
-        const disp = atom.workspace.onDidAddTextEditor(function(event) {
+      const openedPromise = new Promise(function (resolve) {
+        const disp = atom.workspace.onDidAddTextEditor(function (event) {
           textEditor = event.textEditor
           disp.dispose()
           resolve()
@@ -809,7 +809,7 @@ var x = 0;
     })
     // fs.writeFileSync(expectedFilePath, savedHTML, encoding: 'utf8')
 
-    describe('text editor style extraction', function() {
+    describe('text editor style extraction', function () {
       let extractedStyles: string[]
 
       const textEditorStyle = '.editor-style .extraction-test { color: blue; }'
@@ -819,7 +819,7 @@ var x = 0;
         'pre.editor-colors .extraction-test { color: green; }'
       const unrelatedStyle = '.something else { color: red; }'
 
-      beforeEach(function() {
+      beforeEach(function () {
         atom.styles.addStyleSheet(textEditorStyle, {
           context: 'atom-text-editor',
         })
@@ -833,24 +833,24 @@ var x = 0;
         extractedStyles = previewUtil.getPreviewStyles(false)
       })
 
-      it('returns an array containing atom-text-editor css style strings', function() {
+      it('returns an array containing atom-text-editor css style strings', function () {
         expect(extractedStyles.indexOf(textEditorStyle)).to.be.greaterThan(-1)
       })
 
-      it('replaces atom-text-editor selector with pre.editor-colors', function() {
+      it('replaces atom-text-editor selector with pre.editor-colors', function () {
         expect(
           extractedStyles.indexOf(replacementTextEditorStyleExpected),
         ).to.be.greaterThan(-1)
       })
 
-      it('does not return other styles', function() {
+      it('does not return other styles', function () {
         expect(extractedStyles.indexOf(unrelatedStyle)).to.equal(-1)
       })
     })
   })
 
   describe('when core:copy is triggered', () =>
-    it('writes the rendered HTML to the clipboard', async function() {
+    it('writes the rendered HTML to the clipboard', async function () {
       preview.destroy()
 
       filePath = path.join(tempPath, 'subdir/code-block.md')
@@ -874,8 +874,8 @@ var x = 0;
 `)
     }))
 
-  describe('checkbox lists', function() {
-    it('renders checkbox lists', async function() {
+  describe('checkbox lists', function () {
+    it('renders checkbox lists', async function () {
       const checkBoxes = Array.from(
         (await previewFragment(preview)).querySelectorAll(
           'input[type=checkbox]',
@@ -893,8 +893,8 @@ var x = 0;
     })
   })
 
-  describe('emoji', function() {
-    it('renders them', async function() {
+  describe('emoji', function () {
+    it('renders them', async function () {
       const emojis = Array.from(
         (await previewFragment(preview)).querySelectorAll('img.emoji'),
       ) as HTMLImageElement[]
@@ -908,7 +908,7 @@ var x = 0;
     })
   })
 
-  describe('toc', function() {
+  describe('toc', function () {
     let preview: MarkdownPreviewViewFile
     let config: Partial<ConfigValues['markdown-preview-plus.markdownItConfig']>
     let toc: HTMLDivElement
@@ -931,7 +931,7 @@ var x = 0;
         toc.querySelectorAll<HTMLAnchorElement>('li > a'),
       ).map((x) => x.innerText)
     })
-    it('renders toc', async function() {
+    it('renders toc', async function () {
       expect(Array.from(toc.querySelectorAll('ul'))).to.have.length(2)
       expect(Array.from(toc.querySelectorAll('li'))).to.have.length(5)
       expect(
@@ -1006,14 +1006,14 @@ var x = 0;
     })
   })
 
-  describe('imsize', function() {
+  describe('imsize', function () {
     beforeEach(() => {
       atom.config.set('markdown-preview-plus.markdownItConfig.useImsize', true)
     })
     afterEach(() => {
       atom.config.unset('markdown-preview-plus.markdownItConfig.useImsize')
     })
-    it('allows specifying image size', async function() {
+    it('allows specifying image size', async function () {
       const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor
       editor.setText(`![Some Image](img.png "title" =100x200)`)
       const pv = await createMarkdownPreviewViewEditor(editor)
@@ -1028,7 +1028,7 @@ var x = 0;
     })
   })
 
-  describe('Critic Markup', function() {
+  describe('Critic Markup', function () {
     beforeEach(() => {
       atom.config.set(
         'markdown-preview-plus.markdownItConfig.useCriticMarkup',
@@ -1040,7 +1040,7 @@ var x = 0;
         'markdown-preview-plus.markdownItConfig.useCriticMarkup',
       )
     })
-    it('renders it', async function() {
+    it('renders it', async function () {
       const pv = await createMarkdownPreviewViewFile(
         path.join(tempPath, 'subdir/criticMarkup.md'),
       )
@@ -1058,7 +1058,7 @@ var x = 0;
     })
   })
 
-  describe('Footnote Markup', function() {
+  describe('Footnote Markup', function () {
     beforeEach(() => {
       atom.config.set(
         'markdown-preview-plus.markdownItConfig.useFootnote',
@@ -1068,7 +1068,7 @@ var x = 0;
     afterEach(() => {
       atom.config.unset('markdown-preview-plus.markdownItConfig.useFootnote')
     })
-    it('renders it', async function() {
+    it('renders it', async function () {
       const pv = await createMarkdownPreviewViewFile(
         path.join(tempPath, 'subdir/footnote.md'),
       )
@@ -1087,8 +1087,8 @@ var x = 0;
     })
   })
 
-  describe('table alignment', function() {
-    it('realigns table if markdown changed', async function() {
+  describe('table alignment', function () {
+    it('realigns table if markdown changed', async function () {
       const editor = (await atom.workspace.open('nonexistent.md')) as TextEditor
       editor.setText(`\
 | Tables        |      Are      |  Cool |
@@ -1217,16 +1217,16 @@ $$
     })
   })
 
-  describe('configurable tab width', function() {
+  describe('configurable tab width', function () {
     let pv: MarkdownPreviewView
     let ed: TextEditor
-    beforeEach(async function() {
+    beforeEach(async function () {
       ed = (await atom.workspace.open()) as TextEditor
       ed.setText('```\ndef func():\n\treturn\n```')
       atom.grammars.assignLanguageMode(ed.getBuffer(), 'source.python')
       pv = await createMarkdownPreviewViewEditor(ed)
     })
-    afterEach(async function() {
+    afterEach(async function () {
       pv.destroy()
       const pane = atom.workspace.paneForItem(ed)
       if (pane) {
@@ -1239,41 +1239,41 @@ $$
       if (!tab) throw new Error('No hard tab found')
       expect(tab.innerText.length).to.equal(expectedWidth)
     }
-    it('by default uses 2-space tabs', async function() {
+    it('by default uses 2-space tabs', async function () {
       await checkTabWidth(2)
     })
-    describe('When Atom core setting changed', function() {
-      before(function() {
+    describe('When Atom core setting changed', function () {
+      before(function () {
         atom.config.set('editor.tabLength', 4)
       })
-      after(function() {
+      after(function () {
         atom.config.unset('editor.tabLength')
       })
-      it('respects that', async function() {
+      it('respects that', async function () {
         await checkTabWidth(4)
       })
     })
-    describe('When MPP setting changed', function() {
-      before(function() {
+    describe('When MPP setting changed', function () {
+      before(function () {
         atom.config.set('markdown-preview-plus.codeTabWidth', 8)
       })
-      after(function() {
+      after(function () {
         atom.config.unset('markdown-preview-plus.codeTabWidth')
       })
-      it('respects that', async function() {
+      it('respects that', async function () {
         await checkTabWidth(8)
       })
     })
-    describe('When both settings changed', function() {
-      before(function() {
+    describe('When both settings changed', function () {
+      before(function () {
         atom.config.set('editor.tabLength', 4)
         atom.config.set('markdown-preview-plus.codeTabWidth', 8)
       })
-      after(function() {
+      after(function () {
         atom.config.unset('markdown-preview-plus.codeTabWidth')
         atom.config.unset('editor.tabLength')
       })
-      it('MPP overrides', async function() {
+      it('MPP overrides', async function () {
         await checkTabWidth(8)
       })
     })

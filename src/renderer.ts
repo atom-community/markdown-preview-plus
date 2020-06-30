@@ -171,7 +171,7 @@ function resolveImagePaths(
 ) {
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
   const media = getMedia(doc)
-  Array.from(media).map(function(img) {
+  Array.from(media).map(function (img) {
     let attrName: 'href' | 'src'
     if (img.tagName === 'LINK') attrName = 'href'
     else attrName = 'src'

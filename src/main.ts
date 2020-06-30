@@ -208,7 +208,7 @@ function configObserver<T>(
   ) => void,
 ) {
   let configDisposables: CompositeDisposable
-  return function(value: T) {
+  return function (value: T) {
     if (!disposables) return
     if (configDisposables) {
       configDisposables.dispose()

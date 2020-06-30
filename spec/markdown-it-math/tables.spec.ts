@@ -4,7 +4,7 @@ import assert = require('assert')
 import { math_plugin } from '../../src/markdown-it-math/index'
 import mdIt = require('markdown-it')
 
-describe('Tables with default delimiters', function() {
+describe('Tables with default delimiters', function () {
   const md = mdIt({
     html: true,
     langPrefix: '',
@@ -15,7 +15,7 @@ describe('Tables with default delimiters', function() {
   generate(path.join(__dirname, 'fixtures/tables.txt'), md)
 })
 
-describe('Tables with non-default delimiters', function() {
+describe('Tables with non-default delimiters', function () {
   const md = mdIt({
     html: true,
     langPrefix: '',
@@ -29,7 +29,7 @@ describe('Tables with non-default delimiters', function() {
   generate(path.join(__dirname, 'fixtures/tables.txt'), md)
 })
 
-describe('Tables with multiple non-default delimiters', function() {
+describe('Tables with multiple non-default delimiters', function () {
   const md = mdIt({
     html: true,
     langPrefix: '',
@@ -48,13 +48,13 @@ describe('Tables with multiple non-default delimiters', function() {
   generate(path.join(__dirname, 'fixtures/tables.txt'), md)
 })
 
-describe('Parsing pipe inside inline maths delimiters `$`', function() {
+describe('Parsing pipe inside inline maths delimiters `$`', function () {
   const md = mdIt().use(math_plugin, {
     inlineDelim: [['$', '$']],
     blockDelim: [['$$', '$$']],
   })
 
-  it('Should not delimit a column of a table', function() {
+  it('Should not delimit a column of a table', function () {
     const res1 = md.render('col a | col b\n--|--\n$P(A|B)$ | foo')
     assert.equal(
       res1,
@@ -62,7 +62,7 @@ describe('Parsing pipe inside inline maths delimiters `$`', function() {
     )
   })
 
-  it('Should respect multiple inline math on the same row', function() {
+  it('Should respect multiple inline math on the same row', function () {
     const res1 = md.render(
       'col a | col b | col c\n--|--|--\n$P(A|B)$ | foo | $P(A|B)$',
     )
@@ -73,8 +73,8 @@ describe('Parsing pipe inside inline maths delimiters `$`', function() {
   })
 })
 
-describe('Parsing pipe inside inline maths delimiters `\\(`, `\\)`', function() {
-  it('Should not delimit a column of a table', function() {
+describe('Parsing pipe inside inline maths delimiters `\\(`, `\\)`', function () {
+  it('Should not delimit a column of a table', function () {
     const md = mdIt().use(math_plugin, {
       inlineDelim: [['\\(', '\\)']],
       blockDelim: [['\\[', '\\]']],
@@ -88,7 +88,7 @@ describe('Parsing pipe inside inline maths delimiters `\\(`, `\\)`', function() 
   })
 })
 
-describe('Parsing pipe inside inline maths configured with multiple delimiters', function() {
+describe('Parsing pipe inside inline maths configured with multiple delimiters', function () {
   const md = mdIt().use(math_plugin, {
     inlineDelim: [
       ['$', '$'],
@@ -100,7 +100,7 @@ describe('Parsing pipe inside inline maths configured with multiple delimiters',
     ],
   })
 
-  it('Should not delimit a column of a table for `$`', function() {
+  it('Should not delimit a column of a table for `$`', function () {
     const res1 = md.render('col a | col b\n--|--\n$P(A|B)$ | foo')
     assert.equal(
       res1,
@@ -108,7 +108,7 @@ describe('Parsing pipe inside inline maths configured with multiple delimiters',
     )
   })
 
-  it('Should not delimit a column of a table for `\\(`, `\\)`', function() {
+  it('Should not delimit a column of a table for `\\(`, `\\)`', function () {
     const res1 = md.render('col a | col b\n--|--\n\\(P(A|B)\\) | foo')
     assert.equal(
       res1,
@@ -117,8 +117,8 @@ describe('Parsing pipe inside inline maths configured with multiple delimiters',
   })
 })
 
-describe('Parsing pipe inside unclosed maths delimiter', function() {
-  it('Should parse columns as if they were normal text', function() {
+describe('Parsing pipe inside unclosed maths delimiter', function () {
+  it('Should parse columns as if they were normal text', function () {
     const md = mdIt().use(math_plugin, {
       inlineDelim: [['$', '$']],
       blockDelim: [['$$', '$$']],
@@ -132,8 +132,8 @@ describe('Parsing pipe inside unclosed maths delimiter', function() {
   })
 })
 
-describe('Parsing pipe inside unopened maths delimiter', function() {
-  it('Should parse columns as if they were normal text', function() {
+describe('Parsing pipe inside unopened maths delimiter', function () {
+  it('Should parse columns as if they were normal text', function () {
     const md = mdIt().use(math_plugin, {
       inlineDelim: [['$', '$']],
       blockDelim: [['$$', '$$']],

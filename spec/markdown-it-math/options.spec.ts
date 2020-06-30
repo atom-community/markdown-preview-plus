@@ -3,8 +3,8 @@ import assert = require('assert')
 import { math_plugin } from '../../src/markdown-it-math'
 import mdIt = require('markdown-it')
 
-describe('Options', function() {
-  it('Should allow single-double `$` as delimiters', function() {
+describe('Options', function () {
+  it('Should allow single-double `$` as delimiters', function () {
     const md = mdIt().use(math_plugin, {
       inlineDelim: [['$', '$']],
       blockDelim: [['$$', '$$']],
@@ -15,7 +15,7 @@ describe('Options', function() {
     assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n')
     assert.equal(res2, '<div class="math block">1+1 = 2\n</div>\n')
   })
-  it('Should allow LaTeX style delimiters', function() {
+  it('Should allow LaTeX style delimiters', function () {
     const md = mdIt().use(math_plugin, {
       inlineDelim: [['\\(', '\\)']],
       blockDelim: [['\\[', '\\]']],
@@ -26,7 +26,7 @@ describe('Options', function() {
     assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n')
     assert.equal(res2, '<div class="math block">1+1 = 2\n</div>\n')
   })
-  it('Should allow newline in opening block delimiters', function() {
+  it('Should allow newline in opening block delimiters', function () {
     const md = mdIt().use(math_plugin, {
       inlineDelim: [['$$', '$$']],
       blockDelim: [['$$\n', '$$']],
@@ -37,7 +37,7 @@ describe('Options', function() {
     assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n')
     assert.equal(res2, '<div class="math block">1+1 = 2</div>\n')
   })
-  it('Should allow newline in closing block delimiters', function() {
+  it('Should allow newline in closing block delimiters', function () {
     const md = mdIt().use(math_plugin, {
       inlineDelim: [['$$', '$$']],
       blockDelim: [['$$\n', '\n$$']],
@@ -50,7 +50,7 @@ describe('Options', function() {
     assert.equal(res2, '<div class="math block">1+1 = 2$$</div>\n')
     assert.equal(res3, '<div class="math block">1+1 = 2\n</div>\n')
   })
-  it('Should only support singular newlines in block math closing tags', function() {
+  it('Should only support singular newlines in block math closing tags', function () {
     const md = mdIt().use(math_plugin, {
       inlineDelim: [['$$', '$$']],
       blockDelim: [['$$\n', '\n\n$$']],
@@ -65,8 +65,8 @@ describe('Options', function() {
   })
 })
 
-describe('Rendering options', function() {
-  it('Should allow different options', function() {
+describe('Rendering options', function () {
+  it('Should allow different options', function () {
     const md = mdIt().use(math_plugin, {
       renderingOptions: { decimalMark: ',' },
     })
@@ -79,13 +79,13 @@ describe('Rendering options', function() {
   })
 })
 
-describe('Renderer', function() {
-  it('Should allow another renderer', function() {
+describe('Renderer', function () {
+  it('Should allow another renderer', function () {
     const md = mdIt().use(math_plugin, {
-      inlineRenderer: function(tok: Token) {
+      inlineRenderer: function (tok: Token) {
         return `<inline>${tok.content}</inline>`
       },
-      blockRenderer: function(tok: Token) {
+      blockRenderer: function (tok: Token) {
         return `<display>${tok.content}</display>`
       },
     })

@@ -292,7 +292,7 @@ ipcRenderer.on<'reload'>('reload', (_, { id }) => {
   })
 })
 
-window.onbeforeunload = function() {
+window.onbeforeunload = function () {
   return false
 }
 

@@ -123,7 +123,7 @@ export class WebviewHandler {
       if (e.url.startsWith('file://') && !forceOpenExternal) {
         handlePromise(atom.workspace.open(fileUriToPath(e.url)))
       } else {
-        shell.openExternal(e.url)
+        handlePromise(shell.openExternal(e.url))
       }
     })
 

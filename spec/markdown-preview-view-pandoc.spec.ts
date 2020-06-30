@@ -12,14 +12,14 @@ import sinon from 'sinon'
 
 import { waitsFor, previewFragment, activateMe } from './util'
 
-describe('MarkdownPreviewView when Pandoc is enabled', function() {
+describe('MarkdownPreviewView when Pandoc is enabled', function () {
   let html: string
   let preview: MarkdownPreviewView
   let filePath: string
   let stub: sinon.SinonStub<any>
   const previews: Set<MarkdownPreviewView> = new Set()
 
-  const createMarkdownPreviewViewFile = function(filePath: string) {
+  const createMarkdownPreviewViewFile = function (filePath: string) {
     const mpv = new MarkdownPreviewViewFile(filePath)
     assert(mpv.element !== undefined)
     window.workspaceDiv.appendChild(mpv.element!)
@@ -30,7 +30,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
   before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     filePath = path.join(__dirname, 'fixtures/subdir/file.markdown')
     const htmlPath = path.join(__dirname, 'fixtures/subdir/file-pandoc.html')
     html = fs.readFileSync(htmlPath, { encoding: 'utf-8' })
@@ -43,7 +43,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
     preview = createMarkdownPreviewViewFile(filePath)
   })
 
-  afterEach(async function() {
+  afterEach(async function () {
     previews.forEach((x) => x.destroy())
     previews.clear()
 
@@ -54,13 +54,13 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
     stub.restore()
   })
 
-  describe('image resolving', function() {
-    beforeEach(async function() {
+  describe('image resolving', function () {
+    beforeEach(async function () {
       await preview.initialRenderPromise()
     })
 
     describe('when the image uses a relative path', () =>
-      it('resolves to a path relative to the file', async function() {
+      it('resolves to a path relative to the file', async function () {
         const image = await waitsFor(
           async () =>
             (await previewFragment(preview)).querySelector('img[alt=Image1]')!,
@@ -71,7 +71,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
       }))
 
     describe('when the image uses an absolute path that does not exist', () =>
-      it('resolves to a path relative to the project root', async function() {
+      it('resolves to a path relative to the project root', async function () {
         const image = await waitsFor(
           async () =>
             (await previewFragment(preview)).querySelector('img[alt=Image2]')!,
@@ -80,7 +80,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
       }))
 
     describe('when the image uses an absolute path that exists', () =>
-      it('adds a query to the URL', async function() {
+      it('adds a query to the URL', async function () {
         filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
         fs.writeFileSync(filePath, `![absolute](${filePath})`)
 
@@ -105,8 +105,8 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         ).to.equal(true)
       }))
 
-    describe('when the image uses an URL', function() {
-      it("doesn't change the http(s) URL", async function() {
+    describe('when the image uses an URL', function () {
+      it("doesn't change the http(s) URL", async function () {
         const image = await waitsFor(
           async () =>
             (await previewFragment(preview)).querySelector('img[alt=Image3]')!,
@@ -116,7 +116,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function() {
         )
       })
 
-      it("doesn't change the data URL", async function() {
+      it("doesn't change the data URL", async function () {
         const image = (await previewFragment(preview)).querySelector(
           'img[alt=Image4]',
         )

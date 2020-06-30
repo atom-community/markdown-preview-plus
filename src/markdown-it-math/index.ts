@@ -1,8 +1,10 @@
 /* Process inline math */
 // tslint:disable:no-unsafe-any
 
-import * as mdIt from 'markdown-it'
+import mdIt from 'markdown-it'
 import Token from 'markdown-it/lib/token'
+import { RuleInline } from 'markdown-it/lib/parser_inline'
+import { RuleBlock } from 'markdown-it/lib/parser_block'
 import { makeTable } from './lib/table'
 
 function skipTextCommand(state: any, max: number) {
@@ -89,18 +91,18 @@ function scanDelims(state: any, start: number, delimLength: number) {
   }
 }
 
-function makeMath_inline(delims: [[string, string]]) {
-  return function math_inline(state: any, silent: boolean) {
+function makeMath_inline(delims: [[string, string]]): RuleInline {
+  return function math_inline(state, silent) {
     let startCount
     let found
     let res
     let token
     let closeDelim
-    const max = state.posMax as number
-    const start = state.pos as number
-    const foundDelims = delims.find(function(i) {
+    const max = state.posMax
+    const start = state.pos
+    const foundDelims = delims.find(function (i) {
       const open = i[0]
-      const openDelim = state.src.slice(start, start + open.length) as string
+      const openDelim = state.src.slice(start, start + open.length)
       return openDelim === open
     })
     if (!foundDelims) {
@@ -160,13 +162,8 @@ function makeMath_inline(delims: [[string, string]]) {
   }
 }
 
-function makeMath_block(delims: [[string, string]]) {
-  return function math_block(
-    state: any,
-    startLine: number,
-    endLine: number,
-    silent: boolean,
-  ) {
+function makeMath_block(delims: [[string, string]]): RuleBlock {
+  return function math_block(state, startLine, endLine, silent) {
     let len
     let nextLine
     let token
@@ -179,7 +176,7 @@ function makeMath_block(delims: [[string, string]]) {
     let pos: number = state.bMarks[startLine] + state.tShift[startLine]
     let max: number = state.eMarks[startLine]
 
-    const foundDelims = delims.find(function(i) {
+    const foundDelims = delims.find(function (i) {
       const open = i[0]
       const openDelim = state.src.slice(pos, pos + open.length)
       return openDelim === open
@@ -239,10 +236,7 @@ function makeMath_block(delims: [[string, string]]) {
 
       closeDelim = closeStartsAtNewline
         ? state.src.slice(pos, max).trim()
-        : state.src
-            .slice(pos, max)
-            .trim()
-            .slice(-close.length)
+        : state.src.slice(pos, max).trim().slice(-close.length)
 
       if (closeDelim !== close) {
         continue
@@ -293,10 +287,10 @@ export interface RenderingOptions {
 
 function makeMathRenderer(renderingOptions: RenderingOptions = {}) {
   return renderingOptions.display === 'block'
-    ? function(tokens: Token[], idx: number) {
+    ? function (tokens: Token[], idx: number) {
         return '<div class="math block">' + tokens[idx].content + '</div>\n'
       }
-    : function(tokens: Token[], idx: number) {
+    : function (tokens: Token[], idx: number) {
         return '<span class="math inline">' + tokens[idx].content + '</span>'
       }
 }
@@ -316,20 +310,20 @@ export function math_plugin(md: mdIt, options: PluginOptions = {}) {
   const oInlineRenderer = options.inlineRenderer
   const oBlockRenderer = options.blockRenderer
   const inlineRenderer = oInlineRenderer
-    ? function(tokens: Token[], idx: number) {
+    ? function (tokens: Token[], idx: number) {
         return oInlineRenderer(tokens[idx], md)
       }
     : makeMathRenderer(options.renderingOptions)
   const blockRenderer = oBlockRenderer
-    ? function(tokens: Token[], idx: number) {
+    ? function (tokens: Token[], idx: number) {
         return oBlockRenderer(tokens[idx], md) + '\n'
       }
     : makeMathRenderer(
         Object.assign({ display: 'block' }, options.renderingOptions),
       )
 
-  const mathInline = (makeMath_inline(inlineDelim) as any) as mdIt.Rule
-  const mathBlock = (makeMath_block(blockDelim) as any) as mdIt.Rule
+  const mathInline = makeMath_inline(inlineDelim)
+  const mathBlock = makeMath_block(blockDelim)
 
   md.inline.ruler.before('escape', 'math_inline', mathInline)
   md.block.ruler.after('blockquote', 'math_block', mathBlock, {
@@ -343,7 +337,7 @@ export function math_plugin(md: mdIt, options: PluginOptions = {}) {
     inlineDelim,
     blockDelim,
   })
-  md.block.ruler.at('table', tableBlock as any, {
+  md.block.ruler.at('table', tableBlock, {
     alt: ['paragraph', 'reference'],
   })
 }

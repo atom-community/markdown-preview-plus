@@ -25,7 +25,7 @@ export function pairUp<T>(arr: T[], option?: string): Array<[T, T]> {
       },
     )
   }
-  return arr.reduce<Array<[T, T]>>(function(result, _value, index, array) {
+  return arr.reduce<Array<[T, T]>>(function (result, _value, index, array) {
     if (index % 2 === 0) result.push([array[index], array[index + 1]])
     return result
   }, [])

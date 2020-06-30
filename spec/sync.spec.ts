@@ -23,7 +23,7 @@ interface MyToken {
   line: number
 }
 
-describe('Syncronization of source and preview', function() {
+describe('Syncronization of source and preview', function () {
   let preview: MarkdownPreviewView
   let fixturesPath: string
   let stub: sinon.SinonStub<[], any>
@@ -31,7 +31,7 @@ describe('Syncronization of source and preview', function() {
   before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
-  beforeEach(async function() {
+  beforeEach(async function () {
     fixturesPath = path.join(__dirname, 'fixtures')
 
     // Redirect atom to a temp config directory
@@ -59,7 +59,7 @@ describe('Syncronization of source and preview', function() {
     )
   })
 
-  afterEach(async function() {
+  afterEach(async function () {
     stub.restore()
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
@@ -80,11 +80,11 @@ describe('Syncronization of source and preview', function() {
     return el
   }
 
-  describe('Syncronizing preview with source', function() {
+  describe('Syncronizing preview with source', function () {
     let sourceMap: MyToken[]
     let tokens: string
 
-    beforeEach(function() {
+    beforeEach(function () {
       sourceMap = yaml.parse(
         fs.readFileSync(path.join(fixturesPath, 'sync-preview.yaml'), {
           encoding: 'utf-8',
@@ -145,7 +145,7 @@ describe('Syncronization of source and preview', function() {
   })
 
   describe('Syncronizing source with preview', () =>
-    it('sets the editors cursor buffer location to the correct line', function() {
+    it('sets the editors cursor buffer location to the correct line', function () {
       const sourceMap = yaml.parse(
         fs.readFileSync(path.join(fixturesPath, 'sync-source.yaml'), {
           encoding: 'utf-8',

@@ -14,7 +14,7 @@
 // OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 // CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import * as mdIt from 'markdown-it'
+import mdIt from 'markdown-it'
 import Token from 'markdown-it/lib/token'
 
 const specialChars = ['-', '+', '~', '=', '>']
