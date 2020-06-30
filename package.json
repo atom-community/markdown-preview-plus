@@ -14,7 +14,7 @@
   "repository": "https://github.com/atom-community/markdown-preview-plus",
   "license": "MIT",
   "engines": {
-    "atom": ">=1.39.0 <2.0.0"
+    "atom": ">=1.48.0 <2.0.0"
   },
   "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "scripts": {

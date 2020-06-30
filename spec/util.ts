@@ -1,8 +1,7 @@
 // tslint:disable: no-unsafe-any
 import { use, expect } from 'chai'
-import * as sinonChai from 'sinon-chai'
-import { MarkdownPreviewView } from '../lib/markdown-preview-view'
-import Clipboard = require('../lib/clipboard')
+import sinonChai from 'sinon-chai'
+import { MarkdownPreviewView } from '../src/markdown-preview-view'
 
 use(sinonChai)
 
@@ -83,7 +82,7 @@ export async function expectPreviewInSplitPane() {
     .getActiveItem() as MarkdownPreviewView
   await preview.initialRenderPromise()
 
-  expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewEditor')
+  expect(preview.classname).to.be.equal('MarkdownPreviewViewEditor')
   expect(preview.getPath()).to.equal(
     atom.workspace.getActiveTextEditor()!.getPath(),
   )
@@ -134,22 +133,20 @@ export async function activateMe(): Promise<Package> {
   return atom.packages.activatePackage(pkg.name)
 }
 
-import * as sinon from 'sinon'
+import sinon from 'sinon'
 export function stubClipboard() {
   const result: { stub?: sinon.SinonStub; contents: string } = {
     stub: undefined,
     contents: '',
   }
-  const clipboard = require('../lib/clipboard') as typeof Clipboard
   before(function() {
-    result.stub = sinon
-      .stub(clipboard, 'write')
-      .callsFake(function(arg: { text?: string }) {
-        result.contents = arg.text || ''
-      }) as any
+    result.stub = sinon.stub().callsFake(function(arg: { text?: string }) {
+      result.contents = arg.text || ''
+    }) as any
+    window['markdown-preview-plus-tests'] = { clipboardWrite: result.stub }
   })
   after(function() {
-    result.stub && result.stub.restore()
+    delete window['markdown-preview-plus-tests']
   })
   afterEach(function() {
     result.contents = ''

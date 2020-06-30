@@ -19,6 +19,8 @@ export interface SerializedMPV {
 
 export abstract class MarkdownPreviewView {
   private static elementMap = new WeakMap<HTMLElement, MarkdownPreviewView>()
+  // used for tests
+  public abstract readonly classname: string
   public element!: HTMLElement
   protected readonly handler: Promise<WebviewHandler>
   protected emitter: Emitter<{

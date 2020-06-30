@@ -7,5 +7,9 @@ const clipboard =
     : electron.clipboard
 
 export function write(arg: electron.Data) {
-  return clipboard.write(arg)
+  if (window['markdown-preview-plus-tests']?.clipboardWrite) {
+    return window['markdown-preview-plus-tests'].clipboardWrite(arg)
+  } else {
+    return clipboard.write(arg)
+  }
 }

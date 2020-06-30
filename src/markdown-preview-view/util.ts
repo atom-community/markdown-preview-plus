@@ -12,13 +12,6 @@ export function editorForId(editorId: number): TextEditor | undefined {
   return undefined
 }
 
-// this weirdness allows overriding in tests
-let getStylesOverride: typeof getPreviewStyles | undefined = undefined
-
-export function __setGetStylesOverride(f?: typeof getPreviewStyles) {
-  getStylesOverride = f
-}
-
 function* getStyles(context?: string | null): IterableIterator<string> {
   const elements = atom.styles.getStyleElements()
 
@@ -75,7 +68,9 @@ function* getActivePackageStyles(
 }
 
 export function getPreviewStyles(display: boolean): string[] {
-  if (getStylesOverride) return getStylesOverride(display)
+  if (window['markdown-preview-plus-tests']?.getStylesOverride) {
+    return window['markdown-preview-plus-tests']?.getStylesOverride(display)
+  }
   const styles = []
   if (display) {
     // global editor styles

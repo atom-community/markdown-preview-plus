@@ -3,7 +3,8 @@ import { File } from 'atom'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 
 export class MarkdownPreviewViewFile extends MarkdownPreviewView {
-  private file!: File
+  public readonly classname = 'MarkdownPreviewViewFile'
+  private file: File
 
   constructor(filePath: string) {
     super()

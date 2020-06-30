@@ -5,7 +5,7 @@ import * as wrench from 'fs-extra'
 import {
   MarkdownPreviewView,
   MarkdownPreviewViewFile,
-} from '../lib/markdown-preview-view'
+} from '../src/markdown-preview-view'
 
 import {
   waitsFor,
@@ -163,7 +163,7 @@ describe('Markdown preview plus package', function() {
       )
 
       const preview1 = previewPane.getActiveItem() as MarkdownPreviewView
-      expect(preview1.constructor.name).to.be.equal('MarkdownPreviewViewEditor')
+      expect(preview1.classname).to.be.equal('MarkdownPreviewViewEditor')
       expect(preview1.getPath()).to.equal(
         (editorPane.getActiveItem() as TextEditor).getPath(),
       )
@@ -347,7 +347,7 @@ var x = y;
       await atom.workspace.open(`markdown-preview-plus://file/${filePath}`)
 
       preview = atom.workspace.getActivePaneItem() as any
-      expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewFile')
+      expect(preview.classname).to.be.equal('MarkdownPreviewViewFile')
 
       const spy = sinonPrivateSpy<typeof preview['renderMarkdownText']>(
         preview,
@@ -482,9 +482,10 @@ var x = y;
 <p>encoding \u2192 issue</p>
 `)
 
-      atom.workspace
-        .getActiveTextEditor()!
-        .setSelectedBufferRange([[0, 0], [1, 0]])
+      atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
+        [0, 0],
+        [1, 0],
+      ])
 
       await copyHtml(editor)
 
@@ -858,9 +859,11 @@ world</p>
         60000,
       )
 
-      const notifications = Array.from(document.querySelectorAll(
-        'atom-notification.warning',
-      ) as NodeListOf<HTMLElement>)
+      const notifications = Array.from(
+        document.querySelectorAll('atom-notification.warning') as NodeListOf<
+          HTMLElement
+        >,
+      )
       expect(notifications.length).to.equal(2)
       expect(notifications).to.satisfy((x: HTMLElement[]) =>
         x.some((y) => y.innerText.includes('inlineMathSeparators')),

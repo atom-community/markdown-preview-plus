@@ -7,3 +7,10 @@ interface ObjectConstructor {
     x: T,
   ): Array<{ [K in keyof T]-?: [K, T[K]] }[keyof T]>
 }
+
+interface Window {
+  'markdown-preview-plus-tests': {
+    clipboardWrite?: Function
+    getStylesOverride?: (x: boolean) => string[]
+  }
+}

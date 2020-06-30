@@ -6,7 +6,7 @@ import { waitsFor, activateMe } from './util'
 import { expect } from 'chai'
 global.require = require
 import { MathJaxController } from '../src-client/mathjax-helper'
-import { loadUserMacros } from '../lib/macros-util'
+import { loadUserMacros } from '../src/macros-util'
 
 temp.track()
 
@@ -29,7 +29,7 @@ describe('MathJax helper module', () =>
     before(async () => {
       await activateMe()
       configDirPath = temp.mkdirSync('atom-config-dir-')
-      macrosPath = path.join(configDirPath, 'markdown-preview-plus.cson')
+      macrosPath = path.join(configDirPath, 'markdown-preview-plus.yaml')
     })
     after(async () => {
       await atom.packages.deactivatePackage('markdown-preview-plus')

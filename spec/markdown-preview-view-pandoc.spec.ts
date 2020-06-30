@@ -5,10 +5,10 @@ import * as temp from 'temp'
 import {
   MarkdownPreviewViewFile,
   MarkdownPreviewView,
-} from '../lib/markdown-preview-view'
-import pandocHelper = require('../lib/pandoc-helper')
+} from '../src/markdown-preview-view'
+import pandocHelper = require('../src/pandoc-helper')
 import { expect, assert } from 'chai'
-import * as sinon from 'sinon'
+import sinon from 'sinon'
 
 import { waitsFor, previewFragment, activateMe } from './util'
 

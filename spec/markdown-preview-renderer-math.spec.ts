@@ -1,4 +1,4 @@
-import markdownIt = require('../lib/markdown-it-helper')
+import markdownIt = require('../src/markdown-it-helper')
 import { expect } from 'chai'
 let renderMath = false
 

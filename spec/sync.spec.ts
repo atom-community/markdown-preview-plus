@@ -1,9 +1,10 @@
 import * as path from 'path'
+import * as fs from 'fs'
 import * as temp from 'temp'
-import * as cson from 'season'
-import * as markdownIt from '../lib/markdown-it-helper'
-import { MarkdownPreviewView } from '../lib/markdown-preview-view'
-import * as sinon from 'sinon'
+import * as yaml from 'yaml'
+import * as markdownIt from '../src/markdown-it-helper'
+import { MarkdownPreviewView } from '../src/markdown-preview-view'
+import sinon from 'sinon'
 import {
   waitsFor,
   expectPreviewInSplitPane,
@@ -12,7 +13,7 @@ import {
   sinonPrivateSpy,
 } from './util'
 import { expect } from 'chai'
-import * as previewUtil from '../lib/markdown-preview-view/util'
+import * as previewUtil from '../src/markdown-preview-view/util'
 import {} from 'electron'
 
 temp.track()
@@ -84,8 +85,10 @@ describe('Syncronization of source and preview', function() {
     let tokens: string
 
     beforeEach(function() {
-      sourceMap = cson.readFileSync(
-        path.join(fixturesPath, 'sync-preview.cson'),
+      sourceMap = yaml.parse(
+        fs.readFileSync(path.join(fixturesPath, 'sync-preview.yaml'), {
+          encoding: 'utf-8',
+        }),
       ) as MyToken[]
       tokens = markdownIt.getTokens(
         atom.workspace.getActiveTextEditor()!.getText(),
@@ -143,8 +146,10 @@ describe('Syncronization of source and preview', function() {
 
   describe('Syncronizing source with preview', () =>
     it('sets the editors cursor buffer location to the correct line', function() {
-      const sourceMap = cson.readFileSync(
-        path.join(fixturesPath, 'sync-source.cson'),
+      const sourceMap = yaml.parse(
+        fs.readFileSync(path.join(fixturesPath, 'sync-source.yaml'), {
+          encoding: 'utf-8',
+        }),
       ) as Array<MyToken>
 
       for (const sourceElement of sourceMap) {

@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { MarkdownPreviewView } from '../lib/markdown-preview-view'
+import { MarkdownPreviewView } from '../src/markdown-preview-view'
 import { TextEditor } from 'atom'
 import {
   expectPreviewInSplitPane,
@@ -66,7 +66,13 @@ describe('the difference algorithm that updates the preview', function() {
     it("sets the start attribute when the start number isn't 1", async function() {
       expectOrderedListsToStartAt(['1', '1', '1', '1', '1'])
 
-      editor.setTextInBufferRange([[35, 0], [35, 12]], '2. Ordered 1')
+      editor.setTextInBufferRange(
+        [
+          [35, 0],
+          [35, 12],
+        ],
+        '2. Ordered 1',
+      )
       await waitsFor.msg(
         '1st ordered list start attribute to update',
         async () => {
@@ -78,7 +84,13 @@ describe('the difference algorithm that updates the preview', function() {
       )
       expectOrderedListsToStartAt(['2', '1', '1', '1', '1'])
 
-      editor.setTextInBufferRange([[148, 0], [148, 14]], '> 2. Ordered 1')
+      editor.setTextInBufferRange(
+        [
+          [148, 0],
+          [148, 14],
+        ],
+        '> 2. Ordered 1',
+      )
       await waitsFor.msg(
         'ordered list nested in blockquote start attribute to update',
         async () => {
@@ -90,7 +102,13 @@ describe('the difference algorithm that updates the preview', function() {
       )
       expectOrderedListsToStartAt(['2', '1', '2', '1', '1'])
 
-      editor.setTextInBufferRange([[205, 0], [205, 14]], '  2. Ordered 1')
+      editor.setTextInBufferRange(
+        [
+          [205, 0],
+          [205, 14],
+        ],
+        '  2. Ordered 1',
+      )
 
       await waitsFor.msg(
         'ordered list nested in unordered list start attribute to update',
@@ -105,9 +123,27 @@ describe('the difference algorithm that updates the preview', function() {
     })
 
     it('removes the start attribute when the start number is changed to 1', async function() {
-      editor.setTextInBufferRange([[35, 0], [35, 12]], '2. Ordered 1')
-      editor.setTextInBufferRange([[148, 0], [148, 14]], '> 2. Ordered 1')
-      editor.setTextInBufferRange([[205, 0], [205, 14]], '  2. Ordered 1')
+      editor.setTextInBufferRange(
+        [
+          [35, 0],
+          [35, 12],
+        ],
+        '2. Ordered 1',
+      )
+      editor.setTextInBufferRange(
+        [
+          [148, 0],
+          [148, 14],
+        ],
+        '> 2. Ordered 1',
+      )
+      editor.setTextInBufferRange(
+        [
+          [205, 0],
+          [205, 14],
+        ],
+        '  2. Ordered 1',
+      )
       await waitsFor.msg(
         'ordered lists start attributes to update',
         async () => {
@@ -123,7 +159,13 @@ describe('the difference algorithm that updates the preview', function() {
       )
       expectOrderedListsToStartAt(['2', '1', '2', '2', '1'])
 
-      editor.setTextInBufferRange([[35, 0], [35, 12]], '1. Ordered 1')
+      editor.setTextInBufferRange(
+        [
+          [35, 0],
+          [35, 12],
+        ],
+        '1. Ordered 1',
+      )
 
       await waitsFor.msg(
         '1st ordered list start attribute to be removed',
@@ -136,7 +178,13 @@ describe('the difference algorithm that updates the preview', function() {
       )
       expectOrderedListsToStartAt(['1', '1', '2', '2', '1'])
 
-      editor.setTextInBufferRange([[148, 0], [148, 14]], '> 1. Ordered 1')
+      editor.setTextInBufferRange(
+        [
+          [148, 0],
+          [148, 14],
+        ],
+        '> 1. Ordered 1',
+      )
 
       await waitsFor.msg(
         'ordered list nested in blockquote start attribute to be removed',
@@ -149,7 +197,13 @@ describe('the difference algorithm that updates the preview', function() {
       )
       expectOrderedListsToStartAt(['1', '1', '1', '2', '1'])
 
-      editor.setTextInBufferRange([[205, 0], [205, 14]], '  1. Ordered 1')
+      editor.setTextInBufferRange(
+        [
+          [205, 0],
+          [205, 14],
+        ],
+        '  1. Ordered 1',
+      )
 
       await waitsFor.msg(
         'ordered list nested in unordered list start attribute to be removed',
@@ -210,7 +264,13 @@ describe('the difference algorithm that updates the preview', function() {
         window.mathSpans = document.querySelectorAll('span.math')
         `)
 
-      editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
+      editor.setTextInBufferRange(
+        [
+          [46, 0],
+          [46, 43],
+        ],
+        'E=mc^2',
+      )
 
       await waitsFor.msg('math span to be updated', async () =>
         preview.runJS<boolean>(`
@@ -245,7 +305,13 @@ describe('the difference algorithm that updates the preview', function() {
         window.mathSpans = Array.from(document.querySelectorAll('span.math'))
         `)
 
-      editor.setTextInBufferRange([[46, 0], [46, 43]], 'E=mc^2')
+      editor.setTextInBufferRange(
+        [
+          [46, 0],
+          [46, 43],
+        ],
+        'E=mc^2',
+      )
 
       await waitsFor.msg('math span to be updated', async () =>
         preview.runJS<boolean>(`
@@ -300,7 +366,10 @@ describe('the difference algorithm that updates the preview', function() {
       })
 
       editor.setTextInBufferRange(
-        [[23, 0], [24, 9]],
+        [
+          [23, 0],
+          [24, 9],
+        ],
         '```js\nThis is a modified',
       )
 

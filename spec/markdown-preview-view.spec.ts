@@ -5,11 +5,11 @@ import {
   MarkdownPreviewView,
   MarkdownPreviewViewFile,
   MarkdownPreviewViewEditor,
-} from '../lib/markdown-preview-view'
+} from '../src/markdown-preview-view'
 import { expect, assert } from 'chai'
-import * as sinon from 'sinon'
+import sinon from 'sinon'
 import * as wrench from 'fs-extra'
-import * as previewUtil from '../lib/markdown-preview-view/util'
+import * as previewUtil from '../src/markdown-preview-view/util'
 import {} from 'electron'
 
 import {
@@ -23,7 +23,7 @@ import {
   sinonPrivateSpy,
 } from './util'
 import { TextEditorElement, TextEditor, ConfigValues } from 'atom'
-import { PlaceholderView } from '../lib/placeholder-view'
+import { PlaceholderView } from '../src/placeholder-view'
 
 declare module 'atom' {
   interface AtomEnvironment {
@@ -555,7 +555,13 @@ var x = 0;
           'clearly not a png but good enough for tests',
         )
 
-        editor.setTextInBufferRange([[0, 0], [0, 0]], '')
+        editor.setTextInBufferRange(
+          [
+            [0, 0],
+            [0, 0],
+          ],
+          '',
+        )
 
         await waitsFor.msg('image src attribute to update', async function() {
           imageURL = (await previewFragment(preview))
@@ -600,7 +606,13 @@ var x = 0;
         expect(imageURL).to.equal(img1Path)
         fs.renameSync(img1Path + 'trol', img1Path)
 
-        editor.setTextInBufferRange([[0, 0], [0, 0]], '')
+        editor.setTextInBufferRange(
+          [
+            [0, 0],
+            [0, 0],
+          ],
+          '',
+        )
 
         await waitsFor.msg('image src attribute to update', async function() {
           imageURL = (await previewFragment(preview))
@@ -772,7 +784,9 @@ var x = 0;
             return outputPath
           }),
       )
-      previewUtil.__setGetStylesOverride(() => styles)
+      window['markdown-preview-plus-tests'] = {
+        getStylesOverride: () => styles,
+      }
       try {
         assert(preview.element !== undefined)
         atom.commands.dispatch(preview.element!, 'core:save-as')
@@ -790,7 +804,7 @@ var x = 0;
         expect(savedHTML).to.equal(expectedOutput)
         stubs.forEach((stub) => stub.restore())
       } finally {
-        previewUtil.__setGetStylesOverride()
+        delete window['markdown-preview-plus-tests']
       }
     })
     // fs.writeFileSync(expectedFilePath, savedHTML, encoding: 'utf8')

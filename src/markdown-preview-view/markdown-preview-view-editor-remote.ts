@@ -11,6 +11,7 @@ import {
 import { remote } from 'electron'
 
 export class MarkdownPreviewViewEditorRemote extends MarkdownPreviewView {
+  public readonly classname = 'MarkdownPreviewViewEditorRemote'
   private text = ''
   private title: string = '<Pending>'
   private path?: string

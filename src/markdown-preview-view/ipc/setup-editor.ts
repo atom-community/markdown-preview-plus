@@ -34,7 +34,10 @@ export class RemoteEditorServer {
       } else if (max >= this.editor.getLastBufferRow() - 1) {
         this.editor.scrollToBufferPosition([max, 0])
       } else {
-        const range = Range.fromObject([[min, 0], [max, 0]])
+        const range = Range.fromObject([
+          [min, 0],
+          [max, 0],
+        ])
         this.editor.scrollToScreenRange(
           this.editor.screenRangeForBufferRange(range),
           {

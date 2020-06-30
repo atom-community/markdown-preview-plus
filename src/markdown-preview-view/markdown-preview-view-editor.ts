@@ -10,6 +10,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     MarkdownPreviewViewEditor
   >()
 
+  public readonly classname = 'MarkdownPreviewViewEditor'
   private lastRenderedMarkdownText = ''
 
   private constructor(private editor: TextEditor) {
@@ -74,7 +75,10 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     } else {
       // const mid = Math.floor(0.5 * (min + max))
       // this.editor.scrollToBufferPosition([mid, 0], { center: true })
-      const range = Range.fromObject([[min, 0], [max, 0]])
+      const range = Range.fromObject([
+        [min, 0],
+        [max, 0],
+      ])
       this.editor.scrollToScreenRange(
         this.editor.screenRangeForBufferRange(range),
         { center: false },

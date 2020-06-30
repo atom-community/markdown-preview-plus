@@ -2,7 +2,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
 import * as wrench from 'fs-extra'
-import pandocHelper = require('../lib/pandoc-helper')
+import pandocHelper = require('../src/pandoc-helper')
 import { expect } from 'chai'
 
 import { activateMe } from './util'

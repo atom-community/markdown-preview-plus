@@ -1,13 +1,17 @@
 {
   "extends": "../src/tsconfig.json",
   "include": [
-    "./**.ts",
-    "./**.d.ts",
-    "../src/types/season.d.ts",
-    "../src/config.ts"
+    "../src/**/*.d.ts",
+    "../src/**/*.ts",
+    "../src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js"
   ],
   "compileOnSave": false,
   "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
     "noEmit": true
   }
 }
