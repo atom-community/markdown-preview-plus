@@ -4,53 +4,60 @@ import * as fs from 'fs'
 import { isFileSync, packagePath, handlePromise } from './util'
 
 export function getUserMacrosPath(atomHome: string): string {
-  const oldPath = path.join(atomHome, 'markdown-preview-plus.cson')
-  const oldBakPath = path.join(
-    atomHome,
-    'markdown-preview-plus.mpp-update-backup.cson',
-  )
   const newPath = path.join(atomHome, 'markdown-preview-plus.yaml')
-  if (fs.existsSync(oldPath)) {
-    try {
-      const obj = yaml.parseDocument(
-        fs.readFileSync(oldPath).toString('utf-8'),
-        { keepCstNodes: true },
-      )
-      fs.writeFileSync(newPath, obj.toString(), { encoding: 'utf-8' })
-      fs.renameSync(oldPath, oldBakPath)
-      if (Object.keys(obj.toJSON() as {}).length > 0) {
-        atom.notifications.addInfo(
-          `${oldPath} converted to YAML and re-saved as ${newPath}`,
+  if (!isFileSync(newPath)) {
+    const oldPath = path.join(atomHome, 'markdown-preview-plus.cson')
+    if (isFileSync(oldPath)) {
+      /// backwards-compat
+      const buttons = [
+        {
+          text: 'Edit new YAML',
+          onDidClick() {
+            handlePromise(atom.workspace.open(newPath))
+          },
+        },
+        {
+          text: 'Show old CSON',
+          onDidClick() {
+            handlePromise(atom.workspace.open(oldPath))
+          },
+        },
+      ]
+      try {
+        const obj = yaml.parseDocument(
+          fs.readFileSync(oldPath).toString('utf-8'),
+          { keepCstNodes: true },
+        )
+        fs.writeFileSync(newPath, obj.toString(), { encoding: 'utf-8' })
+        if (Object.keys(obj.toJSON() as {}).length > 0) {
+          atom.notifications.addInfo(
+            `${oldPath} converted to YAML and re-saved as ${newPath}`,
+            {
+              detail: `markdown-preview-plus.cson was converted to YAML. The backup is kept as ${oldPath}`,
+              dismissable: true,
+              buttons,
+            },
+          )
+        }
+      } catch (e) {
+        createMacrosTemplate(newPath)
+        atom.notifications.addWarning(
+          'Error converting markdown-preview-plus.cson',
           {
-            detail: `markdown-preview-plus.cson was converted to YAML. The backup is saved as ${oldBakPath}`,
             dismissable: true,
-            buttons: [
-              {
-                text: 'Edit new YAML',
-                onDidClick() {
-                  handlePromise(atom.workspace.open(newPath))
-                },
-              },
-              {
-                text: 'Show old CSON',
-                onDidClick() {
-                  handlePromise(atom.workspace.open(oldBakPath))
-                },
-              },
-            ],
+            detail: (e as Error).toString(),
+            description:
+              'Failed to convert markdown-preview-plus.cson to YAML; please make the conversion manually',
+            buttons,
           },
         )
       }
-    } catch (e) {
-      atom.notifications.addWarning(
-        'Error converting markdown-preview-plus.cson',
-        {
-          dismissable: true,
-          detail: (e as Error).toString(),
-          description:
-            'Failed to convert markdown-preview-plus.cson to YAML; please make the conversion manually',
-        },
+      /// end
+    } else {
+      console.debug(
+        'Creating markdown-preview-plus.yaml, this is a one-time operation.',
       )
+      createMacrosTemplate(newPath)
     }
   }
   return newPath
@@ -78,15 +85,7 @@ function loadMacrosFile(filePath: string): object {
 
 export function loadUserMacros(atomHome = atom.getConfigDirPath()) {
   const userMacrosPath = getUserMacrosPath(atomHome)
-  if (isFileSync(userMacrosPath)) {
-    return loadMacrosFile(userMacrosPath)
-  } else {
-    console.debug(
-      'Creating markdown-preview-plus.cson, this is a one-time operation.',
-    )
-    createMacrosTemplate(userMacrosPath)
-    return loadMacrosFile(userMacrosPath)
-  }
+  return loadMacrosFile(userMacrosPath)
 }
 
 function createMacrosTemplate(filePath: string) {
