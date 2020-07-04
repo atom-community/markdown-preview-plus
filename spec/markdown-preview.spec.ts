@@ -16,6 +16,8 @@ import {
   activateMe,
   stubClipboard,
   sinonPrivateSpy,
+  WithFileType,
+  withFileGen,
 } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
@@ -24,22 +26,25 @@ import { TextEditor, TextEditorElement, ConfigValues } from 'atom'
 describe('Markdown preview plus package', function () {
   let preview: MarkdownPreviewView
   let tempPath: string
+  let withFile: WithFileType
 
   before(async function () {
-    await activateMe()
-    await atom.packages.activatePackage('language-gfm')
+    await Promise.all([
+      activateMe(),
+      atom.packages.activatePackage('language-gfm'),
+    ])
+    const fixturesPath = path.join(__dirname, 'fixtures')
+    tempPath = temp.mkdirSync('atom')
+    wrench.copySync(fixturesPath, tempPath)
+    atom.project.setPaths([tempPath])
+    withFile = withFileGen(tempPath)
   })
 
   after(async function () {
     await atom.packages.deactivatePackage('markdown-preview-plus')
     await atom.packages.deactivatePackage('language-gfm')
-  })
-
-  beforeEach(function () {
-    const fixturesPath = path.join(__dirname, 'fixtures')
-    tempPath = temp.mkdirSync('atom')
-    wrench.copySync(fixturesPath, tempPath)
-    atom.project.setPaths([tempPath])
+    wrench.removeSync(tempPath)
+    atom.project.setPaths([])
   })
 
   afterEach(async function () {
@@ -343,7 +348,7 @@ var x = y;
 
   describe('when the markdown preview view is requested by file URI', () =>
     it('opens a preview editor and watches the file for changes', async function () {
-      const filePath = path.join(tempPath, 'subdir/file.markdown')
+      const filePath = path.join(tempPath, 'subdir', 'file.markdown')
       await atom.workspace.open(`markdown-preview-plus://file/${filePath}`)
 
       preview = atom.workspace.getActivePaneItem() as any
@@ -353,11 +358,15 @@ var x = y;
         preview,
         'renderMarkdownText',
       )
-      fs.writeFileSync(filePath, fs.readFileSync(filePath).toString('utf8'))
-
-      await waitsFor.msg(
-        'markdown to be re-rendered after file changed',
-        () => spy.called,
+      await withFile(
+        filePath,
+        fs.readFileSync(filePath).toString('utf8'),
+        async () => {
+          await waitsFor.msg(
+            'markdown to be re-rendered after file changed',
+            () => spy.called,
+          )
+        },
       )
     }))
 

@@ -2,6 +2,7 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
+import * as wrench from 'fs-extra'
 import { waitsFor, activateMe } from './util'
 import { expect } from 'chai'
 global.require = require
@@ -33,6 +34,7 @@ describe('MathJax helper module', () =>
     })
     after(async () => {
       await atom.packages.deactivatePackage('markdown-preview-plus')
+      wrench.removeSync(configDirPath)
     })
 
     afterEach(function () {

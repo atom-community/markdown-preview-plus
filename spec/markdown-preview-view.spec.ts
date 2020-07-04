@@ -56,24 +56,32 @@ describe('MarkdownPreviewView', function () {
     return mpv
   }
 
-  before(async () => activateMe())
-  after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
-
-  beforeEach(async function () {
+  before(async () => {
     await Promise.all([
+      activateMe(),
       atom.packages.activatePackage('language-ruby'),
       atom.packages.activatePackage('language-javascript'),
     ])
-
-    await waitsFor(() => atom.grammars.grammarForScopeName('source.ruby'))
-
-    await waitsFor(() => atom.grammars.grammarForScopeName('source.js'))
-
+    await Promise.all([
+      waitsFor(() => atom.grammars.grammarForScopeName('source.ruby')),
+      waitsFor(() => atom.grammars.grammarForScopeName('source.js')),
+    ])
     const fixturesPath = path.join(__dirname, 'fixtures')
     tempPath = temp.mkdirSync('atom')
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
+  })
+  after(async () => {
+    await Promise.all([
+      atom.packages.deactivatePackage('markdown-preview-plus'),
+      atom.packages.deactivatePackage('language-ruby'),
+      atom.packages.deactivatePackage('language-javascript'),
+    ])
+    atom.project.setPaths([])
+    wrench.removeSync(tempPath)
+  })
 
+  beforeEach(async function () {
     filePath = path.join(tempPath, 'subdir/file.markdown')
     preview = await createMarkdownPreviewViewFile(filePath)
   })
@@ -86,8 +94,6 @@ describe('MarkdownPreviewView', function () {
       const pane = atom.workspace.paneForItem(item)
       if (pane) await pane.destroyItem(item, true)
     }
-    await atom.packages.deactivatePackage('language-ruby')
-    await atom.packages.deactivatePackage('language-javascript')
   })
 
   describe('::constructor', () =>
@@ -115,7 +121,7 @@ describe('MarkdownPreviewView', function () {
     })
 
     it('does not recreate a preview when the file no longer exists', async function () {
-      filePath = path.join(temp.mkdirSync('markdown-preview-'), 'foo.md')
+      filePath = path.join(tempPath, 'foo.md')
       fs.writeFileSync(filePath, '# Hi')
 
       newPreview = await createMarkdownPreviewViewFile(filePath)
@@ -292,7 +298,7 @@ var x = 0;
       it('adds a query to the URL', async function () {
         preview.destroy()
 
-        filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
+        filePath = path.join(tempPath, 'foo.md')
         fs.writeFileSync(filePath, `![absolute](${filePath})`)
         preview = await createMarkdownPreviewViewFile(filePath)
 
@@ -325,15 +331,13 @@ var x = 0;
   })
 
   describe('image modification', function () {
-    let dirPath: string
     let img1Path: string
 
     beforeEach(function () {
       preview.destroy()
 
-      dirPath = temp.mkdirSync('atom')
-      filePath = path.join(dirPath, 'image-modification.md')
-      img1Path = path.join(dirPath, 'img1.png')
+      filePath = path.join(tempPath, 'image-modification.md')
+      img1Path = path.join(tempPath, 'img1.png')
 
       fs.writeFileSync(filePath, `![img1](${img1Path})`)
       fs.writeFileSync(img1Path, 'clearly not a png but good enough for tests')
@@ -402,8 +406,8 @@ var x = 0;
       it('rerenders the images with a more recent timestamp as they are modified', async function () {
         preview.destroy()
 
-        const img2Path = path.join(dirPath, 'img2.png')
-        const img3Path = path.join(dirPath, 'img3.png')
+        const img2Path = path.join(tempPath, 'img2.png')
+        const img3Path = path.join(tempPath, 'img3.png')
 
         fs.writeFileSync(img2Path, "i'm not really a png ;D")
         fs.writeFileSync(img3Path, 'neither am i ;D')
@@ -629,15 +633,13 @@ var x = 0;
   })
 
   describe('css modification', function () {
-    let dirPath: string
     let css1path: string
 
     beforeEach(function () {
       preview.destroy()
 
-      dirPath = temp.mkdirSync('atom')
-      filePath = path.join(dirPath, 'css-modification.md')
-      css1path = path.join(dirPath, 'theme.css')
+      filePath = path.join(tempPath, 'css-modification.md')
+      css1path = path.join(tempPath, 'theme.css')
 
       fs.writeFileSync(
         filePath,

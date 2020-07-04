@@ -26,17 +26,12 @@ interface MyToken {
 describe('Syncronization of source and preview', function () {
   let preview: MarkdownPreviewView
   let fixturesPath: string
-  let stub: sinon.SinonStub<[], any>
 
   before(async () => activateMe())
   after(async () => atom.packages.deactivatePackage('markdown-preview-plus'))
 
   beforeEach(async function () {
     fixturesPath = path.join(__dirname, 'fixtures')
-
-    // Redirect atom to a temp config directory
-    const configDirPath = temp.mkdirSync('atom-config-dir-')
-    stub = sinon.stub(atom, 'getConfigDirPath').returns(configDirPath)
 
     atom.config.set(
       'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
@@ -60,7 +55,6 @@ describe('Syncronization of source and preview', function () {
   })
 
   afterEach(async function () {
-    stub.restore()
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
       const pane = atom.workspace.paneForItem(item)

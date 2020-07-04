@@ -1,53 +1,55 @@
 import * as path from 'path'
-import * as fs from 'fs'
 import * as temp from 'temp'
 import * as wrench from 'fs-extra'
 import pandocHelper = require('../src/pandoc-helper')
 import { expect } from 'chai'
 
-import { activateMe } from './util'
-
-const bibFile = 'test.bib'
-const cslFile = 'foo.csl'
-
-let tempPath: string
-let file: string
+import { activateMe, withFileGen, WithFileType } from './util'
 
 describe('Markdown preview plus pandoc helper', function () {
-  before(async () => activateMe())
+  const bibFile = 'test.bib'
+  const cslFile = 'foo.csl'
+  let tempPath: string
+  let file: string
+  let withFile: WithFileType
 
-  after(async function () {
-    await atom.packages.deactivatePackage('markdown-preview-plus')
-  })
-
-  beforeEach(async function () {
+  before(async () => {
+    await activateMe()
     const fixturesPath = path.join(__dirname, 'fixtures')
     tempPath = temp.mkdirSync('atom')
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
+    withFile = withFileGen(tempPath)
+  })
+
+  after(async function () {
+    await atom.packages.deactivatePackage('markdown-preview-plus')
+    wrench.removeSync(tempPath)
+    atom.project.setPaths([])
   })
 
   describe('PandocHelper::findFileRecursive', function () {
     const fR = pandocHelper.testing.findFileRecursive
 
     it('should return bibFile in the same directory', function () {
-      const bibPath = path.join(tempPath, 'subdir', bibFile)
-      fs.writeFileSync(bibPath, '')
-      const found = fR(path.join(tempPath, 'subdir', 'simple.md'), bibFile)
-      expect(found).to.equal(bibPath)
+      withFile(path.join('subdir', bibFile), (bibPath) => {
+        const found = fR(path.join(tempPath, 'subdir', 'simple.md'), bibFile)
+        expect(found).to.equal(bibPath)
+      })
     })
 
     it('should return bibFile in a parent directory', function () {
-      const bibPath = path.join(tempPath, bibFile)
-      fs.writeFileSync(bibPath, '')
-      const found = fR(path.join(tempPath, 'subdir', 'simple.md'), bibFile)
-      expect(found).to.equal(bibPath)
+      withFile(bibFile, (bibPath) => {
+        const found = fR(path.join(tempPath, 'subdir', 'simple.md'), bibFile)
+        expect(found).to.equal(bibPath)
+      })
     })
 
     it("shouldn't return bibFile in a out of scope directory", function () {
-      fs.writeFileSync(path.join(tempPath, '..', bibFile), '')
-      const found = fR(path.join(tempPath, 'subdir', 'simple.md'), bibFile)
-      expect(found).to.equal(false)
+      withFile(path.join('..', bibFile), () => {
+        const found = fR(path.join(tempPath, 'subdir', 'simple.md'), bibFile)
+        expect(found).to.equal(false)
+      })
     })
   })
 
@@ -134,9 +136,10 @@ describe('Markdown preview plus pandoc helper', function () {
         'markdown-preview-plus.pandocConfig.pandocBibliography',
         false,
       )
-      fs.writeFileSync(path.join(tempPath, bibFile), '')
-      const config = setPandocOptions(file, false)
-      expect(config.args.bibliography).to.equal(undefined)
+      withFile(bibFile, () => {
+        const config = setPandocOptions(file, false)
+        expect(config.args.bibliography).to.equal(undefined)
+      })
     })
 
     it("shouldn't set pandoc bib options if no fallback file exists", function () {
@@ -148,10 +151,10 @@ describe('Markdown preview plus pandoc helper', function () {
     })
 
     it('should set pandoc bib options if citations are enabled and project bibFile exists', function () {
-      const bibPath = path.join(tempPath, bibFile)
-      fs.writeFileSync(bibPath, '')
-      const config = setPandocOptions(file, false)
-      expect(config.args.bibliography).to.equal(bibPath)
+      withFile(bibFile, (bibPath) => {
+        const config = setPandocOptions(file, false)
+        expect(config.args.bibliography).to.equal(bibPath)
+      })
     })
 
     it('should set pandoc bib options if citations are enabled and use fallback', function () {
@@ -164,9 +167,10 @@ describe('Markdown preview plus pandoc helper', function () {
         'markdown-preview-plus.pandocConfig.pandocBibliography',
         false,
       )
-      fs.writeFileSync(path.join(tempPath, cslFile), '')
-      const config = setPandocOptions(file, false)
-      expect(config.args.csl).to.equal(undefined)
+      withFile(cslFile, () => {
+        const config = setPandocOptions(file, false)
+        expect(config.args.csl).to.equal(undefined)
+      })
     })
 
     it("shouldn't set pandoc csl options if no fallback file exists", function () {
@@ -178,10 +182,10 @@ describe('Markdown preview plus pandoc helper', function () {
     })
 
     it('should set pandoc csl options if citations are enabled and project cslFile exists', function () {
-      const cslPath = path.join(tempPath, cslFile)
-      fs.writeFileSync(cslPath, '')
-      const config = setPandocOptions(file, false)
-      expect(config.args.csl).to.equal(cslPath)
+      withFile(cslFile, (cslPath) => {
+        const config = setPandocOptions(file, false)
+        expect(config.args.csl).to.equal(cslPath)
+      })
     })
 
     it('should set pandoc csl options if citations are enabled and use fallback', function () {

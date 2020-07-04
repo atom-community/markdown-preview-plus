@@ -164,3 +164,55 @@ export type InferredSinonSpy<Callable> = Callable extends (
 export function sinonPrivateSpy<T>(t: object, k: string) {
   return sinon.spy<any, any>(t, k) as InferredSinonSpy<T>
 }
+
+import * as fs from 'fs'
+export type WithFileType = {
+  <R>(fp: string, cb: (path: string) => R): R extends Promise<any>
+    ? Promise<void>
+    : void
+  <R>(fp: string, c: string, cb: (path: string) => R): R extends Promise<any>
+    ? Promise<void>
+    : void
+}
+export function withFileGen(tempPath: string): WithFileType {
+  return function (
+    filePath: string,
+    contentsOrCallback: string | ((path: string) => unknown | Promise<unknown>),
+    callback?: (path: string) => unknown | Promise<unknown>,
+  ) {
+    let contents: string = ''
+    if (callback === undefined) {
+      callback = contentsOrCallback as (
+        path: string,
+      ) => unknown | Promise<unknown>
+    } else {
+      contents = contentsOrCallback as string
+    }
+    const fullPath = path.isAbsolute(filePath)
+      ? filePath
+      : path.join(tempPath, filePath)
+    fs.writeFileSync(fullPath, contents)
+    const res = callback(fullPath)
+    if (isPromise(res)) {
+      return res
+        .then(() => {
+          fs.unlinkSync(fullPath)
+        })
+        .catch((e: Error) => {
+          fs.unlinkSync(fullPath)
+          throw e
+        })
+    } else {
+      fs.unlinkSync(fullPath)
+      return undefined
+    }
+  }
+}
+function isPromise(x: any): x is Promise<unknown> {
+  return (
+    typeof x === 'object' &&
+    x !== null &&
+    'then' in x &&
+    typeof x.then === 'function'
+  )
+}

@@ -1,6 +1,7 @@
 // tslint:disable:no-unused-expression
 import * as path from 'path'
 import * as fs from 'fs'
+import * as wrench from 'fs-extra'
 import * as temp from 'temp'
 import {
   MarkdownPreviewViewFile,
@@ -10,7 +11,13 @@ import pandocHelper = require('../src/pandoc-helper')
 import { expect, assert } from 'chai'
 import sinon from 'sinon'
 
-import { waitsFor, previewFragment, activateMe } from './util'
+import {
+  waitsFor,
+  previewFragment,
+  activateMe,
+  withFileGen,
+  WithFileType,
+} from './util'
 
 describe('MarkdownPreviewView when Pandoc is enabled', function () {
   let html: string
@@ -79,31 +86,49 @@ describe('MarkdownPreviewView when Pandoc is enabled', function () {
         expect(image.getAttribute('src')).to.startWith('/tmp/image2.png')
       }))
 
-    describe('when the image uses an absolute path that exists', () =>
+    describe('when the image uses an absolute path that exists', () => {
+      let tempPath: string
+      let withFile: WithFileType
+
+      before(() => {
+        tempPath = temp.mkdirSync('atom')
+        withFile = withFileGen(tempPath)
+      })
+
+      after(() => {
+        wrench.removeSync(tempPath)
+      })
+
       it('adds a query to the URL', async function () {
-        filePath = path.join(temp.mkdirSync('atom'), 'foo.md')
-        fs.writeFileSync(filePath, `![absolute](${filePath})`)
+        await withFile(
+          'foo.md',
+          `![absolute](${filePath})`,
+          async (filePath) => {
+            html = `\
+<div class="figure">
+<img src="${filePath}" alt="absolute"><p class="caption">absolute</p>
+</div>\
+`
+            preview = createMarkdownPreviewViewFile(filePath)
 
-        html = `\
-        <div class="figure">
-        <img src="${filePath}" alt="absolute"><p class="caption">absolute</p>
-        </div>\
-        `
-        preview = createMarkdownPreviewViewFile(filePath)
+            await preview.initialRenderPromise()
 
-        await preview.initialRenderPromise()
+            await waitsFor(async () =>
+              (await previewFragment(preview)).querySelector(
+                'img[alt=absolute]',
+              ),
+            )
 
-        await waitsFor(async () =>
-          (await previewFragment(preview)).querySelector('img[alt=absolute]'),
+            expect(
+              (await previewFragment(preview))
+                .querySelector('img[alt=absolute]')!
+                .getAttribute('src')!
+                .startsWith(`${filePath}?v=`),
+            ).to.equal(true)
+          },
         )
-
-        expect(
-          (await previewFragment(preview))
-            .querySelector('img[alt=absolute]')!
-            .getAttribute('src')!
-            .startsWith(`${filePath}?v=`),
-        ).to.equal(true)
-      }))
+      })
+    })
 
     describe('when the image uses an URL', function () {
       it("doesn't change the http(s) URL", async function () {
