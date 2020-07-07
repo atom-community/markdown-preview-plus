@@ -56,7 +56,7 @@
     "atom-haskell-tslint-rules": "^0.2.2",
     "atom-ts-spec-runner": "^1.1.1",
     "chai": "^4.2.0",
-    "electron": "^4",
+    "electron": "^7",
     "fs-extra": "^8.1.0",
     "jasmine-tagged": "^1.1.4",
     "markdown-it-testgen": "^0.1.6",
