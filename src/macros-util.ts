@@ -1,55 +1,99 @@
-import path = require('path')
-import CSON = require('season')
-import fs = require('fs')
-import { isFileSync } from './util'
+import * as path from 'path'
+import * as yaml from 'yaml'
+import * as fs from 'fs'
+import { isFileSync, packagePath, handlePromise } from './util'
 
-function getUserMacrosPath(atomHome: string): string {
-  const userMacrosPath: string | undefined | null = CSON.resolve(
-    path.join(atomHome, 'markdown-preview-plus'),
-  )
-  return userMacrosPath != null
-    ? userMacrosPath
-    : path.join(atomHome, 'markdown-preview-plus.cson')
+export function getUserMacrosPath(atomHome: string): string {
+  const newPath = path.join(atomHome, 'markdown-preview-plus.yaml')
+  if (!isFileSync(newPath)) {
+    const oldPath = path.join(atomHome, 'markdown-preview-plus.cson')
+    if (isFileSync(oldPath)) {
+      /// backwards-compat
+      const buttons = [
+        {
+          text: 'Edit new YAML',
+          onDidClick() {
+            handlePromise(atom.workspace.open(newPath))
+          },
+        },
+        {
+          text: 'Show old CSON',
+          onDidClick() {
+            handlePromise(atom.workspace.open(oldPath))
+          },
+        },
+      ]
+      try {
+        const obj = yaml.parseDocument(
+          fs.readFileSync(oldPath).toString('utf-8'),
+          { keepCstNodes: true },
+        )
+        fs.writeFileSync(newPath, obj.toString(), { encoding: 'utf-8' })
+        if (Object.keys(obj.toJSON() as {}).length > 0) {
+          atom.notifications.addInfo(
+            `${oldPath} converted to YAML and re-saved as ${newPath}`,
+            {
+              detail: `markdown-preview-plus.cson was converted to YAML. The backup is kept as ${oldPath}`,
+              dismissable: true,
+              buttons,
+            },
+          )
+        }
+      } catch (e) {
+        createMacrosTemplate(newPath)
+        atom.notifications.addWarning(
+          'Error converting markdown-preview-plus.cson',
+          {
+            dismissable: true,
+            detail: (e as Error).toString(),
+            description:
+              'Failed to convert markdown-preview-plus.cson to YAML; please make the conversion manually',
+            buttons,
+          },
+        )
+      }
+      /// end
+    } else {
+      console.debug(
+        'Creating markdown-preview-plus.yaml, this is a one-time operation.',
+      )
+      createMacrosTemplate(newPath)
+    }
+  }
+  return newPath
 }
 
 function loadMacrosFile(filePath: string): object {
-  if (!CSON.isObjectPath(filePath)) return {}
-
-  const macros = CSON.readFileSync(filePath, function(
-    error?: Error,
-    object?: object,
-  ) {
-    if (error !== undefined) {
-      console.warn(
-        `Error reading Latex Macros file '${filePath}': ${
-          error.stack !== undefined ? error.stack : error
-        }`,
-      )
-      console.error(`Failed to load Latex Macros from '${filePath}'`, {
-        detail: error.message,
-        dismissable: true,
-      })
-    }
-    return object
-  })
-  return checkMacros(macros || {})
+  try {
+    const contents = fs.readFileSync(filePath).toString('utf-8')
+    const macros = yaml.parse(contents) as {}
+    return checkMacros(macros || {})
+  } catch (e) {
+    const error = e as Error
+    console.warn(
+      `Error reading Latex Macros file '${filePath}': ${
+        error.stack !== undefined ? error.stack : error
+      }`,
+    )
+    console.error(`Failed to load Latex Macros from '${filePath}'`, {
+      detail: error.message,
+      dismissable: true,
+    })
+    return {}
+  }
 }
 
 export function loadUserMacros(atomHome = atom.getConfigDirPath()) {
   const userMacrosPath = getUserMacrosPath(atomHome)
-  if (isFileSync(userMacrosPath)) {
-    return loadMacrosFile(userMacrosPath)
-  } else {
-    console.debug(
-      'Creating markdown-preview-plus.cson, this is a one-time operation.',
-    )
-    createMacrosTemplate(userMacrosPath)
-    return loadMacrosFile(userMacrosPath)
-  }
+  return loadMacrosFile(userMacrosPath)
 }
 
 function createMacrosTemplate(filePath: string) {
-  const templatePath = path.join(__dirname, '../assets/macros-template.cson')
+  const templatePath = path.join(
+    packagePath(),
+    'assets',
+    'macros-template.yaml',
+  )
   const templateFile = fs.readFileSync(templatePath, 'utf8')
   fs.writeFileSync(filePath, templateFile)
 }

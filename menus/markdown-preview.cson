@@ -12,6 +12,9 @@
       }, {
         'label': 'Select preview syntax theme'
         'command': 'markdown-preview-plus:select-syntax-theme'
+      }, {
+        'label': 'Edit LaTeX Macros'
+        'command': 'markdown-preview-plus:edit-macros'
       }
     ]
   ]

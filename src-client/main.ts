@@ -4,22 +4,32 @@ import { MathJaxController, processHTMLString } from './mathjax-helper'
 import * as util from './util'
 import { getMedia } from '../src/util-common'
 
+let handlerId: number
+
 window.addEventListener('error', (e) => {
   const err = e.error as Error
-  ipcRenderer.sendToHost<'uncaught-error'>('uncaught-error', {
-    message: err.message,
-    name: err.name,
-    stack: err.stack,
-  })
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-uncaught-error'>(
+    'atom-markdown-preview-plus-ipc-uncaught-error',
+    handlerId,
+    {
+      message: err.message,
+      name: err.name,
+      stack: err.stack,
+    },
+  )
 })
 
 window.addEventListener('unhandledrejection', (evt) => {
   const err = (evt as any).reason as Error
-  ipcRenderer.sendToHost<'uncaught-error'>('uncaught-error', {
-    message: err.message,
-    name: err.name,
-    stack: err.stack,
-  })
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-uncaught-error'>(
+    'atom-markdown-preview-plus-ipc-uncaught-error',
+    handlerId,
+    {
+      message: err.message,
+      name: err.name,
+      stack: err.stack,
+    },
+  )
 })
 
 function mkResPromise<T>() {
@@ -36,6 +46,10 @@ const atomVars = {
   sourceLineMap: new Map<number, Element>(),
   revSourceMap: new WeakMap<Element, number[]>(),
 }
+
+ipcRenderer.on<'set-id'>('set-id', (_evt, id) => {
+  handlerId = id
+})
 
 ipcRenderer.on<'init'>('init', (_evt, params) => {
   atomVars.mathJax.resolve(
@@ -184,11 +198,15 @@ ipcRenderer.on<'update-preview'>(
       }
     }
     await updatePreview.update(domDocument.body, renderLaTeX)
-    ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-      id,
-      request: 'update-preview',
-      result: processHTMLString(preview),
-    })
+    ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
+      'atom-markdown-preview-plus-ipc-request-reply',
+      handlerId,
+      {
+        id,
+        request: 'update-preview',
+        result: processHTMLString(preview),
+      },
+    )
   },
 )
 
@@ -197,19 +215,27 @@ ipcRenderer.on<'await-fully-ready'>(
   async (_event, { id }) => {
     // tslint:disable-next-line: totality-check
     if (document.readyState === 'complete') {
-      ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-        id,
-        request: 'await-fully-ready',
-        result: void 0,
-      })
+      ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
+        'atom-markdown-preview-plus-ipc-request-reply',
+        handlerId,
+        {
+          id,
+          request: 'await-fully-ready',
+          result: void 0,
+        },
+      )
       return
     }
     function loaded() {
-      ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-        id,
-        request: 'await-fully-ready',
-        result: void 0,
-      })
+      ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
+        'atom-markdown-preview-plus-ipc-request-reply',
+        handlerId,
+        {
+          id,
+          request: 'await-fully-ready',
+          result: void 0,
+        },
+      )
       document.removeEventListener('load', loaded)
     }
     document.addEventListener('load', loaded)
@@ -235,9 +261,15 @@ ipcRenderer.on<'error'>('error', (_evt, { msg }) => {
 document.addEventListener('wheel', (event) => {
   if (event.ctrlKey) {
     if (event.deltaY > 0) {
-      ipcRenderer.sendToHost<'zoom-in'>('zoom-in', undefined)
+      ipcRenderer.send<'atom-markdown-preview-plus-ipc-zoom-in'>(
+        'atom-markdown-preview-plus-ipc-zoom-in',
+        handlerId,
+      )
     } else if (event.deltaY < 0) {
-      ipcRenderer.sendToHost<'zoom-out'>('zoom-out', undefined)
+      ipcRenderer.send<'atom-markdown-preview-plus-ipc-zoom-out'>(
+        'atom-markdown-preview-plus-ipc-zoom-out',
+        handlerId,
+      )
     }
     event.preventDefault()
     event.stopPropagation()
@@ -253,16 +285,23 @@ document.addEventListener('scroll', (_event) => {
       return top > 0 && bottom < height
     })
     .map(([line, _elem]) => line)
-  ipcRenderer.sendToHost<'did-scroll-preview'>('did-scroll-preview', {
-    max: Math.max(...visible),
-    min: Math.min(...visible),
-  })
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-did-scroll-preview'>(
+    'atom-markdown-preview-plus-ipc-did-scroll-preview',
+    handlerId,
+    {
+      max: Math.max(...visible),
+      min: Math.min(...visible),
+    },
+  )
 })
 
 let lastContextMenuTarget: HTMLElement
 document.addEventListener('contextmenu', (e) => {
   lastContextMenuTarget = e.target as HTMLElement
-  ipcRenderer.sendToHost<'show-context-menu'>('show-context-menu', undefined)
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-show-context-menu'>(
+    'atom-markdown-preview-plus-ipc-show-context-menu',
+    handlerId,
+  )
 })
 
 ipcRenderer.on<'sync-source'>('sync-source', (_, { id }) => {
@@ -276,32 +315,44 @@ ipcRenderer.on<'sync-source'>('sync-source', (_, { id }) => {
   }
   if (!lines) return
 
-  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-    id,
-    request: 'sync-source',
-    result: Math.min(...lines),
-  })
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
+    'atom-markdown-preview-plus-ipc-request-reply',
+    handlerId,
+    {
+      id,
+      request: 'sync-source',
+      result: Math.min(...lines),
+    },
+  )
 })
 
 ipcRenderer.on<'reload'>('reload', (_, { id }) => {
   window.onbeforeunload = null
-  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-    id,
-    request: 'reload',
-    result: undefined,
-  })
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
+    'atom-markdown-preview-plus-ipc-request-reply',
+    handlerId,
+    {
+      id,
+      request: 'reload',
+      result: undefined,
+    },
+  )
 })
 
-window.onbeforeunload = function() {
+window.onbeforeunload = function () {
   return false
 }
 
 ipcRenderer.on<'get-tex-config'>('get-tex-config', async (_, { id }) => {
-  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-    id,
-    request: 'get-tex-config',
-    result: (await atomVars.mathJax).jaxTeXConfig(),
-  })
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
+    'atom-markdown-preview-plus-ipc-request-reply',
+    handlerId,
+    {
+      id,
+      request: 'get-tex-config',
+      result: (await atomVars.mathJax).jaxTeXConfig(),
+    },
+  )
 })
 
 ipcRenderer.on<'get-selection'>('get-selection', async (_, { id }) => {
@@ -309,11 +360,15 @@ ipcRenderer.on<'get-selection'>('get-selection', async (_, { id }) => {
   const selectedText = selection && selection.toString()
   const selectedNode = selection && selection.anchorNode
 
-  ipcRenderer.sendToHost<'request-reply'>('request-reply', {
-    id,
-    request: 'get-selection',
-    result: selectedText && selectedNode ? selectedText : undefined,
-  })
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
+    'atom-markdown-preview-plus-ipc-request-reply',
+    handlerId,
+    {
+      id,
+      request: 'get-selection',
+      result: selectedText && selectedNode ? selectedText : undefined,
+    },
+  )
 })
 
 document.addEventListener('click', (event) => {

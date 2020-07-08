@@ -8,7 +8,7 @@
   ],
   "compileOnSave": false,
   "compilerOptions": {
-    "noEmit": true,
+    "outDir": "../lib-client",
     "types": ["mathjax"]
   }
 }

@@ -172,7 +172,7 @@ foo|foo
 bar|bar
 .
 <p>foo|foo
-—|---s
+—|—s
 bar|bar</p>
 .
 
@@ -184,7 +184,7 @@ foo|foo
 bar|bar
 .
 <p>foo|foo
-—:---
+—:—
 bar|bar</p>
 .
 
@@ -220,7 +220,7 @@ foo
 bar|bar
 .
 <p>foo
-—|---
+—|—
 bar|bar</p>
 .
 

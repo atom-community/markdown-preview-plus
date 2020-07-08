@@ -1,8 +1,7 @@
 // tslint:disable: no-unsafe-any
 import { use, expect } from 'chai'
-import * as sinonChai from 'sinon-chai'
-import { MarkdownPreviewView } from '../lib/markdown-preview-view'
-import Clipboard = require('../lib/clipboard')
+import sinonChai from 'sinon-chai'
+import { MarkdownPreviewView } from '../src/markdown-preview-view'
 
 use(sinonChai)
 
@@ -15,8 +14,8 @@ declare global {
   }
 }
 
-use(function(chai: any) {
-  const startsWithMethodWrapper = function(this: any, expected: string) {
+use(function (chai: any) {
+  const startsWithMethodWrapper = function (this: any, expected: string) {
     const actual = this._obj
 
     return this.assert(
@@ -45,14 +44,14 @@ export interface WaitsFor {
   ): Promise<T>
 }
 
-export const waitsFor = async function<T>(
+export const waitsFor = async function <T>(
   func: () => T | undefined | null | Promise<T | undefined | null>,
   timeout: number = 8000,
   intervalTime: number = 500,
   msg: string = func.toString(),
 ): Promise<T> {
-  return new Promise<T>(function(fufill, reject) {
-    const interval = setInterval(async function() {
+  return new Promise<T>(function (fufill, reject) {
+    const interval = setInterval(async function () {
       try {
         const res = await func()
         if (res) {
@@ -65,7 +64,7 @@ export const waitsFor = async function<T>(
       }
     }, intervalTime)
 
-    const timeoutId = setTimeout(function() {
+    const timeoutId = setTimeout(function () {
       clearInterval(interval)
       reject(new Error('Waits for condition never met: ' + msg))
     }, timeout)
@@ -83,7 +82,7 @@ export async function expectPreviewInSplitPane() {
     .getActiveItem() as MarkdownPreviewView
   await preview.initialRenderPromise()
 
-  expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewEditor')
+  expect(preview.classname).to.be.equal('MarkdownPreviewViewEditor')
   expect(preview.getPath()).to.equal(
     atom.workspace.getActiveTextEditor()!.getPath(),
   )
@@ -134,24 +133,22 @@ export async function activateMe(): Promise<Package> {
   return atom.packages.activatePackage(pkg.name)
 }
 
-import * as sinon from 'sinon'
+import sinon from 'sinon'
 export function stubClipboard() {
   const result: { stub?: sinon.SinonStub; contents: string } = {
     stub: undefined,
     contents: '',
   }
-  const clipboard = require('../lib/clipboard') as typeof Clipboard
-  before(function() {
-    result.stub = sinon
-      .stub(clipboard, 'write')
-      .callsFake(function(arg: { text?: string }) {
-        result.contents = arg.text || ''
-      }) as any
+  before(function () {
+    result.stub = sinon.stub().callsFake(function (arg: { text?: string }) {
+      result.contents = arg.text || ''
+    }) as any
+    window['markdown-preview-plus-tests'] = { clipboardWrite: result.stub }
   })
-  after(function() {
-    result.stub && result.stub.restore()
+  after(function () {
+    delete window['markdown-preview-plus-tests']
   })
-  afterEach(function() {
+  afterEach(function () {
     result.contents = ''
     result.stub && result.stub.resetHistory()
   })
@@ -166,4 +163,56 @@ export type InferredSinonSpy<Callable> = Callable extends (
 
 export function sinonPrivateSpy<T>(t: object, k: string) {
   return sinon.spy<any, any>(t, k) as InferredSinonSpy<T>
+}
+
+import * as fs from 'fs'
+export type WithFileType = {
+  <R>(fp: string, cb: (path: string) => R): R extends Promise<any>
+    ? Promise<void>
+    : void
+  <R>(fp: string, c: string, cb: (path: string) => R): R extends Promise<any>
+    ? Promise<void>
+    : void
+}
+export function withFileGen(tempPath: string): WithFileType {
+  return function (
+    filePath: string,
+    contentsOrCallback: string | ((path: string) => unknown | Promise<unknown>),
+    callback?: (path: string) => unknown | Promise<unknown>,
+  ) {
+    let contents: string = ''
+    if (callback === undefined) {
+      callback = contentsOrCallback as (
+        path: string,
+      ) => unknown | Promise<unknown>
+    } else {
+      contents = contentsOrCallback as string
+    }
+    const fullPath = path.isAbsolute(filePath)
+      ? filePath
+      : path.join(tempPath, filePath)
+    fs.writeFileSync(fullPath, contents)
+    const res = callback(fullPath)
+    if (isPromise(res)) {
+      return res
+        .then(() => {
+          fs.unlinkSync(fullPath)
+        })
+        .catch((e: Error) => {
+          fs.unlinkSync(fullPath)
+          throw e
+        })
+    } else {
+      fs.unlinkSync(fullPath)
+      return undefined
+    }
+  }
+}
+function isPromise(x: any): x is Promise<unknown> {
+  return (
+    typeof x === 'object' &&
+    x !== null &&
+    'then' in x &&
+    typeof x.then === 'function'
+  )
 }

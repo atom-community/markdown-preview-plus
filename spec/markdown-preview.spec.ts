@@ -5,7 +5,7 @@ import * as wrench from 'fs-extra'
 import {
   MarkdownPreviewView,
   MarkdownPreviewViewFile,
-} from '../lib/markdown-preview-view'
+} from '../src/markdown-preview-view'
 
 import {
   waitsFor,
@@ -16,33 +16,38 @@ import {
   activateMe,
   stubClipboard,
   sinonPrivateSpy,
+  WithFileType,
+  withFileGen,
 } from './util'
 import { expect } from 'chai'
 import * as sinon from 'sinon'
 import { TextEditor, TextEditorElement, ConfigValues } from 'atom'
 
-describe('Markdown preview plus package', function() {
+describe('Markdown preview plus package', function () {
   let preview: MarkdownPreviewView
   let tempPath: string
+  let withFile: WithFileType
 
-  before(async function() {
-    await activateMe()
-    await atom.packages.activatePackage('language-gfm')
-  })
-
-  after(async function() {
-    await atom.packages.deactivatePackage('markdown-preview-plus')
-    await atom.packages.deactivatePackage('language-gfm')
-  })
-
-  beforeEach(function() {
+  before(async function () {
+    await Promise.all([
+      activateMe(),
+      atom.packages.activatePackage('language-gfm'),
+    ])
     const fixturesPath = path.join(__dirname, 'fixtures')
     tempPath = temp.mkdirSync('atom')
     wrench.copySync(fixturesPath, tempPath)
     atom.project.setPaths([tempPath])
+    withFile = withFileGen(tempPath)
   })
 
-  afterEach(async function() {
+  after(async function () {
+    await atom.packages.deactivatePackage('markdown-preview-plus')
+    await atom.packages.deactivatePackage('language-gfm')
+    wrench.removeSync(tempPath)
+    atom.project.setPaths([])
+  })
+
+  afterEach(async function () {
     atom.config.unset('markdown-preview-plus')
     for (const item of atom.workspace.getPaneItems()) {
       const pane = atom.workspace.paneForItem(item)
@@ -50,8 +55,8 @@ describe('Markdown preview plus package', function() {
     }
   })
 
-  describe('when a preview has not been created for the file', function() {
-    it('displays a markdown preview in a split pane', async function() {
+  describe('when a preview has not been created for the file', function () {
+    it('displays a markdown preview in a split pane', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/file.markdown'),
       )
@@ -67,7 +72,7 @@ describe('Markdown preview plus package', function() {
     })
 
     describe("when the editor's path does not exist", () =>
-      it('splits the current pane to the right with a markdown preview for the file', async function() {
+      it('splits the current pane to the right with a markdown preview for the file', async function () {
         const editor = await atom.workspace.open('new.markdown')
         atom.commands.dispatch(
           atom.views.getView(editor),
@@ -77,7 +82,7 @@ describe('Markdown preview plus package', function() {
       }))
 
     describe('when the editor does not have a path', () =>
-      it('splits the current pane to the right with a markdown preview for the file', async function() {
+      it('splits the current pane to the right with a markdown preview for the file', async function () {
         const editor = await atom.workspace.open('')
         atom.commands.dispatch(
           atom.views.getView(editor),
@@ -87,8 +92,8 @@ describe('Markdown preview plus package', function() {
       }))
 
     // https://github.com/atom/markdown-preview/issues/28
-    describe('when the path contains a space', function() {
-      it('renders the preview', async function() {
+    describe('when the path contains a space', function () {
+      it('renders the preview', async function () {
         const editor = await atom.workspace.open(
           path.join(tempPath, 'subdir/file with space.md'),
         )
@@ -101,8 +106,8 @@ describe('Markdown preview plus package', function() {
     })
 
     // https://github.com/atom/markdown-preview/issues/29
-    describe('when the path contains accented characters', function() {
-      it('renders the preview', async function() {
+    describe('when the path contains accented characters', function () {
+      it('renders the preview', async function () {
         const editor = await atom.workspace.open(
           path.join(tempPath, 'subdir/áccéntéd.md'),
         )
@@ -115,8 +120,8 @@ describe('Markdown preview plus package', function() {
     })
   })
 
-  describe('when a preview has been created for the file', function() {
-    beforeEach(async function() {
+  describe('when a preview has been created for the file', function () {
+    beforeEach(async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/file.markdown'),
       )
@@ -128,7 +133,7 @@ describe('Markdown preview plus package', function() {
       preview = await expectPreviewInSplitPane()
     })
 
-    it('closes the existing preview when toggle is triggered a second time on the editor and when the preview is its panes active item', function() {
+    it('closes the existing preview when toggle is triggered a second time on the editor and when the preview is its panes active item', function () {
       atom.commands.dispatch(
         atom.views.getView(atom.workspace.getActivePaneItem()),
         'markdown-preview-plus:toggle',
@@ -139,7 +144,7 @@ describe('Markdown preview plus package', function() {
       expect(previewPane.getActiveItem()).to.be.undefined
     })
 
-    it('activates the existing preview when toggle is triggered a second time on the editor and when the preview is not its panes active item #nottravis', async function() {
+    it('activates the existing preview when toggle is triggered a second time on the editor and when the preview is not its panes active item #nottravis', async function () {
       const [editorPane, previewPane] = atom.workspace.getPanes()
 
       editorPane.activate()
@@ -163,7 +168,7 @@ describe('Markdown preview plus package', function() {
       )
 
       const preview1 = previewPane.getActiveItem() as MarkdownPreviewView
-      expect(preview1.constructor.name).to.be.equal('MarkdownPreviewViewEditor')
+      expect(preview1.classname).to.be.equal('MarkdownPreviewViewEditor')
       expect(preview1.getPath()).to.equal(
         (editorPane.getActiveItem() as TextEditor).getPath(),
       )
@@ -193,7 +198,7 @@ describe('Markdown preview plus package', function() {
       preview2.destroy()
     })
 
-    it('closes the existing preview when toggle is triggered on it and it has focus', async function() {
+    it('closes the existing preview when toggle is triggered on it and it has focus', async function () {
       const [, previewPane] = atom.workspace.getPanes()
       previewPane.activate()
 
@@ -206,8 +211,8 @@ describe('Markdown preview plus package', function() {
       expect(previewPane.getActiveItem()).to.be.undefined
     })
 
-    describe('when the editor is modified', function() {
-      it('re-renders the preview', async function() {
+    describe('when the editor is modified', function () {
+      it('re-renders the preview', async function () {
         const markdownEditor = atom.workspace.getActiveTextEditor()!
         markdownEditor.setText('Hey!')
 
@@ -216,7 +221,7 @@ describe('Markdown preview plus package', function() {
         )
       })
 
-      it('invokes ::onDidChangeMarkdown listeners', async function() {
+      it('invokes ::onDidChangeMarkdown listeners', async function () {
         let listener: sinon.SinonSpy
         const markdownEditor = atom.workspace.getActiveTextEditor()!
         preview.onDidChangeMarkdown((listener = sinon.spy()))
@@ -230,7 +235,7 @@ describe('Markdown preview plus package', function() {
       })
 
       describe('when the preview is in the active pane but is not the active item', () =>
-        it('re-renders the preview but does not make it active', async function() {
+        it('re-renders the preview but does not make it active', async function () {
           const markdownEditor = atom.workspace.getActiveTextEditor()!
           const previewPane = atom.workspace.getPanes()[1]
           previewPane.activate()
@@ -248,7 +253,7 @@ describe('Markdown preview plus package', function() {
         }))
 
       describe('when the preview is not the active item and not in the active pane', () =>
-        it('re-renders the preview and makes it active', async function() {
+        it('re-renders the preview and makes it active', async function () {
           const markdownEditor = atom.workspace.getActiveTextEditor()!
           const editorPane = atom.workspace.paneForItem(markdownEditor)!
           const previewPane = atom.workspace.paneForItem(preview)!
@@ -273,7 +278,7 @@ describe('Markdown preview plus package', function() {
         }))
 
       describe('when the liveUpdate config is set to false', () =>
-        it('only re-renders the markdown when the editor is saved, not when the contents are modified', async function() {
+        it('only re-renders the markdown when the editor is saved, not when the contents are modified', async function () {
           atom.config.set(
             'markdown-preview-plus.previewConfig.liveUpdate',
             false,
@@ -297,7 +302,7 @@ describe('Markdown preview plus package', function() {
     })
 
     describe('when a new grammar is loaded', () =>
-      it('re-renders the preview', async function() {
+      it('re-renders the preview', async function () {
         expect(preview.getPath()).to.equal(
           atom.workspace.getActiveTextEditor()!.getPath(),
         )
@@ -342,33 +347,37 @@ var x = y;
   })
 
   describe('when the markdown preview view is requested by file URI', () =>
-    it('opens a preview editor and watches the file for changes', async function() {
-      const filePath = path.join(tempPath, 'subdir/file.markdown')
+    it('opens a preview editor and watches the file for changes', async function () {
+      const filePath = path.join(tempPath, 'subdir', 'file.markdown')
       await atom.workspace.open(`markdown-preview-plus://file/${filePath}`)
 
       preview = atom.workspace.getActivePaneItem() as any
-      expect(preview.constructor.name).to.be.equal('MarkdownPreviewViewFile')
+      expect(preview.classname).to.be.equal('MarkdownPreviewViewFile')
 
       const spy = sinonPrivateSpy<typeof preview['renderMarkdownText']>(
         preview,
         'renderMarkdownText',
       )
-      fs.writeFileSync(filePath, fs.readFileSync(filePath).toString('utf8'))
-
-      await waitsFor.msg(
-        'markdown to be re-rendered after file changed',
-        () => spy.called,
+      await withFile(
+        filePath,
+        fs.readFileSync(filePath).toString('utf8'),
+        async () => {
+          await waitsFor.msg(
+            'markdown to be re-rendered after file changed',
+            () => spy.called,
+          )
+        },
       )
     }))
 
-  describe("when the editor's grammar it not enabled for preview", function() {
-    beforeEach(function() {
+  describe("when the editor's grammar it not enabled for preview", function () {
+    beforeEach(function () {
       atom.config.set('markdown-preview-plus.grammars', [])
     })
-    afterEach(function() {
+    afterEach(function () {
       atom.config.unset('markdown-preview-plus.grammars')
     })
-    it('does not open the markdown preview', async function() {
+    it('does not open the markdown preview', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/file.markdown'),
       )
@@ -382,8 +391,8 @@ var x = y;
     })
   })
 
-  describe("when the editor's path changes", function() {
-    it("updates the preview's title", async function() {
+  describe("when the editor's path changes", function () {
+    it("updates the preview's title", async function () {
       const titleChangedCallback = sinon.spy()
 
       const ted = (await atom.workspace.open(
@@ -414,12 +423,12 @@ var x = y;
   })
 
   describe('when the URI opened does not have a markdown-preview-plus protocol', () =>
-    it('does not throw an error trying to decode the URI (regression)', async function() {
+    it('does not throw an error trying to decode the URI (regression)', async function () {
       await atom.workspace.open('%')
       expect(atom.workspace.getActiveTextEditor()).to.exist
     }))
 
-  describe('when markdown-preview-plus:copy-html is triggered', function() {
+  describe('when markdown-preview-plus:copy-html is triggered', function () {
     const clipboard = stubClipboard()
 
     async function copyHtml(editor: object) {
@@ -434,23 +443,23 @@ var x = y;
       )
     }
 
-    describe('when rich clipboard is disabled', function() {
+    describe('when rich clipboard is disabled', function () {
       let clipboard = ''
       let stub: sinon.SinonStub<any>
-      before(function() {
+      before(function () {
         atom.config.set('markdown-preview-plus.richClipboard', false)
         stub = sinon
           .stub(atom.clipboard, 'write')
-          .callsFake(function(arg: string) {
+          .callsFake(function (arg: string) {
             clipboard = arg
           })
       })
-      after(function() {
+      after(function () {
         stub.restore()
         atom.config.unset('markdown-preview-plus.richClipboard')
       })
 
-      it('should use atom.clipboard', async function() {
+      it('should use atom.clipboard', async function () {
         const editor = await atom.workspace.open(
           path.join(tempPath, 'subdir/simple.md'),
         )
@@ -469,7 +478,7 @@ var x = y;
       })
     })
 
-    it('copies the HTML to the clipboard', async function() {
+    it('copies the HTML to the clipboard', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/simple.md'),
       )
@@ -482,9 +491,10 @@ var x = y;
 <p>encoding \u2192 issue</p>
 `)
 
-      atom.workspace
-        .getActiveTextEditor()!
-        .setSelectedBufferRange([[0, 0], [1, 0]])
+      atom.workspace.getActiveTextEditor()!.setSelectedBufferRange([
+        [0, 0],
+        [1, 0],
+      ])
 
       await copyHtml(editor)
 
@@ -493,8 +503,8 @@ var x = y;
 `)
     })
 
-    describe('when LaTeX rendering is enabled by default', function() {
-      beforeEach(async function() {
+    describe('when LaTeX rendering is enabled by default', function () {
+      beforeEach(async function () {
         atom.config.set(
           'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
           true,
@@ -508,7 +518,7 @@ var x = y;
         await copyHtml(editor)
       })
 
-      it("copies the HTML with maths blocks as svg's to the clipboard by default", async function() {
+      it("copies the HTML with maths blocks as svg's to the clipboard by default", async function () {
         const cb = clipboard.contents
         expect(cb.match(/MathJax_SVG_Hidden/g)!.length).to.equal(1)
         expect(cb.match(/class="MathJax_SVG_Display"/g)!.length).to.equal(1)
@@ -517,10 +527,10 @@ var x = y;
       })
     })
 
-    describe('code block tokenization', function() {
+    describe('code block tokenization', function () {
       const element = document.createElement('div')
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         await atom.packages.activatePackage('language-ruby')
 
         await atom.packages.activatePackage('markdown-preview-plus')
@@ -540,15 +550,15 @@ var x = y;
         element.innerHTML = clipboard.contents
       })
 
-      describe("when the code block's fence name has a matching grammar", function() {
-        it('tokenizes the code block with the grammar', function() {
+      describe("when the code block's fence name has a matching grammar", function () {
+        it('tokenizes the code block with the grammar', function () {
           expect(element.querySelector('pre.lang-ruby span.syntax--control')).to
             .exist
         })
       })
 
       describe("when the code block's fence name doesn't have a matching grammar", () =>
-        it('does not tokenize the code block', function() {
+        it('does not tokenize the code block', function () {
           expect(
             element.querySelectorAll('pre.lang-kombucha .syntax--null-grammar')
               .length,
@@ -556,7 +566,7 @@ var x = y;
         }))
 
       describe('when the code block contains empty lines', () =>
-        it("doesn't remove the empty lines", function() {
+        it("doesn't remove the empty lines", function () {
           expect(
             element.querySelector('pre.lang-python')!.children.length,
           ).to.equal(6)
@@ -589,8 +599,8 @@ var x = y;
     })
   })
 
-  describe('sanitization', function() {
-    it('removes script tags and attributes that commonly contain inline scripts', async function() {
+  describe('sanitization', function () {
+    it('removes script tags and attributes that commonly contain inline scripts', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/evil.md'),
       )
@@ -611,7 +621,7 @@ world</p>
 `)
     })
 
-    it('remove the first <!doctype> tag at the beginning of the file', async function() {
+    it('remove the first <!doctype> tag at the beginning of the file', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/doctype-tag.md'),
       )
@@ -630,7 +640,7 @@ world</p>
   })
 
   describe('when the markdown contains an <html> tag', () =>
-    it('does not throw an exception', async function() {
+    it('does not throw an exception', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/html-tag.md'),
       )
@@ -645,7 +655,7 @@ world</p>
     }))
 
   describe('when the markdown contains a <pre> tag', () =>
-    it('does not throw an exception', async function() {
+    it('does not throw an exception', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/pre-tag.md'),
       )
@@ -661,7 +671,7 @@ world</p>
       ).to.exist
     }))
 
-  describe('GitHub style markdown preview', function() {
+  describe('GitHub style markdown preview', function () {
     beforeEach(() =>
       atom.config.set('markdown-preview-plus.useGitHubStyle', false),
     )
@@ -672,7 +682,7 @@ world</p>
       )
     }
 
-    it('renders markdown using the default style when GitHub styling is disabled', async function() {
+    it('renders markdown using the default style when GitHub styling is disabled', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/simple.md'),
       )
@@ -688,7 +698,7 @@ world</p>
       expect(await usesGithubStyle(preview)).to.be.false
     })
 
-    it('renders markdown using the GitHub styling when enabled', async function() {
+    it('renders markdown using the GitHub styling when enabled', async function () {
       atom.config.set('markdown-preview-plus.useGitHubStyle', true)
 
       const editor = await atom.workspace.open(
@@ -704,7 +714,7 @@ world</p>
       expect(await usesGithubStyle(preview)).to.be.true
     })
 
-    it('updates the rendering style immediately when the configuration is changed', async function() {
+    it('updates the rendering style immediately when the configuration is changed', async function () {
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/simple.md'),
       )
@@ -727,20 +737,20 @@ world</p>
     })
   })
 
-  describe('Binding and unbinding based on config', function() {
+  describe('Binding and unbinding based on config', function () {
     let spy: sinon.SinonSpy<any>
-    before(async function() {
+    before(async function () {
       await atom.packages.activatePackage('language-javascript')
       spy = sinon.spy(atom.commands, 'add')
     })
-    after(async function() {
+    after(async function () {
       await atom.packages.deactivatePackage('language-javascript')
       spy.restore()
     })
-    beforeEach(function() {
+    beforeEach(function () {
       spy.resetHistory()
     })
-    it('Binds to new scopes when config is changed', async function() {
+    it('Binds to new scopes when config is changed', async function () {
       atom.config.set('markdown-preview-plus.grammars', ['source.js'])
 
       await waitsFor(() => spy.called)
@@ -755,7 +765,7 @@ world</p>
       ).to.be.ok
       preview = await expectPreviewInSplitPane()
     })
-    it('Unbinds from scopes when config is changed', async function() {
+    it('Unbinds from scopes when config is changed', async function () {
       atom.config.set('markdown-preview-plus.grammars', ['no-such-grammar'])
 
       await waitsFor(() => spy.called)
@@ -773,17 +783,17 @@ world</p>
     })
   })
 
-  describe('Math separators configuration', function() {
-    beforeEach(function() {
+  describe('Math separators configuration', function () {
+    beforeEach(function () {
       atom.config.set(
         'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
         true,
       )
     })
-    describe('Uses new math separators', async function() {
+    describe('Uses new math separators', async function () {
       let preview: MarkdownPreviewView
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         atom.config.set(
           'markdown-preview-plus.markdownItConfig.inlineMathSeparators',
           ['$$', '$$'],
@@ -806,21 +816,21 @@ world</p>
         preview = await expectPreviewInSplitPane()
       })
 
-      it('works for inline math', async function() {
+      it('works for inline math', async function () {
         const inline = (await previewFragment(preview)).querySelectorAll(
           'span.math > script[type="math/tex"]',
         ) as NodeListOf<HTMLElement>
         expect(inline.length).to.equal(1)
         expect(inline[0].innerText).to.equal('inlineMath')
       })
-      it('works for block math', async function() {
+      it('works for block math', async function () {
         const block = (await previewFragment(preview)).querySelectorAll(
           'span.math > script[type="math/tex; mode=display"]',
         ) as NodeListOf<HTMLElement>
         expect(block.length).to.be.greaterThan(0)
         expect(block[0].innerText).to.equal('displayMath\n')
       })
-      it('respects newline in block math closing tag', async function() {
+      it('respects newline in block math closing tag', async function () {
         const block = (await previewFragment(preview)).querySelectorAll(
           'span.math > script[type="math/tex; mode=display"]',
         ) as NodeListOf<HTMLElement>
@@ -828,7 +838,7 @@ world</p>
         expect(block[1].innerText).to.equal('displayMath$$\n')
       })
     })
-    it('Shows warnings on odd number of math separators', async function() {
+    it('Shows warnings on odd number of math separators', async function () {
       await atom.packages.activatePackage('notifications')
 
       atom.config.set(
@@ -858,9 +868,11 @@ world</p>
         60000,
       )
 
-      const notifications = Array.from(document.querySelectorAll(
-        'atom-notification.warning',
-      ) as NodeListOf<HTMLElement>)
+      const notifications = Array.from(
+        document.querySelectorAll('atom-notification.warning') as NodeListOf<
+          HTMLElement
+        >,
+      )
       expect(notifications.length).to.equal(2)
       expect(notifications).to.satisfy((x: HTMLElement[]) =>
         x.some((y) => y.innerText.includes('inlineMathSeparators')),

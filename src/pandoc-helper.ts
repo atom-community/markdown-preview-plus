@@ -1,14 +1,14 @@
-import CP = require('child_process')
-import fs = require('fs')
-import path = require('path')
+import * as CP from 'child_process'
+import * as fs from 'fs'
+import * as path from 'path'
 import { atomConfig } from './util'
 
 /**
  * Sets local mathjaxPath if available
  */
-const getMathJaxPath = (function() {
+const getMathJaxPath = (function () {
   let cached: string | null = null
-  return function() {
+  return function () {
     if (cached !== null) {
       return cached
     }
@@ -94,7 +94,7 @@ function handleError(error: string, html: string, renderMath: boolean): never {
 function handleMath(html: string): string {
   const doc = document.createElement('div')
   doc.innerHTML = html
-  doc.querySelectorAll('.math').forEach(function(elem) {
+  doc.querySelectorAll('.math').forEach(function (elem) {
     let math = (elem as HTMLElement).innerText
     // Set mode if it is block math
     const mode = math.indexOf('\\[') > -1 ? '; mode=display' : ''
@@ -165,7 +165,7 @@ export async function renderPandoc(
       atomConfig().pandocConfig.pandocPath,
       getArguments(args),
       opts,
-      function(error, stdout, stderr) {
+      function (error, stdout, stderr) {
         if (error) {
           atom.notifications.addError(error.toString(), {
             stack: error.stack,
@@ -185,6 +185,7 @@ export async function renderPandoc(
         }
       },
     )
+    if (!cp.stdin) throw new Error('No stdin')
     cp.stdin.write(text)
     cp.stdin.end()
   })

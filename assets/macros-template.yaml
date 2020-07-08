@@ -1,0 +1,20 @@
+# You can place LaTeX Macros here.
+# They are written as objects in YAML.
+# Here are some examples to get you going:
+
+# A zero argument macro
+# This is just an alias for \theta.
+
+# th: "{\\theta}" # Example usage: $\th$
+
+# A one argument macro
+# This one gives you "1 over something" as a fraction.
+
+# inv: ["{\\frac{1}{#1}}",1] # Example usage: $\inv{x}$
+
+# A two argument macro
+# This one gives you a fraction with nicely typeset parentheses on either side.
+
+# pfrac: ["{\\left(\\frac{#1}{#2}\\right)}",2] # Example usage: $\pfrac{x}{y}$
+
+# You can use up to 9 arguments like this!

@@ -2,7 +2,8 @@ import { TextEditor, Grammar, Range } from 'atom'
 import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 import { atomConfig, handlePromise } from '../util'
-import { MarkdownPreviewViewEditorRemote } from './markdown-preview-view-editor-remote'
+import { WebContentsHandler } from './web-contents-handler'
+import { browserWindowHandler } from './browserwindow-handler'
 
 export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   private static editorMap = new WeakMap<
@@ -10,10 +11,15 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     MarkdownPreviewViewEditor
   >()
 
+  public readonly classname = 'MarkdownPreviewViewEditor'
   private lastRenderedMarkdownText = ''
 
-  private constructor(private editor: TextEditor) {
-    super()
+  private constructor(
+    private editor: TextEditor,
+    handler?: Promise<WebContentsHandler>,
+    el?: HTMLElement,
+  ) {
+    super(undefined, handler, el)
     handlePromise(this.handleEditorEvents())
   }
 
@@ -32,7 +38,9 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
 
   public destroy() {
     super.destroy()
-    MarkdownPreviewViewEditor.editorMap.delete(this.editor)
+    if (MarkdownPreviewViewEditor.editorMap.get(this.editor) === this) {
+      MarkdownPreviewViewEditor.editorMap.delete(this.editor)
+    }
   }
 
   public serialize(): SerializedMPV {
@@ -74,7 +82,10 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     } else {
       // const mid = Math.floor(0.5 * (min + max))
       // this.editor.scrollToBufferPosition([mid, 0], { center: true })
-      const range = Range.fromObject([[min, 0], [max, 0]])
+      const range = Range.fromObject([
+        [min, 0],
+        [max, 0],
+      ])
       this.editor.scrollToScreenRange(
         this.editor.screenRangeForBufferRange(range),
         { center: false },
@@ -82,8 +93,14 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     }
   }
 
-  protected openNewWindow() {
-    MarkdownPreviewViewEditorRemote.open(this.editor)
+  protected async openNewWindow(): Promise<void> {
+    const el = document.createElement('div')
+    const ctrl = new MarkdownPreviewViewEditor(
+      this.editor,
+      browserWindowHandler(this.getPath(), this.emitter, el),
+      el,
+    )
+    MarkdownPreviewViewEditor.editorMap.set(this.editor, ctrl)
     util.destroy(this)
   }
 

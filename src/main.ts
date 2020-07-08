@@ -1,4 +1,4 @@
-import url = require('url')
+import * as url from 'url'
 import {
   SerializedMPV,
   MarkdownPreviewViewFile,
@@ -17,7 +17,10 @@ import * as path from 'path'
 import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
 import { migrateConfig } from './migrate-config'
-import { MarkdownPreviewViewEditorRemote } from './markdown-preview-view/markdown-preview-view-editor-remote'
+import { selectListView } from './select-list-view'
+import * as pdf from './markdown-preview-view/pdf-export-util'
+import { getUserMacrosPath } from './macros-util'
+import { BrowserWindowHandler } from './markdown-preview-view/browserwindow-handler'
 
 export { config } from './config'
 
@@ -48,9 +51,13 @@ export function activate() {
       'markdown-preview-plus:toggle': close,
     }),
     atom.commands.add('atom-workspace', {
+      'markdown-preview-plus:edit-macros': () => {
+        util.handlePromise(
+          atom.workspace.open(getUserMacrosPath(atom.getConfigDirPath())),
+        )
+      },
       'markdown-preview-plus:select-syntax-theme': async () => {
         try {
-          const { selectListView } = await import('./select-list-view')
           const themeNames = atom.themes.getLoadedThemeNames()
           if (themeNames === undefined) return
           const theme = await selectListView(
@@ -98,6 +105,7 @@ export function activate() {
 
 export function deactivate() {
   disposables && disposables.dispose()
+  BrowserWindowHandler.clean()
 }
 
 export function createMarkdownPreviewView(state: SerializedMPV) {
@@ -200,7 +208,7 @@ function configObserver<T>(
   ) => void,
 ) {
   let configDisposables: CompositeDisposable
-  return function(value: T) {
+  return function (value: T) {
     if (!disposables) return
     if (configDisposables) {
       configDisposables.dispose()
@@ -283,7 +291,6 @@ async function makePDF(evt: CommandEvent): Promise<void> {
       return
     }
 
-    const pdf = await import('./markdown-preview-view/pdf-export-util')
     await pdf.saveAsPDF(
       text,
       filePath,
@@ -339,12 +346,6 @@ function opener(uriToOpen: string) {
       return undefined
     }
     return MarkdownPreviewViewEditor.create(editor)
-  } else if (uri.hostname === 'remote-editor') {
-    const [windowId, editorId] = pathname
-      .slice(1)
-      .split('/')
-      .map((x) => parseInt(x, 10))
-    return new MarkdownPreviewViewEditorRemote(windowId, editorId)
   } else {
     throw new Error(
       `Tried to open markdown-preview-plus with uri ${uriToOpen}. This is not supported. Please report this error.`,

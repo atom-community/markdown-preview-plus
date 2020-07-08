@@ -6,9 +6,10 @@ const clipboard =
     ? electron.remote.clipboard
     : electron.clipboard
 
-// Proxy for easy stubbing
-export = {
-  write: function(arg: electron.Data) {
+export function write(arg: electron.Data) {
+  if (window['markdown-preview-plus-tests']?.clipboardWrite) {
+    return window['markdown-preview-plus-tests'].clipboardWrite(arg)
+  } else {
     return clipboard.write(arg)
-  },
+  }
 }

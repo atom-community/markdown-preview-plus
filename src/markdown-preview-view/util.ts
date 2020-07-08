@@ -1,7 +1,7 @@
 import { TextEditor } from 'atom'
 import * as path from 'path'
 import * as fs from 'fs'
-import { handlePromise, atomConfig } from '../util'
+import { handlePromise, atomConfig, packagePath } from '../util'
 
 export function editorForId(editorId: number): TextEditor | undefined {
   for (const editor of atom.workspace.getTextEditors()) {
@@ -10,13 +10,6 @@ export function editorForId(editorId: number): TextEditor | undefined {
     }
   }
   return undefined
-}
-
-// this weirdness allows overriding in tests
-let getStylesOverride: typeof getPreviewStyles | undefined = undefined
-
-export function __setGetStylesOverride(f?: typeof getPreviewStyles) {
-  getStylesOverride = f
 }
 
 function* getStyles(context?: string | null): IterableIterator<string> {
@@ -31,7 +24,7 @@ function* getStyles(context?: string | null): IterableIterator<string> {
 
 function getClientStyle(file: string): string {
   return atom.themes.loadStylesheet(
-    path.join(__dirname, '..', '..', 'styles-client', `${file}.less`),
+    path.join(packagePath(), 'styles-client', `${file}.less`),
   )
 }
 
@@ -75,7 +68,9 @@ function* getActivePackageStyles(
 }
 
 export function getPreviewStyles(display: boolean): string[] {
-  if (getStylesOverride) return getStylesOverride(display)
+  if (window['markdown-preview-plus-tests']?.getStylesOverride) {
+    return window['markdown-preview-plus-tests']?.getStylesOverride(display)
+  }
   const styles = []
   if (display) {
     // global editor styles
@@ -132,14 +127,14 @@ function getMarkdownPreviewCSS() {
 
   return getPreviewStyles(false)
     .join('\n')
-    .replace(cssUrlRefExp, function(
+    .replace(cssUrlRefExp, function (
       _match,
       assetsName: string,
       _offset,
       _string,
     ) {
       // base64 encode assets
-      const assetPath = path.join(__dirname, '../../assets', assetsName)
+      const assetPath = path.join(packagePath(), 'assets', assetsName)
       const originalData = fs.readFileSync(assetPath, 'binary')
       const base64Data = new Buffer(originalData, 'binary').toString('base64')
       return `url('data:image/jpeg;base64,${base64Data}')`

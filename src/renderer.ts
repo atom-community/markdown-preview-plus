@@ -1,14 +1,13 @@
-import path = require('path')
-import pandocHelper = require('./pandoc-helper')
-import markdownIt = require('./markdown-it-helper') // Defer until used
+import * as path from 'path'
+import * as pandocHelper from './pandoc-helper'
+import * as markdownIt from './markdown-it-helper' // Defer until used
 import { scopeForFenceName } from './extension-helper'
 import { Grammar, TextEditor } from 'atom'
-import { isFileSync, atomConfig } from './util'
+import { isFileSync, atomConfig, packagePath } from './util'
 import { getMedia } from './util-common'
 import { ImageWatcher } from './image-watch-helper'
 
 const { resourcePath } = atom.getLoadSettings()
-const packagePath = path.dirname(__dirname)
 
 export type RenderMode = 'normal' | 'copy' | 'save'
 
@@ -172,7 +171,7 @@ function resolveImagePaths(
 ) {
   const [rootDirectory] = atom.project.relativizePath(filePath || '')
   const media = getMedia(doc)
-  Array.from(media).map(function(img) {
+  Array.from(media).map(function (img) {
     let attrName: 'href' | 'src'
     if (img.tagName === 'LINK') attrName = 'href'
     else attrName = 'src'
@@ -191,7 +190,7 @@ function resolveImagePaths(
       if (src.startsWith(resourcePath)) {
         return
       }
-      if (src.startsWith(packagePath)) {
+      if (src.startsWith(packagePath())) {
         return
       }
 

@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "node",
+    "esModuleInterop": true,
     "isolatedModules": false,
     "jsx": "react",
     "experimentalDecorators": true,
@@ -20,7 +21,7 @@
     "inlineSourceMap": true,
     "strictNullChecks": true,
     "allowJs": false,
-    "lib": ["dom", "dom.iterable", "es2017"],
+    "lib": ["dom", "dom.iterable", "es2019"],
     "strict": true,
     "importHelpers": true,
     "noFallthroughCasesInSwitch": true,

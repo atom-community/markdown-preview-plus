@@ -3,6 +3,11 @@ declare module 'atom' {
   interface CommandRegistryTargetMap {
     '.markdown-preview-plus': HTMLElement
   }
+  interface AtomEnvironment {
+    applicationDelegate: {
+      showSaveDialog: (options: SaveDialogOptions) => string | undefined
+    }
+  }
   interface TextEditor {
     getVisibleRowRange(): [number, number]
     bufferRowForScreenRow(row: number): number
