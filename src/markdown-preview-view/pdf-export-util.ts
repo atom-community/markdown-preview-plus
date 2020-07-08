@@ -12,84 +12,87 @@ export async function saveAsPDF(
   renderLaTeX: boolean,
   saveFilePath: string,
 ): Promise<void> {
-  const view = new WebviewHandler(async () => {
-    const opts = atomConfig().saveConfig.saveToPDFOptions
-    const pageSize =
-      opts.pageSize === 'Custom'
-        ? parsePageSize(opts.customPageSize)
-        : opts.pageSize
-    if (pageSize === undefined) {
-      throw new Error(
-        `Failed to parse custom page size: ${opts.customPageSize}`,
-      )
-    }
-    const selection = await view.getSelection()
-    const printSelectionOnly = selection ? opts.printSelectionOnly : false
-    const newOpts = {
-      ...opts,
-      pageSize,
-      printSelectionOnly,
-    }
-    const [width, height] = getPageWidth(newOpts.pageSize)
+  return new Promise<void>((resolve) => {
+    const view = new WebviewHandler(async () => {
+      const opts = atomConfig().saveConfig.saveToPDFOptions
+      const pageSize =
+        opts.pageSize === 'Custom'
+          ? parsePageSize(opts.customPageSize)
+          : opts.pageSize
+      if (pageSize === undefined) {
+        throw new Error(
+          `Failed to parse custom page size: ${opts.customPageSize}`,
+        )
+      }
+      const selection = await view.getSelection()
+      const printSelectionOnly = selection ? opts.printSelectionOnly : false
+      const newOpts = {
+        ...opts,
+        pageSize,
+        printSelectionOnly,
+      }
+      const [width, height] = getPageWidth(newOpts.pageSize)
 
-    const mathConfig = atomConfig().mathConfig
-    const pdfRenderer = atomConfig().saveConfig.saveToPDFOptions.latexRenderer
-    const renderer =
-      pdfRenderer === 'Same as live preview'
-        ? mathConfig.latexRenderer
-        : pdfRenderer
+      const mathConfig = atomConfig().mathConfig
+      const pdfRenderer = atomConfig().saveConfig.saveToPDFOptions.latexRenderer
+      const renderer =
+        pdfRenderer === 'Same as live preview'
+          ? mathConfig.latexRenderer
+          : pdfRenderer
 
-    await view.init({
-      userMacros: loadUserMacros(),
-      mathJaxConfig: {
-        ...mathConfig,
-        latexRenderer: renderer,
-      },
-      context: 'pdf-export',
-      pdfExportOptions: { width: newOpts.landscape ? height : width },
-    })
-    await view.setBasePath(filePath)
+      await view.init({
+        userMacros: loadUserMacros(),
+        mathJaxConfig: {
+          ...mathConfig,
+          latexRenderer: renderer,
+        },
+        context: 'pdf-export',
+        pdfExportOptions: { width: newOpts.landscape ? height : width },
+      })
+      await view.setBasePath(filePath)
 
-    const domDocument = await render({
-      text,
-      filePath,
-      grammar,
-      renderLaTeX,
-      renderErrors: false,
-      mode: 'normal',
-    })
-    await view.update(domDocument.documentElement!.outerHTML, renderLaTeX)
-    await view.fullyReady()
+      const domDocument = await render({
+        text,
+        filePath,
+        grammar,
+        renderLaTeX,
+        renderErrors: false,
+        mode: 'normal',
+      })
+      await view.update(domDocument.documentElement!.outerHTML, renderLaTeX)
+      await view.fullyReady()
 
-    try {
-      const data = await view.printToPDF(newOpts)
+      try {
+        const data = await view.printToPDF(newOpts)
 
-      await new Promise<void>((resolve, reject) => {
-        writeFile(saveFilePath, data, (error) => {
-          if (error) {
-            reject(error)
-            return
-          }
-          resolve()
+        await new Promise<void>((resolve, reject) => {
+          writeFile(saveFilePath, data, (error) => {
+            if (error) {
+              reject(error)
+              return
+            }
+            resolve()
+          })
         })
-      })
-    } catch (e) {
-      const error = e as Error
-      atom.notifications.addError('Failed saving to PDF', {
-        description: error.toString(),
-        dismissable: true,
-        stack: error.stack,
-      })
-    }
+      } catch (e) {
+        const error = e as Error
+        atom.notifications.addError('Failed saving to PDF', {
+          description: error.toString(),
+          dismissable: true,
+          stack: error.stack,
+        })
+      }
 
-    view.destroy()
+      view.destroy()
+      resolve()
+    })
+    view.element.style.pointerEvents = 'none'
+    view.element.style.position = 'absolute'
+    view.element.style.width = '0px'
+    view.element.style.height = '0px'
+    const ws = atom.views.getView(atom.workspace)
+    ws.appendChild(view.element)
   })
-  view.element.style.pointerEvents = 'none'
-  view.element.style.position = 'absolute'
-  view.element.style.width = '0px'
-  view.element.style.height = '0px'
-  const ws = atom.views.getView(atom.workspace)
-  ws.appendChild(view.element)
 }
 
 type Unit = 'mm' | 'cm' | 'in'
