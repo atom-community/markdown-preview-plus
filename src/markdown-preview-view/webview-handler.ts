@@ -13,7 +13,9 @@ export class WebviewHandler extends WebContentsHandler {
         }
         element.addEventListener('dom-ready', createHandler)
       }),
-      element,
+      () => {
+        atom.contextMenu.showForEvent({ target: element })
+      },
       init,
     )
     this._element = element

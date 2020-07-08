@@ -10,6 +10,7 @@ import * as util from './util'
 import { WebviewHandler } from './webview-handler'
 import { saveAsPDF } from './pdf-export-util'
 import { loadUserMacros } from '../macros-util'
+import { WebContentsHandler } from './web-contents-handler'
 
 export interface SerializedMPV {
   deserializer: 'markdown-preview-plus/MarkdownPreviewView'
@@ -22,7 +23,6 @@ export abstract class MarkdownPreviewView {
   // used for tests
   public abstract readonly classname: string
   public element!: HTMLElement
-  protected readonly handler: Promise<WebviewHandler>
   protected emitter: Emitter<{
     'did-change-title': undefined
     'did-change-markdown': undefined
@@ -35,8 +35,7 @@ export abstract class MarkdownPreviewView {
   protected constructor(
     private renderLaTeX: boolean = atomConfig().mathConfig
       .enableLatexRenderingByDefault,
-  ) {
-    this.handler = new Promise<WebviewHandler>((resolve) => {
+    protected readonly handler = new Promise<WebContentsHandler>((resolve) => {
       const handler = new WebviewHandler(async () => {
         const config = atomConfig()
         await handler.init({
@@ -49,14 +48,29 @@ export abstract class MarkdownPreviewView {
         resolve(handler)
       })
       this.element = handler.element
+    }),
+    el?: HTMLElement,
+  ) {
+    if (!this.element && el) {
+      this.element = el
       MarkdownPreviewView.elementMap.set(this.element, this)
-    })
+    }
+    if (!this.element) {
+      throw new Error(
+        "Init function didn't set element and no element provided",
+      )
+    }
     this._initialRenderPromsie = this.handler
       .then(() => this.renderMarkdown())
       .then(() => {
         this.loading = false
       })
-    handlePromise(this.handleEvents())
+    handlePromise(
+      this.handler.then(async (handler) => {
+        this.disposables.add(handler.onDidDestroy(() => this.destroy()))
+        return this.handleEvents()
+      }),
+    )
   }
 
   public static viewForElement(element: HTMLElement) {
@@ -193,9 +207,7 @@ export abstract class MarkdownPreviewView {
     return (await this.handler).sync(line, flash)
   }
 
-  protected openNewWindow() {
-    util.destroy(this)
-  }
+  protected abstract async openNewWindow(): Promise<void>
 
   private async handleEvents() {
     const handler = await this.handler
@@ -211,9 +223,9 @@ export abstract class MarkdownPreviewView {
           handlePromise(this.renderMarkdown())
         }, 250),
       ),
-      atom.commands.add(handler.element, {
-        'core:move-up': () => handler.element.scrollBy({ top: -10 }),
-        'core:move-down': () => handler.element.scrollBy({ top: 10 }),
+      atom.commands.add(this.element, {
+        'core:move-up': () => this.element.scrollBy({ top: -10 }),
+        'core:move-down': () => this.element.scrollBy({ top: 10 }),
         'core:copy': () => {
           handlePromise(this.copyToClipboard())
         },
@@ -221,7 +233,7 @@ export abstract class MarkdownPreviewView {
           handlePromise(handler.openDevTools())
         },
         'markdown-preview-plus:new-window': () => {
-          this.openNewWindow()
+          handlePromise(this.openNewWindow())
         },
         'markdown-preview-plus:print': () => {
           handlePromise(handler.print())

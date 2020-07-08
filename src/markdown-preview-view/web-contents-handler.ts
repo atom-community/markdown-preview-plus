@@ -51,7 +51,7 @@ interface PrintToPDFOptionsReal {
 export class WebContentsHandler {
   private static _id: number = 0
   public readonly emitter = new Emitter<
-    {},
+    { 'did-destroy': void },
     {
       'did-scroll-preview': { min: number; max: number }
     }
@@ -68,7 +68,7 @@ export class WebContentsHandler {
 
   constructor(
     private readonly contents: Promise<WebContents>,
-    parentElement: HTMLElement,
+    showContextMenu: () => void,
     init: () => void | Promise<void>,
   ) {
     this.addListeners({
@@ -89,7 +89,7 @@ export class WebContentsHandler {
         )
       },
       'atom-markdown-preview-plus-ipc-show-context-menu': () => {
-        atom.contextMenu.showForEvent({ target: parentElement })
+        showContextMenu()
       },
       'atom-markdown-preview-plus-ipc-request-reply': ({
         id,
@@ -116,27 +116,26 @@ export class WebContentsHandler {
       }),
     )
 
-    this.initPromise = contents.then((contents) => {
-      contents.loadURL(`file:///${packagePath()}/client/template.html`)
-      contents.on('dom-ready', () => {
-        if (this.destroyed) return
-        contents.send<'set-id'>('set-id', this.id)
-        contents.setZoomLevel(this.zoomLevel)
+    this.initPromise = contents.then(async (contents) => {
+      await contents.loadURL(`file:///${packagePath()}/client/template.html`)
 
-        contents.on('will-navigate', async (e, url) => {
-          e.preventDefault()
-          const exts = atomConfig().previewConfig.shellOpenFileExtensions
-          const forceOpenExternal = exts.some((ext) =>
-            url.toLowerCase().endsWith(`.${ext.toLowerCase()}`),
-          )
-          if (url.startsWith('file://') && !forceOpenExternal) {
-            handlePromise(atom.workspace.open(fileUriToPath(url)))
-          } else {
-            shell.openExternal(url)
-          }
-        })
-        handlePromise(this.updateStyles().then(init))
+      if (this.destroyed) return
+      contents.send<'set-id'>('set-id', this.id)
+      contents.setZoomLevel(this.zoomLevel)
+
+      contents.on('will-navigate', async (e, url) => {
+        e.preventDefault()
+        const exts = atomConfig().previewConfig.shellOpenFileExtensions
+        const forceOpenExternal = exts.some((ext) =>
+          url.toLowerCase().endsWith(`.${ext.toLowerCase()}`),
+        )
+        if (url.startsWith('file://') && !forceOpenExternal) {
+          handlePromise(atom.workspace.open(fileUriToPath(url)))
+        } else {
+          handlePromise(shell.openExternal(url))
+        }
       })
+      handlePromise(this.updateStyles().then(init))
     })
 
     this.disposables.add(
@@ -158,7 +157,13 @@ export class WebContentsHandler {
       remote.ipcMain.removeListener(channel, handler)
       delete this.listeners[channel]
     }
+    this.emitter.emit('did-destroy')
     this.disposables.dispose()
+    this.emitter.dispose()
+  }
+
+  public onDidDestroy(callback: () => void) {
+    return this.emitter.on('did-destroy', callback)
   }
 
   public async update(html: string, renderLaTeX: boolean) {

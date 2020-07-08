@@ -21,6 +21,7 @@ import { migrateConfig } from './migrate-config'
 import { selectListView } from './select-list-view'
 import * as pdf from './markdown-preview-view/pdf-export-util'
 import { getUserMacrosPath } from './macros-util'
+import { BrowserWindowHandler } from './markdown-preview-view/browserwindow-handler'
 
 export { config } from './config'
 
@@ -105,6 +106,7 @@ export async function activate() {
 
 export function deactivate() {
   disposables && disposables.dispose()
+  BrowserWindowHandler.clean()
 }
 
 export function createMarkdownPreviewView(state: SerializedMPV) {
