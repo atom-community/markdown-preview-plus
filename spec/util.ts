@@ -4,6 +4,10 @@ import sinonChai from 'sinon-chai'
 import { MarkdownPreviewView } from '../src/markdown-preview-view'
 
 use(sinonChai)
+before(function () {
+  console.log('extending setting timeout')
+  this.timeout(30000)
+})
 
 declare global {
   namespace Chai {
