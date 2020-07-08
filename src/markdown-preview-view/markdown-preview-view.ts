@@ -194,17 +194,6 @@ export abstract class MarkdownPreviewView {
   }
 
   protected openNewWindow() {
-    const path = this.getPath()
-    if (!path) {
-      atom.notifications.addWarning(
-        'Can not open this preview in new window: no file path',
-      )
-      return
-    }
-    atom.open({
-      pathsToOpen: [`markdown-preview-plus://file/${path}`],
-      newWindow: true,
-    })
     util.destroy(this)
   }
 
