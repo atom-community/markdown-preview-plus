@@ -1,3 +1,35 @@
+## 3.11.6
+
+-   Add Actions CI
+-   [loader] Check if transpiler is available and report running in dev-mode
+-   One more attempt at fixing specs
+-   Fix MarkdownPreviewView.elementMap
+-   Merge branch 'bundle'
+-   Update bundle
+-   BrowserWindow-based open in new window
+-   Remove defunct remote mode
+-   Wait until pdf is actually created before continuing
+-   Factor out work with webview
+-   Use typescript source when in dev or spec mode
+-   Tweak specs
+-   Do not move\/remove mpp.cson when updating
+-   [CI] Bump travis node
+-   Update dependencies
+-   Fix specs
+-   Bunlde. Many changes. See description
+-   Remove lib
+-   Make activation non-async
+-   Add makePDF tree view command
+-   Slightly rework how tree-view interaction is handled
+-   Wait for load event on pdf save
+-   Make renderErrors option expcicit
+-   Make open-on-save configurable
+-   Do not render pandoc errors in saved\/copied documents
+-   Merge branch 'master' of github.com:atom-community\/markdown-preview-plus
+-   General refactoring; deps update;
+-   Bump acorn from 5.7.3 to 5.7.4 (dependabot[bot])
+-   Bump serialize-to-js from 3.0.0 to 3.0.1 (dependabot[bot])
+
 ## 3.11.5
 
 -   Rework source map builder, update spec
