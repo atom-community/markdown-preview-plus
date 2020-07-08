@@ -5,7 +5,10 @@ declare module 'atom' {
   }
   interface AtomEnvironment {
     applicationDelegate: {
-      showSaveDialog: (options: SaveDialogOptions) => string | undefined
+      showSaveDialog: {
+        (options: SaveDialogOptions): string | undefined
+        (options: SaveDialogOptions, callback: Function): void
+      }
     }
   }
   interface TextEditor {

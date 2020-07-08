@@ -135,22 +135,23 @@ export async function activateMe(): Promise<Package> {
 
 import sinon from 'sinon'
 export function stubClipboard() {
-  const result: { stub?: sinon.SinonStub; contents: string } = {
-    stub: undefined,
+  const result = {
+    stub: sinon.stub().callsFake(function (arg: { text?: string }) {
+      result.contents = arg.text || ''
+    }),
     contents: '',
   }
   before(function () {
-    result.stub = sinon.stub().callsFake(function (arg: { text?: string }) {
-      result.contents = arg.text || ''
-    }) as any
     window['markdown-preview-plus-tests'] = { clipboardWrite: result.stub }
   })
   after(function () {
     delete window['markdown-preview-plus-tests']
+    delete result.stub
+    delete result.contents
   })
   afterEach(function () {
     result.contents = ''
-    result.stub && result.stub.resetHistory()
+    result.stub.resetHistory()
   })
   return result
 }

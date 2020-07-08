@@ -24,6 +24,7 @@ import * as sinon from 'sinon'
 import { TextEditor, TextEditorElement, ConfigValues } from 'atom'
 
 describe('Markdown preview plus package', function () {
+  const clipboard = stubClipboard()
   let preview: MarkdownPreviewView
   let tempPath: string
   let withFile: WithFileType
@@ -55,382 +56,7 @@ describe('Markdown preview plus package', function () {
     }
   })
 
-  describe('when a preview has not been created for the file', function () {
-    it('displays a markdown preview in a split pane', async function () {
-      const editor = await atom.workspace.open(
-        path.join(tempPath, 'subdir/file.markdown'),
-      )
-      atom.commands.dispatch(
-        atom.views.getView(editor),
-        'markdown-preview-plus:toggle',
-      )
-      preview = await expectPreviewInSplitPane()
-
-      const [editorPane] = atom.workspace.getPanes()
-      expect(editorPane.getItems()).to.have.length(1)
-      expect(editorPane.isActive()).to.equal(true)
-    })
-
-    describe("when the editor's path does not exist", () =>
-      it('splits the current pane to the right with a markdown preview for the file', async function () {
-        const editor = await atom.workspace.open('new.markdown')
-        atom.commands.dispatch(
-          atom.views.getView(editor),
-          'markdown-preview-plus:toggle',
-        )
-        preview = await expectPreviewInSplitPane()
-      }))
-
-    describe('when the editor does not have a path', () =>
-      it('splits the current pane to the right with a markdown preview for the file', async function () {
-        const editor = await atom.workspace.open('')
-        atom.commands.dispatch(
-          atom.views.getView(editor),
-          'markdown-preview-plus:toggle',
-        )
-        preview = await expectPreviewInSplitPane()
-      }))
-
-    // https://github.com/atom/markdown-preview/issues/28
-    describe('when the path contains a space', function () {
-      it('renders the preview', async function () {
-        const editor = await atom.workspace.open(
-          path.join(tempPath, 'subdir/file with space.md'),
-        )
-        atom.commands.dispatch(
-          atom.views.getView(editor),
-          'markdown-preview-plus:toggle',
-        )
-        preview = await expectPreviewInSplitPane()
-      })
-    })
-
-    // https://github.com/atom/markdown-preview/issues/29
-    describe('when the path contains accented characters', function () {
-      it('renders the preview', async function () {
-        const editor = await atom.workspace.open(
-          path.join(tempPath, 'subdir/áccéntéd.md'),
-        )
-        atom.commands.dispatch(
-          atom.views.getView(editor),
-          'markdown-preview-plus:toggle',
-        )
-        preview = await expectPreviewInSplitPane()
-      })
-    })
-  })
-
-  describe('when a preview has been created for the file', function () {
-    beforeEach(async function () {
-      const editor = await atom.workspace.open(
-        path.join(tempPath, 'subdir/file.markdown'),
-      )
-
-      atom.commands.dispatch(
-        atom.views.getView(editor),
-        'markdown-preview-plus:toggle',
-      )
-      preview = await expectPreviewInSplitPane()
-    })
-
-    it('closes the existing preview when toggle is triggered a second time on the editor and when the preview is its panes active item', function () {
-      atom.commands.dispatch(
-        atom.views.getView(atom.workspace.getActivePaneItem()),
-        'markdown-preview-plus:toggle',
-      )
-
-      const [editorPane, previewPane] = atom.workspace.getPanes()
-      expect(editorPane.isActive()).to.equal(true)
-      expect(previewPane.getActiveItem()).to.be.undefined
-    })
-
-    it('activates the existing preview when toggle is triggered a second time on the editor and when the preview is not its panes active item #nottravis', async function () {
-      const [editorPane, previewPane] = atom.workspace.getPanes()
-
-      editorPane.activate()
-      const editor = await atom.workspace.open(
-        path.join(tempPath, 'subdir/simple.md'),
-      )
-
-      atom.commands.dispatch(
-        atom.views.getView(editor),
-        'markdown-preview-plus:toggle',
-      )
-
-      await waitsFor.msg(
-        'second markdown preview to be created',
-        () => previewPane.getItems().length === 2,
-      )
-
-      await waitsFor.msg(
-        'second markdown preview to be activated',
-        () => previewPane.getActiveItemIndex() === 1,
-      )
-
-      const preview1 = previewPane.getActiveItem() as MarkdownPreviewView
-      expect(preview1.classname).to.be.equal('MarkdownPreviewViewEditor')
-      expect(preview1.getPath()).to.equal(
-        (editorPane.getActiveItem() as TextEditor).getPath(),
-      )
-      expect(preview1.getPath()).to.equal(
-        atom.workspace.getActiveTextEditor()!.getPath(),
-      )
-
-      editorPane.activate()
-      editorPane.activateItemAtIndex(0)
-
-      atom.commands.dispatch(
-        atom.views.getView(editorPane.getActiveItem()),
-        'markdown-preview-plus:toggle',
-      )
-
-      await waitsFor.msg(
-        'first preview to be activated',
-        () => previewPane.getActiveItemIndex() === 0,
-      )
-
-      const preview2 = previewPane.getActiveItem() as MarkdownPreviewView
-      expect(previewPane.getItems().length).to.equal(2)
-      expect(preview2.getPath()).to.equal(
-        (editorPane.getActiveItem() as TextEditor).getPath(),
-      )
-      preview1.destroy()
-      preview2.destroy()
-    })
-
-    it('closes the existing preview when toggle is triggered on it and it has focus', async function () {
-      const [, previewPane] = atom.workspace.getPanes()
-      previewPane.activate()
-
-      expect(
-        await atom.commands.dispatch(
-          atom.views.getView(previewPane.getActiveItem()),
-          'markdown-preview-plus:toggle',
-        ),
-      ).to.be.ok
-      expect(previewPane.getActiveItem()).to.be.undefined
-    })
-
-    describe('when the editor is modified', function () {
-      it('re-renders the preview', async function () {
-        const markdownEditor = atom.workspace.getActiveTextEditor()!
-        markdownEditor.setText('Hey!')
-
-        await waitsFor(
-          async () => (await previewText(preview)).indexOf('Hey!') >= 0,
-        )
-      })
-
-      it('invokes ::onDidChangeMarkdown listeners', async function () {
-        let listener: sinon.SinonSpy
-        const markdownEditor = atom.workspace.getActiveTextEditor()!
-        preview.onDidChangeMarkdown((listener = sinon.spy()))
-
-        markdownEditor.setText('Hey!')
-
-        await waitsFor.msg(
-          '::onDidChangeMarkdown handler to be called',
-          () => listener.callCount > 0,
-        )
-      })
-
-      describe('when the preview is in the active pane but is not the active item', () =>
-        it('re-renders the preview but does not make it active', async function () {
-          const markdownEditor = atom.workspace.getActiveTextEditor()!
-          const previewPane = atom.workspace.getPanes()[1]
-          previewPane.activate()
-
-          await atom.workspace.open()
-
-          markdownEditor.setText('Hey!')
-
-          await waitsFor(
-            async () => (await previewText(preview)).indexOf('Hey!') >= 0,
-          )
-
-          expect(previewPane.isActive()).to.equal(true)
-          expect(previewPane.getActiveItem()).not.to.equal(preview)
-        }))
-
-      describe('when the preview is not the active item and not in the active pane', () =>
-        it('re-renders the preview and makes it active', async function () {
-          const markdownEditor = atom.workspace.getActiveTextEditor()!
-          const editorPane = atom.workspace.paneForItem(markdownEditor)!
-          const previewPane = atom.workspace.paneForItem(preview)!
-          previewPane.activate()
-
-          const newEditor = await atom.workspace.open()
-
-          await waitsFor(() => previewPane.getActiveItem() === newEditor)
-
-          editorPane.activate()
-          markdownEditor.setText('Hey!')
-
-          await waitsFor(
-            async () => (await previewText(preview)).indexOf('Hey!') >= 0,
-          )
-
-          expect(editorPane.isActive()).to.equal(
-            true,
-            'expecting editorPane to be active',
-          )
-          expect(previewPane.getActiveItem()).to.equal(preview)
-        }))
-
-      describe('when the liveUpdate config is set to false', () =>
-        it('only re-renders the markdown when the editor is saved, not when the contents are modified', async function () {
-          atom.config.set(
-            'markdown-preview-plus.previewConfig.liveUpdate',
-            false,
-          )
-
-          const didStopChangingHandler = sinon.spy()
-          const editor = atom.workspace.getActiveTextEditor()!
-          editor.getBuffer().onDidStopChanging(didStopChangingHandler)
-          editor.setText('ch ch changes')
-
-          await waitsFor(() => didStopChangingHandler.callCount > 0)
-
-          expect(await previewText(preview)).not.to.contain('ch ch changes')
-          await editor.save()
-
-          await waitsFor(
-            async () =>
-              (await previewText(preview)).indexOf('ch ch changes') >= 0,
-          )
-        }))
-    })
-
-    describe('when a new grammar is loaded', () =>
-      it('re-renders the preview', async function () {
-        expect(preview.getPath()).to.equal(
-          atom.workspace.getActiveTextEditor()!.getPath(),
-        )
-        atom.workspace.getActiveTextEditor()!.setText(`\
-\`\`\`javascript
-var x = y;
-\`\`\`\
-`)
-        await waitsFor.msg(
-          'markdown to be rendered after its text changed',
-          async () => {
-            const ed = (await previewFragment(preview)).querySelector(
-              'pre.editor-colors',
-            ) as HTMLElement
-            return ed && ed.classList.contains('lang-javascript')
-          },
-        )
-
-        let grammarAdded = false
-        const disp = atom.grammars.onDidAddGrammar(() => (grammarAdded = true))
-
-        expect(atom.packages.isPackageActive('language-javascript')).to.equal(
-          false,
-        )
-        await atom.packages.activatePackage('language-javascript')
-
-        await waitsFor.msg('grammar to be added', () => grammarAdded)
-
-        await waitsFor.msg(
-          'markdown to be rendered after grammar was added',
-          async () => {
-            const el = (await previewFragment(preview)).querySelector(
-              'pre.editor-colors',
-            ) as TextEditorElement
-            return el && el.dataset.grammar !== 'text plain null-grammar'
-          },
-        )
-
-        await atom.packages.deactivatePackage('language-javascript')
-        disp.dispose()
-      }))
-  })
-
-  describe('when the markdown preview view is requested by file URI', () =>
-    it('opens a preview editor and watches the file for changes', async function () {
-      const filePath = path.join(tempPath, 'subdir', 'file.markdown')
-      await atom.workspace.open(`markdown-preview-plus://file/${filePath}`)
-
-      preview = atom.workspace.getActivePaneItem() as any
-      expect(preview.classname).to.be.equal('MarkdownPreviewViewFile')
-
-      const spy = sinonPrivateSpy<typeof preview['renderMarkdownText']>(
-        preview,
-        'renderMarkdownText',
-      )
-      await withFile(
-        filePath,
-        fs.readFileSync(filePath).toString('utf8'),
-        async () => {
-          await waitsFor.msg(
-            'markdown to be re-rendered after file changed',
-            () => spy.called,
-          )
-        },
-      )
-    }))
-
-  describe("when the editor's grammar it not enabled for preview", function () {
-    beforeEach(function () {
-      atom.config.set('markdown-preview-plus.grammars', [])
-    })
-    afterEach(function () {
-      atom.config.unset('markdown-preview-plus.grammars')
-    })
-    it('does not open the markdown preview', async function () {
-      const editor = await atom.workspace.open(
-        path.join(tempPath, 'subdir/file.markdown'),
-      )
-
-      const spy = sinon.spy(atom.workspace, 'open')
-      atom.commands.dispatch(
-        atom.views.getView(editor),
-        'markdown-preview-plus:toggle',
-      )
-      expect(spy).not.to.be.called
-    })
-  })
-
-  describe("when the editor's path changes", function () {
-    it("updates the preview's title", async function () {
-      const titleChangedCallback = sinon.spy()
-
-      const ted = (await atom.workspace.open(
-        'subdir/file.markdown',
-      )) as TextEditor
-
-      atom.commands.dispatch(
-        atom.views.getView(ted),
-        'markdown-preview-plus:toggle',
-      )
-
-      preview = await expectPreviewInSplitPane()
-
-      expect(preview.getTitle()).to.equal('file.markdown Preview')
-      preview.onDidChangeTitle(titleChangedCallback)
-      const filePath = atom.workspace.getActiveTextEditor()!.getPath()!
-      if (process.platform !== 'linux') {
-        fs.renameSync(filePath, path.join(path.dirname(filePath), 'file2.md'))
-      } else {
-        await ted.saveAs(path.join(path.dirname(filePath), 'file2.md'))
-      }
-
-      await waitsFor(() => preview.getTitle() === 'file2.md Preview')
-
-      expect(titleChangedCallback).to.be.called
-      preview.destroy()
-    })
-  })
-
-  describe('when the URI opened does not have a markdown-preview-plus protocol', () =>
-    it('does not throw an error trying to decode the URI (regression)', async function () {
-      await atom.workspace.open('%')
-      expect(atom.workspace.getActiveTextEditor()).to.exist
-    }))
-
   describe('when markdown-preview-plus:copy-html is triggered', function () {
-    const clipboard = stubClipboard()
-
     async function copyHtml(editor: object) {
       clipboard.stub!.resetHistory()
       atom.commands.dispatch(
@@ -987,7 +613,6 @@ world</p>
       })
     })
     describe('depending on mediaOnCopyAsHTMLBehaviour value', () => {
-      const clipboard = stubClipboard()
       async function readHTML() {
         clipboard.stub!.resetHistory()
         await atom.commands.dispatch(atom.views.getView(preview), 'core:copy')
@@ -1043,4 +668,377 @@ world</p>
       })
     })
   })
+
+  describe('when a preview has not been created for the file', function () {
+    it('displays a markdown preview in a split pane', async function () {
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/file.markdown'),
+      )
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
+      preview = await expectPreviewInSplitPane()
+
+      const [editorPane] = atom.workspace.getPanes()
+      expect(editorPane.getItems()).to.have.length(1)
+      expect(editorPane.isActive()).to.equal(true)
+    })
+
+    describe("when the editor's path does not exist", () =>
+      it('splits the current pane to the right with a markdown preview for the file', async function () {
+        const editor = await atom.workspace.open('new.markdown')
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
+        preview = await expectPreviewInSplitPane()
+      }))
+
+    describe('when the editor does not have a path', () =>
+      it('splits the current pane to the right with a markdown preview for the file', async function () {
+        const editor = await atom.workspace.open('')
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
+        preview = await expectPreviewInSplitPane()
+      }))
+
+    // https://github.com/atom/markdown-preview/issues/28
+    describe('when the path contains a space', function () {
+      it('renders the preview', async function () {
+        const editor = await atom.workspace.open(
+          path.join(tempPath, 'subdir/file with space.md'),
+        )
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
+        preview = await expectPreviewInSplitPane()
+      })
+    })
+
+    // https://github.com/atom/markdown-preview/issues/29
+    describe('when the path contains accented characters', function () {
+      it('renders the preview', async function () {
+        const editor = await atom.workspace.open(
+          path.join(tempPath, 'subdir/áccéntéd.md'),
+        )
+        atom.commands.dispatch(
+          atom.views.getView(editor),
+          'markdown-preview-plus:toggle',
+        )
+        preview = await expectPreviewInSplitPane()
+      })
+    })
+  })
+
+  describe('when a preview has been created for the file', function () {
+    beforeEach(async function () {
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/file.markdown'),
+      )
+
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
+      preview = await expectPreviewInSplitPane()
+    })
+
+    it('closes the existing preview when toggle is triggered a second time on the editor and when the preview is its panes active item', function () {
+      atom.commands.dispatch(
+        atom.views.getView(atom.workspace.getActivePaneItem()),
+        'markdown-preview-plus:toggle',
+      )
+
+      const [editorPane, previewPane] = atom.workspace.getPanes()
+      expect(editorPane.isActive()).to.equal(true)
+      expect(previewPane.getActiveItem()).to.be.undefined
+    })
+
+    it('activates the existing preview when toggle is triggered a second time on the editor and when the preview is not its panes active item #nottravis', async function () {
+      const [editorPane, previewPane] = atom.workspace.getPanes()
+
+      editorPane.activate()
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/simple.md'),
+      )
+
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
+
+      await waitsFor.msg(
+        'second markdown preview to be created',
+        () => previewPane.getItems().length === 2,
+      )
+
+      await waitsFor.msg(
+        'second markdown preview to be activated',
+        () => previewPane.getActiveItemIndex() === 1,
+      )
+
+      const preview1 = previewPane.getActiveItem() as MarkdownPreviewView
+      expect(preview1.classname).to.be.equal('MarkdownPreviewViewEditor')
+      expect(preview1.getPath()).to.equal(
+        (editorPane.getActiveItem() as TextEditor).getPath(),
+      )
+      expect(preview1.getPath()).to.equal(
+        atom.workspace.getActiveTextEditor()!.getPath(),
+      )
+
+      editorPane.activate()
+      editorPane.activateItemAtIndex(0)
+
+      atom.commands.dispatch(
+        atom.views.getView(editorPane.getActiveItem()),
+        'markdown-preview-plus:toggle',
+      )
+
+      await waitsFor.msg(
+        'first preview to be activated',
+        () => previewPane.getActiveItemIndex() === 0,
+      )
+
+      const preview2 = previewPane.getActiveItem() as MarkdownPreviewView
+      expect(previewPane.getItems().length).to.equal(2)
+      expect(preview2.getPath()).to.equal(
+        (editorPane.getActiveItem() as TextEditor).getPath(),
+      )
+      preview1.destroy()
+      preview2.destroy()
+    })
+
+    it('closes the existing preview when toggle is triggered on it and it has focus', async function () {
+      const [, previewPane] = atom.workspace.getPanes()
+      previewPane.activate()
+
+      expect(
+        await atom.commands.dispatch(
+          atom.views.getView(previewPane.getActiveItem()),
+          'markdown-preview-plus:toggle',
+        ),
+      ).to.be.ok
+      expect(previewPane.getActiveItem()).to.be.undefined
+    })
+
+    describe('when the editor is modified', function () {
+      it('re-renders the preview', async function () {
+        const markdownEditor = atom.workspace.getActiveTextEditor()!
+        markdownEditor.setText('Hey!')
+
+        await waitsFor(
+          async () => (await previewText(preview)).indexOf('Hey!') >= 0,
+        )
+      })
+
+      it('invokes ::onDidChangeMarkdown listeners', async function () {
+        let listener: sinon.SinonSpy
+        const markdownEditor = atom.workspace.getActiveTextEditor()!
+        preview.onDidChangeMarkdown((listener = sinon.spy()))
+
+        markdownEditor.setText('Hey!')
+
+        await waitsFor.msg(
+          '::onDidChangeMarkdown handler to be called',
+          () => listener.callCount > 0,
+        )
+      })
+
+      describe('when the preview is in the active pane but is not the active item', () =>
+        it('re-renders the preview but does not make it active', async function () {
+          const markdownEditor = atom.workspace.getActiveTextEditor()!
+          const previewPane = atom.workspace.getPanes()[1]
+          previewPane.activate()
+
+          await atom.workspace.open()
+
+          markdownEditor.setText('Hey!')
+
+          await waitsFor(
+            async () => (await previewText(preview)).indexOf('Hey!') >= 0,
+          )
+
+          expect(previewPane.isActive()).to.equal(true)
+          expect(previewPane.getActiveItem()).not.to.equal(preview)
+        }))
+
+      describe('when the preview is not the active item and not in the active pane', () =>
+        it('re-renders the preview and makes it active', async function () {
+          const markdownEditor = atom.workspace.getActiveTextEditor()!
+          const editorPane = atom.workspace.paneForItem(markdownEditor)!
+          const previewPane = atom.workspace.paneForItem(preview)!
+          previewPane.activate()
+
+          const newEditor = await atom.workspace.open()
+
+          await waitsFor(() => previewPane.getActiveItem() === newEditor)
+
+          editorPane.activate()
+          markdownEditor.setText('Hey!')
+
+          await waitsFor(
+            async () => (await previewText(preview)).indexOf('Hey!') >= 0,
+          )
+
+          expect(editorPane.isActive()).to.equal(
+            true,
+            'expecting editorPane to be active',
+          )
+          expect(previewPane.getActiveItem()).to.equal(preview)
+        }))
+
+      describe('when the liveUpdate config is set to false', () =>
+        it('only re-renders the markdown when the editor is saved, not when the contents are modified', async function () {
+          atom.config.set(
+            'markdown-preview-plus.previewConfig.liveUpdate',
+            false,
+          )
+
+          const didStopChangingHandler = sinon.spy()
+          const editor = atom.workspace.getActiveTextEditor()!
+          editor.getBuffer().onDidStopChanging(didStopChangingHandler)
+          editor.setText('ch ch changes')
+
+          await waitsFor(() => didStopChangingHandler.callCount > 0)
+
+          expect(await previewText(preview)).not.to.contain('ch ch changes')
+          await editor.save()
+
+          await waitsFor(
+            async () =>
+              (await previewText(preview)).indexOf('ch ch changes') >= 0,
+          )
+        }))
+    })
+
+    describe('when a new grammar is loaded', () =>
+      it('re-renders the preview', async function () {
+        expect(preview.getPath()).to.equal(
+          atom.workspace.getActiveTextEditor()!.getPath(),
+        )
+        atom.workspace.getActiveTextEditor()!.setText(`\
+\`\`\`javascript
+var x = y;
+\`\`\`\
+`)
+        await waitsFor.msg(
+          'markdown to be rendered after its text changed',
+          async () => {
+            const ed = (await previewFragment(preview)).querySelector(
+              'pre.editor-colors',
+            ) as HTMLElement
+            return ed && ed.classList.contains('lang-javascript')
+          },
+        )
+
+        let grammarAdded = false
+        const disp = atom.grammars.onDidAddGrammar(() => (grammarAdded = true))
+
+        expect(atom.packages.isPackageActive('language-javascript')).to.equal(
+          false,
+        )
+        await atom.packages.activatePackage('language-javascript')
+
+        await waitsFor.msg('grammar to be added', () => grammarAdded)
+
+        await waitsFor.msg(
+          'markdown to be rendered after grammar was added',
+          async () => {
+            const el = (await previewFragment(preview)).querySelector(
+              'pre.editor-colors',
+            ) as TextEditorElement
+            return el && el.dataset.grammar !== 'text plain null-grammar'
+          },
+        )
+
+        await atom.packages.deactivatePackage('language-javascript')
+        disp.dispose()
+      }))
+  })
+
+  describe('when the markdown preview view is requested by file URI', () =>
+    it('opens a preview editor and watches the file for changes', async function () {
+      const filePath = path.join(tempPath, 'subdir', 'file.markdown')
+      await atom.workspace.open(`markdown-preview-plus://file/${filePath}`)
+
+      preview = atom.workspace.getActivePaneItem() as any
+      expect(preview.classname).to.be.equal('MarkdownPreviewViewFile')
+
+      const spy = sinonPrivateSpy<typeof preview['renderMarkdownText']>(
+        preview,
+        'renderMarkdownText',
+      )
+      await withFile(
+        filePath,
+        fs.readFileSync(filePath).toString('utf8'),
+        async () => {
+          await waitsFor.msg(
+            'markdown to be re-rendered after file changed',
+            () => spy.called,
+          )
+        },
+      )
+    }))
+
+  describe("when the editor's grammar it not enabled for preview", function () {
+    beforeEach(function () {
+      atom.config.set('markdown-preview-plus.grammars', [])
+    })
+    afterEach(function () {
+      atom.config.unset('markdown-preview-plus.grammars')
+    })
+    it('does not open the markdown preview', async function () {
+      const editor = await atom.workspace.open(
+        path.join(tempPath, 'subdir/file.markdown'),
+      )
+
+      const spy = sinon.spy(atom.workspace, 'open')
+      atom.commands.dispatch(
+        atom.views.getView(editor),
+        'markdown-preview-plus:toggle',
+      )
+      expect(spy).not.to.be.called
+    })
+  })
+
+  describe("when the editor's path changes", function () {
+    it("updates the preview's title", async function () {
+      const titleChangedCallback = sinon.spy()
+
+      const ted = (await atom.workspace.open(
+        'subdir/file.markdown',
+      )) as TextEditor
+
+      atom.commands.dispatch(
+        atom.views.getView(ted),
+        'markdown-preview-plus:toggle',
+      )
+
+      preview = await expectPreviewInSplitPane()
+
+      expect(preview.getTitle()).to.equal('file.markdown Preview')
+      preview.onDidChangeTitle(titleChangedCallback)
+      const filePath = atom.workspace.getActiveTextEditor()!.getPath()!
+      if (process.platform !== 'linux') {
+        fs.renameSync(filePath, path.join(path.dirname(filePath), 'file2.md'))
+      } else {
+        await ted.saveAs(path.join(path.dirname(filePath), 'file2.md'))
+      }
+
+      await waitsFor(() => preview.getTitle() === 'file2.md Preview')
+
+      expect(titleChangedCallback).to.be.called
+      preview.destroy()
+    })
+  })
+
+  describe('when the URI opened does not have a markdown-preview-plus protocol', () =>
+    it('does not throw an error trying to decode the URI (regression)', async function () {
+      await atom.workspace.open('%')
+      expect(atom.workspace.getActiveTextEditor()).to.exist
+    }))
 })

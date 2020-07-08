@@ -4,7 +4,6 @@ import * as temp from 'temp'
 import * as yaml from 'yaml'
 import * as markdownIt from '../src/markdown-it-helper'
 import { MarkdownPreviewView } from '../src/markdown-preview-view'
-import sinon from 'sinon'
 import {
   waitsFor,
   expectPreviewInSplitPane,

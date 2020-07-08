@@ -25,14 +25,6 @@ import {
 import { TextEditorElement, TextEditor, ConfigValues } from 'atom'
 import { PlaceholderView } from '../src/placeholder-view'
 
-declare module 'atom' {
-  interface AtomEnvironment {
-    applicationDelegate: {
-      showSaveDialog(options: {}, callback: Function): void
-    }
-  }
-}
-
 describe('MarkdownPreviewView', function () {
   let filePath: string
   let preview: MarkdownPreviewView
