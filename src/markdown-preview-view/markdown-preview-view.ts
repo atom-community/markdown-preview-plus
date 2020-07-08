@@ -51,15 +51,13 @@ export abstract class MarkdownPreviewView {
     }),
     el?: HTMLElement,
   ) {
-    if (!this.element && el) {
-      this.element = el
-      MarkdownPreviewView.elementMap.set(this.element, this)
-    }
+    if (!this.element && el) this.element = el
     if (!this.element) {
       throw new Error(
         "Init function didn't set element and no element provided",
       )
     }
+    MarkdownPreviewView.elementMap.set(this.element, this)
     this._initialRenderPromsie = this.handler
       .then(() => this.renderMarkdown())
       .then(() => {
