@@ -6,6 +6,7 @@ import { handlePromise, atomConfig, packagePath } from '../util'
 import { RequestReplyMap, ChannelMap, ReplyMap } from '../../src-client/ipc'
 import { getPreviewStyles } from './util'
 import { ImageWatcher } from '../image-watch-helper'
+import * as path from 'path'
 
 export type ReplyCallbackStruct<
   T extends keyof RequestReplyMap = keyof RequestReplyMap
@@ -117,7 +118,10 @@ export class WebContentsHandler {
     )
 
     this.initPromise = contents.then(async (contents) => {
-      await contents.loadURL(`file:///${packagePath()}/client/template.html`)
+      await contents.loadFile(
+        path.join(packagePath(), 'client', 'template.html'),
+        { hash: atom.inDevMode() ? 'dev' : undefined },
+      )
 
       if (this.destroyed) return
       contents.send<'set-id'>('set-id', this.id)

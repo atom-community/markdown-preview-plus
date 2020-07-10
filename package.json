@@ -110,6 +110,7 @@
     "markdown-it-testgen": "^0.1.6",
     "morphdom": "^2.6.1",
     "parcel": "^2.0.0-nightly.318",
+    "pirates": "^4.0.1",
     "prettier": "^2.0.5",
     "sinon": "^9.0.2",
     "sinon-chai": "^3.5.0",
