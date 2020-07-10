@@ -33,6 +33,6 @@
     "skipLibCheck": true
   },
   "include": ["**/*.ts", "**/*.tsx", "**/*.js", "../src-client/ipc.d.ts"],
-  "compileOnSave": true,
+  "compileOnSave": false,
   "experimentalDecorators": true
 }
