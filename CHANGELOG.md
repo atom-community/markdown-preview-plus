@@ -1,34 +1,55 @@
-## 3.11.6
+## 4.0.0
 
--   Add Actions CI
--   [loader] Check if transpiler is available and report running in dev-mode
--   One more attempt at fixing specs
--   Fix MarkdownPreviewView.elementMap
--   Merge branch 'bundle'
--   Update bundle
+**WARNING**: Potentially breaking changes.
+
+### Removed features
+
+-   Old "open in new window" has been removed. Due to a long-standing bug in Atom it wasn't working for a while, and it doesn't look like upstream is interested in fixing said bug.
+
+### New features
+
 -   BrowserWindow-based open in new window
--   Remove defunct remote mode
+
+    BrowserWindow is relatively stable API on Electron 5, to which Atom updated in v1.48.0. Which makes it possible to re-introduce "open in new window" based on that.
+
+-   Add makePDF tree view command/menu item
+
+    A small convenience to create PDF from Markdown files straight from tree-view. Makes it possible to create PDFs "in bulk".
+
+    Added a context menu in tree-view called "Make PDF" and Atom command `markdown-preview-plus:make-pdf` bound to `.tree-view` selector. You can bind a key to this command with
+    ```cson
+    ".tree-view":
+      "<some-key>": "markdown-preview-plus:make-pdf"
+    ```
+    bear in mind this keybinding will only work when tree-view is focused and at least Markdown file is selected.
+
+-   Add menu item/command to edit LaTeX macros definitions
+
+    Added a small convenience command `markdown-preview-plus:edit-macros` and a main menu item Packages → Markdown Preview Plus → Edit LaTeX Macros, which open `.atom/markdown-preview-plus.yaml` in Atom.
+
+### Changes
+
+-   `markdown-preview-plus.cson` is now `markdown-preview-plus.yaml`. The conversion should in most cases happen automatically, but in rare cases you might need to do the conversion manually. Syntax is largely very similar if not outright the same.
+
+    This is not done lightly. However, CSON parsing requires a transient dependency on coffeescript, which bloats the size of dependencies and makes it unnecessarily hard to bundle the package.
+
+-   Markdown-preview-plus is now distributed in bundled form. This means installation and load times should be generally smaller. On the flip side, hacking on MPP is slightly more complicated. Check the [contribution guide](./CONTRIBUTING.md).
+
+-   MPP will use the TypeScript sources directly if Atom is started in dev-mode and some devDependencies are installed. This is relatively slow, so bear this in mind if using Atom's dev-mode.
+
+### Fixes
+
 -   Wait until pdf is actually created before continuing
--   Factor out work with webview
--   Use typescript source when in dev or spec mode
--   Tweak specs
--   Do not move\/remove mpp.cson when updating
--   [CI] Bump travis node
--   Update dependencies
--   Fix specs
--   Bunlde. Many changes. See description
--   Remove lib
 -   Make activation non-async
--   Add makePDF tree view command
--   Slightly rework how tree-view interaction is handled
 -   Wait for load event on pdf save
--   Make renderErrors option expcicit
 -   Make open-on-save configurable
 -   Do not render pandoc errors in saved\/copied documents
--   Merge branch 'master' of github.com:atom-community\/markdown-preview-plus
--   General refactoring; deps update;
--   Bump acorn from 5.7.3 to 5.7.4 (dependabot[bot])
--   Bump serialize-to-js from 3.0.0 to 3.0.1 (dependabot[bot])
+
+### Maintenance
+
+-   Slightly rework how tree-view interaction is handled
+-   Bunlde simplified version of markdown-it-imsize in repo (issues with parcel in code that isn't even used)
+-   Dependencies updated
 
 ## 3.11.5
 
