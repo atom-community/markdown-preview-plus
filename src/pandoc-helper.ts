@@ -13,7 +13,9 @@ const getMathJaxPath = (function () {
       return cached
     }
     try {
-      return (cached = require.resolve('mathjax'))
+      return (cached = window[
+        'atom-markdown-preview-plus-helpers'
+      ].require.resolve('mathjax'))
     } catch (e) {
       return ''
     }

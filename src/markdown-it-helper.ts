@@ -114,7 +114,12 @@ function init(initState: InitState): markdownItModule {
       return twemoji.parse(token[idx].content, {
         folder: path.join('assets', 'svg'),
         ext: '.svg',
-        base: path.dirname(require.resolve('twemoji-assets')) + path.sep,
+        base:
+          path.dirname(
+            window['atom-markdown-preview-plus-helpers'].require.resolve(
+              'twemoji-assets',
+            ),
+          ) + path.sep,
       })
     }
   }
