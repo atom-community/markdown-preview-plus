@@ -1,3 +1,9 @@
+## 4.0.1
+
+-   Fix require.resolve bundle issue
+
+    Path to twemoji-assets was not resolving correctly
+
 ## 4.0.0
 
 **WARNING**: Potentially breaking changes.
