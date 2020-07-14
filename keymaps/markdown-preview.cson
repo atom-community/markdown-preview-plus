@@ -3,6 +3,7 @@
   'ctrl-X': 'markdown-preview-plus:toggle-render-latex'
 
 '.markdown-preview-plus':
+  'f3': 'markdown-preview-plus:find-next'
   'end': 'core:move-to-bottom'
   'home': 'core:move-to-top'
 
@@ -12,6 +13,7 @@
   'cmd--': 'markdown-preview-plus:zoom-out'
   'cmd-_': 'markdown-preview-plus:zoom-out'
   'cmd-0': 'markdown-preview-plus:reset-zoom'
+  'cmd-f': 'markdown-preview-plus:find-in-preview'
 
 '.platform-win32 .markdown-preview-plus, .platform-linux .markdown-preview-plus':
   'ctrl-+': 'markdown-preview-plus:zoom-in'
@@ -19,3 +21,4 @@
   'ctrl--': 'markdown-preview-plus:zoom-out'
   'ctrl-_': 'markdown-preview-plus:zoom-out'
   'ctrl-0': 'markdown-preview-plus:reset-zoom'
+  'ctrl-f': 'markdown-preview-plus:find-in-preview'

@@ -66,6 +66,7 @@ export class WebContentsHandler {
   private readonly initPromise: Promise<void>
   private id: number = ++WebContentsHandler._id
   private listeners: { [key: string]: Function } = {}
+  private lastSearchText?: string
 
   constructor(
     private readonly contents: Promise<WebContents>,
@@ -268,6 +269,28 @@ export class WebContentsHandler {
 
   public async getSelection() {
     return this.runRequest('get-selection', {})
+  }
+
+  public async search(text: string) {
+    const c = await this.contents
+    c.findInPage(text)
+    this.lastSearchText = text
+  }
+
+  public async findNext() {
+    if (!this.lastSearchText) return
+    const c = await this.contents
+    c.findInPage(this.lastSearchText)
+  }
+
+  public hasSearch() {
+    return !!this.lastSearchText
+  }
+
+  public async stopSearch() {
+    const c = await this.contents
+    this.lastSearchText = undefined
+    c.stopFindInPage('keepSelection')
   }
 
   public async updateStyles() {

@@ -169,6 +169,10 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         'markdown-preview-plus:sync-preview': () => {
           this.syncPreviewHelper(true)
         },
+        'markdown-preview-plus:search-selection-in-preview': () => {
+          const text = this.editor.getSelectedText()
+          handlePromise(handler.search(text))
+        },
       }),
     )
   }

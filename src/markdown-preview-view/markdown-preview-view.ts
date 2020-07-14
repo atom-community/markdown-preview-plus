@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { Emitter, Disposable, CompositeDisposable, Grammar } from 'atom'
+import { Emitter, Disposable, CompositeDisposable, Grammar, Range } from 'atom'
 import { debounce } from 'lodash'
 import * as fs from 'fs'
 
@@ -246,6 +246,10 @@ export abstract class MarkdownPreviewView {
           handler.runJS(
             'window.scrollBy({top:document.body.scrollHeight, behavior: "smooth"})',
           ),
+        'core:cancel': (evt) => {
+          if (handler.hasSearch()) handlePromise(handler.stopSearch())
+          else evt.abortKeyBinding()
+        },
         'core:copy': () => {
           handlePromise(this.copyToClipboard())
         },
@@ -270,6 +274,77 @@ export abstract class MarkdownPreviewView {
         'markdown-preview-plus:sync-source': async (_event) => {
           const line = await handler.syncSource()
           this.openSource(line)
+        },
+        'markdown-preview-plus:search-selection-in-source': async (_event) => {
+          const text = await handler.getSelection()
+          if (!text) return
+          const path = this.getPath()
+          if (path === undefined) return
+          handlePromise(
+            atom.workspace
+              .open(path, { searchAllPanes: true })
+              .then((editor) => {
+                if (!atom.workspace.isTextEditor(editor)) return
+                const rxs = text
+                  .replace(/[\/\\^$*+?.()|[\]{}]/g, '\\$&')
+                  .replace(/\n+$/, '')
+                const rx = new RegExp(rxs)
+                let found = false
+                editor.scanInBufferRange(
+                  rx,
+                  new Range(
+                    editor.getCursors()[0].getBufferPosition(),
+                    editor.getBuffer().getRange().end,
+                  ),
+                  (it) => {
+                    editor.scrollToBufferPosition(it.range.start)
+                    editor.setSelectedBufferRange(it.range)
+                    found = true
+                    it.stop()
+                  },
+                )
+                if (found) return
+                editor.scan(rx, (it) => {
+                  editor.scrollToBufferPosition(it.range.start)
+                  editor.setSelectedBufferRange(it.range)
+                  it.stop()
+                })
+              }),
+          )
+        },
+        'markdown-preview-plus:find-next': async () => {
+          handlePromise(handler.findNext())
+        },
+        'markdown-preview-plus:find-in-preview': () => {
+          const activeElement = document.activeElement as HTMLElement | null
+          const ed = atom.workspace.buildTextEditor({
+            mini: true,
+          })
+          const edv = atom.views.getView(ed)
+          const disp1 = edv.onDidAttach(() => {
+            atom.views.getView(ed).focus()
+            disp1.dispose()
+          })
+          edv.addEventListener('blur', () => {
+            atom.commands.dispatch(edv, 'core:cancel')
+          })
+          const panel = atom.workspace.addModalPanel({
+            item: ed,
+            visible: true,
+          })
+          const disp = atom.commands.add(atom.views.getView(ed), {
+            'core:confirm': () => {
+              handlePromise(handler.search(ed.getText()))
+              panel.destroy()
+              disp.dispose()
+              if (activeElement) activeElement.focus()
+            },
+            'core:cancel': () => {
+              panel.destroy()
+              disp.dispose()
+              if (activeElement) activeElement.focus()
+            },
+          })
         },
       }),
       atom.config.onDidChange('markdown-preview-plus.markdownItConfig', () => {

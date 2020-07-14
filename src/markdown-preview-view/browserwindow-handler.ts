@@ -10,6 +10,10 @@ const menuItems = [
     label: 'Sync Source',
     command: 'markdown-preview-plus:sync-source',
   },
+  {
+    label: 'Search Selection in Source',
+    command: 'markdown-preview-plus:search-selection-in-source',
+  },
   { label: 'Copy As HTML', command: 'core:copy' },
   { label: 'Save As\u2026', command: 'core:save-as' },
   // { label: 'Print\u2026', command: 'markdown-preview-plus:print' },
