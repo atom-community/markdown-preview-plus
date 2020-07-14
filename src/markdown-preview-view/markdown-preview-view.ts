@@ -464,8 +464,11 @@ export abstract class MarkdownPreviewView {
     const selection = await handler.getSelection()
     // Use stupid copy event handler if there is selected text inside this view
     if (selection !== undefined) {
-      // TODO: rich clipboard support
-      atom.clipboard.write(selection)
+      if (atom.config.get('markdown-preview-plus.richClipboard')) {
+        await handler.runJS('document.execCommand("copy")')
+      } else {
+        atom.clipboard.write(selection)
+      }
     } else {
       const src = await this.getMarkdownSource()
       await copyHtml(src, this.getPath(), this.renderLaTeX)
