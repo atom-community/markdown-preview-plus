@@ -10,6 +10,9 @@ export class WebviewHandler extends WebContentsHandler {
         const createHandler = () => {
           element.removeEventListener('dom-ready', createHandler)
           resolve(element.getWebContents())
+          element.addEventListener('dom-ready', () => {
+            this.emitter.emit('reload', element.getWebContents())
+          })
         }
         element.addEventListener('dom-ready', createHandler)
       }),
@@ -18,22 +21,22 @@ export class WebviewHandler extends WebContentsHandler {
       },
       init,
     )
-    this._element = document.createElement('div')
-    this._element.tabIndex = -1
-    this._element.classList.add('markdown-preview-plus')
-    element.addEventListener('focus', () => {
-      this._element.focus()
-    })
+    this._element = element
     element.disablewebsecurity = 'true'
     element.nodeintegration = 'true'
     element.src = 'about:blank'
     element.style.width = '100%'
     element.style.height = '100%'
-    this._element.appendChild(element)
   }
 
   public get element(): HTMLElement {
     return this._element
+  }
+
+  public registerElementEvents(el: { focus: () => void }) {
+    this._element.addEventListener('focus', () => {
+      el.focus()
+    })
   }
 
   public destroy() {

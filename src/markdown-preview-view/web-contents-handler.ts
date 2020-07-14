@@ -49,11 +49,12 @@ interface PrintToPDFOptionsReal {
   landscape?: boolean
 }
 
-export class WebContentsHandler {
+export abstract class WebContentsHandler {
   private static _id: number = 0
   public readonly emitter = new Emitter<
     { 'did-destroy': void },
     {
+      reload: WebContents
       'did-scroll-preview': { min: number; max: number }
     }
   >()
@@ -63,15 +64,15 @@ export class WebContentsHandler {
   private zoomLevel = 0
   private replyCallbacks = new Map<number, ReplyCallbackStruct>()
   private replyCallbackId = 0
-  private readonly initPromise: Promise<void>
   private id: number = ++WebContentsHandler._id
   private listeners: { [key: string]: Function } = {}
   private lastSearchText?: string
+  private contents: Promise<WebContents>
 
   constructor(
-    private readonly contents: Promise<WebContents>,
+    contents: Promise<WebContents>,
     showContextMenu: () => void,
-    init: () => void | Promise<void>,
+    private readonly initCont: () => void | Promise<void>,
   ) {
     this.addListeners({
       'atom-markdown-preview-plus-ipc-zoom-in': this.zoomIn.bind(this),
@@ -118,35 +119,18 @@ export class WebContentsHandler {
       }),
     )
 
-    this.initPromise = contents.then(async (contents) => {
-      await contents.loadFile(
-        path.join(packagePath(), 'client', 'template.html'),
-        { hash: atom.inDevMode() ? 'dev' : undefined },
-      )
-
-      if (this.destroyed) return
-      contents.send<'set-id'>('set-id', this.id)
-      contents.setZoomLevel(this.zoomLevel)
-
-      contents.on('will-navigate', async (e, url) => {
-        e.preventDefault()
-        const exts = atomConfig().previewConfig.shellOpenFileExtensions
-        const forceOpenExternal = exts.some((ext) =>
-          url.toLowerCase().endsWith(`.${ext.toLowerCase()}`),
-        )
-        if (url.startsWith('file://') && !forceOpenExternal) {
-          handlePromise(atom.workspace.open(fileUriToPath(url)))
-        } else {
-          handlePromise(shell.openExternal(url))
-        }
-      })
-      handlePromise(this.updateStyles().then(init))
-    })
+    this.contents = contents.then(this.initializeContents)
 
     this.disposables.add(
       (this.imageWatcher = new ImageWatcher(this.updateImages.bind(this))),
     )
   }
+
+  public get element(): HTMLElement | undefined {
+    return undefined
+  }
+
+  public abstract registerElementEvents(element: HTMLElement): void
 
   public async runJS<T>(js: string) {
     const contents = await this.contents
@@ -320,7 +304,6 @@ export class WebContentsHandler {
     channel: T,
     value: ChannelMap[T],
   ): Promise<void> {
-    await this.initPromise
     ;(await this.contents).send<T>(channel, value)
   }
 
@@ -342,5 +325,47 @@ export class WebContentsHandler {
       }
       remote.ipcMain.on(channel, this.listeners[channel])
     }
+  }
+
+  private initializeContents = async (
+    contents: WebContents,
+  ): Promise<WebContents> => {
+    contents.once('destroyed', () => {
+      if (this.destroyed) return
+      const disp = this.emitter.once('reload', (ct) => {
+        disp.dispose()
+        this.contents = Promise.resolve(ct).then(this.initializeContents)
+      })
+    })
+    contents.on('will-navigate', async (e, url) => {
+      e.preventDefault()
+      const exts = atomConfig().previewConfig.shellOpenFileExtensions
+      const forceOpenExternal = exts.some((ext) =>
+        url.toLowerCase().endsWith(`.${ext.toLowerCase()}`),
+      )
+      if (url.startsWith('file://') && !forceOpenExternal) {
+        handlePromise(atom.workspace.open(fileUriToPath(url)))
+      } else {
+        handlePromise(shell.openExternal(url))
+      }
+    })
+
+    if (!contents.getURL().includes('client/template.html')) {
+      await contents.loadFile(
+        path.join(packagePath(), 'client', 'template.html'),
+        { hash: atom.inDevMode() ? 'dev' : undefined },
+      )
+    }
+
+    const onload = async () => {
+      if (this.destroyed) return
+      contents.send<'set-id'>('set-id', this.id)
+      contents.setZoomLevel(this.zoomLevel)
+
+      handlePromise(this.updateStyles().then(this.initCont))
+    }
+    await onload()
+    contents.on('dom-ready', onload)
+    return contents
   }
 }

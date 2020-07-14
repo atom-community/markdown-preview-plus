@@ -22,53 +22,56 @@ export abstract class MarkdownPreviewView {
   private static elementMap = new WeakMap<HTMLElement, MarkdownPreviewView>()
   // used for tests
   public abstract readonly classname: string
-  public element!: HTMLElement
+  public readonly element: HTMLElement
   protected emitter: Emitter<{
     'did-change-title': undefined
     'did-change-markdown': undefined
+    'did-init': undefined
   }> = new Emitter()
   protected disposables = new CompositeDisposable()
   protected destroyed = false
+  protected readonly handler: WebContentsHandler
   private loading: boolean = true
   private _initialRenderPromsie: Promise<void>
 
   protected constructor(
     private renderLaTeX: boolean = atomConfig().mathConfig
       .enableLatexRenderingByDefault,
-    protected readonly handler = new Promise<WebContentsHandler>((resolve) => {
-      const handler = new WebviewHandler(async () => {
-        const config = atomConfig()
-        await handler.init({
-          userMacros: loadUserMacros(),
-          mathJaxConfig: config.mathConfig,
-          context: 'live-preview',
-        })
-        await handler.setBasePath(this.getPath())
-        this.emitter.emit('did-change-title')
-        resolve(handler)
-      })
-      this.element = handler.element
-    }),
-    el?: HTMLElement,
+    handlerConstructor: new (
+      x: () => Promise<void>,
+    ) => WebContentsHandler = WebviewHandler,
   ) {
-    if (!this.element && el) this.element = el
-    if (!this.element) {
-      throw new Error(
-        "Init function didn't set element and no element provided",
-      )
-    }
-    MarkdownPreviewView.elementMap.set(this.element, this)
-    this._initialRenderPromsie = this.handler
-      .then(() => this.renderMarkdown())
-      .then(() => {
-        this.loading = false
+    this.handler = new handlerConstructor(async () => {
+      const config = atomConfig()
+      await this.handler.init({
+        userMacros: loadUserMacros(),
+        mathJaxConfig: config.mathConfig,
+        context: 'live-preview',
       })
-    handlePromise(
-      this.handler.then(async (handler) => {
-        this.disposables.add(handler.onDidDestroy(() => this.destroy()))
-        return this.handleEvents()
-      }),
-    )
+      await this.handler.setBasePath(this.getPath())
+      this.emitter.emit('did-change-title')
+      this.emitter.emit('did-init')
+    })
+    this.element = document.createElement('div')
+    this.element.tabIndex = -1
+    this.element.classList.add('markdown-preview-plus')
+    MarkdownPreviewView.elementMap.set(this.element, this)
+    this._initialRenderPromsie = new Promise((resolve) => {
+      this.disposables.add(
+        this.emitter.on('did-init', () => {
+          handlePromise(
+            this.renderMarkdown().then(() => {
+              this.loading = false
+              resolve()
+            }),
+          )
+        }),
+      )
+    })
+    if (this.handler.element) this.element.appendChild(this.handler.element)
+    this.handler.registerElementEvents(this.element)
+    this.disposables.add(this.handler.onDidDestroy(() => this.destroy()))
+    this.handleEvents()
   }
 
   public static viewForElement(element: HTMLElement) {
@@ -81,12 +84,12 @@ export abstract class MarkdownPreviewView {
     if (this.destroyed) return
     this.destroyed = true
     this.disposables.dispose()
-    handlePromise(this.handler.then((h) => h.destroy()))
+    this.handler.destroy()
     if (this.element) MarkdownPreviewView.elementMap.delete(this.element)
   }
 
   public async runJS<T>(js: string) {
-    return (await this.handler).runJS<T>(js)
+    return this.handler.runJS<T>(js)
   }
 
   public async initialRenderPromise() {
@@ -161,7 +164,7 @@ export abstract class MarkdownPreviewView {
             name,
             html,
             this.renderLaTeX,
-            await (await this.handler).getTeXConfig(),
+            await this.handler.getTeXConfig(),
           )
 
           fs.writeFileSync(filePath, fullHtml)
@@ -202,13 +205,12 @@ export abstract class MarkdownPreviewView {
   }
 
   protected async syncPreview(line: number, flash: boolean) {
-    return (await this.handler).sync(line, flash)
+    return this.handler.sync(line, flash)
   }
 
   protected abstract async openNewWindow(): Promise<void>
 
-  private async handleEvents() {
-    const handler = await this.handler
+  private handleEvents() {
     this.disposables.add(
       // atom events
       atom.grammars.onDidAddGrammar(() =>
@@ -223,60 +225,60 @@ export abstract class MarkdownPreviewView {
       ),
       atom.commands.add(this.element, {
         'core:move-up': () =>
-          handler.runJS('window.scrollBy({top:-30, behavior: "auto"})'),
+          this.handler.runJS('window.scrollBy({top:-30, behavior: "auto"})'),
         'core:move-down': () =>
-          handler.runJS('window.scrollBy({top:30, behavior: "auto"})'),
+          this.handler.runJS('window.scrollBy({top:30, behavior: "auto"})'),
         'core:move-left': () =>
-          handler.runJS('window.scrollBy({left:-30, behavior: "auto"})'),
+          this.handler.runJS('window.scrollBy({left:-30, behavior: "auto"})'),
         'core:move-right': () =>
-          handler.runJS('window.scrollBy({left:-30, behavior: "auto"})'),
+          this.handler.runJS('window.scrollBy({left:-30, behavior: "auto"})'),
         'core:page-up': () =>
-          handler.runJS(
+          this.handler.runJS(
             'window.scrollBy({top:-window.innerHeight, behavior: "auto"})',
           ),
         'core:page-down': () =>
-          handler.runJS(
+          this.handler.runJS(
             'window.scrollBy({top:window.innerHeight, behavior: "auto"})',
           ),
         'core:move-to-top': () =>
-          handler.runJS(
+          this.handler.runJS(
             'window.scrollBy({top:-document.body.scrollHeight, behavior: "smooth"})',
           ),
         'core:move-to-bottom': () =>
-          handler.runJS(
+          this.handler.runJS(
             'window.scrollBy({top:document.body.scrollHeight, behavior: "smooth"})',
           ),
         'core:cancel': (evt) => {
-          if (handler.hasSearch()) handlePromise(handler.stopSearch())
+          if (this.handler.hasSearch()) handlePromise(this.handler.stopSearch())
           else evt.abortKeyBinding()
         },
         'core:copy': () => {
           handlePromise(this.copyToClipboard())
         },
         'markdown-preview-plus:open-dev-tools': () => {
-          handlePromise(handler.openDevTools())
+          handlePromise(this.handler.openDevTools())
         },
         'markdown-preview-plus:new-window': () => {
           handlePromise(this.openNewWindow())
         },
         'markdown-preview-plus:print': () => {
-          handlePromise(handler.print())
+          handlePromise(this.handler.print())
         },
         'markdown-preview-plus:zoom-in': () => {
-          handlePromise(handler.zoomIn())
+          handlePromise(this.handler.zoomIn())
         },
         'markdown-preview-plus:zoom-out': () => {
-          handlePromise(handler.zoomOut())
+          handlePromise(this.handler.zoomOut())
         },
         'markdown-preview-plus:reset-zoom': () => {
-          handlePromise(handler.resetZoom())
+          handlePromise(this.handler.resetZoom())
         },
         'markdown-preview-plus:sync-source': async (_event) => {
-          const line = await handler.syncSource()
+          const line = await this.handler.syncSource()
           this.openSource(line)
         },
         'markdown-preview-plus:search-selection-in-source': async (_event) => {
-          const text = await handler.getSelection()
+          const text = await this.handler.getSelection()
           if (!text) return
           const path = this.getPath()
           if (path === undefined) return
@@ -313,7 +315,7 @@ export abstract class MarkdownPreviewView {
           )
         },
         'markdown-preview-plus:find-next': async () => {
-          handlePromise(handler.findNext())
+          handlePromise(this.handler.findNext())
         },
         'markdown-preview-plus:find-in-preview': () => {
           const activeElement = document.activeElement as HTMLElement | null
@@ -334,7 +336,7 @@ export abstract class MarkdownPreviewView {
           })
           const disp = atom.commands.add(atom.views.getView(ed), {
             'core:confirm': () => {
-              handlePromise(handler.search(ed.getText()))
+              handlePromise(this.handler.search(ed.getText()))
               panel.destroy()
               disp.dispose()
               if (activeElement) activeElement.focus()
@@ -356,13 +358,13 @@ export abstract class MarkdownPreviewView {
       atom.config.onDidChange(
         'markdown-preview-plus.mathConfig.latexRenderer',
         () => {
-          handlePromise(handler.reload())
+          handlePromise(this.handler.reload())
         },
       ),
       atom.config.onDidChange(
         'markdown-preview-plus.mathConfig.numberEquations',
         () => {
-          handlePromise(handler.reload())
+          handlePromise(this.handler.reload())
         },
       ),
       atom.config.onDidChange(
@@ -370,20 +372,20 @@ export abstract class MarkdownPreviewView {
         this.changeHandler,
       ),
       atom.config.onDidChange('markdown-preview-plus.useGitHubStyle', () => {
-        handlePromise(handler.updateStyles())
+        handlePromise(this.handler.updateStyles())
       }),
       atom.config.onDidChange('markdown-preview-plus.syntaxThemeName', () => {
-        handlePromise(handler.updateStyles())
+        handlePromise(this.handler.updateStyles())
       }),
       atom.config.onDidChange(
         'markdown-preview-plus.importPackageStyles',
         () => {
-          handlePromise(handler.updateStyles())
+          handlePromise(this.handler.updateStyles())
         },
       ),
 
       // webview events
-      handler.emitter.on('did-scroll-preview', ({ min, max }) => {
+      this.handler.emitter.on('did-scroll-preview', ({ min, max }) => {
         this.didScrollPreview(min, max)
       }),
     )
@@ -415,16 +417,15 @@ export abstract class MarkdownPreviewView {
         renderLaTeX: this.renderLaTeX,
         renderErrors: true,
         mode: 'normal',
-        imageWatcher: (await this.handler).imageWatcher,
+        imageWatcher: this.handler.imageWatcher,
       })
 
       if (this.destroyed) return
-      const handler = await this.handler
-      await handler.update(
+      await this.handler.update(
         domDocument.documentElement!.outerHTML,
         this.renderLaTeX,
       )
-      await handler.setSourceMap(
+      await this.handler.setSourceMap(
         util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),
       )
       this.emitter.emit('did-change-markdown')
@@ -455,17 +456,16 @@ export abstract class MarkdownPreviewView {
       )
       return
     } else {
-      return (await this.handler).error(error.message)
+      return this.handler.error(error.message)
     }
   }
 
   private async copyToClipboard(): Promise<void> {
-    const handler = await this.handler
-    const selection = await handler.getSelection()
+    const selection = await this.handler.getSelection()
     // Use stupid copy event handler if there is selected text inside this view
     if (selection !== undefined) {
       if (atom.config.get('markdown-preview-plus.richClipboard')) {
-        await handler.runJS('document.execCommand("copy")')
+        await this.handler.runJS('document.execCommand("copy")')
       } else {
         atom.clipboard.write(selection)
       }

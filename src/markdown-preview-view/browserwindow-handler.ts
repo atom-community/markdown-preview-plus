@@ -1,8 +1,5 @@
 import { BrowserWindow, remote } from 'electron'
 import { WebContentsHandler } from './web-contents-handler'
-import { atomConfig } from '../util'
-import { loadUserMacros } from '../macros-util'
-import { Emitter } from 'atom'
 import { MarkdownPreviewView } from './markdown-preview-view'
 
 const menuItems = [
@@ -38,8 +35,8 @@ const menuItems = [
 export class BrowserWindowHandler extends WebContentsHandler {
   private static windows = new Set<BrowserWindow>()
   private window: BrowserWindow
-  private element: HTMLElement
-  constructor(init: () => void | Promise<void>, element: HTMLElement) {
+  private menu?: Electron.Menu
+  constructor(init: () => void | Promise<void>) {
     const window = new remote.BrowserWindow({
       webPreferences: {
         webSecurity: false,
@@ -50,23 +47,22 @@ export class BrowserWindowHandler extends WebContentsHandler {
     window.on('close', () => this.destroy())
     window.setMenuBarVisibility(false)
 
-    const menu = remote.Menu.buildFromTemplate(
-      menuItems.map(({ label, command }) => ({
-        label,
-        click: () => atom.commands.dispatch(element, command),
-      })),
-    )
     super(
       Promise.resolve(window.webContents),
       () => {
-        menu.popup({ window })
+        if (this.menu) this.menu.popup({ window })
       },
       init,
     )
     this.window = window
-    this.element = element
-    element.classList.add('markdown-preview-plus')
-    element.tabIndex = -1
+  }
+
+  public static clean() {
+    const windows = Array.from(BrowserWindowHandler.windows)
+    for (const w of windows) w.close()
+  }
+
+  public registerElementEvents(element: HTMLElement) {
     this.disposables.add(
       atom.commands.add(element, {
         'core:save-as': () => {
@@ -80,11 +76,12 @@ export class BrowserWindowHandler extends WebContentsHandler {
         },
       }),
     )
-  }
-
-  public static clean() {
-    const windows = Array.from(BrowserWindowHandler.windows)
-    for (const w of windows) w.close()
+    this.menu = remote.Menu.buildFromTemplate(
+      menuItems.map(({ label, command }) => ({
+        label,
+        click: () => atom.commands.dispatch(element, command),
+      })),
+    )
   }
 
   public destroy() {
@@ -92,28 +89,6 @@ export class BrowserWindowHandler extends WebContentsHandler {
     super.destroy()
     this.window.destroy()
     BrowserWindowHandler.windows.delete(this.window)
-    this.element.remove()
     this.window = null as any
-    this.element = null as any
   }
-}
-
-export async function browserWindowHandler(
-  path: string | undefined,
-  emitter: Emitter,
-  element: HTMLElement,
-) {
-  return new Promise<WebContentsHandler>(function (resolve) {
-    const handler = new BrowserWindowHandler(async function () {
-      const config = atomConfig()
-      await handler.init({
-        userMacros: loadUserMacros(),
-        mathJaxConfig: config.mathConfig,
-        context: 'live-preview',
-      })
-      await handler.setBasePath(path)
-      emitter.emit('did-change-title')
-      resolve(handler)
-    }, element)
-  })
 }

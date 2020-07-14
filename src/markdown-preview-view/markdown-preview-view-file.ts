@@ -3,7 +3,7 @@ import { File } from 'atom'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 import { WebContentsHandler } from './web-contents-handler'
 import * as util from './util'
-import { browserWindowHandler } from './browserwindow-handler'
+import { BrowserWindowHandler } from './browserwindow-handler'
 
 export class MarkdownPreviewViewFile extends MarkdownPreviewView {
   public readonly classname = 'MarkdownPreviewViewFile'
@@ -11,10 +11,9 @@ export class MarkdownPreviewViewFile extends MarkdownPreviewView {
 
   constructor(
     filePath: string,
-    handler?: Promise<WebContentsHandler>,
-    el?: HTMLElement,
+    handler?: new (x: () => Promise<void>) => WebContentsHandler,
   ) {
-    super(undefined, handler, el)
+    super(undefined, handler)
     this.file = new File(filePath)
     this.disposables.add(this.file.onDidChange(this.changeHandler))
   }
@@ -44,13 +43,8 @@ export class MarkdownPreviewViewFile extends MarkdownPreviewView {
   }
 
   protected async openNewWindow(): Promise<void> {
-    const el = document.createElement('div')
     // tslint:disable-next-line: no-unused-expression
-    new MarkdownPreviewViewFile(
-      this.file.getPath(),
-      browserWindowHandler(this.getPath(), this.emitter, el),
-      el,
-    )
+    new MarkdownPreviewViewFile(this.file.getPath(), BrowserWindowHandler)
     util.destroy(this)
   }
 

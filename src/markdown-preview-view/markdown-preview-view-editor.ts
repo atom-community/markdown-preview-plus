@@ -3,7 +3,7 @@ import * as util from './util'
 import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
 import { atomConfig, handlePromise } from '../util'
 import { WebContentsHandler } from './web-contents-handler'
-import { browserWindowHandler } from './browserwindow-handler'
+import { BrowserWindowHandler } from './browserwindow-handler'
 
 export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   private static editorMap = new WeakMap<
@@ -16,10 +16,9 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
 
   private constructor(
     private editor: TextEditor,
-    handler?: Promise<WebContentsHandler>,
-    el?: HTMLElement,
+    handler?: new (x: () => Promise<void>) => WebContentsHandler,
   ) {
-    super(undefined, handler, el)
+    super(undefined, handler)
     handlePromise(this.handleEditorEvents())
   }
 
@@ -94,11 +93,9 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   }
 
   protected async openNewWindow(): Promise<void> {
-    const el = document.createElement('div')
     const ctrl = new MarkdownPreviewViewEditor(
       this.editor,
-      browserWindowHandler(this.getPath(), this.emitter, el),
-      el,
+      BrowserWindowHandler,
     )
     MarkdownPreviewViewEditor.editorMap.set(this.editor, ctrl)
     util.destroy(this)
@@ -115,7 +112,6 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
   }
 
   private async handleEditorEvents() {
-    const handler = await this.handler
     this.disposables.add(
       atom.workspace.onDidChangeActiveTextEditor((ed) => {
         if (atomConfig().previewConfig.activatePreviewWithEditor) {
@@ -137,7 +133,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       this.editor.onDidChangePath(() => {
-        handlePromise(handler.setBasePath(this.getPath()))
+        handlePromise(this.handler.setBasePath(this.getPath()))
         this.emitter.emit('did-change-title')
       }),
       this.editor.onDidDestroy(() => {
@@ -159,7 +155,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         if (!this.shouldScrollSync('editor')) return
         const [first, last] = this.editor.getVisibleRowRange()
         handlePromise(
-          handler.scrollSync(
+          this.handler.scrollSync(
             this.editor.bufferRowForScreenRow(first),
             this.editor.bufferRowForScreenRow(last),
           ),
@@ -171,7 +167,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         },
         'markdown-preview-plus:search-selection-in-preview': () => {
           const text = this.editor.getSelectedText()
-          handlePromise(handler.search(text))
+          handlePromise(this.handler.search(text))
         },
       }),
     )
