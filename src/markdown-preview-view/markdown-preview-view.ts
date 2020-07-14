@@ -290,6 +290,7 @@ export abstract class MarkdownPreviewView {
                 const rxs = text
                   .replace(/[\/\\^$*+?.()|[\]{}]/g, '\\$&')
                   .replace(/\n+$/, '')
+                  .replace(/\s+/g, '\\s+')
                 const rx = new RegExp(rxs)
                 let found = false
                 editor.scanInBufferRange(
