@@ -1,3 +1,24 @@
+## 4.1.0
+
+### New features
+
+-   Search selection in preview and source
+
+    Commands `markdown-preview-plus:search-selection-in-source` on Markdown Preview and `markdown-preview-plus:search-selection-in-preview` on Markdown Text Editor. Not bound to hotkeys by default. The former is available via the context menu.
+
+-   Find in preview
+
+    Commands `markdown-preview-plus:find-in-preview` and `markdown-preview-plus:find-next`, by default bound to `ctrl-f` (`cmd-f` on macOS) and `f3` respectively. Also available via context menu. Only activate when Markdown Preview is focused.
+
+-   Rich clipboard support when copying selection from preview
+
+    When copying selection from preview, some formatting will be kept via rich clipboard functionality. Bear in mind this is not as powerful as `markdown-preview-plus:copy-html` command.
+
+### Fixes
+
+-   Fixed some reloading issues; particularly when settings are changed with preview open or preview is moved to another pane.
+-   Fixed keybindings on preview
+
 ## 4.0.1
 
 -   Fix require.resolve bundle issue
