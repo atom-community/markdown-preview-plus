@@ -1,3 +1,7 @@
+## 4.1.1
+
+-   Fuzzy whitespace search in search-selection-in-source
+
 ## 4.1.0
 
 ### New features
