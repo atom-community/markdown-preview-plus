@@ -1,8 +1,8 @@
-import { WebviewTag, WebContents } from 'electron'
+import { WebContents } from 'electron'
 import { WebContentsHandler } from './web-contents-handler'
 
 export class WebviewHandler extends WebContentsHandler {
-  private readonly _element: WebviewTag
+  private readonly _element: HTMLElement
   constructor(init: () => void | Promise<void>) {
     const element = document.createElement('webview')
     super(
@@ -18,13 +18,18 @@ export class WebviewHandler extends WebContentsHandler {
       },
       init,
     )
-    this._element = element
-    element.classList.add('markdown-preview-plus', 'native-key-bindings')
+    this._element = document.createElement('div')
+    this._element.tabIndex = -1
+    this._element.classList.add('markdown-preview-plus')
+    element.addEventListener('focus', () => {
+      this._element.focus()
+    })
     element.disablewebsecurity = 'true'
     element.nodeintegration = 'true'
     element.src = 'about:blank'
     element.style.width = '100%'
     element.style.height = '100%'
+    this._element.appendChild(element)
   }
 
   public get element(): HTMLElement {

@@ -1,21 +1,21 @@
-'atom-text-editor, webview.markdown-preview-plus':
+'atom-text-editor, .markdown-preview-plus':
   'ctrl-M': 'markdown-preview-plus:toggle'
   'ctrl-X': 'markdown-preview-plus:toggle-render-latex'
 
-'.platform-darwin webview.markdown-preview-plus':
+'.markdown-preview-plus':
+  'end': 'core:move-to-bottom'
+  'home': 'core:move-to-top'
+
+'.platform-darwin .markdown-preview-plus':
   'cmd-+': 'markdown-preview-plus:zoom-in'
   'cmd-=': 'markdown-preview-plus:zoom-in'
   'cmd--': 'markdown-preview-plus:zoom-out'
   'cmd-_': 'markdown-preview-plus:zoom-out'
   'cmd-0': 'markdown-preview-plus:reset-zoom'
 
-'.platform-win32 webview.markdown-preview-plus, .platform-linux webview.markdown-preview-plus':
+'.platform-win32 .markdown-preview-plus, .platform-linux .markdown-preview-plus':
   'ctrl-+': 'markdown-preview-plus:zoom-in'
   'ctrl-=': 'markdown-preview-plus:zoom-in'
   'ctrl--': 'markdown-preview-plus:zoom-out'
   'ctrl-_': 'markdown-preview-plus:zoom-out'
   'ctrl-0': 'markdown-preview-plus:reset-zoom'
-
-'webview.markdown-preview-plus.native-key-bindings':
-  'pageup': 'native!'
-  'pagedown': 'native!'

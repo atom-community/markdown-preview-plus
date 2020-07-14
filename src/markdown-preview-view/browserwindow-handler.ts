@@ -61,7 +61,8 @@ export class BrowserWindowHandler extends WebContentsHandler {
     )
     this.window = window
     this.element = element
-    element.classList.add('markdown-preview-plus', 'native-key-bindings')
+    element.classList.add('markdown-preview-plus')
+    element.tabIndex = -1
     this.disposables.add(
       atom.commands.add(element, {
         'core:save-as': () => {

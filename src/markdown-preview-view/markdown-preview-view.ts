@@ -222,8 +222,30 @@ export abstract class MarkdownPreviewView {
         }, 250),
       ),
       atom.commands.add(this.element, {
-        'core:move-up': () => this.element.scrollBy({ top: -10 }),
-        'core:move-down': () => this.element.scrollBy({ top: 10 }),
+        'core:move-up': () =>
+          handler.runJS('window.scrollBy({top:-30, behavior: "auto"})'),
+        'core:move-down': () =>
+          handler.runJS('window.scrollBy({top:30, behavior: "auto"})'),
+        'core:move-left': () =>
+          handler.runJS('window.scrollBy({left:-30, behavior: "auto"})'),
+        'core:move-right': () =>
+          handler.runJS('window.scrollBy({left:-30, behavior: "auto"})'),
+        'core:page-up': () =>
+          handler.runJS(
+            'window.scrollBy({top:-window.innerHeight, behavior: "auto"})',
+          ),
+        'core:page-down': () =>
+          handler.runJS(
+            'window.scrollBy({top:window.innerHeight, behavior: "auto"})',
+          ),
+        'core:move-to-top': () =>
+          handler.runJS(
+            'window.scrollBy({top:-document.body.scrollHeight, behavior: "smooth"})',
+          ),
+        'core:move-to-bottom': () =>
+          handler.runJS(
+            'window.scrollBy({top:document.body.scrollHeight, behavior: "smooth"})',
+          ),
         'core:copy': () => {
           handlePromise(this.copyToClipboard())
         },
