@@ -6,6 +6,7 @@
   'f3': 'markdown-preview-plus:find-next'
   'end': 'core:move-to-bottom'
   'home': 'core:move-to-top'
+  'space': 'core:page-down'
 
 '.platform-darwin .markdown-preview-plus':
   'cmd-+': 'markdown-preview-plus:zoom-in'
