@@ -237,11 +237,11 @@ export abstract class MarkdownPreviewView {
           this.handler.runJS('window.scrollBy({left:-30, behavior: "auto"})'),
         'core:page-up': () =>
           this.handler.runJS(
-            'window.scrollBy({top:-window.innerHeight, behavior: "auto"})',
+            'window.scrollBy({top:-0.9*window.innerHeight, behavior: "auto"})',
           ),
         'core:page-down': () =>
           this.handler.runJS(
-            'window.scrollBy({top:window.innerHeight, behavior: "auto"})',
+            'window.scrollBy({top:0.9*window.innerHeight, behavior: "auto"})',
           ),
         'core:move-to-top': () =>
           this.handler.runJS(
@@ -342,15 +342,11 @@ export abstract class MarkdownPreviewView {
       }),
       atom.config.onDidChange(
         'markdown-preview-plus.mathConfig.latexRenderer',
-        () => {
-          handlePromise(this.handler.reload())
-        },
+        () => handlePromise(this.handler.reload()),
       ),
       atom.config.onDidChange(
         'markdown-preview-plus.mathConfig.numberEquations',
-        () => {
-          handlePromise(this.handler.reload())
-        },
+        () => handlePromise(this.handler.reload()),
       ),
       atom.config.onDidChange(
         'markdown-preview-plus.renderer',
