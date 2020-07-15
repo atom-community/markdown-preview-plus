@@ -44,7 +44,11 @@ export class MarkdownPreviewViewFile extends MarkdownPreviewView {
 
   protected async openNewWindow(): Promise<void> {
     // tslint:disable-next-line: no-unused-expression
-    new MarkdownPreviewViewFile(this.file.getPath(), BrowserWindowHandler)
+    const ctrl = new MarkdownPreviewViewFile(
+      this.file.getPath(),
+      BrowserWindowHandler,
+    )
+    atom.views.getView(atom.workspace).appendChild(ctrl.element)
     util.destroy(this)
   }
 

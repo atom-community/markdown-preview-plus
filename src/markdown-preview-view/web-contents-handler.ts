@@ -129,9 +129,7 @@ export abstract class WebContentsHandler {
     )
   }
 
-  public get element(): HTMLElement | undefined {
-    return undefined
-  }
+  public abstract get element(): HTMLElement
 
   public registerElementEvents(_element: HTMLElement): void {
     /* not implemented */

@@ -34,8 +34,9 @@ const menuItems = [
 
 export class BrowserWindowHandler extends WebContentsHandler {
   private static windows = new Set<BrowserWindow>()
-  private window: BrowserWindow
   private menu?: Electron.Menu
+  private readonly window: BrowserWindow
+  private readonly _element: HTMLElement
   constructor(init: () => void | Promise<void>) {
     const window = new remote.BrowserWindow({
       webPreferences: {
@@ -55,6 +56,11 @@ export class BrowserWindowHandler extends WebContentsHandler {
       init,
     )
     this.window = window
+    this._element = document.createElement('div')
+  }
+
+  public get element() {
+    return this._element
   }
 
   public static clean() {
@@ -89,6 +95,5 @@ export class BrowserWindowHandler extends WebContentsHandler {
     super.destroy()
     this.window.destroy()
     BrowserWindowHandler.windows.delete(this.window)
-    this.window = null as any
   }
 }

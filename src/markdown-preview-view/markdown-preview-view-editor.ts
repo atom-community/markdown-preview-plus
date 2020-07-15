@@ -98,6 +98,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
       BrowserWindowHandler,
     )
     MarkdownPreviewViewEditor.editorMap.set(this.editor, ctrl)
+    atom.views.getView(atom.workspace).appendChild(ctrl.element)
     util.destroy(this)
   }
 

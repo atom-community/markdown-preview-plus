@@ -85,7 +85,8 @@ export abstract class MarkdownPreviewView {
     this.destroyed = true
     this.disposables.dispose()
     this.handler.destroy()
-    if (this.element) MarkdownPreviewView.elementMap.delete(this.element)
+    MarkdownPreviewView.elementMap.delete(this.element)
+    this.element.remove()
   }
 
   public async runJS<T>(js: string) {
