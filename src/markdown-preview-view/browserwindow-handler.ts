@@ -11,6 +11,11 @@ const menuItems = [
     label: 'Search Selection in Source',
     command: 'markdown-preview-plus:search-selection-in-source',
   },
+  {
+    label: 'Find in Preview...',
+    command: 'markdown-preview-plus:find-in-preview',
+  },
+  { label: 'Find Next', command: 'markdown-preview-plus:find-next' },
   { label: 'Copy As HTML', command: 'core:copy' },
   { label: 'Save As\u2026', command: 'core:save-as' },
   // { label: 'Print\u2026', command: 'markdown-preview-plus:print' },
