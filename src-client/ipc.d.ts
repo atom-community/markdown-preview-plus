@@ -31,6 +31,9 @@ export interface ChannelMap {
 export interface ReplyMap {
   'atom-markdown-preview-plus-ipc-zoom-in': []
   'atom-markdown-preview-plus-ipc-zoom-out': []
+  'atom-markdown-preview-plus-ipc-key': [
+    KeyboardEventInit & { type: 'keydown' | 'keyup' },
+  ]
   'atom-markdown-preview-plus-ipc-uncaught-error': [
     { message: string; name: string; stack?: string },
   ]

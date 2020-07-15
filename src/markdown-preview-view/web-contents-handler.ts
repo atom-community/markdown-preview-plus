@@ -104,6 +104,10 @@ export abstract class WebContentsHandler {
           callback(result)
         }
       },
+      'atom-markdown-preview-plus-ipc-key': (data) => {
+        const evt = new KeyboardEvent(data.type, data)
+        if (this.element) this.element.dispatchEvent(evt)
+      },
     })
 
     this.disposables.add(
@@ -129,7 +133,9 @@ export abstract class WebContentsHandler {
     return undefined
   }
 
-  public abstract registerElementEvents(element: HTMLElement): void
+  public registerElementEvents(_element: HTMLElement): void {
+    /* not implemented */
+  }
 
   public async runJS<T>(js: string) {
     const contents = await this.contents

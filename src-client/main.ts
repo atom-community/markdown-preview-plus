@@ -295,6 +295,34 @@ document.addEventListener('scroll', (_event) => {
   )
 })
 
+function keyEventHandler(type: 'keydown' | 'keyup', e: KeyboardEvent) {
+  const data = {
+    type: type,
+    altKey: e.altKey,
+    ctrlKey: e.ctrlKey,
+    bubbles: e.bubbles,
+    cancelable: e.cancelable,
+    code: e.code,
+    composed: e.composed,
+    detail: e.detail,
+    isComposing: e.isComposing,
+    key: e.key,
+    location: e.location,
+    metaKey: e.metaKey,
+    repeat: e.repeat,
+    shiftKey: e.shiftKey,
+  } as const
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-key'>(
+    'atom-markdown-preview-plus-ipc-key',
+    handlerId,
+    data,
+  )
+  e.preventDefault()
+}
+
+document.addEventListener('keydown', keyEventHandler.bind(this, 'keydown'))
+document.addEventListener('keyup', keyEventHandler.bind(this, 'keyup'))
+
 let lastContextMenuTarget: HTMLElement
 document.addEventListener('contextmenu', (e) => {
   lastContextMenuTarget = e.target as HTMLElement

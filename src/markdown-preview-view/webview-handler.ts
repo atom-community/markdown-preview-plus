@@ -61,12 +61,6 @@ export class WebviewHandler extends WebContentsHandler {
     return this._element
   }
 
-  public registerElementEvents(el: { focus: () => void }) {
-    this._webview.addEventListener('focus', () => {
-      el.focus()
-    })
-  }
-
   public destroy() {
     if (this.destroyed) return
     super.destroy()
