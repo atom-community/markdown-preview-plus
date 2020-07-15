@@ -15,6 +15,7 @@ export interface ChannelMap {
     | { context: 'live-preview' | 'copy-html' }
     | { context: 'pdf-export'; pdfExportOptions: { width: number } }
   )
+  'set-native-keys': boolean
   'set-base-path': { path?: string }
   'set-source-map': {
     map: { [line: number]: Array<{ tag: string; index: number }> }

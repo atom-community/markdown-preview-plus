@@ -181,6 +181,10 @@ export abstract class WebContentsHandler {
     return this.send<'set-base-path'>('set-base-path', { path })
   }
 
+  public async setNativeKeys(val: boolean) {
+    return this.send<'set-native-keys'>('set-native-keys', val)
+  }
+
   public async init(params: ChannelMap['init']) {
     return this.send<'init'>('init', params)
   }

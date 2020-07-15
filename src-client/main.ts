@@ -5,6 +5,7 @@ import * as util from './util'
 import { getMedia } from '../src/util-common'
 
 let handlerId: number
+let nativePageScrollKeys = false
 
 window.addEventListener('error', (e) => {
   const err = e.error as Error
@@ -64,6 +65,10 @@ ipcRenderer.on<'init'>('init', (_evt, params) => {
       'important',
     )
   }
+})
+
+ipcRenderer.on<'set-native-keys'>('set-native-keys', (_evt, val) => {
+  nativePageScrollKeys = val
 })
 
 ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
@@ -296,6 +301,16 @@ document.addEventListener('scroll', (_event) => {
 })
 
 function keyEventHandler(type: 'keydown' | 'keyup', e: KeyboardEvent) {
+  if (
+    nativePageScrollKeys &&
+    !e.altKey &&
+    !e.ctrlKey &&
+    !e.shiftKey &&
+    !e.metaKey &&
+    e.code.match(/^(Arrow.*|Page.*|Space|Home|End)$/)
+  ) {
+    return
+  }
   const data = {
     type: type,
     altKey: e.altKey,

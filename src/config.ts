@@ -132,6 +132,17 @@ export const config: IConfig = {
         default: false,
         order: 27,
       },
+      nativePageScrollKeys: {
+        title: 'Use native scroll keys in preview',
+        description:
+          'Will use arrow keys, page up, page down, home, end and space for native navigation in preview. ' +
+          'The upside is smoother scroll behaviour. The downside is that when this option is enabled, these keys ' +
+          'will be invisible to Atom when preview is focused, so those can not be used in keymap with preview-focused ' +
+          'commands. Also unlike non-native commands, these are non-rebindable.',
+        type: 'boolean',
+        default: true,
+        order: 27.5,
+      },
       shellOpenFileExtensions: {
         title: 'Always open links to these file types externally',
         description:
@@ -608,6 +619,7 @@ declare module 'atom' {
       | 'center'
     'markdown-preview-plus.previewConfig.closePreviewWithEditor': boolean
     'markdown-preview-plus.previewConfig.activatePreviewWithEditor': boolean
+    'markdown-preview-plus.previewConfig.nativePageScrollKeys': boolean
     'markdown-preview-plus.previewConfig.shellOpenFileExtensions': string[]
     'markdown-preview-plus.previewConfig': {
       liveUpdate: boolean
@@ -615,6 +627,7 @@ declare module 'atom' {
       previewDock: 'left' | 'right' | 'bottom' | 'center'
       closePreviewWithEditor: boolean
       activatePreviewWithEditor: boolean
+      nativePageScrollKeys: boolean
       shellOpenFileExtensions: string[]
     }
     'markdown-preview-plus.saveConfig.mediaOnSaveAsHTMLBehaviour':
@@ -781,6 +794,7 @@ declare module 'atom' {
       'previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
       'previewConfig.closePreviewWithEditor': boolean
       'previewConfig.activatePreviewWithEditor': boolean
+      'previewConfig.nativePageScrollKeys': boolean
       'previewConfig.shellOpenFileExtensions': string[]
       previewConfig: {
         liveUpdate: boolean
@@ -788,6 +802,7 @@ declare module 'atom' {
         previewDock: 'left' | 'right' | 'bottom' | 'center'
         closePreviewWithEditor: boolean
         activatePreviewWithEditor: boolean
+        nativePageScrollKeys: boolean
         shellOpenFileExtensions: string[]
       }
       'saveConfig.mediaOnSaveAsHTMLBehaviour':

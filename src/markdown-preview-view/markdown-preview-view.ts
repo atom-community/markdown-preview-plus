@@ -51,6 +51,9 @@ export abstract class MarkdownPreviewView {
         context: 'live-preview',
       })
       await this.handler.setBasePath(this.getPath())
+      await this.handler.setNativeKeys(
+        config.previewConfig.nativePageScrollKeys,
+      )
       this.emitter.emit('did-change-title')
       this.emitter.emit('did-init')
     })
@@ -347,6 +350,10 @@ export abstract class MarkdownPreviewView {
       atom.config.onDidChange(
         'markdown-preview-plus.mathConfig.numberEquations',
         () => handlePromise(this.handler.reload()),
+      ),
+      atom.config.onDidChange(
+        'markdown-preview-plus.previewConfig.nativePageScrollKeys',
+        ({ newValue }) => handlePromise(this.handler.setNativeKeys(newValue)),
       ),
       atom.config.onDidChange(
         'markdown-preview-plus.renderer',
