@@ -1,3 +1,53 @@
+## 4.2.0
+
+This is mostly a correcting release, but it has a couple new features,
+hence the minor version bump.
+
+### New features
+
+-   Convenience command\/menu item to open package settings page
+
+    Easier access to settings page.
+    `markdown-preview-plus:open-configuration` command or
+    Packages → Markdown Preview Plus → Open Package Configuration menu item.
+
+-   Add option to use native keyboard scroll in preview
+
+    The option is called `markdown-preview-plus.previewConfig.nativePageScrollKeys`, termed 'Use native scroll keys in preview' in UI in the 'Preview Behaviour' settings block.
+
+    This option is enabled by default to align better with how earlier versions behaved.
+
+    If the option is enabled, preview will use arrow keys, page up, page down, home, end and space for native navigation. The upside is smoother scroll behaviour. The downside is that these keys will be invisible to Atom when preview is focused, and hence can not be used in keymap with preview-focused commands. Also, unlike non-native commands, these are non-rebindable.
+
+### Fixes and Tweaks
+
+-   Never reparent webview
+
+    This fixes a few issues with preview flickering, reloading or becoming
+    empty after moving the pane around. However, this is achieved by drawing
+    preview over the top of the pane (as opposed to drawing it as a part of
+    the pane). Please report any visual glitches related to that.
+
+-   Make PgUp\/PgDn scroll by 90% of page height instead of 100%
+
+-   Fix findNext flicker
+
+-   Refactor preview search view
+
+-   Scroll webview on space
+
+    Makes space key behave as page down on preview.
+
+-   Disable webview pointer events on drag
+
+    Simplifies moving preview around
+
+-   Proxy webview keypresses instead of stealing focus
+
+    More intuitive preview focus behaviour
+
+-   Bridge the gap in functionality and behaviour between windowed and paned preview
+
 ## 4.1.1
 
 -   Fuzzy whitespace search in search-selection-in-source
