@@ -1,4 +1,3 @@
-// tslint:disable: no-floating-promises
 import SelectListView from 'atom-select-list'
 import { Panel } from 'atom'
 

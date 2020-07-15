@@ -11,6 +11,7 @@ import { WebviewHandler } from './webview-handler'
 import { saveAsPDF } from './pdf-export-util'
 import { loadUserMacros } from '../macros-util'
 import { WebContentsHandler } from './web-contents-handler'
+import { modalTextEditorView } from '../modal-text-editor-view'
 
 export interface SerializedMPV {
   deserializer: 'markdown-preview-plus/MarkdownPreviewView'
@@ -320,35 +321,12 @@ export abstract class MarkdownPreviewView {
           handlePromise(this.handler.findNext())
         },
         'markdown-preview-plus:find-in-preview': () => {
-          const activeElement = document.activeElement as HTMLElement | null
-          const ed = atom.workspace.buildTextEditor({
-            mini: true,
-          })
-          const edv = atom.views.getView(ed)
-          const disp1 = edv.onDidAttach(() => {
-            atom.views.getView(ed).focus()
-            disp1.dispose()
-          })
-          edv.addEventListener('blur', () => {
-            atom.commands.dispatch(edv, 'core:cancel')
-          })
-          const panel = atom.workspace.addModalPanel({
-            item: ed,
-            visible: true,
-          })
-          const disp = atom.commands.add(atom.views.getView(ed), {
-            'core:confirm': () => {
-              handlePromise(this.handler.search(ed.getText()))
-              panel.destroy()
-              disp.dispose()
-              if (activeElement) activeElement.focus()
-            },
-            'core:cancel': () => {
-              panel.destroy()
-              disp.dispose()
-              if (activeElement) activeElement.focus()
-            },
-          })
+          handlePromise(
+            modalTextEditorView('Find in preview').then((text) => {
+              if (!text) return undefined
+              return this.handler.search(text)
+            }),
+          )
         },
       }),
       atom.config.onDidChange('markdown-preview-plus.markdownItConfig', () => {
