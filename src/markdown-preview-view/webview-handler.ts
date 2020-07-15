@@ -3,30 +3,45 @@ import { WebContentsHandler } from './web-contents-handler'
 
 export class WebviewHandler extends WebContentsHandler {
   private readonly _element: HTMLElement
+  private readonly _webview: HTMLElement
+  private readonly _observer: ResizeObserver
   constructor(init: () => void | Promise<void>) {
-    const element = document.createElement('webview')
+    const webview = document.createElement('webview')
     super(
       new Promise<WebContents>((resolve) => {
-        const createHandler = () => {
-          element.removeEventListener('dom-ready', createHandler)
-          resolve(element.getWebContents())
-          element.addEventListener('dom-ready', () => {
-            this.emitter.emit('reload', element.getWebContents())
-          })
+        const initialLoad = () => {
+          webview.removeEventListener('dom-ready', initialLoad)
+          resolve(webview.getWebContents())
         }
-        element.addEventListener('dom-ready', createHandler)
+        webview.addEventListener('dom-ready', initialLoad)
       }),
       () => {
-        atom.contextMenu.showForEvent({ target: element })
+        atom.contextMenu.showForEvent({ target: this._element })
       },
       init,
     )
-    this._element = element
-    element.disablewebsecurity = 'true'
-    element.nodeintegration = 'true'
-    element.src = 'about:blank'
-    element.style.width = '100%'
-    element.style.height = '100%'
+    this._element = document.createElement('div')
+    this._element.style.width = '100%'
+    this._element.style.height = '100%'
+
+    this._observer = new ResizeObserver(() => {
+      const rect = this._element.getBoundingClientRect()
+      webview.style.left = `${rect.left}px`
+      webview.style.top = `${rect.top}px`
+      webview.style.right = `${rect.right}px`
+      webview.style.bottom = `${rect.bottom}px`
+      webview.style.width = `${rect.width}px`
+      webview.style.height = `${rect.height}px`
+    })
+    this._observer.observe(this._element)
+
+    webview.disablewebsecurity = 'true'
+    webview.nodeintegration = 'true'
+    webview.src = 'about:blank'
+    webview.style.position = 'absolute'
+    webview.style.zIndex = '0'
+    this._webview = webview
+    atom.views.getView(atom.workspace).appendChild(webview)
   }
 
   public get element(): HTMLElement {
@@ -34,7 +49,7 @@ export class WebviewHandler extends WebContentsHandler {
   }
 
   public registerElementEvents(el: { focus: () => void }) {
-    this._element.addEventListener('focus', () => {
+    this._webview.addEventListener('focus', () => {
       el.focus()
     })
   }
@@ -42,6 +57,8 @@ export class WebviewHandler extends WebContentsHandler {
   public destroy() {
     if (this.destroyed) return
     super.destroy()
+    this._observer.disconnect()
     this._element.remove()
+    this._webview.remove()
   }
 }

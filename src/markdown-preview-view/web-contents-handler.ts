@@ -54,20 +54,19 @@ export abstract class WebContentsHandler {
   public readonly emitter = new Emitter<
     { 'did-destroy': void },
     {
-      reload: WebContents
       'did-scroll-preview': { min: number; max: number }
     }
   >()
   public readonly imageWatcher: ImageWatcher
-  protected disposables = new CompositeDisposable()
   protected destroyed = false
+  protected readonly disposables = new CompositeDisposable()
   private zoomLevel = 0
-  private replyCallbacks = new Map<number, ReplyCallbackStruct>()
   private replyCallbackId = 0
-  private id: number = ++WebContentsHandler._id
-  private listeners: { [key: string]: Function } = {}
   private lastSearchText?: string
-  private contents: Promise<WebContents>
+  private readonly replyCallbacks = new Map<number, ReplyCallbackStruct>()
+  private readonly id: number = ++WebContentsHandler._id
+  private readonly listeners: { [key: string]: Function } = {}
+  private readonly contents: Promise<WebContents>
 
   constructor(
     contents: Promise<WebContents>,
@@ -330,13 +329,7 @@ export abstract class WebContentsHandler {
   private initializeContents = async (
     contents: WebContents,
   ): Promise<WebContents> => {
-    contents.once('destroyed', () => {
-      if (this.destroyed) return
-      const disp = this.emitter.once('reload', (ct) => {
-        disp.dispose()
-        this.contents = Promise.resolve(ct).then(this.initializeContents)
-      })
-    })
+    contents.once('destroyed', () => this.destroy())
     contents.on('will-navigate', async (e, url) => {
       e.preventDefault()
       const exts = atomConfig().previewConfig.shellOpenFileExtensions
