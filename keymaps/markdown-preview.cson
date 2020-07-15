@@ -16,7 +16,15 @@
   'cmd-0': 'markdown-preview-plus:reset-zoom'
   'cmd-f': 'markdown-preview-plus:find-in-preview'
 
-'.platform-win32 .markdown-preview-plus, .platform-linux .markdown-preview-plus':
+'.platform-win32 .markdown-preview-plus':
+  'ctrl-+': 'markdown-preview-plus:zoom-in'
+  'ctrl-=': 'markdown-preview-plus:zoom-in'
+  'ctrl--': 'markdown-preview-plus:zoom-out'
+  'ctrl-_': 'markdown-preview-plus:zoom-out'
+  'ctrl-0': 'markdown-preview-plus:reset-zoom'
+  'ctrl-f': 'markdown-preview-plus:find-in-preview'
+
+'.platform-linux .markdown-preview-plus':
   'ctrl-+': 'markdown-preview-plus:zoom-in'
   'ctrl-=': 'markdown-preview-plus:zoom-in'
   'ctrl--': 'markdown-preview-plus:zoom-out'
