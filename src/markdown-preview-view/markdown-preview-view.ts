@@ -2,6 +2,7 @@ import * as path from 'path'
 import { Emitter, Disposable, CompositeDisposable, Grammar, Range } from 'atom'
 import { debounce } from 'lodash'
 import * as fs from 'fs'
+import { remote } from 'electron'
 
 import * as renderer from '../renderer'
 import * as markdownIt from '../markdown-it-helper'
@@ -321,8 +322,12 @@ export abstract class MarkdownPreviewView {
           handlePromise(this.handler.findNext())
         },
         'markdown-preview-plus:find-in-preview': () => {
+          const cw = remote.getCurrentWindow()
+          const fw = remote.BrowserWindow.getFocusedWindow()
+          if (fw !== cw) cw.focus()
           handlePromise(
             modalTextEditorView('Find in preview').then((text) => {
+              if (fw && fw !== cw) fw.focus()
               if (!text) return undefined
               return this.handler.search(text)
             }),
