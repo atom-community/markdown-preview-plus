@@ -267,7 +267,7 @@ export abstract class WebContentsHandler {
   public async findNext() {
     if (!this.lastSearchText) return
     const c = await this.contents
-    c.findInPage(this.lastSearchText)
+    c.findInPage(this.lastSearchText, { findNext: true })
   }
 
   public hasSearch() {
