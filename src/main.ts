@@ -161,7 +161,7 @@ async function addPreviewForEditor(editor: TextEditor) {
     MarkdownPreviewViewEditor.create(editor),
     options,
   )
-  previousActivePane.activate()
+  if (!previousActivePane.isDestroyed()) previousActivePane.activate()
   return res
 }
 
