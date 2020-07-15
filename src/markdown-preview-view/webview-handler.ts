@@ -5,6 +5,8 @@ export class WebviewHandler extends WebContentsHandler {
   private readonly _element: HTMLElement
   private readonly _webview: HTMLElement
   private readonly _observer: ResizeObserver
+  private readonly dragStart: () => void
+  private readonly dragEnd: () => void
   constructor(init: () => void | Promise<void>) {
     const webview = document.createElement('webview')
     super(
@@ -35,6 +37,17 @@ export class WebviewHandler extends WebContentsHandler {
     })
     this._observer.observe(this._element)
 
+    this.dragStart = () => {
+      webview.style.pointerEvents = 'none'
+    }
+
+    this.dragEnd = () => {
+      webview.style.pointerEvents = 'auto'
+    }
+
+    window.addEventListener('dragstart', this.dragStart)
+    window.addEventListener('dragend', this.dragEnd)
+
     webview.disablewebsecurity = 'true'
     webview.nodeintegration = 'true'
     webview.src = 'about:blank'
@@ -57,6 +70,8 @@ export class WebviewHandler extends WebContentsHandler {
   public destroy() {
     if (this.destroyed) return
     super.destroy()
+    window.removeEventListener('dragstart', this.dragStart)
+    window.removeEventListener('dragend', this.dragEnd)
     this._observer.disconnect()
     this._element.remove()
     this._webview.remove()
