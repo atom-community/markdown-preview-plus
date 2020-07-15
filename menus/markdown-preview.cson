@@ -7,6 +7,9 @@
         'label': 'Toggle Preview'
         'command': 'markdown-preview-plus:toggle'
       }, {
+        'label': 'Open Package Configuration'
+        'command': 'markdown-preview-plus:open-configuration'
+      }, {
         'label': 'Toggle LaTeX Rendering'
         'command': 'markdown-preview-plus:toggle-render-latex'
       }, {

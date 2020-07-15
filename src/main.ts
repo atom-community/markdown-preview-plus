@@ -51,6 +51,11 @@ export function activate() {
       'markdown-preview-plus:toggle': close,
     }),
     atom.commands.add('atom-workspace', {
+      'markdown-preview-plus:open-configuration': () => {
+        util.handlePromise(
+          atom.workspace.open('atom://config/packages/markdown-preview-plus'),
+        )
+      },
       'markdown-preview-plus:edit-macros': () => {
         util.handlePromise(
           atom.workspace.open(getUserMacrosPath(atom.getConfigDirPath())),
