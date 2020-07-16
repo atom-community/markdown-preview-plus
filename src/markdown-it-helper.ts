@@ -61,30 +61,60 @@ function getOptions(breaks: boolean) {
 }
 
 function currentConfig(rL: boolean) {
-  const config = atomConfig().markdownItConfig
-  return {
-    renderLaTeX: rL,
-    lazyHeaders: config.useLazyHeaders,
-    checkBoxes: config.useCheckBoxes,
-    toc: config.useToc,
-    emoji: config.useEmoji,
-    breaks: config.breakOnSingleNewline,
-    criticMarkup: config.useCriticMarkup,
-    footnote: config.useFootnote,
-    imsize: config.useImsize,
-    inlineMathSeparators: config.inlineMathSeparators,
-    blockMathSeparators: config.blockMathSeparators,
-    forceFullToc: config.forceFullToc,
-    tocDepth: config.tocDepth,
-    attributes: config.useAttributes, // "markdown-it-attrs"
-    spans: config.useSpans, // "markdown-it-bracketed-spans"
-    divs: config.useDivs, // "markdown-it-container"
-    deflist: config.useDeflist, // "markdown-it-deflist"
-    fontmatter: config.useFontmatter, // "markdown-it-front-matter"
-    implicitFigures: config.useImplicitFigures, // "markdown-it-implicit-figures"
-    subscript: config.useSubscript, // "markdown-it-sub"
-    superscript: config.useSuperscript, // "markdown-it-sup"
-    parseDisplayMathInline: config.parseDisplayMathInline,
+  const fullConfig = atomConfig()
+  if (fullConfig.renderer === 'markdown-it') {
+    const config = fullConfig.markdownItConfig
+    return {
+      renderLaTeX: rL,
+      lazyHeaders: config.useLazyHeaders,
+      checkBoxes: config.useCheckBoxes,
+      toc: config.useToc,
+      emoji: config.useEmoji,
+      breaks: config.breakOnSingleNewline,
+      criticMarkup: config.useCriticMarkup,
+      footnote: config.useFootnote,
+      imsize: config.useImsize,
+      inlineMathSeparators: config.inlineMathSeparators,
+      blockMathSeparators: config.blockMathSeparators,
+      forceFullToc: config.forceFullToc,
+      tocDepth: config.tocDepth,
+      attributes: config.useAttributes, // "markdown-it-attrs"
+      spans: config.useSpans, // "markdown-it-bracketed-spans"
+      divs: config.useDivs, // "markdown-it-container"
+      deflist: config.useDeflist, // "markdown-it-deflist"
+      fontmatter: config.useFontmatter, // "markdown-it-front-matter"
+      implicitFigures: config.useImplicitFigures, // "markdown-it-implicit-figures"
+      subscript: config.useSubscript, // "markdown-it-sub"
+      superscript: config.useSuperscript, // "markdown-it-sup"
+      parseDisplayMathInline: config.parseDisplayMathInline,
+    }
+  } else if (fullConfig.renderer === 'pandoc') {
+    return {
+      renderLaTeX: rL,
+      lazyHeaders: true,
+      checkBoxes: true,
+      toc: false,
+      emoji: true,
+      breaks: false,
+      criticMarkup: false,
+      footnote: true,
+      imsize: false,
+      inlineMathSeparators: ['$', '$'],
+      blockMathSeparators: ['$$', '$$'],
+      forceFullToc: false,
+      tocDepth: 0,
+      attributes: true,
+      spans: true,
+      divs: true,
+      deflist: true,
+      fontmatter: true,
+      implicitFigures: true,
+      subscript: true,
+      superscript: true,
+      parseDisplayMathInline: true,
+    }
+  } else {
+    throw new Error(`Unknown renderer ${fullConfig.renderer}`)
   }
 }
 
