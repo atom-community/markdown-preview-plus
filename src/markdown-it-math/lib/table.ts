@@ -1,30 +1,15 @@
-// markdown-it-math@4802439:lib/rules_block/table.js
+/// from markdown-it/lib/rules_block/table.js@d29f421927e93e88daf75f22089a3e732e195bd2
 // GFM table, non-standard
-// tslint:disable:no-unsafe-any
 
-function getLine(state: any, line: number) {
+import StateBlock from 'markdown-it/lib/rules_block/state_block'
+
+function getLine(state: StateBlock, line: number) {
   const pos = state.bMarks[line] + state.blkIndent
   const max = state.eMarks[line]
 
   return state.src.substr(pos, max - pos)
 }
 
-/**
- * Parse a table row for columns/cells
- *
- * @param string str
- *   The table row to parse for columns.
- * @param  array of string openDelims
- *   The opening delimiter sequences for inlines that prevents any contained
- *   pipes from delimiting columns of the parent table block.
- * @param  array of string closeDelims
- *   The closing delimiter sequence for an inline that prevents any containing
- *   pipes from delimiting columns of the parent table block.
- * @return array of string
- *   The unparsed content of the cells/columns identified in str returned as
- *   individual elements of an array. The content is still to be parsed by the
- *   inline rules.
- */
 function escapedSplit(
   str: string,
   openDelims: string[],
@@ -36,38 +21,60 @@ function escapedSplit(
   let ch
   let escapes = 0
   let lastPos = 0
+  let backTicked = false
+  let lastBackTick = 0
   let lastDelim = 0
-  let delimed = false
-  let delimMaskMap
+  let delimed = -1
   let openDelimIdx = -1
   let closeDelimIdx = -1
 
   ch = str.charCodeAt(pos)
 
   // Def map for matching open/close delimiter sequence with str@pos
-  delimMaskMap = function (e: string) {
+  function delimMaskMap(e: string) {
     return str.substring(pos, pos + e.length) === e
   }
 
   while (pos < max) {
-    // Determine ID of first matching open/close delimiter sequence
     openDelimIdx = openDelims.map(delimMaskMap).indexOf(true)
     closeDelimIdx = closeDelims.map(delimMaskMap).indexOf(true)
 
-    // Does str@pos match any opening delimiter?
-    if (openDelimIdx > -1 && escapes % 2 === 0 && !delimed) {
-      delimed = !delimed
-      lastDelim = pos + openDelims[openDelimIdx].length - 1
-      pos += openDelims[openDelimIdx].length - 1
-      // Does str@pos match any closing delimiter?
-    } else if (closeDelimIdx > -1 && escapes % 2 === 0 && delimed) {
-      delimed = !delimed
-      lastDelim = pos + closeDelims[closeDelimIdx].length - 1
-      pos += closeDelims[closeDelimIdx].length - 1
-    } else if (ch === 0x7c /* | */ && escapes % 2 === 0 && !delimed) {
+    if (!backTicked) {
+      if (openDelimIdx > -1 && escapes % 2 === 0 && delimed === -1) {
+        delimed = openDelimIdx
+        lastDelim = pos + openDelims[openDelimIdx].length - 1
+        pos += openDelims[openDelimIdx].length - 1
+      } else if (
+        closeDelimIdx > -1 &&
+        escapes % 2 === 0 &&
+        delimed === closeDelimIdx
+      ) {
+        delimed = -1
+        lastDelim = pos + closeDelims[closeDelimIdx].length - 1
+        pos += closeDelims[closeDelimIdx].length - 1
+      }
+    }
+    if (ch === 0x60 /* ` */) {
+      if (backTicked) {
+        // make \` close code sequence, but not open it;
+        // the reason is: `\` is correct code block
+        backTicked = false
+        lastBackTick = pos
+      } else if (escapes % 2 === 0) {
+        backTicked = true
+        lastBackTick = pos
+      }
+    } else if (
+      ch === 0x7c /* | */ &&
+      escapes % 2 === 0 &&
+      delimed === -1 &&
+      !backTicked
+    ) {
       result.push(str.substring(lastPos, pos))
       lastPos = pos + 1
-    } else if (ch === 0x5c /* \ */) {
+    }
+
+    if (ch === 0x5c /* \ */) {
       escapes++
     } else {
       escapes = 0
@@ -77,9 +84,15 @@ function escapedSplit(
 
     // If there was an un-closed delimiter sequence, go back to just after
     // the last delimiter sequence, but as if it was a normal character
-    if (pos === max && delimed) {
-      delimed = false
+    if (pos === max && delimed > -1) {
+      delimed = -1
       pos = lastDelim + 1
+    }
+    // If there was an un-closed backtick, go back to just after
+    // the last backtick, but as if it was a normal character
+    if (pos === max && backTicked) {
+      backTicked = false
+      pos = lastBackTick + 1
     }
 
     ch = str.charCodeAt(pos)
@@ -90,26 +103,13 @@ function escapedSplit(
   return result
 }
 
-/**
- * A table plock parser with restrictions on pipe placement
- *
- * Partially poulated docstring describing parameters added to
- * `markdown-it-math@4802439:lib/rules_block/table.js`.
- *
- * @param  array of string openDelims
- *   The opening delimiter sequences for inlines that prevents any contained
- *   pipes from delimiting columns of the parent table block.
- * @param  array of string closeDelims
- *   The closing delimiter sequence for an inline that prevents any containing
- *   pipes from delimiting columns of the parent table block.
- */
-function table(
+export function table(
   openDelims: string[],
   closeDelims: string[],
-  state: any,
+  state: StateBlock,
   startLine: number,
   endLine: number,
-  silent: boolean,
+  silent: any,
 ) {
   let ch
   let lineText
@@ -124,7 +124,7 @@ function table(
   let tableLines
   let tbodyLines
 
-  // should have at least three lines
+  // should have at least two lines
   if (startLine + 2 > endLine) {
     return false
   }
@@ -135,22 +135,41 @@ function table(
     return false
   }
 
-  // first character of the second line should be '|' or '-'
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.sCount[nextLine] - state.blkIndent >= 4) {
+    return false
+  }
+
+  // first character of the second line should be '|', '-', ':',
+  // and no other characters are allowed but spaces;
+  // basically, this is the equivalent of /^[-:|][-:|\s]*$/ regexp
 
   pos = state.bMarks[nextLine] + state.tShift[nextLine]
   if (pos >= state.eMarks[nextLine]) {
     return false
   }
 
-  ch = state.src.charCodeAt(pos)
+  ch = state.src.charCodeAt(pos++)
   if (ch !== 0x7c /* | */ && ch !== 0x2d /* - */ && ch !== 0x3a /* : */) {
     return false
   }
 
-  lineText = getLine(state, startLine + 1)
-  if (!/^[-:| ]+$/.test(lineText)) {
-    return false
+  while (pos < state.eMarks[nextLine]) {
+    ch = state.src.charCodeAt(pos)
+
+    if (
+      ch !== 0x7c /* | */ &&
+      ch !== 0x2d /* - */ &&
+      ch !== 0x3a /* : */ &&
+      !state.md.utils.isSpace(ch)
+    ) {
+      return false
+    }
+
+    pos++
   }
+
+  lineText = getLine(state, startLine + 1)
 
   columns = lineText.split('|')
   aligns = []
@@ -182,6 +201,9 @@ function table(
   if (lineText.indexOf('|') === -1) {
     return false
   }
+  if (state.sCount[startLine] - state.blkIndent >= 4) {
+    return false
+  }
   columns = escapedSplit(
     lineText.replace(/^\||\|$/g, ''),
     openDelims,
@@ -200,7 +222,8 @@ function table(
   }
 
   token = state.push('table_open', 'table', 1)
-  token.map = tableLines = [startLine, 0]
+  token.map = [startLine, 0]
+  tableLines = token.map
 
   token = state.push('thead_open', 'thead', 1)
   token.map = [startLine, startLine + 1]
@@ -227,7 +250,8 @@ function table(
   token = state.push('thead_close', 'thead', -1)
 
   token = state.push('tbody_open', 'tbody', 1)
-  token.map = tbodyLines = [startLine + 2, 0]
+  token.map = [startLine + 2, 0]
+  tbodyLines = token.map
 
   for (nextLine = startLine + 2; nextLine < endLine; nextLine++) {
     if (state.sCount[nextLine] < state.blkIndent) {
@@ -236,6 +260,9 @@ function table(
 
     lineText = getLine(state, nextLine).trim()
     if (lineText.indexOf('|') === -1) {
+      break
+    }
+    if (state.sCount[nextLine] - state.blkIndent >= 4) {
       break
     }
     columns = escapedSplit(
@@ -265,35 +292,4 @@ function table(
   tableLines[1] = tbodyLines[1] = nextLine
   state.line = nextLine
   return true
-}
-
-/**
- * Prepare a table plock parser with restrictions on pipe placement
- *
- * @param  string open
- *   The opening delimiter sequence for an inline that prevents any contained
- *   pipes from delimiting columns of the parent table block.
- * @param  string close
- *   The closing delimiter sequence for an inline that prevents any containing
- *   pipes from delimiting columns of the parent table block.
- * @return function
- *   The table block parser that should be used in place of the existing table
- *   block parser such that the specified inline by `open` and `close` is
- *   respected. The delimiters are added to existing list of delimiter pairs in
- *   `escapedSplitDelimiters` allowing `markdown-it-math` to be `use`'d multiple
- *   times leading to multiple inline delimiters.
- */
-export function makeTable(options: Options) {
-  const openDelims = options.inlineDelim.map((i) => i[0])
-  const closeDelims = options.inlineDelim.map((i) => i[1])
-
-  openDelims.unshift('`')
-  closeDelims.unshift('`')
-
-  return table.bind(null, openDelims, closeDelims)
-}
-
-export interface Options {
-  inlineDelim: [[string, string]]
-  blockDelim: [[string, string]]
 }

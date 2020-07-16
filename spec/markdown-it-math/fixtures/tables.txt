@@ -168,11 +168,11 @@ bar|bar
 Second line should not contain symbols except "-", ":", "|" and " ":
 .
 foo|foo
----|---s
+-----|-----s
 bar|bar
 .
 <p>foo|foo
-—|—s
+-----|-----s
 bar|bar</p>
 .
 
@@ -180,11 +180,11 @@ bar|bar</p>
 Second line should contain "|" symbol:
 .
 foo|foo
----:---
+-----:-----
 bar|bar
 .
 <p>foo|foo
-—:—
+-----:-----
 bar|bar</p>
 .
 
@@ -192,11 +192,11 @@ bar|bar</p>
 Second line should not have empty columns in the middle:
 .
 foo|foo
----||---
+-----||-----
 bar|bar
 .
 <p>foo|foo
-—||—
+-----||-----
 bar|bar</p>
 .
 
@@ -204,11 +204,11 @@ bar|bar</p>
 Wrong alignment symbol position:
 .
 foo|foo
----|-::-
+-----|-::-
 bar|bar
 .
 <p>foo|foo
-—|-::-
+-----|-::-
 bar|bar</p>
 .
 
@@ -216,12 +216,35 @@ bar|bar</p>
 Title line should contain "|" symbol:
 .
 foo
----|---
+-----|-----
 bar|bar
 .
 <p>foo
-—|—
+-----|-----
 bar|bar</p>
+.
+
+
+Allow tabs as a separator on 2nd line
+.
+|	foo	|	bar	|
+|	---	|	---	|
+|	baz	|	quux	|
+.
+<table>
+<thead>
+<tr>
+<th>foo</th>
+<th>bar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>baz</td>
+<td>quux</td>
+</tr>
+</tbody>
+</table>
 .
 
 
@@ -377,24 +400,49 @@ Another complicated backticks case
 </table>
 .
 
-
-Should be parsed before code blocks:
+`\` in tables should not count as escaped backtick
 .
-    foo | bar
-  ----- | -----
-    aaa | bbb
+# | 1 | 2
+--|--|--
+x | `\` | `x`
 .
 <table>
 <thead>
 <tr>
-<th>foo</th>
-<th>bar</th>
+<th>#</th>
+<th>1</th>
+<th>2</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>aaa</td>
-<td>bbb</td>
+<td>x</td>
+<td><code>\</code></td>
+<td><code>x</code></td>
+</tr>
+</tbody>
+</table>
+.
+
+Tables should handle escaped backticks
+.
+# | 1 | 2
+--|--|--
+x | \`\` | `x`
+.
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>1</th>
+<th>2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>``</td>
+<td><code>x</code></td>
 </tr>
 </tbody>
 </table>
@@ -469,4 +517,101 @@ Allow one-column tables (issue #171):
 </tr>
 </tbody>
 </table>
+.
+
+
+Allow indented tables (issue #325):
+.
+  | Col1a | Col2a |
+  | ----- | ----- |
+  | Col1b | Col2b |
+.
+<table>
+<thead>
+<tr>
+<th>Col1a</th>
+<th>Col2a</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Col1b</td>
+<td>Col2b</td>
+</tr>
+</tbody>
+</table>
+.
+
+
+Tables should not be indented more than 4 spaces (1st line):
+.
+    | Col1a | Col2a |
+  | ----- | ----- |
+  | Col1b | Col2b |
+.
+<pre><code>| Col1a | Col2a |
+</code></pre>
+<p>| ----- | ----- |
+| Col1b | Col2b |</p>
+.
+
+
+Tables should not be indented more than 4 spaces (2nd line):
+.
+  | Col1a | Col2a |
+    | ----- | ----- |
+  | Col1b | Col2b |
+.
+<p>| Col1a | Col2a |
+| ----- | ----- |
+| Col1b | Col2b |</p>
+.
+
+
+Tables should not be indented more than 4 spaces (3rd line):
+.
+  | Col1a | Col2a |
+  | ----- | ----- |
+    | Col1b | Col2b |
+.
+<table>
+<thead>
+<tr>
+<th>Col1a</th>
+<th>Col2a</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+<pre><code>| Col1b | Col2b |
+</code></pre>
+.
+
+
+Allow tables with empty body:
+.
+  | Col1a | Col2a |
+  | ----- | ----- |
+.
+<table>
+<thead>
+<tr>
+<th>Col1a</th>
+<th>Col2a</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+.
+
+
+Align row should be at least as large as any actual rows:
+.
+Col1a | Col1b | Col1c
+----- | -----
+Col2a | Col2b | Col2c
+.
+<p>Col1a | Col1b | Col1c
+----- | -----
+Col2a | Col2b | Col2c</p>
 .

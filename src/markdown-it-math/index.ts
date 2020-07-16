@@ -4,7 +4,7 @@ import mdIt from 'markdown-it'
 import Token from 'markdown-it/lib/token'
 import { RuleInline } from 'markdown-it/lib/parser_inline'
 import { RuleBlock } from 'markdown-it/lib/parser_block'
-import { makeTable } from './lib/table'
+import { makeTable } from './lib/table-wrapper'
 
 function scanDelims(
   state: import('markdown-it/lib/rules_inline/state_inline'),
@@ -370,10 +370,7 @@ export function math_plugin(md: mdIt, options: PluginOptions = {}) {
   md.renderer.rules.math_block = blockRenderer
 
   // Replace existing table parser with parser that respects new inline delims
-  const tableBlock = makeTable({
-    inlineDelim,
-    blockDelim,
-  })
+  const tableBlock = makeTable({ inlineDelim })
   md.block.ruler.at('table', tableBlock, {
     alt: ['paragraph', 'reference'],
   })
