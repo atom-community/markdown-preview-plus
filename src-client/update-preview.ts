@@ -23,20 +23,25 @@ export class UpdatePreview {
       }
     }
 
-    morph(this.dom, newDom, {
-      childrenOnly: true,
-      onBeforeElUpdated: function (fromEl, toEl) {
-        // do not recurse into element children if isEqualNode === true
-        // spec - https://dom.spec.whatwg.org/#concept-node-equals
-        return !fromEl.isEqualNode(toEl)
-      },
-      getNodeKey: function (node: Element) {
-        if (node.id && node.closest && node.closest('svg') !== null) {
-          return '' // ignore SVG id
-        }
-        return node.id
-      },
-    })
+    try {
+      morph(this.dom, newDom, {
+        childrenOnly: true,
+        onBeforeElUpdated: function (fromEl, toEl) {
+          // do not recurse into element children if isEqualNode === true
+          // spec - https://dom.spec.whatwg.org/#concept-node-equals
+          return !fromEl.isEqualNode(toEl)
+        },
+        getNodeKey: function (node: Element) {
+          if (node.id && node.closest && node.closest('svg') !== null) {
+            return '' // ignore SVG id
+          }
+          return node.id
+        },
+      })
+    } catch (e) {
+      console.error(e)
+      this.dom.innerHTML = newDom.innerHTML
+    }
 
     if (renderLaTeX) {
       return this.mjController.queueTypeset(this.dom)
