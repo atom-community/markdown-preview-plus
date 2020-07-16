@@ -1,6 +1,6 @@
 import Token from 'markdown-it/lib/token'
 import assert = require('assert')
-import { math_plugin } from '../../src/markdown-it-math'
+import { math_plugin, MathMeta } from '../../src/markdown-it-math'
 import mdIt = require('markdown-it')
 
 describe('Options', function () {
@@ -83,10 +83,10 @@ describe('Renderer', function () {
   it('Should allow another renderer', function () {
     const md = mdIt().use(math_plugin, {
       inlineRenderer: function (tok: Token) {
-        return `<inline>${tok.content}</inline>`
+        return `<inline>${(tok.meta as MathMeta).rawContent}</inline>`
       },
       blockRenderer: function (tok: Token) {
-        return `<display>${tok.content}</display>`
+        return `<display>${(tok.meta as MathMeta).rawContent}</display>`
       },
     })
 

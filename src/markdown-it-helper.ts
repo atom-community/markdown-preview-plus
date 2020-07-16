@@ -4,18 +4,23 @@ import * as twemoji from 'twemoji'
 import * as path from 'path'
 import { pairUp, atomConfig } from './util'
 import { isEqual } from 'lodash'
+import { MathMeta } from './markdown-it-math'
 
 type InitState = Readonly<ReturnType<typeof currentConfig>>
 
 function mathInline(tok: Token) {
-  return `<span class='math inline-math'><script type='math/tex'>${tok.content}</script></span>`
+  return `<span class='math inline-math'><script type='math/tex'>${
+    (tok.meta as MathMeta).rawContent
+  }</script></span>`
 }
 
 function mathBlock(tok: Token) {
   let attrs = tok.attrs && tok.attrs.map(([n, v]) => `${n}="${v}"`).join(' ')
   if (!attrs) attrs = ''
   else attrs = ' ' + attrs
-  return `<span class='math display-math'${attrs}><script type='math/tex; mode=display'>${tok.content}</script></span>`
+  return `<span class='math display-math'${attrs}><script type='math/tex; mode=display'>${
+    (tok.meta as MathMeta).rawContent
+  }</script></span>`
 }
 
 function addSourceMapData(token: Token) {

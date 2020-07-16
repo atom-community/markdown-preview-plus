@@ -1,5 +1,4 @@
 /* Process inline math */
-// tslint:disable:no-unsafe-any
 
 import mdIt from 'markdown-it'
 import Token from 'markdown-it/lib/token'
@@ -7,7 +6,10 @@ import { RuleInline } from 'markdown-it/lib/parser_inline'
 import { RuleBlock } from 'markdown-it/lib/parser_block'
 import { makeTable } from './lib/table'
 
-function skipTextCommand(state: any, max: number) {
+function skipTextCommand(
+  state: import('markdown-it/lib/rules_inline/state_inline'),
+  max: number,
+) {
   const textCommand = state.src.slice(state.pos, state.pos + 5)
   const curPos = state.pos
   if (textCommand === '\\text') {
@@ -25,7 +27,11 @@ function skipTextCommand(state: any, max: number) {
   }
 }
 
-function scanDelims(state: any, start: number, delimLength: number) {
+function scanDelims(
+  state: import('markdown-it/lib/rules_inline/state_inline'),
+  start: number,
+  delimLength: number,
+) {
   let pos = start
   let lastChar
   let nextChar
@@ -39,9 +45,7 @@ function scanDelims(state: any, start: number, delimLength: number) {
   let leftFlanking = true
   let rightFlanking = true
   const max = state.posMax
-  const isWhiteSpace = state.md.utils.isWhiteSpace
-  const isPunctChar = state.md.utils.isPunctChar
-  const isMdAsciiPunct = state.md.utils.isMdAsciiPunct
+  const utils = state.md.utils
 
   // treat beginning of the line as a whitespace
   lastChar = start > 0 ? state.src.charCodeAt(start - 1) : 0x20
@@ -58,12 +62,14 @@ function scanDelims(state: any, start: number, delimLength: number) {
   nextChar = pos < max ? state.src.charCodeAt(pos) : 0x20
 
   isLastPunctChar =
-    isMdAsciiPunct(lastChar) || isPunctChar(String.fromCharCode(lastChar))
+    utils.isMdAsciiPunct(lastChar) ||
+    utils.isPunctChar(String.fromCharCode(lastChar))
   isNextPunctChar =
-    isMdAsciiPunct(nextChar) || isPunctChar(String.fromCharCode(nextChar))
+    utils.isMdAsciiPunct(nextChar) ||
+    utils.isPunctChar(String.fromCharCode(nextChar))
 
-  isLastWhiteSpace = isWhiteSpace(lastChar)
-  isNextWhiteSpace = isWhiteSpace(nextChar)
+  isLastWhiteSpace = utils.isWhiteSpace(lastChar)
+  isNextWhiteSpace = utils.isWhiteSpace(nextChar)
 
   if (isNextWhiteSpace) {
     leftFlanking = false
@@ -152,7 +158,7 @@ function makeMath_inline(delims: [[string, string]]): RuleInline {
 
     // Earlier we checked !silent, but this implementation does not need it
     token = state.push('math_inline', 'math', 0)
-    token.content = state.src.slice(state.pos, state.posMax)
+    token.meta = { rawContent: state.src.slice(state.pos, state.posMax) }
     token.markup = open
 
     state.pos = state.posMax + close.length
@@ -270,10 +276,12 @@ function makeMath_block(delims: [[string, string]]): RuleBlock {
 
     token = state.push('math_block', 'math', 0)
     token.block = true
-    token.content =
-      (firstLine && firstLine.trim() ? firstLine + '\n' : '') +
-      state.getLines(startLine + 1, nextLine, len, true) +
-      (lastLine && lastLine.trim() ? lastLine : '')
+    token.meta = {
+      rawContent:
+        (firstLine && firstLine.trim() ? firstLine + '\n' : '') +
+        state.getLines(startLine + 1, nextLine, len, true) +
+        (lastLine && lastLine.trim() ? lastLine : ''),
+    }
     token.map = [startLine, state.line]
     token.markup = open
 
@@ -285,13 +293,25 @@ export interface RenderingOptions {
   display?: 'block'
 }
 
+export interface MathMeta {
+  rawContent: string
+}
+
 function makeMathRenderer(renderingOptions: RenderingOptions = {}) {
   return renderingOptions.display === 'block'
     ? function (tokens: Token[], idx: number) {
-        return '<div class="math block">' + tokens[idx].content + '</div>\n'
+        return (
+          '<div class="math block">' +
+          (tokens[idx].meta as MathMeta).rawContent +
+          '</div>\n'
+        )
       }
     : function (tokens: Token[], idx: number) {
-        return '<span class="math inline">' + tokens[idx].content + '</span>'
+        return (
+          '<span class="math inline">' +
+          (tokens[idx].meta as MathMeta).rawContent +
+          '</span>'
+        )
       }
 }
 
