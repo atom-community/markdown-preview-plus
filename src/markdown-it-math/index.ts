@@ -6,27 +6,6 @@ import { RuleInline } from 'markdown-it/lib/parser_inline'
 import { RuleBlock } from 'markdown-it/lib/parser_block'
 import { makeTable } from './lib/table'
 
-function skipTextCommand(
-  state: import('markdown-it/lib/rules_inline/state_inline'),
-  max: number,
-) {
-  const textCommand = state.src.slice(state.pos, state.pos + 5)
-  const curPos = state.pos
-  if (textCommand === '\\text') {
-    state.pos += 5
-    while (state.src[state.pos] === ' ') {
-      state.pos++
-    }
-    if (state.src[state.pos] !== '{') {
-      state.pos = curPos
-    } else {
-      while (state.src[state.pos] !== '}' && state.pos < max) {
-        state.pos++
-      }
-    }
-  }
-}
-
 function scanDelims(
   state: import('markdown-it/lib/rules_inline/state_inline'),
   start: number,
@@ -144,9 +123,27 @@ function makeMath_inline(
           break
         }
       }
-      skipTextCommand(state, max)
-
-      state.md.inline.skipToken(state)
+      // skip braces and escapes
+      let nesting = 0
+      while (state.pos < max) {
+        switch (state.src.charCodeAt(state.pos)) {
+          case 0x7b /*{*/:
+            state.pos++
+            nesting++
+            break
+          case 0x7d /*}*/:
+            state.pos++
+            nesting--
+            break
+          case 0x5c /*\*/:
+            state.pos += 2
+            break
+          default:
+            state.pos++
+            break
+        }
+        if (nesting <= 0) break
+      }
     }
 
     if (state.pos - start - open.length === 0 || !found) {
