@@ -493,6 +493,14 @@ export const config: IConfig = {
           type: 'string',
         },
       },
+      parseDisplayMathInline: {
+        title: 'Parse display math inline',
+        description:
+          'Will parse display ("block") math as inline elements, like pandoc',
+        type: 'boolean',
+        default: false,
+        order: 1050,
+      },
     },
   },
   pandocConfig: {
@@ -742,6 +750,7 @@ declare module 'atom' {
     'markdown-preview-plus.markdownItConfig.useFootnote': boolean
     'markdown-preview-plus.markdownItConfig.inlineMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig.blockMathSeparators': string[]
+    'markdown-preview-plus.markdownItConfig.parseDisplayMathInline': boolean
     'markdown-preview-plus.markdownItConfig': {
       breakOnSingleNewline: boolean
       useLazyHeaders: boolean
@@ -755,6 +764,7 @@ declare module 'atom' {
       useFootnote: boolean
       inlineMathSeparators: string[]
       blockMathSeparators: string[]
+      parseDisplayMathInline: boolean
     }
     'markdown-preview-plus.pandocConfig.useNativePandocCodeStyles': boolean
     'markdown-preview-plus.pandocConfig.pandocPath': string
@@ -924,6 +934,7 @@ declare module 'atom' {
       'markdownItConfig.useFootnote': boolean
       'markdownItConfig.inlineMathSeparators': string[]
       'markdownItConfig.blockMathSeparators': string[]
+      'markdownItConfig.parseDisplayMathInline': boolean
       markdownItConfig: {
         breakOnSingleNewline: boolean
         useLazyHeaders: boolean
@@ -937,6 +948,7 @@ declare module 'atom' {
         useFootnote: boolean
         inlineMathSeparators: string[]
         blockMathSeparators: string[]
+        parseDisplayMathInline: boolean
       }
       'pandocConfig.useNativePandocCodeStyles': boolean
       'pandocConfig.pandocPath': string

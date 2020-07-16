@@ -97,7 +97,10 @@ function scanDelims(
   }
 }
 
-function makeMath_inline(delims: [[string, string]]): RuleInline {
+function makeMath_inline(
+  name: 'math_inline' | 'math_block',
+  delims: [[string, string]],
+): RuleInline {
   return function math_inline(state, silent) {
     let startCount
     let found
@@ -123,7 +126,7 @@ function makeMath_inline(delims: [[string, string]]): RuleInline {
     res = scanDelims(state, start, open.length)
     startCount = res.delims
 
-    if (!res.can_open) {
+    if (!res.can_open && name === 'math_inline') {
       state.pos += startCount
       // Earlier we checked !silent, but this implementation does not need it
       state.pending += state.src.slice(start, state.pos)
@@ -136,7 +139,7 @@ function makeMath_inline(delims: [[string, string]]): RuleInline {
       closeDelim = state.src.slice(state.pos, state.pos + close.length)
       if (closeDelim === close) {
         res = scanDelims(state, state.pos, close.length)
-        if (res.can_close) {
+        if (res.can_close || name !== 'math_inline') {
           found = true
           break
         }
@@ -146,8 +149,9 @@ function makeMath_inline(delims: [[string, string]]): RuleInline {
       state.md.inline.skipToken(state)
     }
 
-    if (!found) {
-      // Parser failed to find ending tag, so it is not a valid math
+    if (state.pos - start - open.length === 0 || !found) {
+      // Parser failed to find ending tag, or contents are empty,
+      // so it is not a valid math
       state.pos = start
       return false
     }
@@ -157,7 +161,7 @@ function makeMath_inline(delims: [[string, string]]): RuleInline {
     state.pos = start + close.length
 
     // Earlier we checked !silent, but this implementation does not need it
-    token = state.push('math_inline', 'math', 0)
+    token = state.push(name, 'math', 0)
     token.meta = { rawContent: state.src.slice(state.pos, state.posMax) }
     token.markup = open
 
@@ -321,6 +325,7 @@ export interface PluginOptions {
   inlineRenderer?: (tok: Token, md: mdIt) => string
   blockRenderer?: (tok: Token, md: mdIt) => string
   renderingOptions?: RenderingOptions
+  parseDisplayMathInline?: boolean
 }
 
 export function math_plugin(md: mdIt, options: PluginOptions = {}) {
@@ -342,13 +347,28 @@ export function math_plugin(md: mdIt, options: PluginOptions = {}) {
         Object.assign({ display: 'block' }, options.renderingOptions),
       )
 
-  const mathInline = makeMath_inline(inlineDelim)
-  const mathBlock = makeMath_block(blockDelim)
+  md.inline.ruler.before(
+    'escape',
+    'math_inline',
+    makeMath_inline('math_inline', inlineDelim),
+  )
 
-  md.inline.ruler.before('escape', 'math_inline', mathInline)
-  md.block.ruler.after('blockquote', 'math_block', mathBlock, {
-    alt: ['paragraph', 'reference', 'blockquote', 'list'],
-  })
+  if (options.parseDisplayMathInline) {
+    md.inline.ruler.before(
+      'math_inline',
+      'math_block',
+      makeMath_inline('math_block', blockDelim),
+    )
+  } else {
+    md.block.ruler.after(
+      'blockquote',
+      'math_block',
+      makeMath_block(blockDelim),
+      {
+        alt: ['paragraph', 'reference', 'blockquote', 'list'],
+      },
+    )
+  }
   md.renderer.rules.math_inline = inlineRenderer
   md.renderer.rules.math_block = blockRenderer
 

@@ -76,6 +76,7 @@ function currentConfig(rL: boolean) {
     blockMathSeparators: config.blockMathSeparators,
     forceFullToc: config.forceFullToc,
     tocDepth: config.tocDepth,
+    parseDisplayMathInline: config.parseDisplayMathInline,
   }
 }
 
@@ -97,6 +98,7 @@ function init(initState: InitState): markdownItModule {
       blockDelim,
       inlineRenderer: mathInline,
       blockRenderer: mathBlock,
+      parseDisplayMathInline: initState.parseDisplayMathInline,
     })
   }
 
