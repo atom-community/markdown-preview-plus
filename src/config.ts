@@ -471,13 +471,90 @@ export const config: IConfig = {
         default: false,
         order: 45,
       },
+      useAttributes: {
+        // "markdown-it-attrs"
+        title: 'Enable attributes',
+        description:
+          'Allow braced `{}` attributes after inline/block elements. Also sets `id` with `#` and `class` with `.`' +
+          '\n\nF.ex.: `*emphasis*{#id-emphasis .class-emphasis data-attribute=emphasis}`' +
+          '\n\n**NOTE:** this is implicitly enabled by bracketed spans and fenced divs.' +
+          '\n\nSee [package page](https://npmjs.com/package/markdown-it-attrs) for more information.',
+        type: 'boolean',
+        default: false,
+        order: 50,
+      },
+      useSpans: {
+        // "markdown-it-bracketed-spans"
+        title: 'Enable bracketed spans',
+        description:
+          '**NOTE:** implicitly enables attributes.' +
+          '\n\nSee [package page](https://npmjs.com/package/markdown-it-bracketed-spans) for more information.',
+        type: 'boolean',
+        default: false,
+        order: 60,
+      },
+      useDivs: {
+        // "markdown-it-container"
+        title: 'Enable fenced divs',
+        description:
+          '**NOTE:** implicitly enables attributes.' +
+          '\n\nSee [package page](https://npmjs.com/package/markdown-it-container) for more information.',
+        type: 'boolean',
+        default: false,
+        order: 70,
+      },
+      useDeflist: {
+        // "markdown-it-deflist"
+        title: 'Enable definition lists',
+        description:
+          '\n\nSee [package page](https://npmjs.com/package/markdown-it-deflist) for more information.',
+        type: 'boolean',
+        default: false,
+        order: 80,
+      },
+      useFontmatter: {
+        // "markdown-it-front-matter"
+        title: 'Enable YAML fontmatter',
+        description:
+          '\n\nSee [package page](https://npmjs.com/package/markdown-it-front-matter) for more information.',
+        type: 'boolean',
+        default: true,
+        order: 90,
+      },
+      useImplicitFigures: {
+        // "markdown-it-implicit-figures"
+        title: 'Enable implicitFigures',
+        description:
+          '\n\nSee [package page](https://npmjs.com/package/markdown-it-implicit-figures) for more information.',
+        type: 'boolean',
+        default: false,
+        order: 100,
+      },
+      useSubscript: {
+        // "markdown-it-sub"
+        title: 'Enable subscripts',
+        description:
+          '\n\nSee [package page](https://npmjs.com/package/markdown-it-sub) for more information.',
+        type: 'boolean',
+        default: false,
+        order: 110,
+      },
+      useSuperscript: {
+        // "markdown-it-sup"
+        title: 'Enable superscripts',
+        description:
+          '\n\nSee [package page](https://npmjs.com/package/markdown-it-sup) for more information.',
+        type: 'boolean',
+        default: false,
+        order: 120,
+      },
       inlineMathSeparators: {
         title: 'Inline math separators',
         description:
           'List of inline math separators in pairs -- first opening, then closing',
         type: 'array',
         default: ['$', '$', '\\(', '\\)'],
-        order: 110,
+        order: 1010,
         items: {
           type: 'string',
         },
@@ -488,7 +565,7 @@ export const config: IConfig = {
           'List of block math separators in pairs -- first opening, then closing',
         type: 'array',
         default: ['$$', '$$', '\\[', '\\]'],
-        order: 120,
+        order: 1020,
         items: {
           type: 'string',
         },
@@ -748,6 +825,14 @@ declare module 'atom' {
     'markdown-preview-plus.markdownItConfig.useImsize': boolean
     'markdown-preview-plus.markdownItConfig.useCriticMarkup': boolean
     'markdown-preview-plus.markdownItConfig.useFootnote': boolean
+    'markdown-preview-plus.markdownItConfig.useAttributes': boolean
+    'markdown-preview-plus.markdownItConfig.useSpans': boolean
+    'markdown-preview-plus.markdownItConfig.useDivs': boolean
+    'markdown-preview-plus.markdownItConfig.useDeflist': boolean
+    'markdown-preview-plus.markdownItConfig.useFontmatter': boolean
+    'markdown-preview-plus.markdownItConfig.useImplicitFigures': boolean
+    'markdown-preview-plus.markdownItConfig.useSubscript': boolean
+    'markdown-preview-plus.markdownItConfig.useSuperscript': boolean
     'markdown-preview-plus.markdownItConfig.inlineMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig.blockMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig.parseDisplayMathInline': boolean
@@ -762,6 +847,14 @@ declare module 'atom' {
       useImsize: boolean
       useCriticMarkup: boolean
       useFootnote: boolean
+      useAttributes: boolean
+      useSpans: boolean
+      useDivs: boolean
+      useDeflist: boolean
+      useFontmatter: boolean
+      useImplicitFigures: boolean
+      useSubscript: boolean
+      useSuperscript: boolean
       inlineMathSeparators: string[]
       blockMathSeparators: string[]
       parseDisplayMathInline: boolean
@@ -932,6 +1025,14 @@ declare module 'atom' {
       'markdownItConfig.useImsize': boolean
       'markdownItConfig.useCriticMarkup': boolean
       'markdownItConfig.useFootnote': boolean
+      'markdownItConfig.useAttributes': boolean
+      'markdownItConfig.useSpans': boolean
+      'markdownItConfig.useDivs': boolean
+      'markdownItConfig.useDeflist': boolean
+      'markdownItConfig.useFontmatter': boolean
+      'markdownItConfig.useImplicitFigures': boolean
+      'markdownItConfig.useSubscript': boolean
+      'markdownItConfig.useSuperscript': boolean
       'markdownItConfig.inlineMathSeparators': string[]
       'markdownItConfig.blockMathSeparators': string[]
       'markdownItConfig.parseDisplayMathInline': boolean
@@ -946,6 +1047,14 @@ declare module 'atom' {
         useImsize: boolean
         useCriticMarkup: boolean
         useFootnote: boolean
+        useAttributes: boolean
+        useSpans: boolean
+        useDivs: boolean
+        useDeflist: boolean
+        useFontmatter: boolean
+        useImplicitFigures: boolean
+        useSubscript: boolean
+        useSuperscript: boolean
         inlineMathSeparators: string[]
         blockMathSeparators: string[]
         parseDisplayMathInline: boolean

@@ -76,6 +76,14 @@ function currentConfig(rL: boolean) {
     blockMathSeparators: config.blockMathSeparators,
     forceFullToc: config.forceFullToc,
     tocDepth: config.tocDepth,
+    attributes: config.useAttributes, // "markdown-it-attrs"
+    spans: config.useSpans, // "markdown-it-bracketed-spans"
+    divs: config.useDivs, // "markdown-it-container"
+    deflist: config.useDeflist, // "markdown-it-deflist"
+    fontmatter: config.useFontmatter, // "markdown-it-front-matter"
+    implicitFigures: config.useImplicitFigures, // "markdown-it-implicit-figures"
+    subscript: config.useSubscript, // "markdown-it-sub"
+    superscript: config.useSuperscript, // "markdown-it-sup"
     parseDisplayMathInline: config.parseDisplayMathInline,
   }
 }
@@ -139,6 +147,53 @@ function init(initState: InitState): markdownItModule {
   }
   if (initState.imsize) {
     markdownIt.use(require('./markdown-it-imsize').imsize_plugin)
+  }
+  if (initState.spans) {
+    markdownIt.use(require('markdown-it-bracketed-spans'))
+  }
+  if (initState.divs || initState.spans || initState.attributes) {
+    markdownIt.use(require('markdown-it-attrs'))
+  }
+  if (initState.divs) {
+    markdownIt.use(require('markdown-it-container'), 'dynamic', {
+      // adapted from https://github.com/markdown-it/markdown-it-container/issues/23
+      validate: () => true,
+      render: function (
+        tokens: { [x: string]: any },
+        idx: string | number,
+        _options: any,
+        _env: any,
+        slf: { renderAttrs: (arg0: any) => any },
+      ) {
+        const token = tokens[idx]
+        const className = token.info.trim()
+        const renderedAttrs = slf.renderAttrs(token)
+        if (token.nesting === 1) {
+          return className && className !== '{}'
+            ? '<div class="' + className + '">'
+            : '<div' + renderedAttrs + '>'
+        } else {
+          return '</div>'
+        }
+      },
+    })
+  }
+  if (initState.deflist) {
+    markdownIt.use(require('markdown-it-deflist'))
+  }
+  if (initState.fontmatter) {
+    markdownIt.use(require('markdown-it-front-matter'), () => void 0)
+  }
+  if (initState.implicitFigures) {
+    markdownIt.use(require('markdown-it-implicit-figures'), {
+      figcaption: true,
+    })
+  }
+  if (initState.subscript) {
+    markdownIt.use(require('markdown-it-sub'))
+  }
+  if (initState.superscript) {
+    markdownIt.use(require('markdown-it-sup'))
   }
   // tslint:enable:no-unsafe-any
 
