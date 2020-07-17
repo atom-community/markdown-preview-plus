@@ -1,3 +1,48 @@
+## 4.3.0
+
+### New features
+
+-   New markdown-it plug-ins
+
+    Plug-ins that approximate features of Pandoc Markdown:
+
+    - attrs -- braced attributes
+    - bracketed-spans -- bracketed spans (with attributes)
+    - container -- fenced divs (with attributes)
+    - deflist -- definition lists
+    - front-matter -- YAML front-matter
+    - implicit-figures -- implicit figures with captions
+    - sub -- subscripts `~sub~`
+    - sup -- superscripts `^sup^`
+
+    Front-matter is enabled by default, others are disabled.
+
+-   Option to parse display math inline with markdown-it
+
+    Again, approximating Pandoc Markdown. Disabled by default.
+
+-   Add table captions parser
+
+    Approximating Pandoc Markdown. Can be enabled with markdown-it. Disabled by default.
+
+-   Set pandoc-like combination of markdown-it extensions when using pandoc
+
+    This will help with source/preview synchronization. Still by far not ideal, but hopefully at least a little better.
+
+### Fixes
+
+-   Careful-er inline math parsing
+-   Catch morphdom errors
+-   Don't let markdown-it re-parse LaTeX code inside math
+-   Fix #482 (very rare "Pane has been destroyed" error)
+-   Fix keybindings display in settings
+
+### Maintenance
+
+-   Bump dependencies
+-   Update table parser with latest changes from upstream
+-   Move custom markdown-it table parser to separate module
+
 ## 4.2.0
 
 This is mostly a correcting release, but it has a couple new features,
