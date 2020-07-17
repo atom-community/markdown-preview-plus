@@ -2,6 +2,8 @@
 // GFM table, non-standard
 
 import StateBlock from 'markdown-it/lib/rules_block/state_block'
+import { Nesting } from 'markdown-it/lib/token'
+import MarkdownIt from 'markdown-it'
 
 function getLine(state: StateBlock, line: number) {
   const pos = state.bMarks[line] + state.blkIndent
@@ -103,9 +105,10 @@ function escapedSplit(
   return result
 }
 
-export function table(
+function table(
   openDelims: string[],
   closeDelims: string[],
+  caption: boolean,
   state: StateBlock,
   startLine: number,
   endLine: number,
@@ -123,12 +126,19 @@ export function table(
   let t
   let tableLines
   let tbodyLines
+  let captionParsed: ReturnType<typeof parse_caption> | undefined
 
   // should have at least two lines
   if (startLine + 2 > endLine) {
     return false
   }
 
+  if (caption) {
+    captionParsed = parse_caption(state, startLine)
+    if (captionParsed) {
+      startLine = captionParsed.nextLine
+    }
+  }
   nextLine = startLine + 1
 
   if (state.sCount[nextLine] < state.blkIndent) {
@@ -287,9 +297,124 @@ export function table(
     token = state.push('tr_close', 'tr', -1)
   }
   token = state.push('tbody_close', 'tbody', -1)
+
+  if (caption) {
+    if (!captionParsed) {
+      captionParsed = parse_caption(state, nextLine)
+      if (captionParsed) nextLine = captionParsed.nextLine
+    }
+    if (captionParsed) {
+      pushTokens(state, captionParsed.tokens)
+    }
+  }
+
   token = state.push('table_close', 'table', -1)
 
   tableLines[1] = tbodyLines[1] = nextLine
   state.line = nextLine
   return true
+}
+
+interface TempToken {
+  args: [string, string, Nesting]
+  props: { [key: string]: any }
+}
+
+function parse_caption(
+  state: StateBlock,
+  startLine: number,
+):
+  | false
+  | {
+      nextLine: number
+      tokens: TempToken[]
+    } {
+  let nextLine = startLine
+  const pos = state.bMarks[nextLine] + state.tShift[nextLine]
+  if (!state.src.slice(pos).match(/^\s*\w*:/)) return false
+  let bpos = state.bMarks[nextLine] + state.tShift[nextLine]
+  let epos = state.eMarks[nextLine]
+  let line = state.src.slice(bpos, epos)
+  while (line.match(/^\s*$/)) {
+    nextLine++
+    bpos = state.bMarks[nextLine] + state.tShift[nextLine]
+    epos = state.eMarks[nextLine]
+    line = state.src.slice(bpos, epos)
+  }
+  if (state.sCount[nextLine] - state.blkIndent >= 4) return false
+
+  while (state.src.charCodeAt(bpos) !== 0x3a /*:*/) bpos++
+
+  const inlinePos = bpos + 1
+  const beginLine = nextLine
+  let cepos
+  while (!line.match(/^\s*$/)) {
+    cepos = state.eMarks[nextLine]
+    nextLine++
+    bpos = state.bMarks[nextLine] + state.tShift[nextLine]
+    epos = state.eMarks[nextLine]
+    line = state.src.slice(bpos, epos)
+  }
+  const inlineEnd = cepos
+  const endLine = nextLine - 1
+  const tokens: TempToken[] = []
+  tokens.push({
+    args: ['caption_open', 'caption', 1],
+    props: { map: [beginLine, endLine] },
+  })
+  tokens.push({
+    args: ['inline', '', 0],
+    props: {
+      content: state.src.slice(inlinePos, inlineEnd),
+      children: [],
+    },
+  })
+  tokens.push({
+    args: ['caption_close', 'caption', -1],
+    props: {
+      content: state.src.slice(inlinePos, inlineEnd),
+      children: [],
+    },
+  })
+  while (line.match(/^\s*$/)) {
+    nextLine++
+    bpos = state.bMarks[nextLine] + state.tShift[nextLine]
+    epos = state.eMarks[nextLine]
+    line = state.src.slice(bpos, epos)
+  }
+  return {
+    nextLine,
+    tokens,
+  }
+}
+
+function pushTokens(
+  state: StateBlock,
+  tokens: Exclude<ReturnType<typeof parse_caption>, false>['tokens'],
+) {
+  for (const tok of tokens) {
+    const token = state.push(...tok.args)
+    for (const [k, v] of Object.entries(tok.props)) {
+      token[k] = v as any
+    }
+  }
+}
+
+export function makeTable(md: MarkdownIt, options: Options = {}) {
+  const openDelims = options?.inlineDelim
+    ? options.inlineDelim.map((i) => i[0])
+    : []
+  const closeDelims = options?.inlineDelim
+    ? options.inlineDelim.map((i) => i[1])
+    : []
+  const parser = table.bind(null, openDelims, closeDelims, !!options?.caption)
+
+  md.block.ruler.at('table', parser, {
+    alt: ['paragraph', 'reference'],
+  })
+}
+
+export interface Options {
+  inlineDelim?: [[string, string]]
+  caption?: boolean
 }

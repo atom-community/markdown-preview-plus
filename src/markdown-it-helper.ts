@@ -87,6 +87,7 @@ function currentConfig(rL: boolean) {
       subscript: config.useSubscript, // "markdown-it-sub"
       superscript: config.useSuperscript, // "markdown-it-sup"
       parseDisplayMathInline: config.parseDisplayMathInline,
+      tableCaptions: config.tableCaptions,
     }
   } else if (fullConfig.renderer === 'pandoc') {
     return {
@@ -112,6 +113,7 @@ function currentConfig(rL: boolean) {
       subscript: true,
       superscript: true,
       parseDisplayMathInline: true,
+      tableCaptions: true,
     }
   } else {
     throw new Error(`Unknown renderer ${fullConfig.renderer}`)
@@ -121,11 +123,9 @@ function currentConfig(rL: boolean) {
 function init(initState: InitState): markdownItModule {
   const markdownIt = markdownItModule(getOptions(initState.breaks))
 
+  let inlineDelim: [string, string][] = []
   if (initState.renderLaTeX) {
-    const inlineDelim = pairUp(
-      initState.inlineMathSeparators,
-      'inlineMathSeparators',
-    )
+    inlineDelim = pairUp(initState.inlineMathSeparators, 'inlineMathSeparators')
     const blockDelim = pairUp(
       initState.blockMathSeparators,
       'blockMathSeparators',
@@ -141,6 +141,14 @@ function init(initState: InitState): markdownItModule {
   }
 
   markdownIt.use(sourceLineData)
+
+  if (initState.renderLaTeX || initState.tableCaptions) {
+    // tslint:disable-next-line: no-unsafe-any
+    markdownIt.use(require('./markdown-it-table').makeTable, {
+      inlineDelim,
+      caption: initState.tableCaptions,
+    })
+  }
 
   // tslint:disable:no-unsafe-any
   if (initState.lazyHeaders) markdownIt.use(require('markdown-it-lazy-headers'))

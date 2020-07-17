@@ -548,6 +548,14 @@ export const config: IConfig = {
         default: false,
         order: 120,
       },
+      tableCaptions: {
+        title: 'Enable table captions',
+        description:
+          'Table captions as in Pandoc Markdown, e.g. `: caption` or `Table: caption`, etc.',
+        type: 'boolean',
+        default: false,
+        order: 125,
+      },
       inlineMathSeparators: {
         title: 'Inline math separators',
         description:
@@ -833,6 +841,7 @@ declare module 'atom' {
     'markdown-preview-plus.markdownItConfig.useImplicitFigures': boolean
     'markdown-preview-plus.markdownItConfig.useSubscript': boolean
     'markdown-preview-plus.markdownItConfig.useSuperscript': boolean
+    'markdown-preview-plus.markdownItConfig.tableCaptions': boolean
     'markdown-preview-plus.markdownItConfig.inlineMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig.blockMathSeparators': string[]
     'markdown-preview-plus.markdownItConfig.parseDisplayMathInline': boolean
@@ -855,6 +864,7 @@ declare module 'atom' {
       useImplicitFigures: boolean
       useSubscript: boolean
       useSuperscript: boolean
+      tableCaptions: boolean
       inlineMathSeparators: string[]
       blockMathSeparators: string[]
       parseDisplayMathInline: boolean
@@ -1033,6 +1043,7 @@ declare module 'atom' {
       'markdownItConfig.useImplicitFigures': boolean
       'markdownItConfig.useSubscript': boolean
       'markdownItConfig.useSuperscript': boolean
+      'markdownItConfig.tableCaptions': boolean
       'markdownItConfig.inlineMathSeparators': string[]
       'markdownItConfig.blockMathSeparators': string[]
       'markdownItConfig.parseDisplayMathInline': boolean
@@ -1055,6 +1066,7 @@ declare module 'atom' {
         useImplicitFigures: boolean
         useSubscript: boolean
         useSuperscript: boolean
+        tableCaptions: boolean
         inlineMathSeparators: string[]
         blockMathSeparators: string[]
         parseDisplayMathInline: boolean

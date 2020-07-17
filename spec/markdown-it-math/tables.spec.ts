@@ -1,8 +1,16 @@
 import path = require('path')
 import generate = require('markdown-it-testgen')
 import assert = require('assert')
-import { math_plugin } from '../../src/markdown-it-math/index'
+import {
+  math_plugin as orig_math_plugin,
+  PluginOptions as MathOpts,
+} from '../../src/markdown-it-math'
+import { makeTable } from '../../src/markdown-it-table'
 import mdIt = require('markdown-it')
+
+function math_plugin(md: mdIt, opts: MathOpts) {
+  md.use(orig_math_plugin, opts).use(makeTable, opts)
+}
 
 describe('Tables with default delimiters', function () {
   const md = mdIt({
