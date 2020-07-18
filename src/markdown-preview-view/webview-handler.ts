@@ -25,9 +25,11 @@ export class WebviewHandler extends WebContentsHandler {
     this._element = document.createElement('div')
     this._element.style.width = '100%'
     this._element.style.height = '100%'
+    webview.style.display = 'none'
 
     this._observer = new ResizeObserver(() => {
       const rect = this._element.getBoundingClientRect()
+      webview.style.display = ''
       webview.style.left = `${rect.left}px`
       webview.style.top = `${rect.top}px`
       webview.style.right = `${rect.right}px`
