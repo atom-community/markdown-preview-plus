@@ -39,6 +39,7 @@ const menuItems = [
 
 export class BrowserWindowHandler extends WebContentsHandler {
   private static windows = new Set<BrowserWindow>()
+  private static views = new Map<MarkdownPreviewView, BrowserWindow>()
   private menu?: Electron.Menu
   private readonly window: BrowserWindow
   private readonly _element: HTMLElement
@@ -71,14 +72,30 @@ export class BrowserWindowHandler extends WebContentsHandler {
   public static clean() {
     const windows = Array.from(BrowserWindowHandler.windows)
     for (const w of windows) w.close()
+    const views = Array.from(BrowserWindowHandler.views.keys())
+    for (const v of views) v.destroy()
   }
 
-  public registerElementEvents(element: HTMLElement) {
+  public static viewForURI(uri: string) {
+    return Array.from(BrowserWindowHandler.views.keys()).find(
+      (v) => v.getURI() === uri,
+    )
+  }
+
+  public static windowForView(view: MarkdownPreviewView) {
+    return BrowserWindowHandler.views.get(view)
+  }
+
+  public registerViewEvents(view: MarkdownPreviewView) {
+    BrowserWindowHandler.views.set(view, this.window)
+    const disp = view.onDidDestroy(() => {
+      BrowserWindowHandler.views.delete(view)
+      disp.dispose()
+    })
+    const element = atom.views.getView(view)
     this.disposables.add(
       atom.commands.add(element, {
         'core:save-as': () => {
-          const view = MarkdownPreviewView.viewForElement(element)
-          if (!view) return
           const path = atom.applicationDelegate.showSaveDialog(
             view.getSaveDialogOptions(),
           )

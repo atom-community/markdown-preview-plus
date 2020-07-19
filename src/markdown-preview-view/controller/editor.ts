@@ -2,6 +2,9 @@ import { TextEditor, Grammar, Range } from 'atom'
 import { atomConfig, handlePromise } from '../../util'
 import { MarkdownPreviewController } from './base'
 import { SerializedMPV } from './serialized'
+import { viewForEditor } from '../helpers'
+import { remote } from 'electron'
+import { BrowserWindowHandler } from '../browserwindow-handler'
 
 export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
   public readonly type = 'editor'
@@ -43,7 +46,7 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
     return this.emitter.on('did-change', callback)
   }
 
-  protected didScrollPreview(min: number, max: number) {
+  public didScrollPreview(min: number, max: number) {
     if (!this.shouldScrollSync('preview')) return
     if (min === 0) {
       this.editor.scrollToBufferPosition([min, 0])
@@ -135,17 +138,31 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
     this.emitter.emit('sync', [pos, flash])
   }
 
-  private shouldScrollSync(whatScrolled: 'editor' | 'preview') {
+  private shouldScrollSync(whatScrolled: 'editor' | 'preview'): boolean {
     const config = atomConfig().syncConfig
     if (config.syncEditorOnPreviewScroll && config.syncPreviewOnEditorScroll) {
-      const item = whatScrolled === 'editor' ? this.editor : this
-      const pane = atom.workspace.paneForItem(item)
-      return pane && pane.isActive()
+      if (whatScrolled === 'editor') {
+        const item = this.editor
+        if (!item) return false
+        const win = remote.getCurrentWindow()
+        if (!win.isFocused()) return false
+        const pane = atom.workspace.paneForItem(item)
+        return !!pane && pane.isActive()
+      } else if (whatScrolled === 'preview') {
+        const item = viewForEditor(this.editor)
+        if (!item) return false
+        const pane = atom.workspace.paneForItem(item)
+        if (pane) return pane.isActive()
+        const win = BrowserWindowHandler.windowForView(item)
+        if (win) return win.isFocused()
+        return false
+      }
     } else {
       return (
         (config.syncEditorOnPreviewScroll && whatScrolled === 'preview') ||
         (config.syncPreviewOnEditorScroll && whatScrolled === 'editor')
       )
     }
+    return false
   }
 }

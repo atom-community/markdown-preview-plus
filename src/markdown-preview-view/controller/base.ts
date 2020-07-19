@@ -39,6 +39,10 @@ export abstract class MarkdownPreviewController {
 
   public abstract getGrammar(): Grammar | undefined
 
+  public didScrollPreview(_min: number, _max: number) {
+    /* no-op by default */
+  }
+
   public onDidChange(callback: () => void) {
     return this.emitter.on('did-change', callback)
   }

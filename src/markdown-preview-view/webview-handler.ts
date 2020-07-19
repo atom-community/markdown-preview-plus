@@ -59,6 +59,16 @@ export class WebviewHandler extends WebContentsHandler {
     atom.views.getView(atom.workspace).appendChild(webview)
   }
 
+  public registerViewEvents(view: object) {
+    this._webview.addEventListener('focus', () => {
+      const pane = atom.workspace.paneForItem(view)
+      if (pane) {
+        pane.activate()
+        this._webview.focus()
+      }
+    })
+  }
+
   public get element(): HTMLElement {
     return this._element
   }

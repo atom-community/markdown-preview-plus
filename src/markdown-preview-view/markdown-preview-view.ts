@@ -84,7 +84,7 @@ export class MarkdownPreviewView {
       )
     })
     if (this.handler.element) this.element.appendChild(this.handler.element)
-    this.handler.registerElementEvents(this.element)
+    this.handler.registerViewEvents(this)
     this.disposables.add(this.handler.onDidDestroy(() => this.destroy()))
     this.handleEvents()
   }
@@ -206,10 +206,6 @@ export class MarkdownPreviewView {
     }
   }
 
-  protected didScrollPreview(_min: number, _max: number) {
-    /* noop, implementation in editor preview */
-  }
-
   protected changeHandler = () => {
     handlePromise(this.renderMarkdown())
 
@@ -248,12 +244,17 @@ export class MarkdownPreviewView {
   }
 
   protected async openNewWindow(): Promise<void> {
+    const curController = this.controller
+    // this will get destroyed shortly, but we create it for consistency
+    this.controller = new MarkdownPreviewControllerText(
+      this.getMarkdownSource(),
+    )
+    this.subscribeController()
     const ctrl = new MarkdownPreviewView(
-      this.controller,
+      curController,
       this.renderLaTeX,
       BrowserWindowHandler,
     )
-    // MarkdownPreviewViewEditor.editorMap.set(this.editor, ctrl)
     atom.views.getView(atom.workspace).appendChild(ctrl.element)
     util.destroy(this)
   }
@@ -370,7 +371,7 @@ export class MarkdownPreviewView {
 
       // webview events
       this.handler.emitter.on('did-scroll-preview', ({ min, max }) => {
-        this.didScrollPreview(min, max)
+        this.controller.didScrollPreview(min, max)
       }),
     )
   }

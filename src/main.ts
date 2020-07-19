@@ -129,8 +129,8 @@ async function close(event: CommandEvent<HTMLElement>): Promise<void> {
   const item = MarkdownPreviewView.viewForElement(event.currentTarget)
   if (!item) return
   const pane = atom.workspace.paneForItem(item)
-  if (!pane) return
-  await pane.destroyItem(item)
+  if (!pane) item.destroy()
+  else await pane.destroyItem(item)
 }
 
 async function toggle(editor: TextEditor) {
@@ -142,12 +142,20 @@ function removePreviewForEditor(editor: TextEditor) {
   const item = viewForEditor(editor)
   if (!item) return false
   const previewPane = atom.workspace.paneForItem(item)
-  if (!previewPane) return false
-  if (item !== previewPane.getActiveItem()) {
-    previewPane.activateItem(item)
-    return false
+  if (previewPane) {
+    if (item !== previewPane.getActiveItem()) {
+      previewPane.activateItem(item)
+      return true
+    }
+    util.handlePromise(previewPane.destroyItem(item))
+  } else {
+    const win = BrowserWindowHandler.windowForView(item)
+    if (win && !win.isFocused()) {
+      win.focus()
+      return true
+    }
+    item.destroy()
   }
-  util.handlePromise(previewPane.destroyItem(item))
   return true
 }
 

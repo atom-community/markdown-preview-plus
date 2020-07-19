@@ -144,9 +144,7 @@ export abstract class WebContentsHandler {
 
   public abstract get element(): HTMLElement
 
-  public registerElementEvents(_element: HTMLElement): void {
-    /* not implemented */
-  }
+  public abstract registerViewEvents(_view: object): void
 
   public async runJS<T>(js: string) {
     const contents = await this.contents
