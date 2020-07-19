@@ -5,6 +5,7 @@ export class WebviewHandler extends WebContentsHandler {
   private readonly _element: HTMLElement
   private readonly _webview: HTMLElement
   private readonly _observer: ResizeObserver
+  private _observer2?: MutationObserver
   private readonly dragStart: () => void
   private readonly dragEnd: () => void
   constructor(init: () => void | Promise<void>) {
@@ -28,14 +29,7 @@ export class WebviewHandler extends WebContentsHandler {
     webview.style.display = 'none'
 
     this._observer = new ResizeObserver(() => {
-      const rect = this._element.getBoundingClientRect()
-      webview.style.display = ''
-      webview.style.left = `${rect.left}px`
-      webview.style.top = `${rect.top}px`
-      webview.style.right = `${rect.right}px`
-      webview.style.bottom = `${rect.bottom}px`
-      webview.style.width = `${rect.width}px`
-      webview.style.height = `${rect.height}px`
+      requestAnimationFrame(this.updatePosition.bind(this))
     })
     this._observer.observe(this._element)
 
@@ -67,6 +61,19 @@ export class WebviewHandler extends WebContentsHandler {
         this._webview.focus()
       }
     })
+    const elt = atom.views.getView(view)
+    this._observer2 = new MutationObserver((es) => {
+      for (const e of es) {
+        if (Array.from(e.addedNodes).includes(elt)) this.updatePosition()
+      }
+    })
+    this._observer2.observe(
+      atom.views.getView(atom.workspace).querySelector('atom-workspace-axis')!,
+      {
+        childList: true,
+        subtree: true,
+      },
+    )
   }
 
   public get element(): HTMLElement {
@@ -79,7 +86,19 @@ export class WebviewHandler extends WebContentsHandler {
     window.removeEventListener('dragstart', this.dragStart)
     window.removeEventListener('dragend', this.dragEnd)
     this._observer.disconnect()
+    if (this._observer2) this._observer2.disconnect()
     this._element.remove()
     this._webview.remove()
+  }
+
+  private updatePosition() {
+    const rect = this._element.getBoundingClientRect()
+    this._webview.style.display = ''
+    this._webview.style.left = `${rect.left}px`
+    this._webview.style.top = `${rect.top}px`
+    this._webview.style.right = `${rect.right}px`
+    this._webview.style.bottom = `${rect.bottom}px`
+    this._webview.style.width = `${rect.width}px`
+    this._webview.style.height = `${rect.height}px`
   }
 }
