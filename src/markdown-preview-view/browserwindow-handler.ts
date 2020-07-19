@@ -19,10 +19,10 @@ const menuItems = [
   { label: 'Copy As HTML', command: 'core:copy' },
   { label: 'Save As\u2026', command: 'core:save-as' },
   // { label: 'Print\u2026', command: 'markdown-preview-plus:print' },
-  // {
-  //   label: 'Open in new window',
-  //   command: 'markdown-preview-plus:new-window',
-  // },
+  {
+    label: 'Open in main window',
+    command: 'markdown-preview-plus:main-window',
+  },
   {
     label: 'Open Dev Tools',
     command: 'markdown-preview-plus:open-dev-tools',
@@ -101,6 +101,9 @@ export class BrowserWindowHandler extends WebContentsHandler {
           )
           if (!path) return
           view.saveAs(path)
+        },
+        'markdown-preview-plus:main-window': () => {
+          view.openMainWindow()
         },
       }),
     )

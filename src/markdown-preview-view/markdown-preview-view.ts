@@ -21,6 +21,7 @@ import {
   MarkdownPreviewControllerText,
   SerializedMPV,
 } from './controller'
+import { openPreviewPane } from './helpers'
 
 export { SerializedMPV }
 
@@ -206,6 +207,30 @@ export class MarkdownPreviewView {
     }
   }
 
+  public openMainWindow(): void {
+    const ctrl = this.createNewFromThis(WebviewHandler)
+    handlePromise(openPreviewPane(ctrl))
+    util.destroy(this)
+  }
+
+  protected openNewWindow(): void {
+    const ctrl = this.createNewFromThis(BrowserWindowHandler)
+    atom.views.getView(atom.workspace).appendChild(ctrl.element)
+    util.destroy(this)
+  }
+
+  protected createNewFromThis(
+    handler: new (x: () => Promise<void>) => WebContentsHandler,
+  ) {
+    const curController = this.controller
+    // this will get destroyed shortly, but we create it for consistency
+    this.controller = new MarkdownPreviewControllerText(
+      this.getMarkdownSource(),
+    )
+    this.subscribeController()
+    return new MarkdownPreviewView(curController, this.renderLaTeX, handler)
+  }
+
   protected changeHandler = () => {
     handlePromise(this.renderMarkdown())
 
@@ -241,22 +266,6 @@ export class MarkdownPreviewView {
 
   protected async syncPreview(line: number, flash: boolean) {
     return this.handler.sync(line, flash)
-  }
-
-  protected async openNewWindow(): Promise<void> {
-    const curController = this.controller
-    // this will get destroyed shortly, but we create it for consistency
-    this.controller = new MarkdownPreviewControllerText(
-      this.getMarkdownSource(),
-    )
-    this.subscribeController()
-    const ctrl = new MarkdownPreviewView(
-      curController,
-      this.renderLaTeX,
-      BrowserWindowHandler,
-    )
-    atom.views.getView(atom.workspace).appendChild(ctrl.element)
-    util.destroy(this)
   }
 
   private handleEvents() {
@@ -308,7 +317,7 @@ export class MarkdownPreviewView {
           handlePromise(this.handler.openDevTools())
         },
         'markdown-preview-plus:new-window': () => {
-          handlePromise(this.openNewWindow())
+          this.openNewWindow()
         },
         'markdown-preview-plus:print': () => {
           handlePromise(this.handler.print())
