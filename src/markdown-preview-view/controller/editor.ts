@@ -8,10 +8,11 @@ import { BrowserWindowHandler } from '../browserwindow-handler'
 
 export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
   public readonly type = 'editor'
+  private text = ''
 
   constructor(private editor: TextEditor) {
     super()
-    this.editor = editor
+    this.text = editor.getText()
     handlePromise(this.handleEditorEvents())
   }
 
@@ -35,7 +36,7 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
   }
 
   public async getMarkdownSource() {
-    return this.editor.getText()
+    return this.text
   }
 
   public getGrammar(): Grammar {
@@ -130,6 +131,7 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
   }
 
   private changeHandler() {
+    this.text = this.editor.getText()
     this.emitter.emit('did-change')
   }
 

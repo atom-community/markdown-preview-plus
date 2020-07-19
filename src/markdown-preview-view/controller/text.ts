@@ -8,7 +8,11 @@ export class MarkdownPreviewControllerText extends MarkdownPreviewController {
 
   constructor(private textPromise: Promise<string>) {
     super()
-    handlePromise(textPromise.then((x) => (this.text = x)))
+    handlePromise(
+      textPromise.then((x) => {
+        this.text = x
+      }),
+    )
   }
 
   public serialize(): SerializedMPV {
