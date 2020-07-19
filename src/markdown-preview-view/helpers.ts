@@ -1,10 +1,12 @@
-import { TextEditor } from 'atom'
+import { TextEditor, WorkspaceOpenOptions, ViewModel } from 'atom'
 import { MarkdownPreviewView } from './markdown-preview-view'
 import {
   MarkdownPreviewControllerEditor,
   MarkdownPreviewControllerFile,
+  MarkdownPreviewControllerText,
 } from './controller'
 import { BrowserWindowHandler } from './browserwindow-handler'
+import { atomConfig } from '../util'
 
 export function createEditorView(editor: TextEditor) {
   const mppv = viewForEditor(editor)
@@ -26,6 +28,12 @@ export function createFileView(filePath: string) {
   return new MarkdownPreviewView(new MarkdownPreviewControllerFile(filePath))
 }
 
+export function createTextView(text: string) {
+  return new MarkdownPreviewView(
+    new MarkdownPreviewControllerText(Promise.resolve(text)),
+  )
+}
+
 function itemForURI(uri: string) {
   const pane = atom.workspace.paneForURI(uri)
   if (pane) {
@@ -33,4 +41,16 @@ function itemForURI(uri: string) {
     if (item) return item as MarkdownPreviewView
   }
   return BrowserWindowHandler.viewForURI(uri)
+}
+
+export async function openPreviewPane(view: ViewModel) {
+  const previousActivePane = atom.workspace.getActivePane()
+  const options: WorkspaceOpenOptions = { searchAllPanes: true }
+  const splitConfig = atomConfig().previewConfig.previewSplitPaneDir
+  if (splitConfig !== 'none') {
+    options.split = splitConfig
+  }
+  const res = await atom.workspace.open(view, options)
+  if (!previousActivePane.isDestroyed()) previousActivePane.activate()
+  return res
 }

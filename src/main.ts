@@ -5,10 +5,11 @@ import {
   createEditorView,
   createFileView,
   viewForEditor,
+  openPreviewPane,
+  createTextView,
 } from './markdown-preview-view'
 import {
   TextEditor,
-  WorkspaceOpenOptions,
   CommandEvent,
   CompositeDisposable,
   ContextMenuOptions,
@@ -119,6 +120,8 @@ export function createMarkdownPreviewView(state: SerializedMPV) {
     return new PlaceholderView(state.editorId)
   } else if (state.filePath && util.isFileSync(state.filePath)) {
     return createFileView(state.filePath)
+  } else if (state.text) {
+    return createTextView(state.text)
   }
   return undefined
 }
@@ -160,15 +163,7 @@ function removePreviewForEditor(editor: TextEditor) {
 }
 
 async function addPreviewForEditor(editor: TextEditor) {
-  const previousActivePane = atom.workspace.getActivePane()
-  const options: WorkspaceOpenOptions = { searchAllPanes: true }
-  const splitConfig = util.atomConfig().previewConfig.previewSplitPaneDir
-  if (splitConfig !== 'none') {
-    options.split = splitConfig
-  }
-  const res = await atom.workspace.open(createEditorView(editor), options)
-  if (!previousActivePane.isDestroyed()) previousActivePane.activate()
-  return res
+  return openPreviewPane(createEditorView(editor))
 }
 
 async function previewFile(evt: CommandEvent): Promise<void> {

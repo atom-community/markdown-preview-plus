@@ -219,7 +219,8 @@ ${html.head!.innerHTML}
 ` // Ensure trailing newline
 }
 
-export function destroy(item: object) {
+export function destroy(item: { destroy(): void }) {
   const pane = atom.workspace.paneForItem(item)
   if (pane) handlePromise(pane.destroyItem(item))
+  else item.destroy()
 }
