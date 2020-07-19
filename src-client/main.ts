@@ -93,31 +93,27 @@ ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
 ipcRenderer.on<'scroll-sync'>(
   'scroll-sync',
   (_evt, { firstLine, lastLine }) => {
-    const mean = Math.floor(0.5 * (firstLine + lastLine))
     const slm = atomVars.sourceLineMap
-    let topLine
-    let topBound
-    for (topLine = mean; topLine >= 0; topLine -= 1) {
-      topBound = slm.get(topLine)
-      if (topBound) break
+    const lines = Array.from(slm.keys()).sort((a, b) => a - b)
+    let lowix = lines.findIndex((x) => x >= firstLine)
+    if (lowix > 0) lowix--
+    let highix = lines.findIndex((x) => x >= lastLine)
+    if (highix === -1) highix = lines.length - 1
+    else if (highix < lines.length - 1) highix++
+    const low = lines[lowix]
+    const high = lines[highix]
+    let norm = 0
+    let meanScroll = 0
+    const entries = Array.from(slm.entries()).slice(lowix, highix + 1)
+    for (const [line, item] of entries) {
+      const weight = line <= (high + low) / 2 ? line - low + 1 : high - line + 1
+      norm += weight
+      meanScroll += item.getBoundingClientRect().top * weight
     }
-    if (!topBound) return
-
-    const max = Math.max(...Array.from(slm.keys()))
-    let bottomLine
-    let bottomBound
-    for (bottomLine = mean + 1; bottomLine < max; bottomLine += 1) {
-      bottomBound = slm.get(bottomLine)
-      if (bottomBound) break
-    }
-    if (!bottomBound) return
-    const topScroll = topBound.getBoundingClientRect().top
-    const bottomScroll = bottomBound.getBoundingClientRect().top
-    const frac = (mean - firstLine) / (lastLine - firstLine)
+    if (norm === 0) return
     const offset = document.documentElement!.scrollTop
     const clientHeight = document.documentElement!.clientHeight
-    const top =
-      offset - clientHeight / 2 + topScroll + frac * (bottomScroll - topScroll)
+    const top = offset - clientHeight / 2 + meanScroll / norm
     window.scroll({ top })
   },
 )
