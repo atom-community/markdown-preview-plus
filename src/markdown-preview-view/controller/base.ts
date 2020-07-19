@@ -1,5 +1,5 @@
 import { Grammar, CompositeDisposable, Emitter, Pane } from 'atom'
-import { SerializedMPV } from './markdown-preview-view'
+import { SerializedMPV } from './serialized'
 
 export abstract class MarkdownPreviewController {
   public abstract readonly type: 'editor' | 'file' | 'text'

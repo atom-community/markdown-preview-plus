@@ -14,17 +14,15 @@ import { loadUserMacros } from '../macros-util'
 import { WebContentsHandler } from './web-contents-handler'
 import { modalTextEditorView } from '../modal-text-editor-view'
 import { BrowserWindowHandler } from './browserwindow-handler'
-import { MarkdownPreviewController } from './markdown-preview-view-controller'
-import { MarkdownPreviewViewFile } from './markdown-preview-view-file'
-import { MarkdownPreviewControllerText } from './markdown-preview-view-text'
-import { MarkdownPreviewViewEditor } from './markdown-preview-view-editor'
+import {
+  MarkdownPreviewController,
+  MarkdownPreviewControllerEditor,
+  MarkdownPreviewControllerFile,
+  MarkdownPreviewControllerText,
+  SerializedMPV,
+} from './controller'
 
-export interface SerializedMPV {
-  deserializer: 'markdown-preview-plus/MarkdownPreviewView'
-  editorId?: number
-  filePath?: string
-  text?: string
-}
+export { SerializedMPV }
 
 export class MarkdownPreviewView {
   private static elementMap = new WeakMap<HTMLElement, MarkdownPreviewView>()
@@ -239,7 +237,7 @@ export class MarkdownPreviewView {
     if (!atom.workspace.isTextEditor(ed)) return undefined
     if (this.controller.type !== 'editor') {
       this.controller.destroy()
-      this.controller = new MarkdownPreviewViewEditor(ed)
+      this.controller = new MarkdownPreviewControllerEditor(ed)
       this.subscribeController()
     }
     return ed
@@ -512,7 +510,7 @@ export class MarkdownPreviewView {
         } else {
           const path = this.controller.getPath()
           if (path) {
-            this.controller = new MarkdownPreviewViewFile(path)
+            this.controller = new MarkdownPreviewControllerFile(path)
           } else {
             this.controller = new MarkdownPreviewControllerText(
               this.controller.getMarkdownSource(),

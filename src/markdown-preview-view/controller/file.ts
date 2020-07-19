@@ -1,9 +1,9 @@
 import * as path from 'path'
 import { File } from 'atom'
-import { SerializedMPV } from './markdown-preview-view'
-import { MarkdownPreviewController } from './markdown-preview-view-controller'
+import { SerializedMPV } from './serialized'
+import { MarkdownPreviewController } from './base'
 
-export class MarkdownPreviewViewFile extends MarkdownPreviewController {
+export class MarkdownPreviewControllerFile extends MarkdownPreviewController {
   public readonly type = 'file'
   private file: File
 

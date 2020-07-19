@@ -1,6 +1,6 @@
-import { SerializedMPV } from './markdown-preview-view'
-import { MarkdownPreviewController } from './markdown-preview-view-controller'
-import { handlePromise } from '../util'
+import { SerializedMPV } from './serialized'
+import { MarkdownPreviewController } from './base'
+import { handlePromise } from '../../util'
 
 export class MarkdownPreviewControllerText extends MarkdownPreviewController {
   public readonly type = 'text'

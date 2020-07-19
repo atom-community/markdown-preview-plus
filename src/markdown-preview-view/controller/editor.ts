@@ -1,9 +1,9 @@
 import { TextEditor, Grammar, Range } from 'atom'
-import { SerializedMPV } from './markdown-preview-view'
-import { atomConfig, handlePromise } from '../util'
-import { MarkdownPreviewController } from './markdown-preview-view-controller'
+import { atomConfig, handlePromise } from '../../util'
+import { MarkdownPreviewController } from './base'
+import { SerializedMPV } from './serialized'
 
-export class MarkdownPreviewViewEditor extends MarkdownPreviewController {
+export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
   public readonly type = 'editor'
 
   constructor(private editor: TextEditor) {
