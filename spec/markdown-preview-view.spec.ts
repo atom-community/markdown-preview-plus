@@ -3,8 +3,8 @@ import * as fs from 'fs'
 import * as temp from 'temp'
 import {
   MarkdownPreviewView,
-  MarkdownPreviewViewFile,
-  MarkdownPreviewViewEditor,
+  createFileView,
+  createEditorView,
 } from '../src/markdown-preview-view'
 import { expect, assert } from 'chai'
 import sinon from 'sinon'
@@ -32,7 +32,7 @@ describe('MarkdownPreviewView', function () {
   const previews: Set<MarkdownPreviewView> = new Set()
 
   const createMarkdownPreviewViewFile = async function (filePath: string) {
-    const mpv = new MarkdownPreviewViewFile(filePath)
+    const mpv = createFileView(filePath)
     assert(mpv.element !== undefined)
     window.workspaceDiv.appendChild(mpv.element!)
     previews.add(mpv)
@@ -40,7 +40,7 @@ describe('MarkdownPreviewView', function () {
     return mpv
   }
   const createMarkdownPreviewViewEditor = async function (editor: TextEditor) {
-    const mpv = MarkdownPreviewViewEditor.create(editor)
+    const mpv = createEditorView(editor)
     assert(mpv.element !== undefined)
     window.workspaceDiv.appendChild(mpv.element!)
     previews.add(mpv)
@@ -903,7 +903,7 @@ var x = 0;
   })
 
   describe('toc', function () {
-    let preview: MarkdownPreviewViewFile
+    let preview: MarkdownPreviewView
     let config: Partial<ConfigValues['markdown-preview-plus.markdownItConfig']>
     let toc: HTMLDivElement
     let headers: string[]

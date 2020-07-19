@@ -4,10 +4,6 @@ import sinonChai from 'sinon-chai'
 import { MarkdownPreviewView } from '../src/markdown-preview-view'
 
 use(sinonChai)
-before(function () {
-  console.log('extending setting timeout')
-  this.timeout(30000)
-})
 
 declare global {
   namespace Chai {
@@ -86,7 +82,7 @@ export async function expectPreviewInSplitPane() {
     .getActiveItem() as MarkdownPreviewView
   await preview.initialRenderPromise()
 
-  expect(preview.classname).to.be.equal('MarkdownPreviewViewEditor')
+  expect(preview.type).to.be.equal('editor')
   expect(preview.getPath()).to.equal(
     atom.workspace.getActiveTextEditor()!.getPath(),
   )

@@ -4,7 +4,7 @@ import * as fs from 'fs'
 import * as wrench from 'fs-extra'
 import * as temp from 'temp'
 import {
-  MarkdownPreviewViewFile,
+  createFileView,
   MarkdownPreviewView,
 } from '../src/markdown-preview-view'
 import pandocHelper = require('../src/pandoc-helper')
@@ -27,7 +27,7 @@ describe('MarkdownPreviewView when Pandoc is enabled', function () {
   const previews: Set<MarkdownPreviewView> = new Set()
 
   const createMarkdownPreviewViewFile = function (filePath: string) {
-    const mpv = new MarkdownPreviewViewFile(filePath)
+    const mpv = createFileView(filePath)
     assert(mpv.element !== undefined)
     window.workspaceDiv.appendChild(mpv.element!)
     previews.add(mpv)

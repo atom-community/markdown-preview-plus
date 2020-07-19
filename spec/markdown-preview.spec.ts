@@ -4,7 +4,7 @@ import * as temp from 'temp'
 import * as wrench from 'fs-extra'
 import {
   MarkdownPreviewView,
-  MarkdownPreviewViewFile,
+  createFileView,
 } from '../src/markdown-preview-view'
 
 import {
@@ -512,9 +512,7 @@ world</p>
   })
   describe('saveConfig configuration', () => {
     beforeEach(async () => {
-      preview = new MarkdownPreviewViewFile(
-        path.join(tempPath, 'subdir', 'file.markdown'),
-      )
+      preview = createFileView(path.join(tempPath, 'subdir', 'file.markdown'))
       atom.views
         .getView(atom.workspace)
         .appendChild(atom.views.getView(preview))
@@ -782,7 +780,7 @@ world</p>
       )
 
       const preview1 = previewPane.getActiveItem() as MarkdownPreviewView
-      expect(preview1.classname).to.be.equal('MarkdownPreviewViewEditor')
+      expect(preview1.type).to.be.equal('editor')
       expect(preview1.getPath()).to.equal(
         (editorPane.getActiveItem() as TextEditor).getPath(),
       )
@@ -966,7 +964,7 @@ var x = y;
       await atom.workspace.open(`markdown-preview-plus://file/${filePath}`)
 
       preview = atom.workspace.getActivePaneItem() as any
-      expect(preview.classname).to.be.equal('MarkdownPreviewViewFile')
+      expect(preview.type).to.be.equal('file')
 
       const spy = sinonPrivateSpy<typeof preview['renderMarkdownText']>(
         preview,
