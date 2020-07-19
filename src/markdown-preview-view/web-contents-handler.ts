@@ -67,6 +67,7 @@ export abstract class WebContentsHandler {
   private readonly id: number = ++WebContentsHandler._id
   private readonly listeners: { [key: string]: Function } = {}
   private readonly contents: Promise<WebContents>
+  private stylesReady = false
 
   constructor(
     contents: Promise<WebContents>,
@@ -120,6 +121,18 @@ export abstract class WebContentsHandler {
       atom.styles.onDidUpdateStyleElement(() => {
         handlePromise(this.updateStyles())
       }),
+      atom.config.onDidChange('markdown-preview-plus.useGitHubStyle', () => {
+        handlePromise(this.updateStyles())
+      }),
+      atom.config.onDidChange('markdown-preview-plus.syntaxThemeName', () => {
+        handlePromise(this.updateStyles())
+      }),
+      atom.config.onDidChange(
+        'markdown-preview-plus.importPackageStyles',
+        () => {
+          handlePromise(this.updateStyles())
+        },
+      ),
     )
 
     this.contents = contents.then(this.initializeContents)
@@ -284,7 +297,8 @@ export abstract class WebContentsHandler {
     c.stopFindInPage('keepSelection')
   }
 
-  public async updateStyles() {
+  protected async updateStyles() {
+    if (!this.stylesReady) return
     return this.send<'style'>('style', { styles: getPreviewStyles(true) })
   }
 
@@ -362,7 +376,7 @@ export abstract class WebContentsHandler {
       if (this.destroyed) return
       contents.send<'set-id'>('set-id', this.id)
       contents.setZoomLevel(this.zoomLevel)
-
+      this.stylesReady = true
       handlePromise(this.updateStyles().then(this.initCont))
     }
     await onload()

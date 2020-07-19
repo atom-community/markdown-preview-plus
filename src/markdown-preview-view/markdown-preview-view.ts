@@ -13,30 +13,41 @@ import { saveAsPDF } from './pdf-export-util'
 import { loadUserMacros } from '../macros-util'
 import { WebContentsHandler } from './web-contents-handler'
 import { modalTextEditorView } from '../modal-text-editor-view'
+import { BrowserWindowHandler } from './browserwindow-handler'
+import { MarkdownPreviewController } from './markdown-preview-view-controller'
+import { MarkdownPreviewViewFile } from './markdown-preview-view-file'
+import { MarkdownPreviewControllerText } from './markdown-preview-view-text'
+import { MarkdownPreviewViewEditor } from './markdown-preview-view-editor'
 
 export interface SerializedMPV {
   deserializer: 'markdown-preview-plus/MarkdownPreviewView'
   editorId?: number
   filePath?: string
+  text?: string
 }
 
-export abstract class MarkdownPreviewView {
+export class MarkdownPreviewView {
   private static elementMap = new WeakMap<HTMLElement, MarkdownPreviewView>()
   // used for tests
-  public abstract readonly classname: string
+  public get type() {
+    return this.controller.type
+  }
   public readonly element: HTMLElement
   protected emitter: Emitter<{
     'did-change-title': undefined
     'did-change-markdown': undefined
     'did-init': undefined
+    'did-destroy': undefined
   }> = new Emitter()
   protected disposables = new CompositeDisposable()
+  protected controllerDisposables?: CompositeDisposable
   protected destroyed = false
   protected readonly handler: WebContentsHandler
   private loading: boolean = true
   private _initialRenderPromsie: Promise<void>
 
-  protected constructor(
+  constructor(
+    private controller: MarkdownPreviewController,
     private renderLaTeX: boolean = atomConfig().mathConfig
       .enableLatexRenderingByDefault,
     handlerConstructor: new (
@@ -61,6 +72,7 @@ export abstract class MarkdownPreviewView {
     this.element.tabIndex = -1
     this.element.classList.add('markdown-preview-plus')
     MarkdownPreviewView.elementMap.set(this.element, this)
+    this.subscribeController()
     this._initialRenderPromsie = new Promise((resolve) => {
       this.disposables.add(
         this.emitter.on('did-init', () => {
@@ -83,15 +95,23 @@ export abstract class MarkdownPreviewView {
     return MarkdownPreviewView.elementMap.get(element)
   }
 
-  public abstract serialize(): SerializedMPV
+  public serialize(): SerializedMPV {
+    return this.controller.serialize()
+  }
 
   public destroy() {
     if (this.destroyed) return
     this.destroyed = true
+    this.emitter.emit('did-destroy')
     this.disposables.dispose()
+    this.controller.destroy()
     this.handler.destroy()
     MarkdownPreviewView.elementMap.delete(this.element)
     this.element.remove()
+  }
+
+  public onDidDestroy(callback: () => void) {
+    return this.emitter.on('did-destroy', callback)
   }
 
   public async runJS<T>(js: string) {
@@ -115,7 +135,9 @@ export abstract class MarkdownPreviewView {
     this.changeHandler()
   }
 
-  public abstract getTitle(): string
+  public getTitle(): string {
+    return this.controller.getTitle()
+  }
 
   public getDefaultLocation(): 'left' | 'right' | 'bottom' | 'center' {
     return atomConfig().previewConfig.previewDock
@@ -125,9 +147,13 @@ export abstract class MarkdownPreviewView {
     return 'markdown'
   }
 
-  public abstract getURI(): string
+  public getURI(): string {
+    return this.controller.getURI()
+  }
 
-  public abstract getPath(): string | undefined
+  public getPath(): string | undefined {
+    return this.controller.getPath()
+  }
 
   public getSaveDialogOptions() {
     let defaultPath = this.getPath()
@@ -195,26 +221,44 @@ export abstract class MarkdownPreviewView {
     }
   }
 
-  protected abstract async getMarkdownSource(): Promise<string>
+  protected async getMarkdownSource(): Promise<string> {
+    return this.controller.getMarkdownSource()
+  }
 
-  protected abstract getGrammar(): Grammar | undefined
+  protected getGrammar(): Grammar | undefined {
+    return this.controller.getGrammar()
+  }
 
-  protected openSource(initialLine?: number) {
+  protected async openSource(initialLine?: number) {
     const path = this.getPath()
-    if (path === undefined) return
-    handlePromise(
-      atom.workspace.open(path, {
-        initialLine,
-        searchAllPanes: true,
-      }),
-    )
+    if (path === undefined) return undefined
+    const ed = await atom.workspace.open(path, {
+      initialLine,
+      searchAllPanes: true,
+    })
+    if (!atom.workspace.isTextEditor(ed)) return undefined
+    if (this.controller.type !== 'editor') {
+      this.controller.destroy()
+      this.controller = new MarkdownPreviewViewEditor(ed)
+      this.subscribeController()
+    }
+    return ed
   }
 
   protected async syncPreview(line: number, flash: boolean) {
     return this.handler.sync(line, flash)
   }
 
-  protected abstract async openNewWindow(): Promise<void>
+  protected async openNewWindow(): Promise<void> {
+    const ctrl = new MarkdownPreviewView(
+      this.controller,
+      this.renderLaTeX,
+      BrowserWindowHandler,
+    )
+    // MarkdownPreviewViewEditor.editorMap.set(this.editor, ctrl)
+    atom.views.getView(atom.workspace).appendChild(ctrl.element)
+    util.destroy(this)
+  }
 
   private handleEvents() {
     this.disposables.add(
@@ -279,49 +323,15 @@ export abstract class MarkdownPreviewView {
         'markdown-preview-plus:reset-zoom': () => {
           handlePromise(this.handler.resetZoom())
         },
-        'markdown-preview-plus:sync-source': async (_event) => {
-          const line = await this.handler.syncSource()
-          this.openSource(line)
-        },
-        'markdown-preview-plus:search-selection-in-source': async (_event) => {
-          const text = await this.handler.getSelection()
-          if (!text) return
-          const path = this.getPath()
-          if (path === undefined) return
+        'markdown-preview-plus:sync-source': (_event) => {
           handlePromise(
-            atom.workspace
-              .open(path, { searchAllPanes: true })
-              .then((editor) => {
-                if (!atom.workspace.isTextEditor(editor)) return
-                const rxs = text
-                  .replace(/[\/\\^$*+?.()|[\]{}]/g, '\\$&')
-                  .replace(/\n+$/, '')
-                  .replace(/\s+/g, '\\s+')
-                const rx = new RegExp(rxs)
-                let found = false
-                editor.scanInBufferRange(
-                  rx,
-                  new Range(
-                    editor.getCursors()[0].getBufferPosition(),
-                    editor.getBuffer().getRange().end,
-                  ),
-                  (it) => {
-                    editor.scrollToBufferPosition(it.range.start)
-                    editor.setSelectedBufferRange(it.range)
-                    found = true
-                    it.stop()
-                  },
-                )
-                if (found) return
-                editor.scan(rx, (it) => {
-                  editor.scrollToBufferPosition(it.range.start)
-                  editor.setSelectedBufferRange(it.range)
-                  it.stop()
-                })
-              }),
+            this.handler.syncSource().then((line) => this.openSource(line)),
           )
         },
-        'markdown-preview-plus:find-next': async () => {
+        'markdown-preview-plus:search-selection-in-source': () => {
+          handlePromise(this.searchSelectionInSource())
+        },
+        'markdown-preview-plus:find-next': () => {
           handlePromise(this.handler.findNext())
         },
         'markdown-preview-plus:find-in-preview': () => {
@@ -358,18 +368,6 @@ export abstract class MarkdownPreviewView {
       atom.config.onDidChange(
         'markdown-preview-plus.renderer',
         this.changeHandler,
-      ),
-      atom.config.onDidChange('markdown-preview-plus.useGitHubStyle', () => {
-        handlePromise(this.handler.updateStyles())
-      }),
-      atom.config.onDidChange('markdown-preview-plus.syntaxThemeName', () => {
-        handlePromise(this.handler.updateStyles())
-      }),
-      atom.config.onDidChange(
-        'markdown-preview-plus.importPackageStyles',
-        () => {
-          handlePromise(this.handler.updateStyles())
-        },
       ),
 
       // webview events
@@ -461,5 +459,83 @@ export abstract class MarkdownPreviewView {
       const src = await this.getMarkdownSource()
       await copyHtml(src, this.getPath(), this.renderLaTeX)
     }
+  }
+
+  private async searchSelectionInSource() {
+    const text = await this.handler.getSelection()
+    if (!text) return
+    const editor = await this.openSource()
+    if (!editor) return
+    const rxs = text
+      .replace(/[\/\\^$*+?.()|[\]{}]/g, '\\$&')
+      .replace(/\n+$/, '')
+      .replace(/\s+/g, '\\s+')
+    const rx = new RegExp(rxs)
+    let found = false
+    editor.scanInBufferRange(
+      rx,
+      new Range(
+        editor.getCursors()[0].getBufferPosition(),
+        editor.getBuffer().getRange().end,
+      ),
+      (it) => {
+        editor.scrollToBufferPosition(it.range.start)
+        editor.setSelectedBufferRange(it.range)
+        found = true
+        it.stop()
+      },
+    )
+    if (found) return
+    editor.scan(rx, (it) => {
+      editor.scrollToBufferPosition(it.range.start)
+      editor.setSelectedBufferRange(it.range)
+      it.stop()
+    })
+  }
+
+  private subscribeController() {
+    if (this.controllerDisposables) {
+      this.disposables.remove(this.controllerDisposables)
+      this.controllerDisposables.dispose()
+    }
+    this.controllerDisposables = new CompositeDisposable()
+    this.disposables.add(this.controllerDisposables)
+    this.controllerDisposables.add(
+      this.controller.onDidChange(this.changeHandler),
+      this.controller.onDidChangePath((path) => {
+        handlePromise(this.handler.setBasePath(path))
+        this.emitter.emit('did-change-title')
+      }),
+      this.controller.onDidDestroy(() => {
+        if (atomConfig().previewConfig.closePreviewWithEditor) {
+          util.destroy(this)
+        } else {
+          const path = this.controller.getPath()
+          if (path) {
+            this.controller = new MarkdownPreviewViewFile(path)
+          } else {
+            this.controller = new MarkdownPreviewControllerText(
+              this.controller.getMarkdownSource(),
+            )
+          }
+          this.subscribeController()
+        }
+      }),
+      this.controller.onActivate((edPane) => {
+        const pane = atom.workspace.paneForItem(this)
+        if (!pane) return
+        if (pane === edPane) return
+        pane.activateItem(this)
+      }),
+      this.controller.onScrollSync(([first, last]) => {
+        handlePromise(this.handler.scrollSync(first, last))
+      }),
+      this.controller.onSearch((text) => {
+        handlePromise(this.handler.search(text))
+      }),
+      this.controller.onSync(([pos, flash]) => {
+        handlePromise(this.syncPreview(pos, flash))
+      }),
+    )
   }
 }

@@ -1,21 +1,20 @@
 import * as path from 'path'
 import { File } from 'atom'
-import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
-import { WebContentsHandler } from './web-contents-handler'
-import * as util from './util'
-import { BrowserWindowHandler } from './browserwindow-handler'
+import { SerializedMPV } from './markdown-preview-view'
+import { MarkdownPreviewController } from './markdown-preview-view-controller'
 
-export class MarkdownPreviewViewFile extends MarkdownPreviewView {
-  public readonly classname = 'MarkdownPreviewViewFile'
+export class MarkdownPreviewViewFile extends MarkdownPreviewController {
+  public readonly type = 'file'
   private file: File
 
-  constructor(
-    filePath: string,
-    handler?: new (x: () => Promise<void>) => WebContentsHandler,
-  ) {
-    super(undefined, handler)
+  constructor(filePath: string) {
+    super()
     this.file = new File(filePath)
-    this.disposables.add(this.file.onDidChange(this.changeHandler))
+    this.disposables.add(
+      this.file.onDidChange(() => {
+        this.emitter.emit('did-change')
+      }),
+    )
   }
 
   public serialize(): SerializedMPV {
@@ -38,21 +37,11 @@ export class MarkdownPreviewViewFile extends MarkdownPreviewView {
     return this.file.getPath()
   }
 
-  protected getGrammar(): undefined {
+  public getGrammar(): undefined {
     return
   }
 
-  protected async openNewWindow(): Promise<void> {
-    // tslint:disable-next-line: no-unused-expression
-    const ctrl = new MarkdownPreviewViewFile(
-      this.file.getPath(),
-      BrowserWindowHandler,
-    )
-    atom.views.getView(atom.workspace).appendChild(ctrl.element)
-    util.destroy(this)
-  }
-
-  protected async getMarkdownSource() {
+  public async getMarkdownSource() {
     const res = await this.file.read()
     if (res !== null) return res
     else return ''

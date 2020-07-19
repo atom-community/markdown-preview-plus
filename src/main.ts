@@ -1,9 +1,10 @@
 import * as url from 'url'
 import {
   SerializedMPV,
-  MarkdownPreviewViewFile,
-  MarkdownPreviewViewEditor,
   MarkdownPreviewView,
+  createEditorView,
+  createFileView,
+  viewForEditor,
 } from './markdown-preview-view'
 import {
   TextEditor,
@@ -82,7 +83,7 @@ export function activate() {
     atom.commands.add('atom-text-editor', {
       'markdown-preview-plus:toggle-render-latex': (e) => {
         const editor = e.currentTarget.getModel()
-        const view = MarkdownPreviewViewEditor.viewForEditor(editor)
+        const view = viewForEditor(editor)
         if (view) view.toggleRenderLatex()
       },
     }),
@@ -117,7 +118,7 @@ export function createMarkdownPreviewView(state: SerializedMPV) {
   if (state.editorId !== undefined) {
     return new PlaceholderView(state.editorId)
   } else if (state.filePath && util.isFileSync(state.filePath)) {
-    return new MarkdownPreviewViewFile(state.filePath)
+    return createFileView(state.filePath)
   }
   return undefined
 }
@@ -138,7 +139,7 @@ async function toggle(editor: TextEditor) {
 }
 
 function removePreviewForEditor(editor: TextEditor) {
-  const item = MarkdownPreviewViewEditor.viewForEditor(editor)
+  const item = viewForEditor(editor)
   if (!item) return false
   const previewPane = atom.workspace.paneForItem(item)
   if (!previewPane) return false
@@ -157,10 +158,7 @@ async function addPreviewForEditor(editor: TextEditor) {
   if (splitConfig !== 'none') {
     options.split = splitConfig
   }
-  const res = await atom.workspace.open(
-    MarkdownPreviewViewEditor.create(editor),
-    options,
-  )
+  const res = await atom.workspace.open(createEditorView(editor), options)
   if (!previousActivePane.isDestroyed()) previousActivePane.activate()
   return res
 }
@@ -337,7 +335,7 @@ function opener(uriToOpen: string) {
   }
 
   if (uri.hostname === 'file') {
-    return new MarkdownPreviewViewFile(pathname.slice(1))
+    return createFileView(pathname.slice(1))
   } else if (uri.hostname === 'editor') {
     const editorId = parseInt(pathname.slice(1), 10)
     const editor = atom.workspace
@@ -350,7 +348,7 @@ function opener(uriToOpen: string) {
       )
       return undefined
     }
-    return MarkdownPreviewViewEditor.create(editor)
+    return createEditorView(editor)
   } else {
     throw new Error(
       `Tried to open markdown-preview-plus with uri ${uriToOpen}. This is not supported. Please report this error.`,

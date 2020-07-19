@@ -1,45 +1,15 @@
 import { TextEditor, Grammar, Range } from 'atom'
-import * as util from './util'
-import { MarkdownPreviewView, SerializedMPV } from './markdown-preview-view'
+import { SerializedMPV } from './markdown-preview-view'
 import { atomConfig, handlePromise } from '../util'
-import { WebContentsHandler } from './web-contents-handler'
-import { BrowserWindowHandler } from './browserwindow-handler'
+import { MarkdownPreviewController } from './markdown-preview-view-controller'
 
-export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
-  private static editorMap = new WeakMap<
-    TextEditor,
-    MarkdownPreviewViewEditor
-  >()
+export class MarkdownPreviewViewEditor extends MarkdownPreviewController {
+  public readonly type = 'editor'
 
-  public readonly classname = 'MarkdownPreviewViewEditor'
-  private lastRenderedMarkdownText = ''
-
-  private constructor(
-    private editor: TextEditor,
-    handler?: new (x: () => Promise<void>) => WebContentsHandler,
-  ) {
-    super(undefined, handler)
+  constructor(private editor: TextEditor) {
+    super()
+    this.editor = editor
     handlePromise(this.handleEditorEvents())
-  }
-
-  public static create(editor: TextEditor) {
-    let mppv = MarkdownPreviewViewEditor.editorMap.get(editor)
-    if (!mppv) {
-      mppv = new MarkdownPreviewViewEditor(editor)
-      MarkdownPreviewViewEditor.editorMap.set(editor, mppv)
-    }
-    return mppv
-  }
-
-  public static viewForEditor(editor: TextEditor) {
-    return MarkdownPreviewViewEditor.editorMap.get(editor)
-  }
-
-  public destroy() {
-    super.destroy()
-    if (MarkdownPreviewViewEditor.editorMap.get(this.editor) === this) {
-      MarkdownPreviewViewEditor.editorMap.delete(this.editor)
-    }
   }
 
   public serialize(): SerializedMPV {
@@ -61,15 +31,16 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     return this.editor.getPath()
   }
 
-  protected async getMarkdownSource() {
-    if (this.editor.isAlive()) {
-      this.lastRenderedMarkdownText = this.editor.getText()
-    }
-    return this.lastRenderedMarkdownText
+  public async getMarkdownSource() {
+    return this.editor.getText()
   }
 
-  protected getGrammar(): Grammar {
+  public getGrammar(): Grammar {
     return this.editor.getGrammar()
+  }
+
+  public onDidChange(callback: () => void) {
+    return this.emitter.on('did-change', callback)
   }
 
   protected didScrollPreview(min: number, max: number) {
@@ -92,16 +63,6 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
     }
   }
 
-  protected async openNewWindow(): Promise<void> {
-    const ctrl = new MarkdownPreviewViewEditor(
-      this.editor,
-      BrowserWindowHandler,
-    )
-    MarkdownPreviewViewEditor.editorMap.set(this.editor, ctrl)
-    atom.views.getView(atom.workspace).appendChild(ctrl.element)
-    util.destroy(this)
-  }
-
   protected openSource(initialLine?: number) {
     if (initialLine !== undefined) {
       this.editor.setCursorBufferPosition([initialLine, 0])
@@ -117,11 +78,7 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
       atom.workspace.onDidChangeActiveTextEditor((ed) => {
         if (atomConfig().previewConfig.activatePreviewWithEditor) {
           if (ed === this.editor) {
-            const pane = atom.workspace.paneForItem(this)
-            if (!pane) return
-            const edPane = atom.workspace.paneForItem(ed)
-            if (pane === edPane) return
-            pane.activateItem(this)
+            this.emitter.emit('activate', atom.workspace.paneForItem(ed))
           }
         }
       }),
@@ -134,13 +91,10 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         }
       }),
       this.editor.onDidChangePath(() => {
-        handlePromise(this.handler.setBasePath(this.getPath()))
-        this.emitter.emit('did-change-title')
+        this.emitter.emit('did-change-path', this.getPath())
       }),
       this.editor.onDidDestroy(() => {
-        if (atomConfig().previewConfig.closePreviewWithEditor) {
-          util.destroy(this)
-        }
+        this.destroy()
       }),
       this.editor.getBuffer().onDidSave(() => {
         if (!atomConfig().previewConfig.liveUpdate) {
@@ -155,12 +109,10 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
       atom.views.getView(this.editor).onDidChangeScrollTop(() => {
         if (!this.shouldScrollSync('editor')) return
         const [first, last] = this.editor.getVisibleRowRange()
-        handlePromise(
-          this.handler.scrollSync(
-            this.editor.bufferRowForScreenRow(first),
-            this.editor.bufferRowForScreenRow(last),
-          ),
-        )
+        this.emitter.emit('scroll-sync', [
+          this.editor.bufferRowForScreenRow(first),
+          this.editor.bufferRowForScreenRow(last),
+        ])
       }),
       atom.commands.add(atom.views.getView(this.editor), {
         'markdown-preview-plus:sync-preview': () => {
@@ -168,15 +120,19 @@ export class MarkdownPreviewViewEditor extends MarkdownPreviewView {
         },
         'markdown-preview-plus:search-selection-in-preview': () => {
           const text = this.editor.getSelectedText()
-          handlePromise(this.handler.search(text))
+          this.emitter.emit('search', text)
         },
       }),
     )
   }
 
+  private changeHandler() {
+    this.emitter.emit('did-change')
+  }
+
   private syncPreviewHelper(flash: boolean) {
     const pos = this.editor.getCursorBufferPosition().row
-    handlePromise(this.syncPreview(pos, flash))
+    this.emitter.emit('sync', [pos, flash])
   }
 
   private shouldScrollSync(whatScrolled: 'editor' | 'preview') {

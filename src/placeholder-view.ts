@@ -1,10 +1,10 @@
 import { editorForId } from './markdown-preview-view/util'
-import { MarkdownPreviewViewEditor } from './markdown-preview-view'
 import { handlePromise } from './util'
+import { MarkdownPreviewView, createEditorView } from './markdown-preview-view'
 
 export class PlaceholderView {
   public element = document.createElement('div')
-  private _view?: MarkdownPreviewViewEditor
+  private _view?: MarkdownPreviewView
   constructor(private editorId: number) {
     this.element.classList.add('markdown-spinner')
     setImmediate(this.initialize)
@@ -28,7 +28,7 @@ export class PlaceholderView {
       return
     }
     const pane = atom.workspace.paneForItem(this)
-    this._view = MarkdownPreviewViewEditor.create(editor)
+    this._view = createEditorView(editor)
     if (!pane) return
     pane.addItem(this._view)
     handlePromise(pane.destroyItem(this))
