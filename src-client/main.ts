@@ -71,25 +71,6 @@ ipcRenderer.on<'set-native-keys'>('set-native-keys', (_evt, val) => {
   nativePageScrollKeys = val
 })
 
-ipcRenderer.on<'set-source-map'>('set-source-map', (_evt, { map }) => {
-  const root = document.querySelector('div.update-preview')
-  if (!root) throw new Error('No root element!')
-  const slsm = new Map<number, Element>()
-  const rsm = new WeakMap<Element, number[]>()
-  for (const [lineS, path] of Object.entries(map)) {
-    const line = parseInt(lineS, 10)
-    const elem = util.resolveElement(root, path)
-    if (elem) {
-      slsm.set(line, elem)
-      const rsmel = rsm.get(elem)
-      if (rsmel) rsmel.push(line)
-      else rsm.set(elem, [line])
-    }
-  }
-  atomVars.sourceLineMap = slsm
-  atomVars.revSourceMap = rsm
-})
-
 ipcRenderer.on<'scroll-sync'>(
   'scroll-sync',
   (_evt, { firstLine, lastLine }) => {
@@ -173,7 +154,7 @@ let updatePreview: UpdatePreview | undefined
 
 ipcRenderer.on<'update-preview'>(
   'update-preview',
-  async (_event, { id, html, renderLaTeX }) => {
+  async (_event, { id, html, renderLaTeX, map }) => {
     // div.update-preview created after constructor st UpdatePreview cannot
     // be instanced in the constructor
     const preview = document.querySelector('div.update-preview')
@@ -199,6 +180,22 @@ ipcRenderer.on<'update-preview'>(
       }
     }
     await updatePreview.update(domDocument.body, renderLaTeX)
+    if (map) {
+      const slsm = new Map<number, Element>()
+      const rsm = new WeakMap<Element, number[]>()
+      for (const [lineS, path] of Object.entries(map)) {
+        const line = parseInt(lineS, 10)
+        const elem = util.resolveElement(preview, path)
+        if (elem) {
+          slsm.set(line, elem)
+          const rsmel = rsm.get(elem)
+          if (rsmel) rsmel.push(line)
+          else rsm.set(elem, [line])
+        }
+      }
+      atomVars.sourceLineMap = slsm
+      atomVars.revSourceMap = rsm
+    }
     ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
       'atom-markdown-preview-plus-ipc-request-reply',
       handlerId,

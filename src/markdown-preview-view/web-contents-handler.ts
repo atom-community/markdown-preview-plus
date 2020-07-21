@@ -169,23 +169,22 @@ export abstract class WebContentsHandler {
     return this.emitter.on('did-destroy', callback)
   }
 
-  public async update(html: string, renderLaTeX: boolean) {
+  public async update(
+    html: string,
+    renderLaTeX: boolean,
+    map?: { [line: number]: { tag: string; index: number }[] },
+  ) {
     if (this.destroyed) return undefined
     return this.runRequest('update-preview', {
       html,
       renderLaTeX,
+      map,
     })
   }
 
   public async fullyReady() {
     if (this.destroyed) return
     return this.runRequest('await-fully-ready', {})
-  }
-
-  public async setSourceMap(map: {
-    [line: number]: { tag: string; index: number }[]
-  }) {
-    return this.send<'set-source-map'>('set-source-map', { map })
   }
 
   public async setBasePath(path?: string) {

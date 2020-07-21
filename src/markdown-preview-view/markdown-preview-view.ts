@@ -418,8 +418,6 @@ export class MarkdownPreviewView {
       await this.handler.update(
         domDocument.documentElement!.outerHTML,
         this.renderLaTeX,
-      )
-      await this.handler.setSourceMap(
         util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),
       )
       this.emitter.emit('did-change-markdown')

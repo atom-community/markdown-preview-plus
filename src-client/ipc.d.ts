@@ -6,6 +6,7 @@ export interface ChannelMap {
     id: number
     html: string
     renderLaTeX: boolean
+    map?: { [line: number]: Array<{ tag: string; index: number }> }
   }
   error: { msg: string }
   init: {
@@ -17,9 +18,6 @@ export interface ChannelMap {
   )
   'set-native-keys': boolean
   'set-base-path': { path?: string }
-  'set-source-map': {
-    map: { [line: number]: Array<{ tag: string; index: number }> }
-  }
   'scroll-sync': { firstLine: number; lastLine: number }
   'set-id': number
   // actual requests
