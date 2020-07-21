@@ -1021,11 +1021,7 @@ var x = y;
       expect(preview.getTitle()).to.equal('file.markdown Preview')
       preview.onDidChangeTitle(titleChangedCallback)
       const filePath = atom.workspace.getActiveTextEditor()!.getPath()!
-      if (process.platform !== 'linux') {
-        fs.renameSync(filePath, path.join(path.dirname(filePath), 'file2.md'))
-      } else {
-        await ted.saveAs(path.join(path.dirname(filePath), 'file2.md'))
-      }
+      await ted.saveAs(path.join(path.dirname(filePath), 'file2.md'))
 
       await waitsFor(() => preview.getTitle() === 'file2.md Preview')
 
