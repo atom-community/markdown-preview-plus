@@ -6,21 +6,8 @@ import { atomConfig } from './util'
 /**
  * Sets local mathjaxPath if available
  */
-const getMathJaxPath = (function () {
-  let cached: string | null = null
-  return function () {
-    if (cached !== null) {
-      return cached
-    }
-    try {
-      return (cached = window[
-        'atom-markdown-preview-plus-helpers'
-      ].require.resolve('mathjax'))
-    } catch (e) {
-      return ''
-    }
-  }
-})()
+const mathJaxPath =
+  'atom://markdown-preview-plus/node_modules/mathjax/MathJax.js'
 
 function findFileRecursive(filePath: string, fileName: string): string | false {
   const bibFile = path.join(filePath, '../', fileName)
@@ -52,12 +39,11 @@ function setPandocOptions(filePath: string | undefined, renderMath: boolean) {
   if (filePath !== undefined) {
     opts.cwd = path.dirname(filePath)
   }
-  const mathjaxPath = getMathJaxPath()
   const config = atomConfig().pandocConfig
   const args: Args = {
     from: config.pandocMarkdownFlavor,
     to: 'html',
-    mathjax: renderMath ? mathjaxPath : undefined,
+    mathjax: renderMath ? mathJaxPath : undefined,
     filter: config.pandocFilters,
   }
   if (config.pandocBibliography) {

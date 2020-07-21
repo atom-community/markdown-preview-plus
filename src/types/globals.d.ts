@@ -13,7 +13,4 @@ interface Window {
     clipboardWrite?: Function
     getStylesOverride?: (x: boolean) => string[]
   }
-  'atom-markdown-preview-plus-helpers': {
-    require: NodeRequire
-  }
 }

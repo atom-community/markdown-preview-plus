@@ -1,7 +1,6 @@
 import markdownItModule from 'markdown-it'
 import Token from 'markdown-it/lib/token'
 import * as twemoji from 'twemoji'
-import * as path from 'path'
 import { pairUp, atomConfig } from './util'
 import { isEqual } from 'lodash'
 import { MathMeta } from './markdown-it-math'
@@ -165,14 +164,9 @@ function init(initState: InitState): markdownItModule {
     markdownIt.use(require('markdown-it-emoji'))
     markdownIt.renderer.rules.emoji = function (token, idx) {
       return twemoji.parse(token[idx].content, {
-        folder: path.join('assets', 'svg'),
+        folder: 'assets/svg',
         ext: '.svg',
-        base:
-          path.dirname(
-            window['atom-markdown-preview-plus-helpers'].require.resolve(
-              'twemoji-assets',
-            ),
-          ) + path.sep,
+        base: 'atom://markdown-preview-plus/node_modules/twemoji-assets/',
       })
     }
   }
