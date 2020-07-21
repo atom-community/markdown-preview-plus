@@ -9,10 +9,13 @@ interface ImageRegisterRec {
 export class ImageWatcher {
   private registry = new Map<string, ImageRegisterRec>()
   private disposed = false
+  private lastImages = new Set<string>()
+  private tracked = false
 
   constructor(private callback: (src: string, version?: number) => void) {}
 
   public watch(image: string): number | undefined {
+    if (this.tracked) this.lastImages.add(image)
     const i = this.registry.get(image)
     if (!i && isFileSync(image)) {
       const version = Date.now()
@@ -35,13 +38,30 @@ export class ImageWatcher {
     }
   }
 
+  public track() {
+    this.lastImages.clear()
+    this.tracked = true
+  }
+
+  public untrack() {
+    this.tracked = false
+    const items = Array.from(this.registry.entries())
+    for (const [k, v] of items) {
+      if (!this.lastImages.has(k)) {
+        v.watcher.dispose()
+        this.registry.delete(k)
+      }
+    }
+    this.lastImages.clear()
+  }
+
   public dispose(): void {
     if (this.disposed) return
     this.clear()
     this.disposed = true
   }
 
-  public clear(): void {
+  private clear(): void {
     for (const v of this.registry.values()) {
       v.watcher.dispose()
     }

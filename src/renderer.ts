@@ -53,7 +53,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
   const doc = parser.parseFromString(html, 'text/html')
   sanitize(doc)
   if (options.mode === 'normal') {
-    if (options.imageWatcher) options.imageWatcher.clear()
+    if (options.imageWatcher) options.imageWatcher.track()
     resolveImagePaths(
       doc,
       options.filePath,
@@ -61,6 +61,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
       undefined,
       options.imageWatcher,
     )
+    if (options.imageWatcher) options.imageWatcher.untrack()
   } else {
     switch (options.mode) {
       case 'save':
