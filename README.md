@@ -1,7 +1,6 @@
 # Markdown Preview Plus (MPP)
 
-[![appveyor](https://img.shields.io/appveyor/ci/lierdakil/markdown-preview-plus/master.svg?label=appveyor)](https://ci.appveyor.com/project/lierdakil/markdown-preview-plus/branch/master)
-[![travis](https://img.shields.io/travis/atom-community/markdown-preview-plus/master.svg?label=travis)](https://travis-ci.org/atom-community/markdown-preview-plus)
+[![CI](https://github.com/atom-community/markdown-preview-plus/workflows/CI/badge.svg?branch=master)](https://github.com/atom-community/markdown-preview-plus/actions)
 ![apm version](https://img.shields.io/apm/v/markdown-preview-plus.svg)
 ![apm
 downloads](https://img.shields.io/apm/dm/markdown-preview-plus.svg)
