@@ -30,6 +30,9 @@ jobs:
         run: apm -v
       - name: Install dependencies
         run: apm ci
-      - name: Run tests 🧪
+      - name: Run tests
         shell: bash
-        run: find spec -iname *.spec.ts | xargs -n1 atom --test
+        run: atom --no-sandbox --test spec 2>/tmp/test.log
+      - name: Cat test log
+        shell: bash
+        run: cat /tmp/test.log
