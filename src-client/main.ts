@@ -171,11 +171,23 @@ ipcRenderer.on<'update-preview'>(
         container.appendChild(headElement)
       }
     }
+    const visibleElements = Array.from(preview.children)
+      .map((x) => ({ el: x, r: x.getBoundingClientRect() }))
+      .filter(({ r }) => r.top <= window.innerHeight && r.bottom >= 0)
     await update(preview, domDocument.body, {
       renderLaTeX,
       diffMethod,
       mjController: await atomVars.mathJax,
     })
+    const stillVisibleElements = visibleElements.filter(
+      ({ el }) => (el as HTMLElement).offsetParent,
+    )
+    const lastEl = stillVisibleElements[stillVisibleElements.length - 1]
+    if (lastEl) {
+      window.scrollBy({
+        top: lastEl.el.getBoundingClientRect().bottom - lastEl.r.bottom,
+      })
+    }
     if (map) {
       const slsm = new Map<number, Element>()
       const rsm = new WeakMap<Element, number[]>()
