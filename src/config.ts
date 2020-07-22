@@ -106,6 +106,18 @@ export const config: IConfig = {
         default: true,
         order: 10,
       },
+      diffMethod: {
+        title: 'Diff Method',
+        description:
+          'Advanced diffing method selection when updating the preview. ' +
+          'None is obviously fastest, but inaccurate; heuristic is reasonably fast and ' +
+          'should work most of the time; myers uses classic min-diff algoritm, but can be ' +
+          'slow on large documents',
+        type: 'string',
+        enum: ['none', 'heuristic', 'myers'],
+        default: 'heuristic',
+        order: 15,
+      },
       previewSplitPaneDir: {
         title: 'Direction to load the preview in split pane',
         type: 'string',
@@ -701,6 +713,10 @@ declare module 'atom' {
     'markdown-preview-plus.renderer': 'markdown-it' | 'pandoc'
     'markdown-preview-plus.richClipboard': boolean
     'markdown-preview-plus.previewConfig.liveUpdate': boolean
+    'markdown-preview-plus.previewConfig.diffMethod':
+      | 'none'
+      | 'heuristic'
+      | 'myers'
     'markdown-preview-plus.previewConfig.previewSplitPaneDir':
       | 'down'
       | 'right'
@@ -716,6 +732,7 @@ declare module 'atom' {
     'markdown-preview-plus.previewConfig.shellOpenFileExtensions': string[]
     'markdown-preview-plus.previewConfig': {
       liveUpdate: boolean
+      diffMethod: 'none' | 'heuristic' | 'myers'
       previewSplitPaneDir: 'down' | 'right' | 'none'
       previewDock: 'left' | 'right' | 'bottom' | 'center'
       closePreviewWithEditor: boolean
@@ -903,6 +920,7 @@ declare module 'atom' {
       renderer: 'markdown-it' | 'pandoc'
       richClipboard: boolean
       'previewConfig.liveUpdate': boolean
+      'previewConfig.diffMethod': 'none' | 'heuristic' | 'myers'
       'previewConfig.previewSplitPaneDir': 'down' | 'right' | 'none'
       'previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
       'previewConfig.closePreviewWithEditor': boolean
@@ -911,6 +929,7 @@ declare module 'atom' {
       'previewConfig.shellOpenFileExtensions': string[]
       previewConfig: {
         liveUpdate: boolean
+        diffMethod: 'none' | 'heuristic' | 'myers'
         previewSplitPaneDir: 'down' | 'right' | 'none'
         previewDock: 'left' | 'right' | 'bottom' | 'center'
         closePreviewWithEditor: boolean

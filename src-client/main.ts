@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron'
-import { UpdatePreview } from './update-preview'
+import { update } from './update-preview'
 import { MathJaxController, processHTMLString } from './mathjax-helper'
 import * as util from './util'
 import { getMedia } from '../src/util-common'
@@ -150,21 +150,13 @@ ipcRenderer.on<'sync'>('sync', (_event, { line, flash }) => {
   }
 })
 
-let updatePreview: UpdatePreview | undefined
-
 ipcRenderer.on<'update-preview'>(
   'update-preview',
-  async (_event, { id, html, renderLaTeX, map }) => {
+  async (_event, { id, html, renderLaTeX, map, diffMethod }) => {
     // div.update-preview created after constructor st UpdatePreview cannot
     // be instanced in the constructor
     const preview = document.querySelector('div.update-preview')
     if (!preview) return
-    if (!updatePreview) {
-      updatePreview = new UpdatePreview(
-        preview as HTMLElement,
-        await atomVars.mathJax,
-      )
-    }
     const parser = new DOMParser()
     const domDocument = parser.parseFromString(html, 'text/html')
     const doc = document
@@ -179,7 +171,11 @@ ipcRenderer.on<'update-preview'>(
         container.appendChild(headElement)
       }
     }
-    await updatePreview.update(domDocument.body, renderLaTeX)
+    await update(preview, domDocument.body, {
+      renderLaTeX,
+      diffMethod,
+      mjController: await atomVars.mathJax,
+    })
     if (map) {
       const slsm = new Map<number, Element>()
       const rsm = new WeakMap<Element, number[]>()

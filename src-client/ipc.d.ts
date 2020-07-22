@@ -1,3 +1,4 @@
+export type TDiffMethod = 'none' | 'heuristic' | 'myers'
 export interface ChannelMap {
   style: { styles: string[] }
   'update-images': { oldsrc: string; v: number | undefined }
@@ -7,6 +8,7 @@ export interface ChannelMap {
     html: string
     renderLaTeX: boolean
     map?: { [line: number]: Array<{ tag: string; index: number }> }
+    diffMethod: TDiffMethod
   }
   error: { msg: string }
   init: {

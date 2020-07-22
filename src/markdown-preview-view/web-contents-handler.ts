@@ -3,7 +3,12 @@ import { shell, WebContents, remote } from 'electron'
 import fileUriToPath from 'file-uri-to-path'
 
 import { handlePromise, atomConfig, packagePath } from '../util'
-import { RequestReplyMap, ChannelMap, ReplyMap } from '../../src-client/ipc'
+import {
+  RequestReplyMap,
+  ChannelMap,
+  ReplyMap,
+  TDiffMethod,
+} from '../../src-client/ipc'
 import { getPreviewStyles } from './util'
 import { ImageWatcher } from '../image-watch-helper'
 import * as path from 'path'
@@ -172,6 +177,7 @@ export abstract class WebContentsHandler {
   public async update(
     html: string,
     renderLaTeX: boolean,
+    diffMethod: TDiffMethod = 'none',
     map?: { [line: number]: { tag: string; index: number }[] },
   ) {
     if (this.destroyed) return undefined
@@ -179,6 +185,7 @@ export abstract class WebContentsHandler {
       html,
       renderLaTeX,
       map,
+      diffMethod,
     })
   }
 

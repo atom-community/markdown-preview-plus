@@ -418,6 +418,7 @@ export class MarkdownPreviewView {
       await this.handler.update(
         domDocument.documentElement!.outerHTML,
         this.renderLaTeX,
+        atomConfig().previewConfig.diffMethod,
         util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),
       )
       this.emitter.emit('did-change-markdown')

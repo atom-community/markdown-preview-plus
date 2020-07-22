@@ -56,20 +56,21 @@ export class MathJaxController {
   }
 
   public async queueTypeset(domElement: Node) {
-    const hasUnprocessedMath = Array.from(
-      document.querySelectorAll('script[type^="math/tex"]'),
-    ).some((x) => !x.id)
-    if (!hasUnprocessedMath) return
+    const unprocessedMath = Array.from(
+      document.querySelectorAll('span.math > script[type^="math/tex"]'),
+    ).filter((x) => !x.id)
+    if (unprocessedMath.length === 0) return
     return new Promise<void>((resolve) => {
       if (MathJax.InputJax.TeX) {
         MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])
-        if (this.mathJaxConfig.numberEquations) {
-          MathJax.Hub.Queue(['PreProcess', MathJax.Hub])
-          MathJax.Hub.Queue(['Reprocess', MathJax.Hub])
-        }
       }
-
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, domElement])
+      if (this.mathJaxConfig.numberEquations) {
+        MathJax.Hub.Queue(['PreProcess', MathJax.Hub])
+        MathJax.Hub.Queue(['Reprocess', MathJax.Hub])
+      } else {
+        MathJax.Hub.Queue(['PreProcess', MathJax.Hub, unprocessedMath])
+        MathJax.Hub.Queue(['Reprocess', MathJax.Hub, unprocessedMath])
+      }
       MathJax.Hub.Queue([resolve])
     })
   }

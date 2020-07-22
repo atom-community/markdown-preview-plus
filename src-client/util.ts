@@ -29,3 +29,18 @@ export function resolveElement(
   if (element === root) return undefined // Do not jump to the top of the preview for bad syncs
   return element
 }
+
+export function* zip<U, V>(
+  a: Iterable<U>,
+  b: Iterable<V>,
+): IterableIterator<[U, V]> {
+  const ita = a[Symbol.iterator]()
+  const itb = b[Symbol.iterator]()
+  let x = ita.next()
+  let y = itb.next()
+  while (!x.done && !y.done) {
+    yield [x.value, y.value]
+    x = ita.next()
+    y = itb.next()
+  }
+}
