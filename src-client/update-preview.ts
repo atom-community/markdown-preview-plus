@@ -95,8 +95,12 @@ function isEqual(a: Node, b: Node): boolean {
 function* allChildren(node: Element): IterableIterator<Element> {
   for (const c of node.children) {
     if (c.tagName === 'SPAN' && c.classList.contains('MathJax')) continue
+    if (c.tagName === 'SPAN' && c.classList.contains('MathJax_SVG')) continue
     if (c.tagName === 'SCRIPT') continue
     if (c.tagName === 'DIV' && c.classList.contains('MathJax_Display')) continue
+    if (c.tagName === 'DIV' && c.classList.contains('MathJax_SVG_Display')) {
+      continue
+    }
     yield c
     yield* allChildren(c)
   }
@@ -204,7 +208,9 @@ export async function update(
     morph(oldDom, newDom, {
       childrenOnly: true,
       onBeforeElUpdated(fromEl, toEl) {
-        return !fromEl.isEqualNode(toEl) && !isEqualMath(fromEl, toEl)
+        if (fromEl.isEqualNode(toEl)) return false
+        if (isEqualMath(fromEl, toEl)) return false
+        return true
       },
       getNodeKey(node: Element) {
         return idMap.get(node) || ''
