@@ -4,6 +4,11 @@ import { diff } from './diff'
 import { TDiffMethod } from './ipc'
 
 function isEqualMath(a: Node, b: Node) {
+  const tcs = getMathContents(a, b)
+  return tcs && tcs[0].textContent === tcs[1].textContent
+}
+
+function getMathContents(a: Node, b: Node) {
   if (!isElement(a) || !isElement(b)) return false
   if (
     a.tagName !== 'SPAN' ||
@@ -17,7 +22,8 @@ function isEqualMath(a: Node, b: Node) {
   if (!ascr) return false
   const bscr = b.querySelector<HTMLScriptElement>(':scope > script')
   if (!bscr) return false
-  return ascr.type === bscr.type && ascr.textContent === bscr.textContent
+  if (ascr.type !== bscr.type) return false
+  return [ascr, bscr] as const
 }
 
 function isElement(a: Node): a is Element {
@@ -209,7 +215,13 @@ export async function update(
       childrenOnly: true,
       onBeforeElUpdated(fromEl, toEl) {
         if (fromEl.isEqualNode(toEl)) return false
-        if (isEqualMath(fromEl, toEl)) return false
+        const tcs = getMathContents(fromEl, toEl)
+        if (tcs) {
+          if (tcs[0].textContent !== tcs[1].textContent) {
+            tcs[0].textContent = tcs[1].textContent
+          }
+          return false
+        }
         return true
       },
       getNodeKey(node: Element) {
