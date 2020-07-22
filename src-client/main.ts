@@ -3,12 +3,12 @@ import { update } from './update-preview'
 import { MathJaxController, processHTMLString } from './mathjax-helper'
 import * as util from './util'
 import { getMedia } from '../src/util-common'
+import { ChannelMap } from './ipc'
 
 let handlerId: number
 let nativePageScrollKeys = false
 
-window.addEventListener('error', (e) => {
-  const err = e.error as Error
+function uncaughtError(err: Error) {
   ipcRenderer.send<'atom-markdown-preview-plus-ipc-uncaught-error'>(
     'atom-markdown-preview-plus-ipc-uncaught-error',
     handlerId,
@@ -18,19 +18,14 @@ window.addEventListener('error', (e) => {
       stack: err.stack,
     },
   )
+}
+
+window.addEventListener('error', (e) => {
+  uncaughtError(e.error as Error)
 })
 
 window.addEventListener('unhandledrejection', (evt) => {
-  const err = (evt as any).reason as Error
-  ipcRenderer.send<'atom-markdown-preview-plus-ipc-uncaught-error'>(
-    'atom-markdown-preview-plus-ipc-uncaught-error',
-    handlerId,
-    {
-      message: err.message,
-      name: err.name,
-      stack: err.stack,
-    },
-  )
+  uncaughtError((evt as any).reason as Error)
 })
 
 function mkResPromise<T>() {
@@ -150,71 +145,96 @@ ipcRenderer.on<'sync'>('sync', (_event, { line, flash }) => {
   }
 })
 
-ipcRenderer.on<'update-preview'>(
-  'update-preview',
-  async (_event, { id, html, renderLaTeX, map, diffMethod }) => {
-    // div.update-preview created after constructor st UpdatePreview cannot
-    // be instanced in the constructor
-    const preview = document.querySelector('div.update-preview')
-    if (!preview) return
-    const parser = new DOMParser()
-    const domDocument = parser.parseFromString(html, 'text/html')
-    const doc = document
-    if (doc && domDocument.head!.hasChildNodes) {
-      let container = doc.head!.querySelector('original-elements')
-      if (!container) {
-        container = doc.createElement('original-elements')
-        doc.head!.appendChild(container)
-      }
-      container.innerHTML = ''
-      for (const headElement of Array.from(domDocument.head!.childNodes)) {
-        container.appendChild(headElement)
-      }
+let updatePromise: Promise<void> | undefined
+let nextUpdateParams: ChannelMap['update-preview'] | undefined
+async function doUpdate({
+  id,
+  html,
+  renderLaTeX,
+  map,
+  diffMethod,
+}: ChannelMap['update-preview']) {
+  // div.update-preview created after constructor st UpdatePreview cannot
+  // be instanced in the constructor
+  const preview = document.querySelector('div.update-preview')
+  if (!preview) return
+  const parser = new DOMParser()
+  const domDocument = parser.parseFromString(html, 'text/html')
+  const doc = document
+  if (doc && domDocument.head!.hasChildNodes) {
+    let container = doc.head!.querySelector('original-elements')
+    if (!container) {
+      container = doc.createElement('original-elements')
+      doc.head!.appendChild(container)
     }
-    const visibleElements = Array.from(preview.children)
-      .map((x) => ({ el: x, r: x.getBoundingClientRect() }))
-      .filter(({ r }) => r.top <= window.innerHeight && r.bottom >= 0)
-    await update(preview, domDocument.body, {
-      renderLaTeX,
-      diffMethod,
-      mjController: await atomVars.mathJax,
+    container.innerHTML = ''
+    for (const headElement of Array.from(domDocument.head!.childNodes)) {
+      container.appendChild(headElement)
+    }
+  }
+  const visibleElements = Array.from(preview.children)
+    .map((x) => ({ el: x, r: x.getBoundingClientRect() }))
+    .filter(({ r }) => r.top <= window.innerHeight && r.bottom >= 0)
+  await update(preview, domDocument.body, {
+    renderLaTeX,
+    diffMethod,
+    mjController: await atomVars.mathJax,
+  })
+  const stillVisibleElements = visibleElements.filter(
+    ({ el }) => (el as HTMLElement).offsetParent,
+  )
+  const lastEl = stillVisibleElements[stillVisibleElements.length - 1]
+  if (lastEl) {
+    window.scrollBy({
+      top: lastEl.el.getBoundingClientRect().bottom - lastEl.r.bottom,
     })
-    const stillVisibleElements = visibleElements.filter(
-      ({ el }) => (el as HTMLElement).offsetParent,
-    )
-    const lastEl = stillVisibleElements[stillVisibleElements.length - 1]
-    if (lastEl) {
-      window.scrollBy({
-        top: lastEl.el.getBoundingClientRect().bottom - lastEl.r.bottom,
-      })
-    }
-    if (map) {
-      const slsm = new Map<number, Element>()
-      const rsm = new WeakMap<Element, number[]>()
-      for (const [lineS, path] of Object.entries(map)) {
-        const line = parseInt(lineS, 10)
-        const elem = util.resolveElement(preview, path)
-        if (elem) {
-          slsm.set(line, elem)
-          const rsmel = rsm.get(elem)
-          if (rsmel) rsmel.push(line)
-          else rsm.set(elem, [line])
-        }
+  }
+  if (map) {
+    const slsm = new Map<number, Element>()
+    const rsm = new WeakMap<Element, number[]>()
+    for (const [lineS, path] of Object.entries(map)) {
+      const line = parseInt(lineS, 10)
+      const elem = util.resolveElement(preview, path)
+      if (elem) {
+        slsm.set(line, elem)
+        const rsmel = rsm.get(elem)
+        if (rsmel) rsmel.push(line)
+        else rsm.set(elem, [line])
       }
-      atomVars.sourceLineMap = slsm
-      atomVars.revSourceMap = rsm
     }
-    ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
-      'atom-markdown-preview-plus-ipc-request-reply',
-      handlerId,
-      {
-        id,
-        request: 'update-preview',
-        result: processHTMLString(preview),
-      },
-    )
-  },
-)
+    atomVars.sourceLineMap = slsm
+    atomVars.revSourceMap = rsm
+  }
+  ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
+    'atom-markdown-preview-plus-ipc-request-reply',
+    handlerId,
+    {
+      id,
+      request: 'update-preview',
+      result: processHTMLString(preview),
+    },
+  )
+}
+
+function delayedUpdate(): Promise<void> | undefined {
+  let res
+  if (nextUpdateParams) res = doUpdate(nextUpdateParams).then(delayedUpdate)
+  nextUpdateParams = undefined
+  return res
+}
+
+ipcRenderer.on<'update-preview'>('update-preview', (_event, params) => {
+  if (!updatePromise) {
+    updatePromise = doUpdate(params)
+      .then(delayedUpdate)
+      .catch(uncaughtError)
+      .then(() => {
+        updatePromise = undefined
+      })
+  } else {
+    nextUpdateParams = params
+  }
+})
 
 ipcRenderer.on<'await-fully-ready'>(
   'await-fully-ready',
