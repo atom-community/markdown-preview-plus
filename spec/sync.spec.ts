@@ -2,7 +2,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as temp from 'temp'
 import * as yaml from 'yaml'
-import * as markdownIt from '../src/markdown-it-helper'
+import { MarkdownItWorker } from '../src/markdown-it-helper'
 import { MarkdownPreviewView } from '../src/markdown-preview-view'
 import {
   waitsFor,
@@ -77,13 +77,13 @@ describe('Syncronization of source and preview', function () {
     let sourceMap: MyToken[]
     let tokens: string
 
-    beforeEach(function () {
+    beforeEach(async function () {
       sourceMap = yaml.parse(
         fs.readFileSync(path.join(fixturesPath, 'sync-preview.yaml'), {
           encoding: 'utf-8',
         }),
       ) as MyToken[]
-      tokens = markdownIt.getTokens(
+      tokens = await MarkdownItWorker.instance().getTokens(
         atom.workspace.getActiveTextEditor()!.getText(),
         true,
       )
