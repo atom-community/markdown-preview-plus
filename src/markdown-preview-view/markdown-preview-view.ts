@@ -5,7 +5,7 @@ import * as fs from 'fs'
 import { remote } from 'electron'
 
 import * as renderer from '../renderer'
-import * as markdownIt from '../markdown-it-helper'
+import { MarkdownItWorker } from '../markdown-it-helper'
 import { handlePromise, copyHtml, atomConfig } from '../util'
 import * as util from './util'
 import { WebviewHandler } from './webview-handler'
@@ -419,7 +419,9 @@ export class MarkdownPreviewView {
         domDocument.documentElement!.outerHTML,
         this.renderLaTeX,
         atomConfig().previewConfig.diffMethod,
-        util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),
+        util.buildLineMap(
+          await MarkdownItWorker.instance().getTokens(text, this.renderLaTeX),
+        ),
         atomConfig().syncConfig.syncPreviewOnEditorScroll
           ? this.controller.getScrollSyncParams()
           : undefined,

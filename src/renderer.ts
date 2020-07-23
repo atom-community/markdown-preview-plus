@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as pandocHelper from './pandoc-helper'
-import * as markdownIt from './markdown-it-helper' // Defer until used
+import { MarkdownItWorker } from './markdown-it-helper'
 import { scopeForFenceName } from './extension-helper'
 import { Grammar, TextEditor } from 'atom'
 import { isFileSync, atomConfig, packagePath } from './util'
@@ -47,7 +47,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
       html = e.html as string
     }
   } else {
-    html = markdownIt.render(text, options.renderLaTeX)
+    html = await MarkdownItWorker.instance().render(text, options.renderLaTeX)
   }
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
