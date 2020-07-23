@@ -1,3 +1,8 @@
+## 4.4.1
+
+-   Fix MathJax update crash when diff algorithm is 'none'
+-   Remove old template.html
+
 ## 4.4.0
 
 ### New features
