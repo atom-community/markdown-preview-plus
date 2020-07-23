@@ -89,6 +89,7 @@ export class MathJaxController {
       temp.style.position = ''
       temp.style.width = ''
       temp.style.display = ''
+      temp.classList.remove('temp-MathJax')
     }
   }
 
@@ -103,10 +104,9 @@ export class MathJaxController {
       const disp = script.previousElementSibling
       if (disp) {
         // update render
-        const temp = document.createElement('span')
-        temp.className = span.className
+        const temp = span.cloneNode(false) as HTMLSpanElement
+        temp.classList.add('temp-MathJax')
         temp.appendChild(script.cloneNode(true))
-        console.log('temp', temp.outerHTML)
         temps.push(temp)
         spans.push(span)
         par.insertBefore(temp, span)
