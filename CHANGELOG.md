@@ -1,3 +1,56 @@
+## 4.4.0
+
+### New features
+
+-   More involved diffing algorithms
+
+    Added more involved diffing algorithms, and a new setting `markdown-preview-plus.previewConfig.diffMethod`, which can take values of `'none'`, `'heuristic'`, or `'myers'`. It is found in the settings UI as 'Diff Method' under 'Preview Behaviour'.
+
+    - `'none'` is the old method. Very fast, but doesn't handle insertions anywhere but the end of the document particularly gracefully.
+    - `'heuristic'` is a linear-complexity method that should produce slightly better results for common cases of insertion and deletion. It doesn't handle complete replacements particularly well though.
+    - `'myers'` uses Myers' least-common-subsequence algorithm, which is very good at finding minimal sets of insertions and deletions, but in the worst case has near-quadratic complexity, so it can be very slow on large documents.
+
+    `'heuristic'` is the default.
+
+-   Command to move windowed preview back to Atom workspace
+
+    Windowed preview can be moved back inside the main Atom window using the context menu.
+
+-   Preview dynamic type change (file\/editor)
+
+    When the editor for the preview closes, and `markdown-preview-plus.previewConfig.closePreviewWithEditor` setting is disabled, preview will switch to monitoring the file automatically. If there is no file to monitor, it will instead "freeze" its state. This fixes issues with preview losing state over Atom restarts.
+
+### Changes
+
+-   Align preview post-update by the bottom of bottom visible element
+
+    Preview scroll position is now aligned with the bottom of the bottom-most visible element. This reduce the preview "jumping around" when the document is changed in the more common cases. Please open new issues if you observe undesirable behaviour wrt scroll position.
+
+-   Smoother scroll sync
+
+    Scroll synchronization is now using a weighted average position to determine the preview scroll position. It should generally result in smoother scrolling.
+
+### Fixes
+
+-   Avoid interleaving updates
+-   Optimize MathJax updates: reduce flicker
+-   Fix image flickering
+-   Cache editor text
+-   Fix scroll sync in windowed preview
+-   Various minor windowed preview fixes
+-   Don't show preview until the root element is drawn
+
+### Maintenance
+
+-   Update readme badges
+-   Fix specs
+-   Remove travis and appveyor CI
+-   Use static atom:\/\/ path for twemoji assets
+-   Simplify client IPC: Removed separate set-map command
+-   State deserialization for text-only previews
+-   Work around "loop limit exceeded" error
+-   Rename and move around some files
+
 ## 4.3.0
 
 ### New features
