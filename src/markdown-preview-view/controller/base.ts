@@ -1,5 +1,6 @@
 import { Grammar, CompositeDisposable, Emitter, Pane } from 'atom'
 import { SerializedMPV } from './serialized'
+import { ChannelMap } from '../../../src-client/ipc'
 
 export abstract class MarkdownPreviewController {
   public abstract readonly type: 'editor' | 'file' | 'text'
@@ -12,7 +13,7 @@ export abstract class MarkdownPreviewController {
     {
       activate: Pane | undefined
       'did-change-path': string | undefined
-      'scroll-sync': [number, number]
+      'scroll-sync': ChannelMap['scroll-sync']
       sync: [number, boolean]
       search: string
     }
@@ -43,6 +44,10 @@ export abstract class MarkdownPreviewController {
     /* no-op by default */
   }
 
+  public getScrollSyncParams(): ChannelMap['scroll-sync'] | undefined {
+    return undefined
+  }
+
   public onDidChange(callback: () => void) {
     return this.emitter.on('did-change', callback)
   }
@@ -55,7 +60,7 @@ export abstract class MarkdownPreviewController {
     return this.emitter.on('did-destroy', callback)
   }
 
-  public onScrollSync(callback: (arg: [number, number]) => void) {
+  public onScrollSync(callback: (arg: ChannelMap['scroll-sync']) => void) {
     return this.emitter.on('scroll-sync', callback)
   }
 

@@ -66,33 +66,34 @@ ipcRenderer.on<'set-native-keys'>('set-native-keys', (_evt, val) => {
   nativePageScrollKeys = val
 })
 
-ipcRenderer.on<'scroll-sync'>(
-  'scroll-sync',
-  (_evt, { firstLine, lastLine }) => {
-    const slm = atomVars.sourceLineMap
-    const lines = Array.from(slm.keys()).sort((a, b) => a - b)
-    let lowix = lines.findIndex((x) => x >= firstLine)
-    if (lowix > 0) lowix--
-    let highix = lines.findIndex((x) => x >= lastLine)
-    if (highix === -1) highix = lines.length - 1
-    else if (highix < lines.length - 1) highix++
-    const low = lines[lowix]
-    const high = lines[highix]
-    let norm = 0
-    let meanScroll = 0
-    const entries = Array.from(slm.entries()).slice(lowix, highix + 1)
-    for (const [line, item] of entries) {
-      const weight = line <= (high + low) / 2 ? line - low + 1 : high - line + 1
-      norm += weight
-      meanScroll += item.getBoundingClientRect().top * weight
-    }
-    if (norm === 0) return
-    const offset = document.documentElement!.scrollTop
-    const clientHeight = document.documentElement!.clientHeight
-    const top = offset - clientHeight / 2 + meanScroll / norm
-    window.scroll({ top })
-  },
-)
+function scrollSync({ firstLine, lastLine }: ChannelMap['scroll-sync']) {
+  const slm = atomVars.sourceLineMap
+  const lines = Array.from(slm.keys()).sort((a, b) => a - b)
+  let lowix = lines.findIndex((x) => x >= firstLine)
+  if (lowix > 0) lowix--
+  let highix = lines.findIndex((x) => x >= lastLine)
+  if (highix === -1) highix = lines.length - 1
+  else if (highix < lines.length - 1) highix++
+  const low = lines[lowix]
+  const high = lines[highix]
+  let norm = 0
+  let meanScroll = 0
+  const entries = Array.from(slm.entries()).slice(lowix, highix + 1)
+  for (const [line, item] of entries) {
+    const weight = line <= (high + low) / 2 ? line - low + 1 : high - line + 1
+    norm += weight
+    meanScroll += item.getBoundingClientRect().top * weight
+  }
+  if (norm === 0) return
+  const offset = document.documentElement!.scrollTop
+  const clientHeight = document.documentElement!.clientHeight
+  const top = offset - clientHeight / 2 + meanScroll / norm
+  window.scroll({ top })
+}
+
+ipcRenderer.on<'scroll-sync'>('scroll-sync', (_evt, params) => {
+  scrollSync(params)
+})
 
 ipcRenderer.on<'style'>('style', (_event, { styles }) => {
   let styleElem = document.head!.querySelector('style#atom-styles')
@@ -153,6 +154,7 @@ async function doUpdate({
   renderLaTeX,
   map,
   diffMethod,
+  scrollSyncParams,
 }: ChannelMap['update-preview']) {
   // div.update-preview created after constructor st UpdatePreview cannot
   // be instanced in the constructor
@@ -172,22 +174,26 @@ async function doUpdate({
       container.appendChild(headElement)
     }
   }
-  const visibleElements = Array.from(preview.children)
-    .map((x) => ({ el: x, r: x.getBoundingClientRect() }))
-    .filter(({ r }) => r.top <= window.innerHeight && r.bottom >= 0)
+  const visibleElements = scrollSyncParams
+    ? undefined
+    : Array.from(preview.children)
+        .map((x) => ({ el: x, r: x.getBoundingClientRect() }))
+        .filter(({ r }) => r.top <= window.innerHeight && r.bottom >= 0)
   await update(preview, domDocument.body, {
     renderLaTeX,
     diffMethod,
     mjController: await atomVars.mathJax,
   })
-  const stillVisibleElements = visibleElements.filter(
-    ({ el }) => (el as HTMLElement).offsetParent,
-  )
-  const lastEl = stillVisibleElements[stillVisibleElements.length - 1]
-  if (lastEl) {
-    window.scrollBy({
-      top: lastEl.el.getBoundingClientRect().bottom - lastEl.r.bottom,
-    })
+  if (visibleElements) {
+    const stillVisibleElements = visibleElements.filter(
+      ({ el }) => (el as HTMLElement).offsetParent,
+    )
+    const lastEl = stillVisibleElements[stillVisibleElements.length - 1]
+    if (lastEl) {
+      window.scrollBy({
+        top: lastEl.el.getBoundingClientRect().bottom - lastEl.r.bottom,
+      })
+    }
   }
   if (map) {
     const slsm = new Map<number, Element>()
@@ -205,6 +211,7 @@ async function doUpdate({
     atomVars.sourceLineMap = slsm
     atomVars.revSourceMap = rsm
   }
+  if (scrollSyncParams) scrollSync(scrollSyncParams)
   ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
     'atom-markdown-preview-plus-ipc-request-reply',
     handlerId,

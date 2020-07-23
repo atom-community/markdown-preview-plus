@@ -9,6 +9,7 @@ export interface ChannelMap {
     renderLaTeX: boolean
     map?: { [line: number]: Array<{ tag: string; index: number }> }
     diffMethod: TDiffMethod
+    scrollSyncParams?: ChannelMap['scroll-sync']
   }
   error: { msg: string }
   init: {

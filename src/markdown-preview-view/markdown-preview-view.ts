@@ -420,6 +420,9 @@ export class MarkdownPreviewView {
         this.renderLaTeX,
         atomConfig().previewConfig.diffMethod,
         util.buildLineMap(markdownIt.getTokens(text, this.renderLaTeX)),
+        atomConfig().syncConfig.syncPreviewOnEditorScroll
+          ? this.controller.getScrollSyncParams()
+          : undefined,
       )
       this.emitter.emit('did-change-markdown')
     } catch (error) {
@@ -534,8 +537,8 @@ export class MarkdownPreviewView {
         if (pane === edPane) return
         pane.activateItem(this)
       }),
-      this.controller.onScrollSync(([first, last]) => {
-        handlePromise(this.handler.scrollSync(first, last))
+      this.controller.onScrollSync(({ firstLine, lastLine }) => {
+        handlePromise(this.handler.scrollSync(firstLine, lastLine))
       }),
       this.controller.onSearch((text) => {
         handlePromise(this.handler.search(text))

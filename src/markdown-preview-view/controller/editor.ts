@@ -5,6 +5,7 @@ import { SerializedMPV } from './serialized'
 import { viewForEditor } from '../helpers'
 import { remote } from 'electron'
 import { BrowserWindowHandler } from '../browserwindow-handler'
+import { ChannelMap } from '../../../src-client/ipc'
 
 export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
   public readonly type = 'editor'
@@ -67,6 +68,14 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
     }
   }
 
+  public getScrollSyncParams(): ChannelMap['scroll-sync'] {
+    const [first, last] = this.editor.getVisibleRowRange()
+    return {
+      firstLine: this.editor.bufferRowForScreenRow(first),
+      lastLine: this.editor.bufferRowForScreenRow(last),
+    }
+  }
+
   protected openSource(initialLine?: number) {
     if (initialLine !== undefined) {
       this.editor.setCursorBufferPosition([initialLine, 0])
@@ -112,11 +121,7 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
       }),
       atom.views.getView(this.editor).onDidChangeScrollTop(() => {
         if (!this.shouldScrollSync('editor')) return
-        const [first, last] = this.editor.getVisibleRowRange()
-        this.emitter.emit('scroll-sync', [
-          this.editor.bufferRowForScreenRow(first),
-          this.editor.bufferRowForScreenRow(last),
-        ])
+        this.emitter.emit('scroll-sync', this.getScrollSyncParams())
       }),
       atom.commands.add(atom.views.getView(this.editor), {
         'markdown-preview-plus:sync-preview': () => {

@@ -179,6 +179,7 @@ export abstract class WebContentsHandler {
     renderLaTeX: boolean,
     diffMethod: TDiffMethod = 'none',
     map?: { [line: number]: { tag: string; index: number }[] },
+    scrollSyncParams?: ChannelMap['scroll-sync'],
   ) {
     if (this.destroyed) return undefined
     return this.runRequest('update-preview', {
@@ -186,6 +187,7 @@ export abstract class WebContentsHandler {
       renderLaTeX,
       map,
       diffMethod,
+      scrollSyncParams,
     })
   }
 
