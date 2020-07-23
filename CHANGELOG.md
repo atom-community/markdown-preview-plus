@@ -26,6 +26,12 @@
 
     Preview scroll position is now aligned with the bottom of the bottom-most visible element. This reduce the preview "jumping around" when the document is changed in the more common cases. Please open new issues if you observe undesirable behaviour wrt scroll position.
 
+    This is only done if `syncPreviewOnEditorScroll` (aka 'Sync preview position when text editor is scrolled') is disabled.
+
+-   Sync preview to scroll position on update if enabled
+
+    If `syncPreviewOnEditorScroll` (aka 'Sync preview position when text editor is scrolled') is enabled, sync preview to editor scroll position after update.
+
 -   Smoother scroll sync
 
     Scroll synchronization is now using a weighted average position to determine the preview scroll position. It should generally result in smoother scrolling.
