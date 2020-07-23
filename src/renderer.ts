@@ -6,6 +6,7 @@ import { Grammar, TextEditor } from 'atom'
 import { isFileSync, atomConfig, packagePath } from './util'
 import { getMedia } from './util-common'
 import { ImageWatcher } from './image-watch-helper'
+import highlightSync from 'atom-highlight'
 
 const { resourcePath } = atom.getLoadSettings()
 
@@ -229,6 +230,11 @@ async function highlightCodeBlocks(
   domFragment: Document,
   defaultLanguage: string,
 ) {
+  const highlighter = atom.config.get(
+    'markdown-preview-plus.previewConfig.highlighter',
+  )
+  // tslint:disable-next-line: totality-check
+  if (highlighter === 'none') return domFragment
   const fontFamily = atom.config.get('editor.fontFamily')
   if (fontFamily) {
     for (const codeElement of Array.from(
@@ -249,33 +255,44 @@ async function highlightCodeBlocks(
         ? cbClass.replace(/^(lang-|sourceCode )/, '')
         : defaultLanguage
 
-      const ctw = atomConfig().codeTabWidth
-      const ed = new TextEditor({
-        readonly: true,
-        keyboardInputEnabled: false,
-        showInvisibles: false,
-        tabLength: ctw === 0 ? atom.config.get('editor.tabLength') : ctw,
-      })
-      const el = atom.views.getView(ed)
-      try {
-        el.setUpdatedSynchronously(true)
-        el.style.pointerEvents = 'none'
-        el.style.position = 'absolute'
-        el.style.top = '100vh'
-        el.style.width = '100vw'
-        atom.grammars.assignLanguageMode(
-          ed.getBuffer(),
-          scopeForFenceName(fenceName),
-        )
-        ed.setText(codeBlock.textContent!.replace(/\r?\n$/, ''))
-        atom.views.getView(atom.workspace).appendChild(el)
-        await editorTokenized(ed)
-        const html = Array.from(el.querySelectorAll('.line:not(.dummy)'))
+      if (highlighter === 'legacy') {
+        const html = highlightSync({
+          fileContents: codeBlock.textContent!.replace(/\r?\n$/, ''),
+          scopeName: scopeForFenceName(fenceName),
+          nullScope: 'text.plain.null-grammar',
+        })
         preElement.classList.add('editor-colors')
-        preElement.innerHTML = html.map((x) => x.innerHTML).join('\n')
+        preElement.innerHTML = html
         if (fenceName) preElement.classList.add(`lang-${fenceName}`)
-      } finally {
-        el.remove()
+      } else if (highlighter === 'text-editor') {
+        const ctw = atomConfig().codeTabWidth
+        const ed = new TextEditor({
+          readonly: true,
+          keyboardInputEnabled: false,
+          showInvisibles: false,
+          tabLength: ctw === 0 ? atom.config.get('editor.tabLength') : ctw,
+        })
+        const el = atom.views.getView(ed)
+        try {
+          el.setUpdatedSynchronously(true)
+          el.style.pointerEvents = 'none'
+          el.style.position = 'absolute'
+          el.style.top = '100vh'
+          el.style.width = '100vw'
+          atom.grammars.assignLanguageMode(
+            ed.getBuffer(),
+            scopeForFenceName(fenceName),
+          )
+          ed.setText(codeBlock.textContent!.replace(/\r?\n$/, ''))
+          atom.views.getView(atom.workspace).appendChild(el)
+          await editorTokenized(ed)
+          const html = Array.from(el.querySelectorAll('.line:not(.dummy)'))
+          preElement.classList.add('editor-colors')
+          preElement.innerHTML = html.map((x) => x.innerHTML).join('\n')
+          if (fenceName) preElement.classList.add(`lang-${fenceName}`)
+        } finally {
+          el.remove()
+        }
       }
     }),
   )
