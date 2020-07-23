@@ -1,6 +1,6 @@
 import Token from 'markdown-it/lib/token'
 import assert = require('assert')
-import { math_plugin, MathMeta } from '../../src/markdown-it-math'
+import { math_plugin, MathMeta } from '../../src-worker/markdown-it-math'
 import mdIt = require('markdown-it')
 
 describe('Options', function () {

@@ -4,8 +4,8 @@ import assert = require('assert')
 import {
   math_plugin as orig_math_plugin,
   PluginOptions as MathOpts,
-} from '../../src/markdown-it-math'
-import { makeTable } from '../../src/markdown-it-table'
+} from '../../src-worker/markdown-it-math'
+import { makeTable } from '../../src-worker/markdown-it-table'
 import mdIt = require('markdown-it')
 
 function math_plugin(md: mdIt, opts: MathOpts) {
