@@ -8,7 +8,7 @@
 
     - `'none'` is the old method. Very fast, but doesn't handle insertions anywhere but the end of the document particularly gracefully.
     - `'heuristic'` is a linear-complexity method that should produce slightly better results for common cases of insertion and deletion. It doesn't handle complete replacements particularly well though.
-    - `'myers'` uses Myers' least-common-subsequence algorithm, which is very good at finding minimal sets of insertions and deletions, but in the worst case has near-quadratic complexity, so it can be very slow on large documents.
+    - `'myers'` uses Myers' longest common subsequence algorithm, which is very good at finding minimal sets of insertions and deletions, but in the worst case has near-quadratic complexity, so it can be very slow on large documents.
 
     `'heuristic'` is the default.
 
