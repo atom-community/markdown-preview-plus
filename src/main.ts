@@ -23,6 +23,7 @@ import { selectListView } from './select-list-view'
 import * as pdf from './markdown-preview-view/pdf-export-util'
 import { getUserMacrosPath } from './macros-util'
 import { BrowserWindowHandler } from './markdown-preview-view/browserwindow-handler'
+import { MarkdownItWorker } from './markdown-it-helper'
 
 export { config } from './config'
 
@@ -111,6 +112,7 @@ export function activate() {
 }
 
 export function deactivate() {
+  MarkdownItWorker.destroy()
   disposables && disposables.dispose()
   BrowserWindowHandler.clean()
 }

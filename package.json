@@ -4,6 +4,7 @@
   "main": "./loader.js",
   "bundle": "./dist/main.js",
   "client": "./client/main.js",
+  "worker": "./dist/worker.js",
   "description": "Markdown Preview + Community Features",
   "keywords": [
     "markdown",
@@ -19,11 +20,13 @@
   },
   "atomTestRunner": "./node_modules/atom-ts-spec-runner/runner.js",
   "scripts": {
-    "build": "npm run build-main && npm run build-client",
+    "build": "npm run build-main && npm run build-client && npm run build-worker",
     "build-main": "tsc -p src && npm run bundle-main",
-    "bundle-main": "parcel build --target bundle lib/main.js --no-scope-hoist",
+    "bundle-main": "parcel build --target bundle lib/main.js",
     "build-client": "tsc -p src-client && npm run bundle-client",
     "bundle-client": "parcel build --target client lib-client/src-client/main.js",
+    "build-worker": "tsc -p src-worker && npm run bundle-worker",
+    "bundle-worker": "parcel build --no-scope-hoist --target worker lib-worker/main.js",
     "prettier": "prettier --write 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "prettier-check": "prettier -l 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "typecheck": "tsc --noEmit -p src && tsc --noEmit -p src-client && tsc --noEmit -p spec",
@@ -69,6 +72,15 @@
         "twemoji-assets": false
       },
       "outputFormat": "commonjs",
+      "isLibrary": true,
+      "sourceMap": {
+        "inlineSources": true
+      }
+    },
+    "worker": {
+      "context": "web-worker",
+      "includeNodeModules": true,
+      "outputFormat": "global",
       "isLibrary": true,
       "sourceMap": {
         "inlineSources": true

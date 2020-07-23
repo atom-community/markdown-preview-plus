@@ -1,0 +1,9 @@
+{
+  "extends": "../src/tsconfig.json",
+  "include": ["./**/**.ts", "./**/**.d.ts"],
+  "compileOnSave": false,
+  "compilerOptions": {
+    "outDir": "../lib-worker",
+    "lib": ["webworker", "scripthost"]
+  }
+}
