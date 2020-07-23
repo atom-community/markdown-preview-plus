@@ -47,21 +47,20 @@ describe('MathJax helper module', () =>
 
     const waitsForMacrosToLoad = async function () {
       // Trigger MathJax TeX extension to load
+      const div = document.createElement('div')
       const span = document.createElement('span')
+      span.classList.add('math')
       const equation = document.createElement('script')
+      div.appendChild(span)
       equation.type = 'math/tex; mode=display'
       equation.textContent = '\\int_1^2'
       span.appendChild(equation)
-      atom.views.getView(atom.workspace).appendChild(span)
-      spans.push(span)
+      atom.views.getView(atom.workspace).appendChild(div)
+      spans.push(div)
       await mathJax.queueTypeset(span)
 
       macros = await waitsFor.msg('MathJax macros to be defined', function () {
-        try {
-          return MathJax.InputJax.TeX.Definitions.macros
-        } catch {
-          return undefined
-        }
+        return MathJax?.InputJax?.TeX?.Definitions?.macros
       })
     }
 

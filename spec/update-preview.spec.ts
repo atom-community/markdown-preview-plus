@@ -222,11 +222,13 @@ describe('the difference algorithm that updates the preview', function () {
     let mathBlocks: HTMLElement[]
 
     beforeEach(async function () {
-      await waitsFor.msg('LaTeX rendering to be enabled', () =>
-        atom.config.set(
-          'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
-          true,
-        ),
+      atom.config.set(
+        'markdown-preview-plus.mathConfig.enableLatexRenderingByDefault',
+        true,
+      )
+      atom.config.set(
+        'markdown-preview-plus.mathConfig.latexRenderer',
+        'HTML-CSS',
       )
 
       await loadPreviewInSplitPane()
@@ -259,10 +261,12 @@ describe('the difference algorithm that updates the preview', function () {
       )
     })
 
-    it('replaces the entire span.math container element', async function () {
-      await preview.runJS<void>(`
-        window.mathSpans = document.querySelectorAll('span.math')
+    it('only updates script textContent in math.span', async function () {
+      const numMathBlocks = await preview.runJS<void>(`
+        window.mathSpans = document.querySelectorAll('span.math > script')
+        window.mathSpans.length
         `)
+      expect(numMathBlocks).to.equal(20)
 
       editor.setTextInBufferRange(
         [
@@ -274,35 +278,33 @@ describe('the difference algorithm that updates the preview', function () {
 
       await waitsFor.msg('math span to be updated', async () =>
         preview.runJS<boolean>(`
-          !window.mathSpans[2].isSameNode(document.querySelectorAll('span.math')[2])
+          window.mathSpans[2].textContent.startsWith('E=mc^2')
           `),
       )
 
-      const numMathBlocks = await preview.runJS<number>(
-        `window.mathSpans.length`,
+      await waitsFor.msg('math spans to finish rendering', async () =>
+        preview.runJS<boolean>(`
+          document.querySelectorAll('span.math.temp-MathJax').length === 0
+          `),
       )
-      expect(numMathBlocks).to.equal(20)
 
       const numSameMathBlocks = await preview.runJS<number>(`{
-        const newMathSpans = document.querySelectorAll('span.math')
-        Array.from(window.mathSpans).filter(
-          (x, i) => x.isSameNode(newMathSpans[i])
-        ).length
+        const newMathSpans = document.querySelectorAll('span.math > script')
+        Array.from(window.mathSpans).filter((x, i) => x.isEqualNode(newMathSpans[i])).length
         }`)
-      expect(numSameMathBlocks).to.equal(19)
+      expect(numSameMathBlocks).to.equal(20)
 
       const mathBlocks = (await previewFragment(preview)).querySelectorAll(
         'span.math',
       )
       const modMathBlock = mathBlocks[2]
-      expect(modMathBlock.querySelector('script')!.innerText).to.equal(
-        'E=mc^2\n',
-      )
+      expect(modMathBlock.querySelector('span')!.innerText).to.equal('E=mc2')
     })
 
     it('subsequently only rerenders the maths block that was modified', async function () {
       await preview.runJS<void>(`
-        window.mathSpans = Array.from(document.querySelectorAll('span.math'))
+        window.mathSpans = Array.from(document.querySelectorAll('span.math > script'))
+          .map(x => x.parentElement)
         `)
 
       editor.setTextInBufferRange(
@@ -315,30 +317,35 @@ describe('the difference algorithm that updates the preview', function () {
 
       await waitsFor.msg('math span to be updated', async () =>
         preview.runJS<boolean>(`
-          !window.mathSpans[2].isSameNode(document.querySelectorAll('span.math')[2])
+          window.mathSpans[2].lastElementChild.textContent.startsWith('E=mc^2')
           `),
       )
 
-      await preview.runJS<boolean>(`
-          window.newMath = Array.from(document.querySelectorAll('span.math'))
-          `)
+      await waitsFor.msg('math spans to finish rendering', async () =>
+        preview.runJS<boolean>(`
+          document.querySelectorAll('span.math.temp-MathJax').length === 0
+          `),
+      )
 
-      await preview.runJS<boolean>(`
-          window.diffMath = window.mathSpans.filter((x, idx) => ! x.isSameNode(window.newMath[idx]))
-          `)
+      await preview.runJS<boolean>(`{
+          const newMath = Array.from(document.querySelectorAll('span.math > script'))
+            .map(x => x.parentElement)
+          window.diffMath = newMath.filter((x, idx) =>
+            ! x.firstElementChild.isSameNode(window.mathSpans[idx].firstElementChild)
+          )}`)
 
       expect(await preview.runJS<any>(`window.diffMath.length`)).to.equal(1)
-      expect(
-        await preview.runJS<any>(`window.diffMath[0].tagName.toLowerCase()`),
-      ).to.equal('span')
+      expect(await preview.runJS<any>(`window.diffMath[0].tagName`)).to.equal(
+        'SPAN',
+      )
       expect(await preview.runJS<any>(`window.diffMath[0].className`)).to.equal(
         'math display-math',
       )
       expect(
         await preview.runJS<any>(
-          `window.diffMath[0].querySelector('script').textContent`,
+          `window.diffMath[0].querySelector('div').textContent`,
         ),
-      ).to.equal('E=mc^2\n')
+      ).to.equal('E=mc2')
     })
   })
 
