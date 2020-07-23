@@ -67,6 +67,10 @@ ipcRenderer.on<'set-native-keys'>('set-native-keys', (_evt, val) => {
 })
 
 function scrollSync({ firstLine, lastLine }: ChannelMap['scroll-sync']) {
+  if (firstLine === 0) {
+    window.scroll({ top: 0 })
+    return
+  }
   const slm = atomVars.sourceLineMap
   const lines = Array.from(slm.keys()).sort((a, b) => a - b)
   let lowix = lines.findIndex((x) => x >= firstLine)
