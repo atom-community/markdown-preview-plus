@@ -4,7 +4,6 @@
   "main": "./loader.js",
   "bundle": "./dist/main.js",
   "client": "./client/main.js",
-  "worker": "./dist/worker.js",
   "description": "Markdown Preview + Community Features",
   "keywords": [
     "markdown",
