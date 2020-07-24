@@ -15,26 +15,6 @@ export function isFileSync(filePath: string) {
   return lstatSync(filePath).isFile()
 }
 
-export function pairUp<T>(arr: T[], option?: string): Array<[T, T]> {
-  if (arr.length % 2 !== 0) {
-    atom.notifications.addWarning(
-      `Invalid math delimiter configuration${option ? `in ${option}` : ''}`,
-      {
-        detail: `Expected even number of elements, but got "${arr.join(', ')}"`,
-        dismissable: true,
-      },
-    )
-  }
-  return arr.reduce<Array<[T, T]>>(function (result, _value, index, array) {
-    if (index % 2 === 0) result.push([array[index], array[index + 1]])
-    return result
-  }, [])
-}
-
-export function isElement(node: Node): node is Element {
-  return node.nodeType === Node.ELEMENT_NODE
-}
-
 import { WebviewHandler } from './markdown-preview-view/webview-handler'
 import * as renderer from './renderer'
 import { loadUserMacros } from './macros-util'

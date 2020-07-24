@@ -27,6 +27,16 @@ const pandocConfig = {
   tableCaptions: true,
 }
 
+function warnOddSeparators(arr: string[], option: string): void {
+  atom.notifications.addWarning(
+    `Invalid math delimiter configuration${option ? `in ${option}` : ''}`,
+    {
+      detail: `Expected even number of elements, but got "${arr.join(', ')}"`,
+      dismissable: true,
+    },
+  )
+}
+
 export class MarkdownItWorker {
   private static _instance: MarkdownItWorker | undefined
   private worker = new Worker(path.join(packagePath(), 'dist', 'worker.js'))
@@ -39,6 +49,11 @@ export class MarkdownItWorker {
       if ('id' in evt.data) {
         const cb = this.replyCallbacks.get(evt.data.id)
         if (cb) cb(evt.data.result)
+      } else if ('evt' in evt.data) {
+        switch (evt.data.evt) {
+          case 'odd-separators':
+            warnOddSeparators(evt.data.arr, evt.data.option)
+        }
       }
       // tslint:enable:no-unsafe-any
     }
