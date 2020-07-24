@@ -23,7 +23,7 @@ import {
 } from './controller'
 import { openPreviewPane } from './helpers'
 
-export { SerializedMPV }
+export type { SerializedMPV }
 
 export class MarkdownPreviewView {
   private static elementMap = new WeakMap<HTMLElement, MarkdownPreviewView>()

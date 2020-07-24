@@ -3,7 +3,6 @@
   "include": ["./**/**.ts", "./**/**.d.ts", "../src/config.ts"],
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "../lib-worker",
     "lib": ["webworker", "scripthost"]
   }
 }
