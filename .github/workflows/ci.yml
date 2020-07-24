@@ -36,3 +36,6 @@ jobs:
       - name: Cat test log
         shell: bash
         run: cat /tmp/test.log
+      - name: Run static checks
+        shell: bash
+        run: npm test
