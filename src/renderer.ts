@@ -6,7 +6,7 @@ import { Grammar, TextEditor } from 'atom'
 import { isFileSync, atomConfig, packagePath } from './util'
 import { getMedia } from './util-common'
 import { ImageWatcher } from './image-watch-helper'
-import highlightSync from 'atom-highlight'
+import { hightlightLines } from 'atom-highlight'
 
 const { resourcePath } = atom.getLoadSettings()
 
@@ -256,13 +256,13 @@ async function highlightCodeBlocks(
         : defaultLanguage
 
       if (highlighter === 'legacy') {
-        const html = highlightSync({
-          fileContents: codeBlock.textContent!.replace(/\r?\n$/, ''),
-          scopeName: scopeForFenceName(fenceName),
-          nullScope: 'text.plain.null-grammar',
-        })
+        const lines = hightlightLines(
+          codeBlock.textContent!.split('\n'),
+          scopeForFenceName(fenceName),
+          'text.plain.null-grammar',
+        )
         preElement.classList.add('editor-colors')
-        preElement.innerHTML = html
+        preElement.innerHTML = Array.from(lines).join('\n')
         if (fenceName) preElement.classList.add(`lang-${fenceName}`)
       } else if (highlighter === 'text-editor') {
         const ctw = atomConfig().codeTabWidth
