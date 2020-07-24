@@ -259,9 +259,10 @@ async function highlightCodeBlocks(
         : defaultLanguage
       preElement.style.tabSize = ctw.toString()
 
+      const sourceCode = codeBlock.textContent!.replace(/\r?\n$/, '')
       if (highlighter === 'legacy') {
         const lines = hightlightLines(
-          codeBlock.textContent!.split('\n'),
+          sourceCode.split('\n'),
           scopeForFenceName(fenceName),
           'text.plain.null-grammar',
         )
@@ -273,7 +274,7 @@ async function highlightCodeBlocks(
         const grammar = atom.grammars.grammarForId(scopeForFenceName(fenceName))
         const lm = atom.grammars.languageModeForGrammarAndBuffer(grammar, buf)
         buf.setLanguageMode(lm)
-        buf.setText(codeBlock.textContent!.replace(/\r?\n$/, ''))
+        buf.setText(sourceCode)
         const end = buf.getEndPosition()
         if (lm.startTokenizing) lm.startTokenizing()
         await tokenized(lm)

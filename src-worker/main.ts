@@ -62,9 +62,7 @@ onmessage = function (evt) {
 
 function pairUp<T>(arr: T[], option: string): Array<[T, T]> {
   if (arr.length % 2 !== 0) {
-    const err = new Error('INV_MATH_DELIM') as Error & { detail: string }
-    err.detail = option
-    throw err
+    postMessage({ evt: 'odd-separators', arr, option })
   }
 
   return arr.reduce<Array<[T, T]>>(function (result, _value, index, array) {
