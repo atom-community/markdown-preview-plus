@@ -29,8 +29,8 @@
     "bundle-worker": "parcel build --no-scope-hoist --target worker lib-worker/main.js",
     "prettier": "prettier --write 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "prettier-check": "prettier -l 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
-    "typecheck": "tsc --noEmit -p src && tsc --noEmit -p src-client && tsc --noEmit -p spec",
-    "lint": "tslint --project src && tslint --project src-client && tslint --project spec",
+    "typecheck": "tsc --noEmit -p src && tsc --noEmit -p src-client && tsc --noEmit -p src-worker && tsc --noEmit -p spec",
+    "lint": "tslint --project src && tslint --project src-client && tslint --project src-worker && tslint --project spec",
     "test": "npm run typecheck && npm run lint && npm run prettier-check"
   },
   "atomTranspilers": [
