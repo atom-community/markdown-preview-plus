@@ -420,7 +420,7 @@ export class MarkdownPreviewView {
         this.renderLaTeX,
         atomConfig().previewConfig.diffMethod,
         util.buildLineMap(
-          await MarkdownItWorker.instance().getTokens(text, this.renderLaTeX),
+          await MarkdownItWorker.getTokens(text, this.renderLaTeX),
         ),
         atomConfig().syncConfig.syncPreviewOnEditorScroll
           ? this.controller.getScrollSyncParams()

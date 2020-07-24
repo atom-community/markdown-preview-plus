@@ -48,7 +48,7 @@ export async function render(options: RenderOptions): Promise<HTMLDocument> {
       html = e.html as string
     }
   } else {
-    html = await MarkdownItWorker.instance().render(text, options.renderLaTeX)
+    html = await MarkdownItWorker.render(text, options.renderLaTeX)
   }
   const parser = new DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
