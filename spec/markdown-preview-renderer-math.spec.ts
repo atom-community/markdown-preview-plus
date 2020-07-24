@@ -5,7 +5,7 @@ let renderMath = false
 import { activateMe } from './util'
 
 const compareHTML = async function (one: string, two: string) {
-  one = await MarkdownItWorker.instance().render(one, renderMath)
+  one = await MarkdownItWorker.render(one, renderMath)
   one = one.replace(/\n\s*/g, '')
   two = two.replace(/\n\s*/g, '')
   expect(one).to.equal(two)

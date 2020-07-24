@@ -83,7 +83,7 @@ describe('Syncronization of source and preview', function () {
           encoding: 'utf-8',
         }),
       ) as MyToken[]
-      tokens = await MarkdownItWorker.instance().getTokens(
+      tokens = await MarkdownItWorker.getTokens(
         atom.workspace.getActiveTextEditor()!.getText(),
         true,
       )

@@ -86,12 +86,6 @@ export class MarkdownItWorker {
       }),
     )
   }
-  public static instance() {
-    if (!MarkdownItWorker._instance) {
-      MarkdownItWorker._instance = new MarkdownItWorker()
-    }
-    return MarkdownItWorker._instance
-  }
   public static destroy() {
     if (MarkdownItWorker._instance) {
       MarkdownItWorker._instance.worker.terminate()
@@ -99,16 +93,24 @@ export class MarkdownItWorker {
       MarkdownItWorker._instance = undefined
     }
   }
-  public configure(
+  public static async render(text: string, rL: boolean): Promise<string> {
+    return MarkdownItWorker.instance().request({ cmd: 'render', text, rL })
+  }
+  public static async getTokens(text: string, rL: boolean): Promise<string> {
+    return MarkdownItWorker.instance().request({ cmd: 'getTokens', text, rL })
+  }
+
+  private static instance() {
+    if (!MarkdownItWorker._instance) {
+      MarkdownItWorker._instance = new MarkdownItWorker()
+    }
+    return MarkdownItWorker._instance
+  }
+
+  private configure(
     config: ConfigValues['markdown-preview-plus.markdownItConfig'],
   ) {
     this.worker.postMessage({ cmd: 'config', arg: config })
-  }
-  public async render(text: string, rL: boolean): Promise<string> {
-    return this.request({ cmd: 'render', text, rL })
-  }
-  public async getTokens(text: string, rL: boolean): Promise<string> {
-    return this.request({ cmd: 'getTokens', text, rL })
   }
   private async request(
     cmd: Omit<Extract<MessageToWorker, { id: number }>, 'id'>,
