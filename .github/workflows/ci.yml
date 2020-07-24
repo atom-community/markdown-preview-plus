@@ -30,6 +30,8 @@ jobs:
         run: apm -v
       - name: Install dependencies
         run: apm ci
+      - name: Build required artifacts
+        run: npm run build-worker
       - name: Run tests
         shell: bash
         run: atom --no-sandbox --test spec 2>/tmp/test.log
