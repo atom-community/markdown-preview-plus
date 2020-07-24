@@ -49,9 +49,7 @@ type MyWorker = Omit<Worker, 'postMessage'> & { postMessage: MyPostMessageT }
 
 export class MarkdownItWorker {
   private static _instance: MarkdownItWorker | undefined
-  private worker: MyWorker = new Worker(
-    path.join(packagePath(), 'dist', 'worker.js'),
-  )
+  private readonly worker: MyWorker
   private requestId = 0
   private readonly replyCallbacks = new Map<
     number,
@@ -59,6 +57,9 @@ export class MarkdownItWorker {
   >()
   private disposables = new CompositeDisposable()
   private constructor() {
+      this.worker = new Worker(
+        path.join(packagePath(), 'dist', 'worker', 'main.js'),
+      )
     this.worker.onmessage = (evt: MyMessageEvent) => {
       if ('id' in evt.data) {
         const cb = this.replyCallbacks.get(evt.data.id)
