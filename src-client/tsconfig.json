@@ -8,7 +8,6 @@
   ],
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "../lib-client",
     "types": ["mathjax"]
   }
 }
