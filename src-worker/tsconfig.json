@@ -1,6 +1,6 @@
 {
   "extends": "../src/tsconfig.json",
-  "include": ["./**/**.ts", "./**/**.d.ts"],
+  "include": ["./**/**.ts", "./**/**.d.ts", "../src/config.ts"],
   "compileOnSave": false,
   "compilerOptions": {
     "outDir": "../lib-worker",
