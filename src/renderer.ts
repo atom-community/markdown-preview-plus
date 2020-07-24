@@ -2,7 +2,7 @@ import * as path from 'path'
 import * as pandocHelper from './pandoc-helper'
 import { MarkdownItWorker } from './markdown-it-helper'
 import { scopeForFenceName } from './extension-helper'
-import { Grammar, TextEditor } from 'atom'
+import { Grammar, TextBuffer, LanguageMode } from 'atom'
 import { isFileSync, atomConfig, packagePath } from './util'
 import { getMedia } from './util-common'
 import { ImageWatcher } from './image-watch-helper'
@@ -244,8 +244,11 @@ async function highlightCodeBlocks(
     }
   }
 
+  const ctw = atomConfig().codeTabWidth || atom.config.get('editor.tabLength')
+
   await Promise.all(
     Array.from(domFragment.querySelectorAll('pre')).map(async (preElement) => {
+      await new Promise(setImmediate) // yield event loop
       const codeBlock =
         preElement.firstElementChild !== null
           ? preElement.firstElementChild
@@ -254,6 +257,7 @@ async function highlightCodeBlocks(
       const fenceName = cbClass
         ? cbClass.replace(/^(lang-|sourceCode )/, '')
         : defaultLanguage
+      preElement.style.tabSize = ctw.toString()
 
       if (highlighter === 'legacy') {
         const lines = hightlightLines(
@@ -265,52 +269,61 @@ async function highlightCodeBlocks(
         preElement.innerHTML = Array.from(lines).join('\n')
         if (fenceName) preElement.classList.add(`lang-${fenceName}`)
       } else if (highlighter === 'text-editor') {
-        const ctw = atomConfig().codeTabWidth
-        const ed = new TextEditor({
-          readonly: true,
-          keyboardInputEnabled: false,
-          showInvisibles: false,
-          tabLength: ctw === 0 ? atom.config.get('editor.tabLength') : ctw,
-        })
-        const el = atom.views.getView(ed)
-        try {
-          el.setUpdatedSynchronously(true)
-          el.style.pointerEvents = 'none'
-          el.style.position = 'absolute'
-          el.style.top = '100vh'
-          el.style.width = '100vw'
-          atom.grammars.assignLanguageMode(
-            ed.getBuffer(),
-            scopeForFenceName(fenceName),
-          )
-          ed.setText(codeBlock.textContent!.replace(/\r?\n$/, ''))
-          atom.views.getView(atom.workspace).appendChild(el)
-          await editorTokenized(ed)
-          const html = Array.from(el.querySelectorAll('.line:not(.dummy)'))
-          preElement.classList.add('editor-colors')
-          preElement.innerHTML = html.map((x) => x.innerHTML).join('\n')
-          if (fenceName) preElement.classList.add(`lang-${fenceName}`)
-        } finally {
-          el.remove()
+        const buf = new TextBuffer()
+        const grammar = atom.grammars.grammarForId(scopeForFenceName(fenceName))
+        const lm = atom.grammars.languageModeForGrammarAndBuffer(grammar, buf)
+        buf.setLanguageMode(lm)
+        buf.setText(codeBlock.textContent!.replace(/\r?\n$/, ''))
+        const end = buf.getEndPosition()
+        if (lm.startTokenizing) lm.startTokenizing()
+        await tokenized(lm)
+        const iter = lm.buildHighlightIterator()
+        if (iter.getOpenScopeIds && iter.getCloseScopeIds) {
+          let pos = { row: 0, column: 0 }
+          iter.seek(pos)
+          const res = []
+          while (
+            pos.row < end.row ||
+            (pos.row === end.row && pos.column <= end.column)
+          ) {
+            const open = iter
+              .getOpenScopeIds()
+              .map((x) => lm.classNameForScopeId(x))
+            res.push(...open.map((x) => `<span class="${x}">`))
+            const close = iter
+              .getCloseScopeIds()
+              .map((x) => lm.classNameForScopeId(x))
+            res.push(...close.map((_) => `</span>`))
+            iter.moveToSuccessor()
+            const nextPos = iter.getPosition()
+            res.push(buf.getTextInRange([pos, nextPos]))
+            pos = nextPos
+          }
+          preElement.innerHTML = res.join('')
+        } else {
+          preElement.innerHTML = codeBlock.innerHTML
         }
+        buf.destroy()
       }
+      preElement.classList.add('editor-colors')
+      if (fenceName) preElement.classList.add(`lang-${fenceName}`)
     }),
   )
 
   return domFragment
 }
 
-async function editorTokenized(editor: TextEditor) {
+async function tokenized(lm: LanguageMode) {
   return new Promise((resolve) => {
-    const languageMode = editor.getBuffer().getLanguageMode()
-    const nextUpdatePromise = editor.component.getNextUpdatePromise()
-    if (languageMode.fullyTokenized || languageMode.tree) {
-      resolve(nextUpdatePromise)
-    } else {
-      const disp = editor.onDidTokenize(() => {
+    if (lm.fullyTokenized || lm.tree) {
+      resolve()
+    } else if (lm.onDidTokenize) {
+      const disp = lm.onDidTokenize(() => {
         disp.dispose()
-        resolve(nextUpdatePromise)
+        resolve()
       })
+    } else {
+      resolve() // null language mode
     }
   })
 }
