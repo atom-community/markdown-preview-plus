@@ -62,8 +62,9 @@ export class MathJaxController {
     const unprocessedMath = allMath.filter((x) => {
       const jax = MathJax.Hub.getJaxFor(x) as MathJax.ElementJax | null
       try {
-        return !jax || jax.needsUpdate()
+        return !jax || x.id !== jax.inputID || jax.needsUpdate()
       } catch (e) {
+        console.error(e)
         return true
       }
     })
