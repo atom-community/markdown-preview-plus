@@ -3,6 +3,7 @@ import Token from 'markdown-it/lib/token'
 import * as twemoji from 'twemoji'
 import { isEqual } from 'lodash'
 import { MathMeta } from './markdown-it-math'
+import { MessageToWorker, MessageFromWorker } from './ipc'
 
 let config = {
   useLazyHeaders: true,
@@ -29,16 +30,18 @@ let config = {
   tableCaptions: true,
 }
 
-type MessageData =
-  | {
-      cmd: 'config'
-      arg: typeof config
-    }
-  | { cmd: 'render'; text: string; rL: boolean; id: number }
-  | { cmd: 'getTokens'; text: string; rL: boolean; id: number }
+type MyMessageEvent = Omit<MessageEvent, 'data'> & { data: MessageToWorker }
+type PostMessageT = typeof globalThis.postMessage
+type Params = PostMessageT extends (a: any, ...args: infer P) => any ? P : never
+type MyPostMessageT = (
+  message: MessageFromWorker,
+  ...args: Params
+) => ReturnType<PostMessageT>
 
-onmessage = function (evt) {
-  const data = evt.data as MessageData
+const postMessage: MyPostMessageT = globalThis.postMessage
+
+onmessage = function (evt: MyMessageEvent) {
+  const data = evt.data
   switch (data.cmd) {
     case 'config':
       config = data.arg

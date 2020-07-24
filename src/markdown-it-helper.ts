@@ -1,6 +1,7 @@
 import { atomConfig, packagePath } from './util'
 import path from 'path'
 import { ConfigValues, CompositeDisposable } from 'atom'
+import { MessageFromWorker, MessageToWorker } from '../src-worker/ipc'
 
 const pandocConfig = {
   useLazyHeaders: true,
@@ -27,7 +28,7 @@ const pandocConfig = {
   tableCaptions: true,
 }
 
-function warnOddSeparators(arr: string[], option: string): void {
+function warnOddSeparators(arr: unknown[], option: string): void {
   atom.notifications.addWarning(
     `Invalid math delimiter configuration${option ? `in ${option}` : ''}`,
     {
@@ -37,15 +38,28 @@ function warnOddSeparators(arr: string[], option: string): void {
   )
 }
 
+type MyMessageEvent = Omit<MessageEvent, 'data'> & { data: MessageFromWorker }
+type PostMessageT = Worker['postMessage']
+type Params = PostMessageT extends (a: any, ...args: infer P) => any ? P : never
+type MyPostMessageT = (
+  message: MessageToWorker,
+  ...args: Params
+) => ReturnType<PostMessageT>
+type MyWorker = Omit<Worker, 'postMessage'> & { postMessage: MyPostMessageT }
+
 export class MarkdownItWorker {
   private static _instance: MarkdownItWorker | undefined
-  private worker = new Worker(path.join(packagePath(), 'dist', 'worker.js'))
+  private worker: MyWorker = new Worker(
+    path.join(packagePath(), 'dist', 'worker.js'),
+  )
   private requestId = 0
-  private readonly replyCallbacks = new Map<number, any>()
+  private readonly replyCallbacks = new Map<
+    number,
+    (result: Extract<MessageFromWorker, { result: any }>['result']) => void
+  >()
   private disposables = new CompositeDisposable()
   private constructor() {
-    this.worker.onmessage = (evt) => {
-      // tslint:disable:no-unsafe-any
+    this.worker.onmessage = (evt: MyMessageEvent) => {
       if ('id' in evt.data) {
         const cb = this.replyCallbacks.get(evt.data.id)
         if (cb) cb(evt.data.result)
@@ -55,7 +69,6 @@ export class MarkdownItWorker {
             warnOddSeparators(evt.data.arr, evt.data.option)
         }
       }
-      // tslint:enable:no-unsafe-any
     }
 
     this.disposables.add(
@@ -97,7 +110,9 @@ export class MarkdownItWorker {
   public async getTokens(text: string, rL: boolean): Promise<string> {
     return this.request({ cmd: 'getTokens', text, rL })
   }
-  private async request(cmd: any) {
+  private async request(
+    cmd: Omit<Extract<MessageToWorker, { id: number }>, 'id'>,
+  ) {
     const id = this.requestId++
     const result = new Promise<any>((resolve) => {
       this.replyCallbacks.set(id, (result: any) => {

@@ -32,7 +32,13 @@
     "newLine": "LF",
     "skipLibCheck": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "../src-client/ipc.d.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "../src-client/ipc.d.ts",
+    "../src-worker.d.ts/ipc.d.ts"
+  ],
   "compileOnSave": false,
   "experimentalDecorators": true
 }
