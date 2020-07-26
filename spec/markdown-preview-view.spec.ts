@@ -1340,6 +1340,6 @@ runSpec('with legacy highlighter', () => {
 runSpec('with new highlighter', () => {
   atom.config.set(
     'markdown-preview-plus.previewConfig.highlighter',
-    'text-editor',
+    'tree-sitter-compatible',
   )
 })
