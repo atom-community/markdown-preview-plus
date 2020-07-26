@@ -279,7 +279,7 @@ async function highlightCodeBlocks(
           line = lines.next()
         }
         preElement.innerHTML = linesArr.join('\n')
-      } else if (highlighter === 'tree-view-compatible') {
+      } else if (highlighter === 'tree-sitter-compatible') {
         const buf = new TextBuffer()
         const grammar = atom.grammars.grammarForId(scopeForFenceName(fenceName))
         const lm = atom.grammars.languageModeForGrammarAndBuffer(grammar, buf)
@@ -362,7 +362,7 @@ async function eventLoopYielder(delayMs: number, maxTimeMs: number) {
 Some code blocks may be incomplete.`
       if (
         atom.config.get('markdown-preview-plus.previewConfig.highlighter') ===
-        'tree-view-compatible'
+        'tree-sitter-compatible'
       ) {
         description += ` You're currently using tree-view-compatible highlighter, you may try
 switching to legacy highlighter instead.`
