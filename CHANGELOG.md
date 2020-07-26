@@ -1,3 +1,47 @@
+## 4.5.0
+
+### Changes
+
+-   Move markdown-it to webworker
+
+    Previously, rendering Markdown was done in the main UI thread, which on larger documents could result in intermittent freezes and overall latency issues. It has now been moved into a separate WebWorker thread.
+
+    This complicates hacking on markdown-it a little bit, see the contribution guide for more information.
+
+-   Rewrite tree-sitter compatible highlighter
+
+    For a while now, highlighter was creating a TextEditor for each code block and then ripping the highlighted HTML from it. This didn't work well enough in some corner cases, and creating TextEditors is rather slow due to required DOM manipulation.
+
+    That code has been rewritten to use low-level internal Atom API, which makes it quite a bit faster and generally more robust. That said, future Atom versions might break something.
+
+-   Show preview error at the top of preview
+
+    It wasn't always evident that a preview error happened due to error message being added at the bottom of preview content. It is now added at the top.
+
+### New features
+
+-   Re-introduce legacy highlighter
+
+    Legacy highlighter only supports older TextMate-style grammars, but it is very well-tested. If the new highlighter algorithm breaks at some point, legacy highlighter offers a fallback option.
+
+    The active highlighter is controlled by the `markdown-preview-plus.previewConfig.highlighter` option.
+
+### Fixes
+
+-   Yield event loop periodically while highlighting to avoid UI freezes
+
+    This ensures UI doesn't freeze up completely if highlighting takes longer than expected. It also adds an upper limit on the time highlighter can work (currently hard-coded at 5 seconds).
+
+-   Skip over code block children when computing difference
+
+    Code blocks contain a lot of small stateless elements, and in general, we don't care how those are updated, so it makes sense to skip over those to speed up the diffing algorithm.
+
+### Maintenance
+
+-   Use babel to transpile TypeScript for faster builds
+-   Re-add static checks to CI
+-   Avoid error when searching for unprocesed math; report other errors
+
 ## 4.4.1
 
 -   Fix MathJax update crash when diff algorithm is 'none'
