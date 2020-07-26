@@ -35,3 +35,19 @@ Earlier is usually better. For one, creating PRs early is a good way of
 letting people know you're working on something, which helps avoid
 effort duplication. Also it will allow maintainers to chime in early and
 help you avoid pitfalls and common mistakes.
+
+## Hacking on the worker
+
+When hacking on markdown-it worker, located in `src-worker`, the workflow is a little bit different, since only the actual bundle is loaded in runtime, not the source code. The package will however hot-reload the bundle if Atom is in dev-mode, so when hacking on the worker, you'll want to start a watch process with `npm run watch-worker` from the project directory (run it from the terminal for instance). So, essentially, an extra step is added to the list above after (3):
+
+3. a) Start watcher by running `npm run watch-worker` from the project directory. This will automatically recompile the worker bundle when the source changes.
+
+The good news is, you don't need to restart anything to see the changes, see below.
+
+## Reload behaviour
+
+Reload behaviour is a bit different between different components:
+
+-   `src` is the main package code. This is only reloaded on Atom restart/reload. You can use `window:reload` Atom command to reload Atom.
+-   `src-client` is the code for "client" script that runs inside the preview. This is loaded separately for each open preview window, and hence reloaded when preview is closed and reopened. Use `markdown-preview-plus:toggle` command to close/open the current preview.
+-   `src-worker` is the markdown-it webworker code. This one is reloaded automatically when Atom is in dev-mode, so you'll see changes to the bundle immediately. However, changes to the sources are not bundled automatically, you need to start a dedicated process for that, see above.
