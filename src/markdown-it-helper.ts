@@ -1,6 +1,6 @@
 import { atomConfig, packagePath } from './util'
 import path from 'path'
-import { ConfigValues, CompositeDisposable } from 'atom'
+import { ConfigValues, CompositeDisposable, File } from 'atom'
 import { MessageFromWorker, MessageToWorker } from '../src-worker/ipc'
 
 const pandocConfig = {
@@ -49,26 +49,33 @@ type MyWorker = Omit<Worker, 'postMessage'> & { postMessage: MyPostMessageT }
 
 export class MarkdownItWorker {
   private static _instance: MarkdownItWorker | undefined
-  private readonly worker: MyWorker = new Worker(
-    path.join(packagePath(), 'dist', 'worker', 'main.js'),
-  )
+  private readonly workerPath: string
+  private worker: MyWorker
   private requestId = 0
   private readonly replyCallbacks = new Map<
     number,
-    (result: Extract<MessageFromWorker, { result: any }>['result']) => void
+    {
+      resolve: (
+        result: Extract<MessageFromWorker, { result: any }>['result'],
+      ) => void
+      reject: (e: Error) => void
+    }
   >()
   private disposables = new CompositeDisposable()
   private constructor() {
-    this.worker.onmessage = (evt: MyMessageEvent) => {
-      if ('id' in evt.data) {
-        const cb = this.replyCallbacks.get(evt.data.id)
-        if (cb) cb(evt.data.result)
-      } else if ('evt' in evt.data) {
-        switch (evt.data.evt) {
-          case 'odd-separators':
-            warnOddSeparators(evt.data.arr, evt.data.option)
-        }
-      }
+    this.workerPath = path.join(packagePath(), 'dist', 'worker', 'main.js')
+    this.worker = this.initWorker()
+    if (atom.inDevMode()) {
+      const fileWatcher = new File(this.workerPath)
+      this.disposables.add(
+        fileWatcher.onDidChange(() => {
+          this.teardownWorker()
+          this.worker = this.initWorker()
+          this.configure(
+            atom.config.get('markdown-preview-plus.markdownItConfig'),
+          )
+        }),
+      )
     }
 
     this.disposables.add(
@@ -88,7 +95,7 @@ export class MarkdownItWorker {
   }
   public static destroy() {
     if (MarkdownItWorker._instance) {
-      MarkdownItWorker._instance.worker.terminate()
+      MarkdownItWorker._instance.teardownWorker()
       MarkdownItWorker._instance.disposables.dispose()
       MarkdownItWorker._instance = undefined
     }
@@ -107,6 +114,28 @@ export class MarkdownItWorker {
     return MarkdownItWorker._instance
   }
 
+  private initWorker() {
+    const worker = new Worker(this.workerPath)
+    worker.onmessage = (evt: MyMessageEvent) => {
+      if ('id' in evt.data) {
+        const cb = this.replyCallbacks.get(evt.data.id)
+        if (cb) cb.resolve(evt.data.result)
+      } else if ('evt' in evt.data) {
+        switch (evt.data.evt) {
+          case 'odd-separators':
+            warnOddSeparators(evt.data.arr, evt.data.option)
+        }
+      }
+    }
+    return worker
+  }
+  private teardownWorker() {
+    this.worker.onmessage = null
+    this.worker.terminate()
+    for (const { reject } of Array.from(this.replyCallbacks.values())) {
+      reject(new Error('Worker terminated'))
+    }
+  }
   private configure(
     config: ConfigValues['markdown-preview-plus.markdownItConfig'],
   ) {
@@ -116,10 +145,16 @@ export class MarkdownItWorker {
     cmd: Omit<Extract<MessageToWorker, { id: number }>, 'id'>,
   ) {
     const id = this.requestId++
-    const result = new Promise<any>((resolve) => {
-      this.replyCallbacks.set(id, (result: any) => {
-        this.replyCallbacks.delete(id)
-        resolve(result)
+    const result = new Promise<any>((resolve, reject) => {
+      this.replyCallbacks.set(id, {
+        resolve: (result: any) => {
+          this.replyCallbacks.delete(id)
+          resolve(result)
+        },
+        reject: (e: Error) => {
+          this.replyCallbacks.delete(id)
+          reject(e)
+        },
       })
     })
     const newargs = Object.assign({ id }, cmd)
