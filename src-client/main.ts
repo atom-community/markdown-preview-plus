@@ -292,7 +292,11 @@ ipcRenderer.on<'error'>('error', (_evt, { msg }) => {
   if (!preview) return
   const errorDiv = document.createElement('div')
   errorDiv.innerHTML = `<h2>Previewing Markdown Failed</h2><h3>${msg}</h3>`
-  preview.appendChild(errorDiv)
+  if (preview.firstElementChild) {
+    preview.insertBefore(errorDiv, preview.firstElementChild)
+  } else {
+    preview.appendChild(errorDiv)
+  }
 })
 
 document.addEventListener('wheel', (event) => {
