@@ -270,6 +270,7 @@ async function highlightCodeBlocks(
         preElement.innerHTML = Array.from(lines).join('\n')
         if (fenceName) preElement.classList.add(`lang-${fenceName}`)
       } else if (highlighter === 'text-editor') {
+      } else if (highlighter === 'tree-view-compatible') {
         const buf = new TextBuffer()
         const grammar = atom.grammars.grammarForId(scopeForFenceName(fenceName))
         const lm = atom.grammars.languageModeForGrammarAndBuffer(grammar, buf)
