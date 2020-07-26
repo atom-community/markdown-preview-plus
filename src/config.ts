@@ -122,12 +122,12 @@ export const config: IConfig = {
         title: 'Code Highlighter',
         description:
           'What is used for highlighting code in code blocks. `none` is no highlighting, ' +
-          '`legacy` is fast, but only supports legacy textmate grammars. `tree-view-compatible` ' +
+          '`legacy` is fast, but only supports legacy textmate grammars. `tree-sitter-compatible` ' +
           "uses Atom's internal highlighting API, and hence is compatible with tree-sitter grammars, " +
           ' but it can be slower than `legacy` and is not as well-tested',
         type: 'string',
-        enum: ['none', 'legacy', 'tree-view-compatible'],
-        default: 'tree-view-compatible',
+        enum: ['none', 'legacy', 'tree-sitter-compatible'],
+        default: 'tree-sitter-compatible',
         order: 15,
       },
       previewSplitPaneDir: {
@@ -732,7 +732,7 @@ declare module 'atom' {
     'markdown-preview-plus.previewConfig.highlighter':
       | 'none'
       | 'legacy'
-      | 'tree-view-compatible'
+      | 'tree-sitter-compatible'
     'markdown-preview-plus.previewConfig.previewSplitPaneDir':
       | 'down'
       | 'right'
@@ -749,7 +749,7 @@ declare module 'atom' {
     'markdown-preview-plus.previewConfig': {
       liveUpdate: boolean
       diffMethod: 'none' | 'heuristic' | 'myers'
-      highlighter: 'none' | 'legacy' | 'tree-view-compatible'
+      highlighter: 'none' | 'legacy' | 'tree-sitter-compatible'
       previewSplitPaneDir: 'down' | 'right' | 'none'
       previewDock: 'left' | 'right' | 'bottom' | 'center'
       closePreviewWithEditor: boolean
@@ -938,7 +938,7 @@ declare module 'atom' {
       richClipboard: boolean
       'previewConfig.liveUpdate': boolean
       'previewConfig.diffMethod': 'none' | 'heuristic' | 'myers'
-      'previewConfig.highlighter': 'none' | 'legacy' | 'tree-view-compatible'
+      'previewConfig.highlighter': 'none' | 'legacy' | 'tree-sitter-compatible'
       'previewConfig.previewSplitPaneDir': 'down' | 'right' | 'none'
       'previewConfig.previewDock': 'left' | 'right' | 'bottom' | 'center'
       'previewConfig.closePreviewWithEditor': boolean
@@ -948,7 +948,7 @@ declare module 'atom' {
       previewConfig: {
         liveUpdate: boolean
         diffMethod: 'none' | 'heuristic' | 'myers'
-        highlighter: 'none' | 'legacy' | 'tree-view-compatible'
+        highlighter: 'none' | 'legacy' | 'tree-sitter-compatible'
         previewSplitPaneDir: 'down' | 'right' | 'none'
         previewDock: 'left' | 'right' | 'bottom' | 'center'
         closePreviewWithEditor: boolean
