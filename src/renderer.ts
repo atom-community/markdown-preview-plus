@@ -248,7 +248,6 @@ async function highlightCodeBlocks(
 
   await Promise.all(
     Array.from(domFragment.querySelectorAll('pre')).map(async (preElement) => {
-      await new Promise(setImmediate) // yield event loop
       const codeBlock =
         preElement.firstElementChild !== null
           ? preElement.firstElementChild
@@ -259,6 +258,7 @@ async function highlightCodeBlocks(
         : defaultLanguage
       preElement.style.tabSize = ctw.toString()
 
+      const yielder = await eventLoopYielder(100, 5000)
       const sourceCode = codeBlock.textContent!.replace(/\r?\n$/, '')
       if (highlighter === 'legacy') {
         const lines = hightlightLines(
@@ -266,10 +266,19 @@ async function highlightCodeBlocks(
           scopeForFenceName(fenceName),
           'text.plain.null-grammar',
         )
-        preElement.classList.add('editor-colors')
-        preElement.innerHTML = Array.from(lines).join('\n')
-        if (fenceName) preElement.classList.add(`lang-${fenceName}`)
-      } else if (highlighter === 'text-editor') {
+        const linesArr = []
+        let line = lines.next()
+        while (!line.done) {
+          linesArr.push(line.value)
+          try {
+            await yielder()
+          } catch (e) {
+            console.error(e)
+            break
+          }
+          line = lines.next()
+        }
+        preElement.innerHTML = linesArr.join('\n')
       } else if (highlighter === 'tree-view-compatible') {
         const buf = new TextBuffer()
         const grammar = atom.grammars.grammarForId(scopeForFenceName(fenceName))
@@ -299,6 +308,12 @@ async function highlightCodeBlocks(
             iter.moveToSuccessor()
             const nextPos = iter.getPosition()
             res.push(buf.getTextInRange([pos, nextPos]))
+            try {
+              await yielder()
+            } catch (e) {
+              console.error(e)
+              break
+            }
             pos = nextPos
           }
           preElement.innerHTML = res.join('')
@@ -328,4 +343,39 @@ async function tokenized(lm: LanguageMode) {
       resolve() // null language mode
     }
   })
+}
+
+async function eventLoopYielder(delayMs: number, maxTimeMs: number) {
+  await new Promise(setImmediate)
+  const started = performance.now()
+  let lastYield = started
+  let now = lastYield
+  return async function () {
+    now = performance.now()
+    if (now - lastYield > delayMs) {
+      await new Promise(setImmediate)
+      lastYield = now
+    }
+    if (now - started > maxTimeMs) {
+      const err = new Error('Max time reached')
+      let description = `The highlighter took too long to complete and was terminated.
+Some code blocks may be incomplete.`
+      if (
+        atom.config.get('markdown-preview-plus.previewConfig.highlighter') ===
+        'tree-view-compatible'
+      ) {
+        description += ` You're currently using tree-view-compatible highlighter, you may try
+switching to legacy highlighter instead.`
+      }
+      atom.notifications.addError(
+        'Markdown-Preview-Plus: Highlighter took more than 5 seconds to complete',
+        {
+          dismissable: true,
+          description,
+          stack: err.stack,
+        },
+      )
+      throw err
+    }
+  }
 }
