@@ -108,6 +108,7 @@ function* allChildren(node: Element): IterableIterator<Element> {
       continue
     }
     yield c
+    if (c.tagName === 'PRE' && c.classList.contains('editor-colors')) continue
     yield* allChildren(c)
   }
 }
