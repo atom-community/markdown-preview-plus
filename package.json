@@ -23,6 +23,7 @@
     "build-main": "parcel build --target bundle src/main.ts",
     "build-client": "parcel build --target client src-client/main.ts",
     "build-worker": "parcel build --no-scope-hoist --target worker src-worker/main.ts",
+    "watch-worker": "parcel watch --target worker src-worker/main.ts",
     "prettier": "prettier --write 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "prettier-check": "prettier -l 'src/**/*.ts' 'src-client/**/*.ts' 'spec/**/*.ts'",
     "typecheck": "tsc --noEmit -p src && tsc --noEmit -p src-client && tsc --noEmit -p src-worker && tsc --noEmit -p spec",
