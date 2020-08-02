@@ -15,6 +15,7 @@ import {
   ContextMenuOptions,
   File,
 } from 'atom'
+import { getToolBarManager } from 'atom/tool-bar'
 import * as path from 'path'
 import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
@@ -359,4 +360,13 @@ function opener(uriToOpen: string) {
       `Tried to open markdown-preview-plus with uri ${uriToOpen}. This is not supported. Please report this error.`,
     )
   }
+}
+
+export function consumeToolBar(getToolBar: getToolBarManager) {
+  const toolbar = getToolBar("markdown-preview-plus")
+  toolbar.addButton({
+      icon: "markdown",
+      callback: "markdown-preview-plus:toggle",
+      tooltip: "Markdown Preview",
+  })
 }
