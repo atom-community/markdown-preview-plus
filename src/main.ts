@@ -363,10 +363,10 @@ function opener(uriToOpen: string) {
 }
 
 export function consumeToolBar(getToolBar: getToolBarManager) {
-  const toolbar = getToolBar("markdown-preview-plus")
+  const toolbar = getToolBar('markdown-preview-plus')
   toolbar.addButton({
-      icon: "markdown",
-      callback: "markdown-preview-plus:toggle",
-      tooltip: "Markdown Preview",
+    icon: 'markdown',
+    callback: 'markdown-preview-plus:toggle',
+    tooltip: 'Markdown Preview',
   })
 }
