@@ -141,5 +141,12 @@
   },
   "deserializers": {
     "markdown-preview-plus/MarkdownPreviewView": "createMarkdownPreviewView"
+  },
+  "consumedServices": {
+    "tool-bar": {
+      "versions": {
+        "^0 || ^1": "consumeToolBar"
+      }
+    }
   }
 }
