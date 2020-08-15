@@ -8,7 +8,7 @@ downloads](https://img.shields.io/apm/dm/markdown-preview-plus.svg)
 
 Markdown Preview Plus (MPP) is a fork of [Markdown
 Preview](https://github.com/atom/markdown-preview) that provides a
-real-time preview of markdown documents.
+real-time preview of markdown documents.  (Note: This is not the Chrome browser extension of the same name, which can be found [here](https://github.com/volca/markdown-preview)).
 
 Should you have any problems while installing or using MPP please open
 up a [new
