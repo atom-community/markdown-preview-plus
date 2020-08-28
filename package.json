@@ -87,6 +87,7 @@
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.10.4",
+    "@parcel/transformer-typescript-tsc": "^2.0.0-nightly.387",
     "@types/atom": "^1.40.4",
     "@types/chai": "^4.2.12",
     "@types/fs-extra": "^9.0.1",
@@ -125,7 +126,7 @@
     "markdown-it-task-lists": "^2.1.1",
     "markdown-it-testgen": "^0.1.6",
     "morphdom": "^2.6.1",
-    "parcel": "^2.0.0-nightly.384",
+    "parcel": "^2.0.0-nightly.385",
     "pirates": "^4.0.1",
     "prettier": "^2.1.0",
     "sinon": "^9.0.3",
