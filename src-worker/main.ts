@@ -11,6 +11,7 @@ let config = {
   useToc: false,
   useEmoji: true,
   breakOnSingleNewline: false,
+  typographicReplacements: true,
   useCriticMarkup: false,
   useFootnote: true,
   useImsize: false,
@@ -117,14 +118,16 @@ function sourceLineData(md: markdownItModule) {
   })
 }
 
-function getOptions(breaks: boolean) {
+function getOptions(opts: {
+  breaks: boolean
+  typographer: boolean
+}): markdownItModule.Options {
   return {
     html: true,
     xhtmlOut: false,
-    breaks,
     langPrefix: 'lang-',
     linkify: true,
-    typographer: true,
+    ...opts,
   }
 }
 
@@ -136,6 +139,7 @@ function currentConfig(rL: boolean) {
     toc: config.useToc,
     emoji: config.useEmoji,
     breaks: config.breakOnSingleNewline,
+    typographer: config.typographicReplacements,
     criticMarkup: config.useCriticMarkup,
     footnote: config.useFootnote,
     imsize: config.useImsize,
@@ -157,7 +161,12 @@ function currentConfig(rL: boolean) {
 }
 
 function init(initState: InitState): markdownItModule {
-  const markdownIt = markdownItModule(getOptions(initState.breaks))
+  const markdownIt = markdownItModule(
+    getOptions({
+      breaks: initState.breaks,
+      typographer: initState.typographer,
+    }),
+  )
 
   let inlineDelim: [string, string][] = []
   if (initState.renderLaTeX) {

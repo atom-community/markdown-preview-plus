@@ -9,6 +9,7 @@ const pandocConfig = {
   useToc: false,
   useEmoji: false,
   breakOnSingleNewline: false,
+  typographicReplacements: true,
   useCriticMarkup: false,
   useFootnote: true,
   useImsize: false,
@@ -26,7 +27,7 @@ const pandocConfig = {
   useSuperscript: true,
   parseDisplayMathInline: true,
   tableCaptions: true,
-}
+} as ConfigValues['markdown-preview-plus.markdownItConfig']
 
 function warnOddSeparators(arr: unknown[], option: string): void {
   atom.notifications.addWarning(

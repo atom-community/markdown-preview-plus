@@ -428,6 +428,14 @@ export const config: IConfig = {
         default: false,
         order: 0,
       },
+      typographicReplacements: {
+        title: 'Typographic Replacements',
+        description:
+          'Replace (R) with ®, (c) with ©, (p) with §, -- with –, enable smart quotes, etc',
+        type: 'boolean',
+        default: true,
+        order: 1,
+      },
       useLazyHeaders: {
         title: 'Use Lazy Headers with markdown-it parser',
         description: 'Require no space after headings #',
@@ -858,6 +866,7 @@ declare module 'atom' {
       undefinedFamily: string
     }
     'markdown-preview-plus.markdownItConfig.breakOnSingleNewline': boolean
+    'markdown-preview-plus.markdownItConfig.typographicReplacements': boolean
     'markdown-preview-plus.markdownItConfig.useLazyHeaders': boolean
     'markdown-preview-plus.markdownItConfig.useCheckBoxes': boolean
     'markdown-preview-plus.markdownItConfig.useEmoji': boolean
@@ -881,6 +890,7 @@ declare module 'atom' {
     'markdown-preview-plus.markdownItConfig.parseDisplayMathInline': boolean
     'markdown-preview-plus.markdownItConfig': {
       breakOnSingleNewline: boolean
+      typographicReplacements: boolean
       useLazyHeaders: boolean
       useCheckBoxes: boolean
       useEmoji: boolean
@@ -1064,6 +1074,7 @@ declare module 'atom' {
         undefinedFamily: string
       }
       'markdownItConfig.breakOnSingleNewline': boolean
+      'markdownItConfig.typographicReplacements': boolean
       'markdownItConfig.useLazyHeaders': boolean
       'markdownItConfig.useCheckBoxes': boolean
       'markdownItConfig.useEmoji': boolean
@@ -1087,6 +1098,7 @@ declare module 'atom' {
       'markdownItConfig.parseDisplayMathInline': boolean
       markdownItConfig: {
         breakOnSingleNewline: boolean
+        typographicReplacements: boolean
         useLazyHeaders: boolean
         useCheckBoxes: boolean
         useEmoji: boolean
