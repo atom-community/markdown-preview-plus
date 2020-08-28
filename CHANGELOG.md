@@ -1,3 +1,19 @@
+## 4.6.0
+
+### New features
+
+-   Add `typographicReplacements` option for markdown-it writer
+
+    Enables/disables replacement of `(r), (c), (tm), --, ---` etc with "®, ©, ™, –, —", etc. Enabled by default (backwards compatible).
+
+    Corresponds to Markdown-It `typographer` option. See https://markdown-it.github.io/markdown-it/#MarkdownIt.new for more information (more specifically, see https://github.com/markdown-it/markdown-it/blob/master/lib/rules_core/replacements.js)
+
+### Maintenance
+
+-   \[Bundler\] Use tsc transformer for now
+-   Minor dependency updates
+-   Minor README update (by Robert Kieffer)
+
 ## 4.5.0
 
 ### Changes
