@@ -1,3 +1,7 @@
+## 4.6.1
+
+-   Improve child\_process latency by manually activating Node's event loop
+
 ## 4.6.0
 
 ### New features
