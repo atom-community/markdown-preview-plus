@@ -14,3 +14,9 @@ interface Window {
     getStylesOverride?: (x: boolean) => string[]
   }
 }
+
+namespace NodeJS {
+  interface Process {
+    activateUvLoop: () => void
+  }
+}

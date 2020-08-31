@@ -148,35 +148,43 @@ export async function renderPandoc(
   showErrors: boolean,
 ): Promise<string> {
   const { args, opts } = setPandocOptions(filePath, renderMath)
-  return new Promise<string>((resolve, reject) => {
-    const cp = CP.execFile(
-      atomConfig().pandocConfig.pandocPath,
-      getArguments(args),
-      opts,
-      function (error, stdout, stderr) {
-        if (error) {
-          atom.notifications.addError(error.toString(), {
-            stack: error.stack,
-            dismissable: true,
-          })
-          reject(error)
-        }
-        try {
-          const result = handleResponse(
-            showErrors ? stderr || '' : '',
-            stdout || '',
-            renderMath,
-          )
-          resolve(result)
-        } catch (e) {
-          reject(e)
-        }
-      },
-    )
-    if (!cp.stdin) throw new Error('No stdin')
-    cp.stdin.write(text)
-    cp.stdin.end()
-  })
+  let interval: number | undefined
+  try {
+    return await new Promise<string>((resolve, reject) => {
+      const cp = CP.execFile(
+        atomConfig().pandocConfig.pandocPath,
+        getArguments(args),
+        opts,
+        function (error, stdout, stderr) {
+          if (error) {
+            atom.notifications.addError(error.toString(), {
+              stack: error.stack,
+              dismissable: true,
+            })
+            reject(error)
+          }
+          try {
+            const result = handleResponse(
+              showErrors ? stderr || '' : '',
+              stdout || '',
+              renderMath,
+            )
+            resolve(result)
+          } catch (e) {
+            reject(e)
+          }
+        },
+      )
+      if (!cp.stdin) throw new Error('No stdin')
+      cp.stdin.write(text)
+      cp.stdin.end()
+      interval = window.setInterval(() => {
+        process.activateUvLoop()
+      }, 100)
+    })
+  } finally {
+    if (interval !== undefined) clearInterval(interval)
+  }
 }
 
 function getArguments(iargs: Args) {
