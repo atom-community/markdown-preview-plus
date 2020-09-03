@@ -114,6 +114,22 @@ inv: ["\\frac{1}{#1}",1]
 pfrac: ["\\left(\\frac{#1}{#2}\\right)",2]
 ```
 
+Note that Atom's default YAML grammar can get a little bit confused with the bracket syntax
+("flow sequence syntax").
+If this is an issue, you can use the YAML "block sequence syntax" instead:
+
+```yaml
+# This one gives you "1 over something" as a fraction.
+inv:
+- "\\frac{1}{#1}"
+- 1
+
+# This one gives you a fraction with nicely typeset parentheses on either side.
+pfrac:
+- "\\left(\\frac{#1}{#2}\\right)"
+- 2
+```
+
 #### Macro Names
 
 Macros need to be named with either
