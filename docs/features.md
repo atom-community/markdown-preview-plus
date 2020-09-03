@@ -45,4 +45,4 @@ You may configure them in the [settings of MPP][options]
 [pandoc-args]: http://pandoc.org/README.html#options
 [pandoc-flavor]: http://pandoc.org/README.html#pandocs-markdown
 [pandoc-cit]: http://pandoc.org/README.html#citations
-[macro-support]: http://docs.mathjax.org/en/latest/tex.html#supported-latex-commands
+[macro-support]: http://docs.mathjax.org/en/v2.7-latest/tex.html#supported-latex-commands
