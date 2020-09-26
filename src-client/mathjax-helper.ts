@@ -73,16 +73,10 @@ export class MathJaxController {
       if (MathJax.InputJax.TeX) {
         MathJax.Hub.Queue(['resetEquationNumbers', MathJax.InputJax.TeX])
       }
-      if (this.mathJaxConfig.numberEquations) {
-        const { temps, spans } = this.setupTemps(allMath)
-        MathJax.Hub.Queue(['PreProcess', MathJax.Hub, temps])
-        MathJax.Hub.Queue(['Reprocess', MathJax.Hub, temps])
-        MathJax.Hub.Queue(() => this.cleanupTemps(temps, spans))
-      } else {
-        const { temps, spans } = this.setupTemps(unprocessedMath)
-        MathJax.Hub.Queue(['Update', MathJax.Hub, temps])
-        MathJax.Hub.Queue(() => this.cleanupTemps(temps, spans))
-      }
+      const { temps, spans } = this.setupTemps(allMath)
+      MathJax.Hub.Queue(['PreProcess', MathJax.Hub, temps])
+      MathJax.Hub.Queue(['Reprocess', MathJax.Hub, temps])
+      MathJax.Hub.Queue(() => this.cleanupTemps(temps, spans))
       MathJax.Hub.Queue([resolve])
     })
   }
