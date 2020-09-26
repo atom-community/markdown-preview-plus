@@ -146,8 +146,6 @@ export function stubClipboard() {
   })
   after(function () {
     delete window['markdown-preview-plus-tests']
-    delete result.stub
-    delete result.contents
   })
   afterEach(function () {
     result.contents = ''

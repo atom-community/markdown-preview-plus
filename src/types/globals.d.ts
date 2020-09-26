@@ -9,7 +9,7 @@ interface ObjectConstructor {
 }
 
 interface Window {
-  'markdown-preview-plus-tests': {
+  'markdown-preview-plus-tests'?: {
     clipboardWrite?: Function
     getStylesOverride?: (x: boolean) => string[]
   }
