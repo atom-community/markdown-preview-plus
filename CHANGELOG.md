@@ -1,3 +1,20 @@
+## 4.7.0
+
+### New features
+
+-   Add support for tool-bar package (by @aminya)
+
+### Fixes
+
+-   Work around MathJax crash
+
+    This crash usually manifested when math was changed from inline to display. The workaround incurs some slight overhead potentially, but it's certainly better than math engine crashing entirely.
+
+### Maintenance
+
+-   Bump dependencies
+-   Documentation updates
+
 ## 4.6.1
 
 -   Improve child\_process latency by manually activating Node's event loop
