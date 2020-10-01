@@ -136,7 +136,7 @@ function getMarkdownPreviewCSS() {
       // base64 encode assets
       const assetPath = path.join(packagePath(), 'assets', assetsName)
       const originalData = fs.readFileSync(assetPath, 'binary')
-      const base64Data = new Buffer(originalData, 'binary').toString('base64')
+      const base64Data = Buffer.from(originalData, 'binary').toString('base64')
       return `url('data:image/jpeg;base64,${base64Data}')`
     })
 }
