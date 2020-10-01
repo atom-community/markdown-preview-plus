@@ -68,11 +68,16 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
     }
   }
 
-  public getScrollSyncParams(): ChannelMap['scroll-sync'] {
-    const [first, last] = this.editor.getVisibleRowRange()
-    return {
-      firstLine: this.editor.bufferRowForScreenRow(first),
-      lastLine: this.editor.bufferRowForScreenRow(last),
+  public getScrollSyncParams(): ChannelMap['scroll-sync'] | undefined {
+    try {
+      const [first, last] = this.editor.getVisibleRowRange()
+      return {
+        firstLine: this.editor.bufferRowForScreenRow(first),
+        lastLine: this.editor.bufferRowForScreenRow(last),
+      }
+    } catch (e: unknown) {
+      console.error(e)
+      return undefined
     }
   }
 
@@ -121,7 +126,8 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
       }),
       atom.views.getView(this.editor).onDidChangeScrollTop(() => {
         if (!this.shouldScrollSync('editor')) return
-        this.emitter.emit('scroll-sync', this.getScrollSyncParams())
+        const p = this.getScrollSyncParams()
+        if (p !== undefined) this.emitter.emit('scroll-sync', p)
       }),
       atom.commands.add(atom.views.getView(this.editor), {
         'markdown-preview-plus:sync-preview': () => {
