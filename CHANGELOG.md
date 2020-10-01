@@ -1,3 +1,8 @@
+## 4.7.1
+
+-   Catch and suppress errors in getScrollSyncParams
+-   Use non-deprecated Buffer interface
+
 ## 4.7.0
 
 ### New features
