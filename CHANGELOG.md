@@ -1,3 +1,8 @@
+## 4.8.1
+
+-   [Fix] Build the bundle
+-   [Fix] Dispose of toolbar on deactivation
+
 ## 4.8.0
 
 -   [Feat] Option to disable tool-bar integration
