@@ -14,6 +14,7 @@ import {
   CompositeDisposable,
   ContextMenuOptions,
   File,
+  Disposable,
 } from 'atom'
 import type { getToolBarManager } from 'atom/tool-bar'
 import * as path from 'path'
@@ -115,6 +116,7 @@ export function activate() {
 export function deactivate() {
   MarkdownItWorker.destroy()
   disposables && disposables.dispose()
+  disposables = undefined
   BrowserWindowHandler.clean()
 }
 
@@ -363,12 +365,17 @@ function opener(uriToOpen: string) {
 }
 
 export function consumeToolBar(getToolBar: getToolBarManager) {
-  if (!atom.config.get('markdown-preview-plus.disableToolBarIntegration')) {
-    const toolbar = getToolBar('markdown-preview-plus')
-    toolbar.addButton({
-      icon: 'markdown',
-      callback: 'markdown-preview-plus:toggle',
-      tooltip: 'Markdown Preview',
-    })
-  }
+  if (!disposables) return
+  if (atom.config.get('markdown-preview-plus.disableToolBarIntegration')) return
+  const toolbar = getToolBar('markdown-preview-plus')
+  toolbar.addButton({
+    icon: 'markdown',
+    callback: 'markdown-preview-plus:toggle',
+    tooltip: 'Markdown Preview',
+  })
+  disposables.add(
+    new Disposable(function () {
+      toolbar.removeItems()
+    }),
+  )
 }
