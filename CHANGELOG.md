@@ -1,3 +1,7 @@
+## 4.8.2
+
+-   [Fix] Fix html special characters w\/ tree-sitter-compatible highlighter
+
 ## 4.8.1
 
 -   [Fix] Build the bundle
