@@ -307,7 +307,7 @@ async function highlightCodeBlocks(
             res.push(...close.map((_) => `</span>`))
             iter.moveToSuccessor()
             const nextPos = iter.getPosition()
-            res.push(buf.getTextInRange([pos, nextPos]))
+            res.push(escapeHTML(buf.getTextInRange([pos, nextPos])))
             try {
               await yielder()
             } catch (e) {
@@ -378,4 +378,13 @@ switching to legacy highlighter instead.`
       throw err
     }
   }
+}
+
+function escapeHTML(str: string) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
 }

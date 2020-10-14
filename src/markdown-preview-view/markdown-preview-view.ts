@@ -377,6 +377,10 @@ export class MarkdownPreviewView {
         'markdown-preview-plus.renderer',
         this.changeHandler,
       ),
+      atom.config.onDidChange(
+        'markdown-preview-plus.previewConfig.highlighter',
+        this.changeHandler,
+      ),
 
       // webview events
       this.handler.emitter.on('did-scroll-preview', ({ min, max }) => {
