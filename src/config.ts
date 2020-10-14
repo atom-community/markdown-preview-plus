@@ -43,6 +43,14 @@ export const config: IConfig = {
       type: 'string',
     },
   },
+  disableToolBarIntegration: {
+    title: 'Disable Tool Bar integration',
+    description:
+      'Do not add the preview button to tool bar (only relevant if [tool-bar](https://atom.io/packages/tool-bar) package is installed)',
+    type: 'boolean',
+    default: false,
+    order: 0.5,
+  },
   useGitHubStyle: {
     title: 'Use GitHub.com style',
     type: 'boolean',
@@ -726,6 +734,7 @@ declare module 'atom' {
   interface ConfigValues {
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.extensions': string[]
+    'markdown-preview-plus.disableToolBarIntegration': boolean
     'markdown-preview-plus.useGitHubStyle': boolean
     'markdown-preview-plus.syntaxThemeName': string
     'markdown-preview-plus.importPackageStyles': string[]
@@ -940,6 +949,7 @@ declare module 'atom' {
     'markdown-preview-plus': {
       grammars: string[]
       extensions: string[]
+      disableToolBarIntegration: boolean
       useGitHubStyle: boolean
       syntaxThemeName: string
       importPackageStyles: string[]

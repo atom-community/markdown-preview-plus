@@ -15,7 +15,7 @@ import {
   ContextMenuOptions,
   File,
 } from 'atom'
-import { getToolBarManager } from 'atom/tool-bar'
+import type { getToolBarManager } from 'atom/tool-bar'
 import * as path from 'path'
 import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
@@ -363,10 +363,12 @@ function opener(uriToOpen: string) {
 }
 
 export function consumeToolBar(getToolBar: getToolBarManager) {
-  const toolbar = getToolBar('markdown-preview-plus')
-  toolbar.addButton({
-    icon: 'markdown',
-    callback: 'markdown-preview-plus:toggle',
-    tooltip: 'Markdown Preview',
-  })
+  if (!atom.config.get('markdown-preview-plus.disableToolBarIntegration')) {
+    const toolbar = getToolBar('markdown-preview-plus')
+    toolbar.addButton({
+      icon: 'markdown',
+      callback: 'markdown-preview-plus:toggle',
+      tooltip: 'Markdown Preview',
+    })
+  }
 }
