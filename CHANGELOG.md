@@ -1,3 +1,7 @@
+## 4.8.0
+
+-   [Feat] Option to disable tool-bar integration
+
 ## 4.7.1
 
 -   Catch and suppress errors in getScrollSyncParams
