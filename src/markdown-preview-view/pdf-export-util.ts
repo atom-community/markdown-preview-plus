@@ -88,10 +88,12 @@ export async function saveAsPDF(
     })
     view.element.style.pointerEvents = 'none'
     view.element.style.position = 'absolute'
-    view.element.style.width = '0px'
-    view.element.style.height = '0px'
+    view.element.style.top = '100vh'
+    view.element.style.height = '100vh'
+    view.element.style.width = '100vw'
     const ws = atom.views.getView(atom.workspace)
     ws.appendChild(view.element)
+    view.updatePosition()
   })
 }
 

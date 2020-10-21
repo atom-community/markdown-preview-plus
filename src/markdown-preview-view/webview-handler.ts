@@ -91,7 +91,7 @@ export class WebviewHandler extends WebContentsHandler {
     this._webview.remove()
   }
 
-  private updatePosition() {
+  public updatePosition() {
     const rect = this._element.getBoundingClientRect()
     this._webview.style.display = ''
     this._webview.style.left = `${rect.left}px`
