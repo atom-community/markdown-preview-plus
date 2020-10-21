@@ -70,7 +70,9 @@ export abstract class WebContentsHandler {
   private lastSearchText?: string
   private readonly replyCallbacks = new Map<number, ReplyCallbackStruct>()
   private readonly id: number = ++WebContentsHandler._id
-  private readonly listeners: { [key: string]: Function } = {}
+  private readonly listeners: {
+    [key: string]: (evt: unknown, id: number, ...args: any) => void
+  } = {}
   private readonly contents: Promise<WebContents>
   private stylesReady = false
 
@@ -336,19 +338,19 @@ export abstract class WebContentsHandler {
 
   private addListeners<T extends keyof ReplyMap>(
     listeners: {
-      [T in keyof ReplyMap]: (...args: ReplyMap[T]) => void
+      [K in T]: (...args: ReplyMap[K]) => void
     },
   ): void {
     for (const [channel, handler] of Object.entries(listeners)) {
       this.listeners[channel] = (
         _event: any,
         id: number,
-        ...args: ReplyMap[T]
+        ...args: ReplyMap[typeof channel]
       ) => {
         if (this.id !== id) {
           return
         }
-        ;(handler as Function)(...args)
+        handler(...args)
       }
       remote.ipcMain.on(channel, this.listeners[channel])
     }
