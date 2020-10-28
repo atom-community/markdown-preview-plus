@@ -88,7 +88,8 @@ export async function saveAsPDF(
     })
     view.element.style.pointerEvents = 'none'
     view.element.style.position = 'absolute'
-    view.element.style.top = '100vh'
+    view.element.style.top = '0'
+    view.element.style.opacity = '0'
     view.element.style.height = '100vh'
     view.element.style.width = '100vw'
     const ws = atom.views.getView(atom.workspace)

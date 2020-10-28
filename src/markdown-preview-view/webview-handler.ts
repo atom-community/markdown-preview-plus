@@ -100,5 +100,7 @@ export class WebviewHandler extends WebContentsHandler {
     this._webview.style.bottom = `${rect.bottom}px`
     this._webview.style.width = `${rect.width}px`
     this._webview.style.height = `${rect.height}px`
+    this._webview.style.pointerEvents = this._element.style.pointerEvents
+    this._webview.style.opacity = this._element.style.opacity
   }
 }
