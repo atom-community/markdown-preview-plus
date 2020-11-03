@@ -1,3 +1,25 @@
+## 4.8.3
+
+### Fixes
+
+-   Fix highlighter syntax detection for newer pandoc versions
+
+    Fixes highlighting for some pandoc code blocks (known to be an issue with pandoc 2.11)
+
+-   Tree-sitter: first close old scopes then open new ones
+
+    Fixes broken highlighting on some grammars
+
+-   Tweak pdf export webview (inside viewport with opacity 0)
+
+    Fixes intermittent hangs during pdf export on newer Atom versions
+
+### Maintenance
+
+-   Move highlighters to separate functions
+-   Move highlighter to separate file
+-   Bump dependencies
+
 ## 4.8.2
 
 -   [Fix] Fix html special characters w\/ tree-sitter-compatible highlighter
