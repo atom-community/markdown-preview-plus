@@ -111,11 +111,11 @@ async function highlightTreeSitter(
         const open = iter
           .getOpenScopeIds()
           .map((x) => lm.classNameForScopeId(x))
-        res.push(...open.map((x) => `<span class="${x}">`))
         const close = iter
           .getCloseScopeIds()
           .map((x) => lm.classNameForScopeId(x))
         res.push(...close.map((_) => `</span>`))
+        res.push(...open.map((x) => `<span class="${x}">`))
         iter.moveToSuccessor()
         const nextPos = iter.getPosition()
         res.push(escapeHTML(buf.getTextInRange([pos, nextPos])))
