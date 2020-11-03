@@ -38,66 +38,18 @@ export async function highlightCodeBlocks(
       const yielder = await eventLoopYielder(100, 5000)
       const sourceCode = codeBlock.textContent!.replace(/\r?\n$/, '')
       if (highlighter === 'legacy') {
-        const lines = hightlightLines(
-          sourceCode.split('\n'),
-          scopeForFenceName(fenceName),
-          'text.plain.null-grammar',
+        preElement.innerHTML = await highlightLegacy(
+          sourceCode,
+          fenceName,
+          yielder,
         )
-        const linesArr = []
-        let line = lines.next()
-        while (!line.done) {
-          linesArr.push(line.value)
-          try {
-            await yielder()
-          } catch (e) {
-            console.error(e)
-            break
-          }
-          line = lines.next()
-        }
-        preElement.innerHTML = linesArr.join('\n')
       } else if (highlighter === 'tree-sitter-compatible') {
-        const buf = new TextBuffer()
-        const grammar = atom.grammars.grammarForId(scopeForFenceName(fenceName))
-        const lm = atom.grammars.languageModeForGrammarAndBuffer(grammar, buf)
-        buf.setLanguageMode(lm)
-        buf.setText(sourceCode)
-        const end = buf.getEndPosition()
-        if (lm.startTokenizing) lm.startTokenizing()
-        await tokenized(lm)
-        const iter = lm.buildHighlightIterator()
-        if (iter.getOpenScopeIds && iter.getCloseScopeIds) {
-          let pos = { row: 0, column: 0 }
-          iter.seek(pos)
-          const res = []
-          while (
-            pos.row < end.row ||
-            (pos.row === end.row && pos.column <= end.column)
-          ) {
-            const open = iter
-              .getOpenScopeIds()
-              .map((x) => lm.classNameForScopeId(x))
-            res.push(...open.map((x) => `<span class="${x}">`))
-            const close = iter
-              .getCloseScopeIds()
-              .map((x) => lm.classNameForScopeId(x))
-            res.push(...close.map((_) => `</span>`))
-            iter.moveToSuccessor()
-            const nextPos = iter.getPosition()
-            res.push(escapeHTML(buf.getTextInRange([pos, nextPos])))
-            try {
-              await yielder()
-            } catch (e) {
-              console.error(e)
-              break
-            }
-            pos = nextPos
-          }
-          preElement.innerHTML = res.join('')
-        } else {
-          preElement.innerHTML = codeBlock.innerHTML
-        }
-        buf.destroy()
+        preElement.innerHTML = await highlightTreeSitter(
+          sourceCode,
+          fenceName,
+          codeBlock.innerHTML,
+          yielder,
+        )
       }
       preElement.classList.add('editor-colors')
       if (fenceName) preElement.classList.add(`lang-${fenceName}`)
@@ -105,6 +57,84 @@ export async function highlightCodeBlocks(
   )
 
   return domFragment
+}
+
+async function highlightLegacy(
+  sourceCode: string,
+  fenceName: string,
+  yielder: () => Promise<void>,
+) {
+  const lines = hightlightLines(
+    sourceCode.split('\n'),
+    scopeForFenceName(fenceName),
+    'text.plain.null-grammar',
+  )
+  const linesArr = []
+  let line = lines.next()
+  while (!line.done) {
+    linesArr.push(line.value)
+    try {
+      await yielder()
+    } catch (e) {
+      console.error(e)
+      break
+    }
+    line = lines.next()
+  }
+  return linesArr.join('\n')
+}
+
+async function highlightTreeSitter(
+  sourceCode: string,
+  fenceName: string,
+  fallback: string,
+  yielder: () => Promise<void>,
+) {
+  const buf = new TextBuffer()
+  try {
+    const grammar = atom.grammars.grammarForId(scopeForFenceName(fenceName))
+    const lm = atom.grammars.languageModeForGrammarAndBuffer(grammar, buf)
+    buf.setLanguageMode(lm)
+    buf.setText(sourceCode)
+    const end = buf.getEndPosition()
+    if (lm.startTokenizing) lm.startTokenizing()
+    await tokenized(lm)
+    const iter = lm.buildHighlightIterator()
+    if (iter.getOpenScopeIds && iter.getCloseScopeIds) {
+      let pos = { row: 0, column: 0 }
+      iter.seek(pos)
+      const res = []
+      while (
+        pos.row < end.row ||
+        (pos.row === end.row && pos.column <= end.column)
+      ) {
+        const open = iter
+          .getOpenScopeIds()
+          .map((x) => lm.classNameForScopeId(x))
+        res.push(...open.map((x) => `<span class="${x}">`))
+        const close = iter
+          .getCloseScopeIds()
+          .map((x) => lm.classNameForScopeId(x))
+        res.push(...close.map((_) => `</span>`))
+        iter.moveToSuccessor()
+        const nextPos = iter.getPosition()
+        res.push(escapeHTML(buf.getTextInRange([pos, nextPos])))
+        console.log(pos, open, close)
+        try {
+          await yielder()
+        } catch (e) {
+          console.error(e)
+          break
+        }
+        pos = nextPos
+      }
+      return res.join('')
+    } else {
+      return fallback
+    }
+  } finally {
+    buf.destroy()
+  }
 }
 
 async function tokenized(lm: LanguageMode) {
