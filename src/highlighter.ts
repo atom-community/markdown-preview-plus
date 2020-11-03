@@ -29,7 +29,10 @@ export async function highlightCodeBlocks(
         preElement.firstElementChild !== null
           ? preElement.firstElementChild
           : preElement
-      const cbClass = codeBlock.className || preElement.className
+      const cbClass =
+        codeBlock.className && preElement.className
+          ? preElement.className
+          : codeBlock.className || preElement.className
       const fenceName = cbClass
         ? cbClass.replace(/^(lang-|sourceCode )/, '')
         : defaultLanguage
@@ -119,7 +122,6 @@ async function highlightTreeSitter(
         iter.moveToSuccessor()
         const nextPos = iter.getPosition()
         res.push(escapeHTML(buf.getTextInRange([pos, nextPos])))
-        console.log(pos, open, close)
         try {
           await yielder()
         } catch (e) {
