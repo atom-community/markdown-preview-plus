@@ -1,0 +1,167 @@
+import { scopeForFenceName } from './extension-helper'
+import { TextBuffer, LanguageMode } from 'atom'
+import { atomConfig } from './util'
+import { hightlightLines } from 'atom-highlight'
+
+export async function highlightCodeBlocks(
+  domFragment: Document,
+  defaultLanguage: string,
+) {
+  const highlighter = atom.config.get(
+    'markdown-preview-plus.previewConfig.highlighter',
+  )
+  // tslint:disable-next-line: totality-check
+  if (highlighter === 'none') return domFragment
+  const fontFamily = atom.config.get('editor.fontFamily')
+  if (fontFamily) {
+    for (const codeElement of Array.from(
+      domFragment.querySelectorAll('code'),
+    )) {
+      codeElement.style.fontFamily = fontFamily
+    }
+  }
+
+  const ctw = atomConfig().codeTabWidth || atom.config.get('editor.tabLength')
+
+  await Promise.all(
+    Array.from(domFragment.querySelectorAll('pre')).map(async (preElement) => {
+      const codeBlock =
+        preElement.firstElementChild !== null
+          ? preElement.firstElementChild
+          : preElement
+      const cbClass = codeBlock.className || preElement.className
+      const fenceName = cbClass
+        ? cbClass.replace(/^(lang-|sourceCode )/, '')
+        : defaultLanguage
+      preElement.style.tabSize = ctw.toString()
+
+      const yielder = await eventLoopYielder(100, 5000)
+      const sourceCode = codeBlock.textContent!.replace(/\r?\n$/, '')
+      if (highlighter === 'legacy') {
+        const lines = hightlightLines(
+          sourceCode.split('\n'),
+          scopeForFenceName(fenceName),
+          'text.plain.null-grammar',
+        )
+        const linesArr = []
+        let line = lines.next()
+        while (!line.done) {
+          linesArr.push(line.value)
+          try {
+            await yielder()
+          } catch (e) {
+            console.error(e)
+            break
+          }
+          line = lines.next()
+        }
+        preElement.innerHTML = linesArr.join('\n')
+      } else if (highlighter === 'tree-sitter-compatible') {
+        const buf = new TextBuffer()
+        const grammar = atom.grammars.grammarForId(scopeForFenceName(fenceName))
+        const lm = atom.grammars.languageModeForGrammarAndBuffer(grammar, buf)
+        buf.setLanguageMode(lm)
+        buf.setText(sourceCode)
+        const end = buf.getEndPosition()
+        if (lm.startTokenizing) lm.startTokenizing()
+        await tokenized(lm)
+        const iter = lm.buildHighlightIterator()
+        if (iter.getOpenScopeIds && iter.getCloseScopeIds) {
+          let pos = { row: 0, column: 0 }
+          iter.seek(pos)
+          const res = []
+          while (
+            pos.row < end.row ||
+            (pos.row === end.row && pos.column <= end.column)
+          ) {
+            const open = iter
+              .getOpenScopeIds()
+              .map((x) => lm.classNameForScopeId(x))
+            res.push(...open.map((x) => `<span class="${x}">`))
+            const close = iter
+              .getCloseScopeIds()
+              .map((x) => lm.classNameForScopeId(x))
+            res.push(...close.map((_) => `</span>`))
+            iter.moveToSuccessor()
+            const nextPos = iter.getPosition()
+            res.push(escapeHTML(buf.getTextInRange([pos, nextPos])))
+            try {
+              await yielder()
+            } catch (e) {
+              console.error(e)
+              break
+            }
+            pos = nextPos
+          }
+          preElement.innerHTML = res.join('')
+        } else {
+          preElement.innerHTML = codeBlock.innerHTML
+        }
+        buf.destroy()
+      }
+      preElement.classList.add('editor-colors')
+      if (fenceName) preElement.classList.add(`lang-${fenceName}`)
+    }),
+  )
+
+  return domFragment
+}
+
+async function tokenized(lm: LanguageMode) {
+  return new Promise((resolve) => {
+    if (lm.fullyTokenized || lm.tree) {
+      resolve()
+    } else if (lm.onDidTokenize) {
+      const disp = lm.onDidTokenize(() => {
+        disp.dispose()
+        resolve()
+      })
+    } else {
+      resolve() // null language mode
+    }
+  })
+}
+
+async function eventLoopYielder(delayMs: number, maxTimeMs: number) {
+  await new Promise(setImmediate)
+  const started = performance.now()
+  let lastYield = started
+  let now = lastYield
+  return async function () {
+    now = performance.now()
+    if (now - lastYield > delayMs) {
+      await new Promise(setImmediate)
+      lastYield = now
+    }
+    if (now - started > maxTimeMs) {
+      const err = new Error('Max time reached')
+      let description = `The highlighter took too long to complete and was terminated.
+Some code blocks may be incomplete.`
+      if (
+        atom.config.get('markdown-preview-plus.previewConfig.highlighter') ===
+        'tree-sitter-compatible'
+      ) {
+        description += ` You're currently using tree-view-compatible highlighter, you may try
+switching to legacy highlighter instead.`
+      }
+      atom.notifications.addError(
+        'Markdown-Preview-Plus: Highlighter took more than 5 seconds to complete',
+        {
+          dismissable: true,
+          description,
+          stack: err.stack,
+        },
+      )
+      throw err
+    }
+  }
+}
+
+function escapeHTML(str: string) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
