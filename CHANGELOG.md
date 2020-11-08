@@ -1,3 +1,7 @@
+## 4.8.4
+
+-   [Fix] Let atom's styles override pandoc's, not vice versa
+
 ## 4.8.3
 
 ### Fixes
