@@ -171,7 +171,7 @@ async function doUpdate({
     let container = doc.head!.querySelector('original-elements')
     if (!container) {
       container = doc.createElement('original-elements')
-      doc.head!.appendChild(container)
+      doc.head!.insertBefore(container, doc.head!.firstElementChild)
     }
     container.innerHTML = ''
     for (const headElement of Array.from(domDocument.head!.childNodes)) {
