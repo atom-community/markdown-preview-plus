@@ -159,16 +159,13 @@ export class MarkdownPreviewControllerEditor extends MarkdownPreviewController {
         if (!item) return false
         const win = remote.getCurrentWindow()
         if (!win.isFocused()) return false
-        const pane = atom.workspace.paneForItem(item)
-        return !!pane && pane.isActive()
+        return item === atom.workspace.getActivePaneItem()
       } else if (whatScrolled === 'preview') {
         const item = viewForEditor(this.editor)
         if (!item) return false
-        const pane = atom.workspace.paneForItem(item)
-        if (pane) return pane.isActive()
         const win = BrowserWindowHandler.windowForView(item)
         if (win) return win.isFocused()
-        return false
+        return item === atom.workspace.getActivePaneItem()
       }
     } else {
       return (
