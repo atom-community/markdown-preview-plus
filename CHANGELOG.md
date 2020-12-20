@@ -1,3 +1,15 @@
+## 4.9.0
+
+### New features
+
+-   Initial support for Pandoc's sourcepos extension
+
+    New in Pandoc 2.11.3. You need to set Markdown Flavor in MPP's Pandoc settings to `commonmark+sourcepos` (possibly with other extensions) or `commonmark_x+sourcepos` (which has many extensions automatically enabled). Bear in mind this is pretty new, so expect issues.
+
+### Fixes
+
+-   Rework bidirectional scroll sync condition for docks
+
 ## 4.8.4
 
 -   [Fix] Let atom's styles override pandoc's, not vice versa
