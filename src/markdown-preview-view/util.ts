@@ -160,7 +160,7 @@ export function buildLineMap(html: string | Document) {
       : he.dataset
           .pos!.slice(1)
           .split('-')
-          .map((x) => parseInt(x.split(':')[0], 10))
+          .map((x) => parseInt(x.split(':')[0], 10) - 1)
     if (!start || !end) continue
     let e: Element | null = elem
     const path = []
@@ -175,7 +175,7 @@ export function buildLineMap(html: string | Document) {
       e = e.parentElement
     }
     for (let i = start; i < end; ++i) {
-      if (!map[i] || map[i].length < path.length) map[i] = path
+      if (!map[i] || map[i].length <= path.length) map[i] = path
     }
   }
   return map
