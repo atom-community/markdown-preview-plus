@@ -424,7 +424,9 @@ export class MarkdownPreviewView {
         this.renderLaTeX,
         atomConfig().previewConfig.diffMethod,
         util.buildLineMap(
-          await MarkdownItWorker.getTokens(text, this.renderLaTeX),
+          domDocument.querySelector('[data-pos]')
+            ? domDocument
+            : await MarkdownItWorker.getTokens(text, this.renderLaTeX),
         ),
         atomConfig().syncConfig.syncPreviewOnEditorScroll
           ? this.controller.getScrollSyncParams()

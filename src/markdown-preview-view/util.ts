@@ -141,16 +141,27 @@ function getMarkdownPreviewCSS() {
     })
 }
 
-export function buildLineMap(html: string) {
-  const domparser = new DOMParser()
-  const dom = domparser.parseFromString(html, 'text/html')
+export function buildLineMap(html: string | Document) {
+  let dom: Document
+  if (typeof html === 'string') {
+    const domparser = new DOMParser()
+    dom = domparser.parseFromString(html, 'text/html')
+  } else {
+    dom = html
+  }
 
   const map: { [line: number]: { tag: string; index: number }[] } = {}
-  for (const elem of Array.from(dom.querySelectorAll(`[data-source-lines]`))) {
+  for (const elem of Array.from(
+    dom.querySelectorAll(`[data-source-lines],[data-pos]`),
+  )) {
     const he = elem as HTMLElement
-    const [start, end] = he.dataset
-      .sourceLines!.split(' ')
-      .map((x) => parseInt(x, 10))
+    const [start, end] = he.dataset.sourceLines
+      ? he.dataset.sourceLines.split(' ').map((x) => parseInt(x, 10))
+      : he.dataset
+          .pos!.slice(1)
+          .split('-')
+          .map((x) => parseInt(x.split(':')[0], 10))
+    if (!start || !end) continue
     let e: Element | null = elem
     const path = []
     while (e && e.tagName !== 'BODY') {
