@@ -125,6 +125,7 @@ export function deactivate() {
   MarkdownItWorker.destroy()
   disposables && disposables.dispose()
   disposables = undefined
+  toolbar = undefined
   BrowserWindowHandler.clean()
 }
 
@@ -386,4 +387,7 @@ function observeToolbarButton(disableToolBarIntegration: boolean) {
 
 export function consumeToolBar(getToolBar: getToolBarManager) {
   toolbar = getToolBar('markdown-preview-plus')
+  return new Disposable(() => {
+    toolbar = undefined;
+  })
 }
