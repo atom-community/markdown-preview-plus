@@ -16,7 +16,7 @@ import {
   File,
   Disposable,
 } from 'atom'
-import type { getToolBarManager } from 'atom/tool-bar'
+import type { getToolBarManager, ToolBarManager } from 'atom/tool-bar'
 import * as path from 'path'
 import * as util from './util'
 import { PlaceholderView } from './placeholder-view'
@@ -30,6 +30,7 @@ import { MarkdownItWorker } from './markdown-it-helper'
 export { config } from './config'
 
 let disposables: CompositeDisposable | undefined
+let toolbar: ToolBarManager | undefined
 
 export function activate() {
   if (migrateConfig()) {
@@ -110,6 +111,13 @@ export function activate() {
       'markdown-preview-plus.extensions',
       configObserver(registerExtensions),
     ),
+    atom.config.observe(
+      'markdown-preview-plus.disableToolBarIntegration',
+      configObserver(observeToolbarButton),
+    ),
+    new Disposable(function () {
+      toolbar?.removeItems()
+    }),
   )
 }
 
@@ -117,6 +125,7 @@ export function deactivate() {
   MarkdownItWorker.destroy()
   disposables && disposables.dispose()
   disposables = undefined
+  toolbar = undefined
   BrowserWindowHandler.clean()
 }
 
@@ -364,18 +373,21 @@ function opener(uriToOpen: string) {
   }
 }
 
+function observeToolbarButton(disableToolBarIntegration: boolean) {
+  if (disableToolBarIntegration) {
+    toolbar?.removeItems()
+  } else {
+    toolbar?.addButton({
+      icon: 'markdown',
+      callback: 'markdown-preview-plus:toggle',
+      tooltip: 'Markdown Preview',
+    })
+  }
+}
+
 export function consumeToolBar(getToolBar: getToolBarManager) {
-  if (!disposables) return
-  if (atom.config.get('markdown-preview-plus.disableToolBarIntegration')) return
-  const toolbar = getToolBar('markdown-preview-plus')
-  toolbar.addButton({
-    icon: 'markdown',
-    callback: 'markdown-preview-plus:toggle',
-    tooltip: 'Markdown Preview',
+  toolbar = getToolBar('markdown-preview-plus')
+  return new Disposable(() => {
+    toolbar = undefined
   })
-  disposables.add(
-    new Disposable(function () {
-      toolbar.removeItems()
-    }),
-  )
 }
