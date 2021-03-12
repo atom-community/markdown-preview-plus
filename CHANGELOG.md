@@ -1,3 +1,8 @@
+## 4.9.1
+
+-   Use electron 9-compatible API
+-   fix: observe disableToolBarIntegration config (#518) (Tony Brix)
+
 ## 4.9.0
 
 ### New features
