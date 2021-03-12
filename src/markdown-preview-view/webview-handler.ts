@@ -1,4 +1,4 @@
-import { WebContents } from 'electron'
+import { WebContents, remote } from 'electron'
 import { WebContentsHandler } from './web-contents-handler'
 
 export class WebviewHandler extends WebContentsHandler {
@@ -14,7 +14,7 @@ export class WebviewHandler extends WebContentsHandler {
       new Promise<WebContents>((resolve) => {
         const initialLoad = () => {
           webview.removeEventListener('dom-ready', initialLoad)
-          resolve(webview.getWebContents())
+          resolve(remote.webContents.fromId(webview.getWebContentsId()))
         }
         webview.addEventListener('dom-ready', initialLoad)
       }),
