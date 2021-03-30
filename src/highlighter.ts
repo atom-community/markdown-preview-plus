@@ -33,8 +33,8 @@ export async function highlightCodeBlocks(
         codeBlock.className && preElement.className
           ? preElement.className
           : codeBlock.className || preElement.className
-      const fenceName = cbClass
-        ? cbClass.replace(/^(lang-|sourceCode )/, '')
+      const [fenceName, ...extra] = cbClass
+        ? cbClass.replace(/^(lang-|sourceCode )/, '').split(' ')
         : defaultLanguage
       preElement.style.tabSize = ctw.toString()
 
@@ -56,6 +56,7 @@ export async function highlightCodeBlocks(
       }
       preElement.classList.add('editor-colors')
       if (fenceName) preElement.classList.add(`lang-${fenceName}`)
+      if (extra.length > 0) preElement.classList.add(...extra)
     }),
   )
 
