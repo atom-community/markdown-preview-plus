@@ -1,18 +1,70 @@
-export interface IConfig {
-  [key: string]: {
-    title: string
-    order: number
-    type: string
-    description?: string
-    properties?: IConfig
-    default?: any
-    minimum?: any
-    maximum?: any
-    enum?: any[]
-    items?: {
-      type: string
-    }
+export type Type = 'array' | 'string' | 'boolean' | 'object' | 'integer'
+export type ItemType = Type | never
+export type TypedConfig<
+  T extends Type = Type,
+  U extends Type | never = Type
+> = TypedProps<T, U> & {
+  type: T
+  items?: {
+    type: T extends 'array' ? U : never
   }
+}
+interface BasicProps<T extends Type> {
+  title: string
+  order: number
+  type: T
+  description?: string
+}
+type TypeFromTypeDesc<T extends Type, U extends ItemType> = T extends 'string'
+  ? string
+  : T extends 'boolean'
+  ? boolean
+  : T extends 'object'
+  ? IConfig
+  : T extends 'integer'
+  ? number
+  : T extends 'array'
+  ? U[]
+  : never
+type EnumDesc<T> = T[] | Array<{ value: T; description: string }>
+interface StringProps {
+  enum?: EnumDesc<string>
+  default: string
+}
+interface IntProps {
+  minimum?: number
+  maximum?: number
+  default: number
+  enum?: EnumDesc<number>
+}
+interface ArrayProps<U extends Type> {
+  items: {
+    type: U
+  }
+  default: TypeFromTypeDesc<U, never>[] // todo
+  enum?: EnumDesc<TypeFromTypeDesc<U, never>[]>
+}
+interface ObjectProps {
+  properties: IConfig
+}
+interface BoolProps {
+  default: boolean
+  enum?: EnumDesc<boolean>
+}
+type TypedProps<T extends Type, U extends ItemType> = BasicProps<T> &
+  (T extends 'string'
+    ? StringProps
+    : T extends 'boolean'
+    ? BoolProps
+    : T extends 'object'
+    ? ObjectProps
+    : T extends 'integer'
+    ? IntProps
+    : T extends 'array'
+    ? ArrayProps<U>
+    : never)
+export interface IConfig {
+  [key: string]: TypedConfig
 }
 
 export const config: IConfig = {
