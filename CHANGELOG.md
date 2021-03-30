@@ -1,3 +1,7 @@
+## 4.9.2
+
+-   Fix highlighter for multiclass fences
+
 ## 4.9.1
 
 -   Use electron 9-compatible API
