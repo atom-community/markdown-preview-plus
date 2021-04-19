@@ -56,8 +56,8 @@ export async function copyHtml(
   })
   view.element.style.pointerEvents = 'none'
   view.element.style.position = 'absolute'
-  view.element.style.width = '0px'
-  view.element.style.height = '0px'
+  view.element.style.width = '100vw'
+  view.element.style.height = '1px'
   const ws = atom.views.getView(atom.workspace)
   ws.appendChild(view.element)
 }
