@@ -35,7 +35,7 @@ export async function highlightCodeBlocks(
           : codeBlock.className || preElement.className
       const [fenceName, ...extra] = cbClass
         ? cbClass.replace(/^(lang-|sourceCode )/, '').split(' ')
-        : defaultLanguage
+        : [defaultLanguage]
       preElement.style.tabSize = ctw.toString()
 
       const yielder = await eventLoopYielder(100, 5000)
