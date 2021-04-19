@@ -1,6 +1,6 @@
 {
   "name": "markdown-preview-plus",
-  "version": "4.9.2",
+  "version": "4.9.3",
   "main": "./loader.js",
   "bundle": "./dist/main.js",
   "client": "./client/main.js",
