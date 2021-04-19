@@ -1,3 +1,13 @@
+## 4.9.3
+
+Updates related to electron 9:
+
+-   Fix copy-html
+-   Fix default highlighter class name
+-   Fix save PDF
+
+Also fixed some specs.
+
 ## 4.9.2
 
 -   Fix highlighter for multiclass fences
