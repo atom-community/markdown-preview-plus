@@ -161,7 +161,8 @@ export function buildLineMap(html: string | Document) {
           .pos!.slice(1)
           .split('-')
           .map((x) => parseInt(x.split(':')[0], 10) - 1)
-    if (!start || !end) continue
+    // tslint:disable-next-line: strict-type-predicates
+    if (start === undefined || end === undefined) continue
     let e: Element | null = elem
     const path = []
     while (e && e.tagName !== 'BODY') {

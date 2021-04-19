@@ -165,7 +165,7 @@
     - tag: tr
       index: 0
     - tag: th
-      index: 0
+      index: 2
 - line: 40
   path:
     - tag: table
@@ -387,7 +387,7 @@
     - tag: tr
       index: 0
     - tag: th
-      index: 0
+      index: 2
 - line: 96
   path:
     - tag: table
@@ -709,7 +709,7 @@
     - tag: tr
       index: 0
     - tag: th
-      index: 0
+      index: 2
 - line: 153
   path:
     - tag: blockquote
@@ -1145,7 +1145,7 @@
     - tag: tr
       index: 0
     - tag: th
-      index: 0
+      index: 2
 - line: 210
   path:
     - tag: ul
@@ -1607,7 +1607,7 @@
     - tag: tr
       index: 0
     - tag: th
-      index: 0
+      index: 2
 - line: 265
   path:
     - tag: ul

@@ -80,6 +80,8 @@ export async function expectPreviewInSplitPane() {
     .getCenter()
     .getPanes()[1]
     .getActiveItem() as MarkdownPreviewView
+  preview.element.style.width = '100vw'
+  preview.element.style.height = '10vh'
   await preview.initialRenderPromise()
 
   expect(preview.type).to.be.equal('editor')
@@ -136,8 +138,12 @@ export async function activateMe(): Promise<Package> {
 import sinon from 'sinon'
 export function stubClipboard() {
   const result = {
-    stub: sinon.stub().callsFake(function (arg: { text?: string }) {
-      result.contents = arg.text || ''
+    stub: sinon.stub().callsFake(function (arg: { text?: string } | string) {
+      if (typeof arg === 'string') {
+        result.contents = arg
+      } else {
+        result.contents = arg.text || ''
+      }
     }),
     contents: '',
   }

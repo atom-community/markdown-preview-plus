@@ -46,6 +46,8 @@ function runSpec(desc: string, configure: () => void) {
       const mpv = createEditorView(editor)
       assert(mpv.element !== undefined)
       window.workspaceDiv.appendChild(mpv.element!)
+      mpv.element.style.width = '100%'
+      mpv.element.style.height = '100%'
       previews.add(mpv)
       await mpv.initialRenderPromise()
       return mpv
@@ -881,26 +883,43 @@ var x = 0;
       })
     })
 
-    describe('when core:copy is triggered', () =>
+    describe('when core:copy is triggered', () => {
+      let clipboardContents = ''
+      const atomclipboard = {
+        write: (x: string) => {
+          clipboardContents = x
+        },
+        read: () => clipboardContents,
+      }
+      before(() => {
+        window['markdown-preview-plus-tests'] = {
+          clipboardWrite: (x: string | { text: string }) => {
+            clipboardContents = typeof x === 'object' ? x.text : x
+          },
+        }
+      })
+      after(() => {
+        delete window['markdown-preview-plus-tests']
+      })
       it('writes the rendered HTML to the clipboard', async function () {
         preview.destroy()
 
         filePath = path.join(tempPath, 'subdir/code-block.md')
         preview = await createMarkdownPreviewViewFile(filePath)
 
-        atom.clipboard.write('initial clipboard content')
+        atomclipboard.write('initial clipboard content')
 
         assert(preview.element !== undefined)
         atom.commands.dispatch(preview.element!, 'core:copy')
 
         await waitsFor(
-          () => atom.clipboard.read() !== 'initial clipboard content',
+          () => atomclipboard.read() !== 'initial clipboard content',
         )
         if (
           atom.config.get('markdown-preview-plus').previewConfig.highlighter ===
           'legacy'
         ) {
-          expect(atom.clipboard.read()).to.equal(`\
+          expect(atomclipboard.read()).to.equal(`\
 <h1>Code Block</h1>
 <pre class="editor-colors lang-javascript" style="tab-size: 2;"><span class="syntax--source syntax--js"><span class="syntax--keyword syntax--control syntax--js">if</span> a <span class="syntax--keyword syntax--operator syntax--comparison syntax--js">===</span> <span class="syntax--constant syntax--numeric syntax--decimal syntax--js">3</span> <span class="syntax--meta syntax--brace syntax--curly syntax--js">{</span></span>
 <span class="syntax--source syntax--js">  b <span class="syntax--keyword syntax--operator syntax--assignment syntax--js">=</span> <span class="syntax--constant syntax--numeric syntax--decimal syntax--js">5</span></span>
@@ -908,7 +927,7 @@ var x = 0;
 <p>encoding → issue</p>
 `)
         } else {
-          expect(atom.clipboard.read()).to.equal(`\
+          expect(atomclipboard.read()).to.equal(`\
 <h1>Code Block</h1>
 <pre class="editor-colors lang-javascript" style="tab-size: 2;"><span class="syntax--source syntax--js"><span class="syntax--keyword syntax--control">if</span> a <span class="syntax--keyword syntax--operator syntax--js">===</span> <span class="syntax--constant syntax--numeric">3</span> <span class="syntax--punctuation syntax--definition syntax--function syntax--body syntax--begin syntax--bracket syntax--curly">{</span>
   b <span class="syntax--keyword syntax--operator syntax--js">=</span> <span class="syntax--constant syntax--numeric">5</span>
@@ -916,7 +935,8 @@ var x = 0;
 <p>encoding → issue</p>
 `)
         }
-      }))
+      })
+    })
 
     describe('checkbox lists', function () {
       it('renders checkbox lists', async function () {

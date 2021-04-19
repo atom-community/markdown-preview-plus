@@ -13,3 +13,11 @@ export function write(arg: electron.Data) {
     return clipboard.write(arg)
   }
 }
+
+export function writePlain(arg: string) {
+  if (window['markdown-preview-plus-tests']?.clipboardWrite) {
+    return window['markdown-preview-plus-tests'].clipboardWrite(arg)
+  } else {
+    return atom.clipboard.write(arg)
+  }
+}

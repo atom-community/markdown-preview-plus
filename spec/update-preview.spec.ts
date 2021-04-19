@@ -303,8 +303,8 @@ describe('the difference algorithm that updates the preview', function () {
 
     it('subsequently only rerenders the maths block that was modified', async function () {
       await preview.runJS<void>(`
-        window.mathSpans = Array.from(document.querySelectorAll('span.math > script'))
-          .map(x => x.parentElement)
+        (function() { window.mathSpans = Array.from(document.querySelectorAll('span.math > script'))
+          .map(x => x.parentElement) })()
         `)
 
       editor.setTextInBufferRange(
@@ -327,12 +327,12 @@ describe('the difference algorithm that updates the preview', function () {
           `),
       )
 
-      await preview.runJS<boolean>(`{
+      await preview.runJS<void>(`(function(){
           const newMath = Array.from(document.querySelectorAll('span.math > script'))
             .map(x => x.parentElement)
           window.diffMath = newMath.filter((x, idx) =>
             ! x.firstElementChild.isSameNode(window.mathSpans[idx].firstElementChild)
-          )}`)
+          )})()`)
 
       expect(await preview.runJS<any>(`window.diffMath.length`)).to.equal(1)
       expect(await preview.runJS<any>(`window.diffMath[0].tagName`)).to.equal(

@@ -70,18 +70,10 @@ describe('Markdown preview plus package', function () {
     }
 
     describe('when rich clipboard is disabled', function () {
-      let clipboard = ''
-      let stub: sinon.SinonStub<any>
       before(function () {
         atom.config.set('markdown-preview-plus.richClipboard', false)
-        stub = sinon
-          .stub(atom.clipboard, 'write')
-          .callsFake(function (arg: string) {
-            clipboard = arg
-          })
       })
       after(function () {
-        stub.restore()
         atom.config.unset('markdown-preview-plus.richClipboard')
       })
 
@@ -97,10 +89,10 @@ describe('Markdown preview plus package', function () {
 
         await waitsFor.msg(
           'atom.clipboard.write to have been called',
-          () => stub.callCount === 1,
+          () => clipboard.stub.called,
         )
 
-        expect(clipboard).to.not.equal('')
+        expect(clipboard.contents).to.not.equal('')
       })
     })
 

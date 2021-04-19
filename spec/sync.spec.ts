@@ -91,11 +91,16 @@ describe('Syncronization of source and preview', function () {
 
     it('identifies the correct HTMLElement path', () => {
       const elementPaths = previewUtil.buildLineMap(tokens)
+      //////////////////////////////////////////////////////
       // const out = []
       // for (const [line, path] of Object.entries(elementPaths)) {
-      //   out.push({ line: parseInt(line, 10), path })
+      //   out.push({ line: parseInt(line as any, 10), path })
       // }
-      // console.log(cson.stringify(out))
+      // const doc = new yaml.Document()
+      // doc.setSchema()
+      // doc.contents = doc.schema!.createNode(out)
+      // console.log(doc.toString())
+      //////////////////////////////////////////////////////
       for (const sourceLine of sourceMap) {
         if (sourceLine.path.length === 0) continue
         const elementPath = elementPaths[sourceLine.line]

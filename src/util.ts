@@ -49,7 +49,7 @@ export async function copyHtml(
       if (atom.config.get('markdown-preview-plus.richClipboard')) {
         clipboard.write({ text: html, html })
       } else {
-        atom.clipboard.write(html)
+        clipboard.writePlain(html)
       }
     }
     view.destroy()

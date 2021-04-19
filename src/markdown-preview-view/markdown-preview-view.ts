@@ -22,6 +22,7 @@ import {
   SerializedMPV,
 } from './controller'
 import { openPreviewPane } from './helpers'
+import * as clipboard from '../clipboard'
 
 export type { SerializedMPV }
 
@@ -471,7 +472,7 @@ export class MarkdownPreviewView {
       if (atom.config.get('markdown-preview-plus.richClipboard')) {
         await this.handler.runJS('document.execCommand("copy")')
       } else {
-        atom.clipboard.write(selection)
+        clipboard.writePlain(selection)
       }
     } else {
       const src = await this.getMarkdownSource()
