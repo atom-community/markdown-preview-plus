@@ -155,9 +155,7 @@ export abstract class WebContentsHandler {
 
   public async runJS<T>(js: string) {
     const contents = await this.contents
-    return new Promise<T>((resolve) =>
-      contents.executeJavaScript(js, false, resolve),
-    )
+    return contents.executeJavaScript(js, false) as Promise<T>
   }
 
   public destroy() {
@@ -219,16 +217,7 @@ export abstract class WebContentsHandler {
 
   public async printToPDF(opts: PrintToPDFOptionsReal) {
     const contents = await this.contents
-    return new Promise<Buffer>((resolve, reject) => {
-      // TODO: Complain on Electron
-      contents.printToPDF(opts as any, (error, data) => {
-        if (error) {
-          reject(error)
-          return
-        }
-        resolve(data)
-      })
-    })
+    return contents.printToPDF(opts)
   }
 
   public async sync(line: number, flash: boolean) {

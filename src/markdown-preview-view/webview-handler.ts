@@ -44,8 +44,8 @@ export class WebviewHandler extends WebContentsHandler {
     window.addEventListener('dragstart', this.dragStart)
     window.addEventListener('dragend', this.dragEnd)
 
-    webview.disablewebsecurity = 'true'
-    webview.nodeintegration = 'true'
+    webview.disablewebsecurity = true
+    webview.nodeintegration = true
     webview.src = 'about:blank'
     webview.style.position = 'absolute'
     webview.style.zIndex = '0'
