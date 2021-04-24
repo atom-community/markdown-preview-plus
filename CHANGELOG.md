@@ -1,3 +1,7 @@
+## 4.9.4
+
+-   \[Fix\] rebuild assets
+
 ## 4.9.3
 
 Updates related to electron 9:
