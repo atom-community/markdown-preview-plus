@@ -1,3 +1,8 @@
+## 4.9.5
+
+-   Wait for animation frame on pdf render to ensure CSS is rendered
+-   Respect shellOpenFileExtensions with openOnSave.pdf
+
 ## 4.9.4
 
 -   \[Fix\] rebuild assets
