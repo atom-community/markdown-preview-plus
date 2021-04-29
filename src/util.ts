@@ -75,3 +75,18 @@ export function packagePath() {
   }
   return (memoizedPath = pkg.path)
 }
+
+import { shell } from 'electron'
+import fileUriToPath from 'file-uri-to-path'
+
+export function shellOpen(url: string) {
+  const exts = atomConfig().previewConfig.shellOpenFileExtensions
+  const forceOpenExternal = exts.some((ext) =>
+    url.toLowerCase().endsWith(`.${ext.toLowerCase()}`),
+  )
+  if (url.startsWith('file://') && !forceOpenExternal) {
+    handlePromise(atom.workspace.open(fileUriToPath(url)))
+  } else {
+    handlePromise(shell.openExternal(url))
+  }
+}

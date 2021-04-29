@@ -6,7 +6,7 @@ import { remote } from 'electron'
 
 import * as renderer from '../renderer'
 import { MarkdownItWorker } from '../markdown-it-helper'
-import { handlePromise, copyHtml, atomConfig } from '../util'
+import { handlePromise, copyHtml, atomConfig, shellOpen } from '../util'
 import * as util from './util'
 import { WebviewHandler } from './webview-handler'
 import { saveAsPDF } from './pdf-export-util'
@@ -23,6 +23,7 @@ import {
 } from './controller'
 import { openPreviewPane } from './helpers'
 import * as clipboard from '../clipboard'
+import { pathToFileURL } from 'url'
 
 export type { SerializedMPV }
 
@@ -185,8 +186,8 @@ export class MarkdownPreviewView {
             filePath,
           )
           if (atomConfig().saveConfig.openOnSave.pdf) {
-            return atom.workspace.open(filePath)
-          } else return undefined
+            return shellOpen(pathToFileURL(filePath).toString())
+          } else return
         }),
       )
     } else {

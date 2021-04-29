@@ -1,8 +1,6 @@
 import { Emitter, CompositeDisposable } from 'atom'
-import { shell, WebContents, remote } from 'electron'
-import fileUriToPath from 'file-uri-to-path'
-
-import { handlePromise, atomConfig, packagePath } from '../util'
+import { WebContents, remote } from 'electron'
+import { handlePromise, shellOpen, packagePath } from '../util'
 import {
   RequestReplyMap,
   ChannelMap,
@@ -351,15 +349,7 @@ export abstract class WebContentsHandler {
     contents.once('destroyed', () => this.destroy())
     contents.on('will-navigate', async (e, url) => {
       e.preventDefault()
-      const exts = atomConfig().previewConfig.shellOpenFileExtensions
-      const forceOpenExternal = exts.some((ext) =>
-        url.toLowerCase().endsWith(`.${ext.toLowerCase()}`),
-      )
-      if (url.startsWith('file://') && !forceOpenExternal) {
-        handlePromise(atom.workspace.open(fileUriToPath(url)))
-      } else {
-        handlePromise(shell.openExternal(url))
-      }
+      shellOpen(url)
     })
 
     if (!contents.getURL().includes('client/template.html')) {
