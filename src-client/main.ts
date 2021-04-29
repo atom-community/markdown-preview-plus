@@ -247,11 +247,9 @@ ipcRenderer.on<'update-preview'>('update-preview', (_event, params) => {
   }
 })
 
-ipcRenderer.on<'await-fully-ready'>(
-  'await-fully-ready',
-  async (_event, { id }) => {
-    // tslint:disable-next-line: totality-check
-    if (document.readyState === 'complete') {
+ipcRenderer.on<'await-fully-ready'>('await-fully-ready', (_event, { id }) => {
+  function sendLoaded() {
+    requestAnimationFrame(function () {
       ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
         'atom-markdown-preview-plus-ipc-request-reply',
         handlerId,
@@ -261,23 +259,19 @@ ipcRenderer.on<'await-fully-ready'>(
           result: void 0,
         },
       )
-      return
-    }
-    function loaded() {
-      ipcRenderer.send<'atom-markdown-preview-plus-ipc-request-reply'>(
-        'atom-markdown-preview-plus-ipc-request-reply',
-        handlerId,
-        {
-          id,
-          request: 'await-fully-ready',
-          result: void 0,
-        },
-      )
-      document.removeEventListener('load', loaded)
-    }
-    document.addEventListener('load', loaded)
-  },
-)
+    })
+  }
+  // tslint:disable-next-line: totality-check
+  if (document.readyState === 'complete') {
+    sendLoaded()
+    return
+  }
+  function loaded() {
+    sendLoaded()
+    document.removeEventListener('load', loaded)
+  }
+  document.addEventListener('load', loaded)
+})
 
 const baseElement = document.createElement('base')
 document.head!.appendChild(baseElement)
