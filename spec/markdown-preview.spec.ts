@@ -290,9 +290,7 @@ world</p>
     }))
 
   describe('GitHub style markdown preview', function () {
-    beforeEach(() =>
-      atom.config.set('markdown-preview-plus.useGitHubStyle', false),
-    )
+    beforeEach(() => atom.config.set('markdown-preview-plus.style', 'default'))
 
     async function usesGithubStyle(preview: MarkdownPreviewView) {
       return preview.runJS<boolean>(
@@ -317,7 +315,7 @@ world</p>
     })
 
     it('renders markdown using the GitHub styling when enabled', async function () {
-      atom.config.set('markdown-preview-plus.useGitHubStyle', true)
+      atom.config.set('markdown-preview-plus.style', 'github')
 
       const editor = await atom.workspace.open(
         path.join(tempPath, 'subdir/simple.md'),
@@ -345,11 +343,11 @@ world</p>
 
       expect(await usesGithubStyle(preview)).to.be.false
 
-      atom.config.set('markdown-preview-plus.useGitHubStyle', true)
+      atom.config.set('markdown-preview-plus.style', 'github')
       await waitsFor(async () => (await usesGithubStyle(preview)) === true)
       expect(await usesGithubStyle(preview)).to.be.true
 
-      atom.config.set('markdown-preview-plus.useGitHubStyle', false)
+      atom.config.set('markdown-preview-plus.style', 'default')
       await waitsFor(async () => (await usesGithubStyle(preview)) === false)
       expect(await usesGithubStyle(preview)).to.be.false
     })

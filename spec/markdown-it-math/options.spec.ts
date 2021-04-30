@@ -12,8 +12,11 @@ describe('Options', function () {
 
     const res1 = md.render('$1+1 = 2$')
     const res2 = md.render('$$\n1+1 = 2\n$$')
-    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n')
-    assert.equal(res2, '<div class="math block">1+1 = 2\n</div>\n')
+    assert.strictEqual(
+      res1,
+      '<p><span class="math inline">1+1 = 2</span></p>\n',
+    )
+    assert.strictEqual(res2, '<div class="math block">1+1 = 2\n</div>\n')
   })
   it('Should allow LaTeX style delimiters', function () {
     const md = mdIt().use(math_plugin, {
@@ -23,8 +26,11 @@ describe('Options', function () {
 
     const res1 = md.render('\\(1+1 = 2\\)')
     const res2 = md.render('\\[\n1+1 = 2\n\\]')
-    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n')
-    assert.equal(res2, '<div class="math block">1+1 = 2\n</div>\n')
+    assert.strictEqual(
+      res1,
+      '<p><span class="math inline">1+1 = 2</span></p>\n',
+    )
+    assert.strictEqual(res2, '<div class="math block">1+1 = 2\n</div>\n')
   })
   it('Should allow newline in opening block delimiters', function () {
     const md = mdIt().use(math_plugin, {
@@ -34,8 +40,11 @@ describe('Options', function () {
 
     const res1 = md.render('$$1+1 = 2$$')
     const res2 = md.render('$$\n1+1 = 2$$')
-    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n')
-    assert.equal(res2, '<div class="math block">1+1 = 2</div>\n')
+    assert.strictEqual(
+      res1,
+      '<p><span class="math inline">1+1 = 2</span></p>\n',
+    )
+    assert.strictEqual(res2, '<div class="math block">1+1 = 2</div>\n')
   })
   it('Should allow newline in closing block delimiters', function () {
     const md = mdIt().use(math_plugin, {
@@ -46,9 +55,12 @@ describe('Options', function () {
     const res1 = md.render('$$1+1 = 2$$')
     const res2 = md.render('$$\n1+1 = 2$$')
     const res3 = md.render('$$\n1+1 = 2\n$$')
-    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n')
-    assert.equal(res2, '<div class="math block">1+1 = 2$$</div>\n')
-    assert.equal(res3, '<div class="math block">1+1 = 2\n</div>\n')
+    assert.strictEqual(
+      res1,
+      '<p><span class="math inline">1+1 = 2</span></p>\n',
+    )
+    assert.strictEqual(res2, '<div class="math block">1+1 = 2$$</div>\n')
+    assert.strictEqual(res3, '<div class="math block">1+1 = 2\n</div>\n')
   })
   it('Should only support singular newlines in block math closing tags', function () {
     const md = mdIt().use(math_plugin, {
@@ -59,9 +71,12 @@ describe('Options', function () {
     const res1 = md.render('$$1+1 = 2$$')
     const res2 = md.render('$$\n1+1 = 2$$')
     const res3 = md.render('$$\n1+1 = 2\n\n$$')
-    assert.equal(res1, '<p><span class="math inline">1+1 = 2</span></p>\n')
-    assert.equal(res2, '<div class="math block">1+1 = 2$$</div>\n')
-    assert.equal(res3, '<div class="math block">1+1 = 2\n\n$$</div>\n')
+    assert.strictEqual(
+      res1,
+      '<p><span class="math inline">1+1 = 2</span></p>\n',
+    )
+    assert.strictEqual(res2, '<div class="math block">1+1 = 2$$</div>\n')
+    assert.strictEqual(res3, '<div class="math block">1+1 = 2\n\n$$</div>\n')
   })
 })
 
@@ -72,10 +87,10 @@ describe('Rendering options', function () {
     })
 
     const res1 = md.render('$$40,2$$')
-    assert.equal(res1, '<p><span class="math inline">40,2</span></p>\n')
+    assert.strictEqual(res1, '<p><span class="math inline">40,2</span></p>\n')
 
     const res2 = md.render('$$$\n40,2\n$$$')
-    assert.equal(res2, '<div class="math block">40,2\n</div>\n')
+    assert.strictEqual(res2, '<div class="math block">40,2\n</div>\n')
   })
 })
 
@@ -91,9 +106,9 @@ describe('Renderer', function () {
     })
 
     const res1 = md.render('$$1+1 = 2$$')
-    assert.equal(res1, '<p><inline>1+1 = 2</inline></p>\n')
+    assert.strictEqual(res1, '<p><inline>1+1 = 2</inline></p>\n')
 
     const res2 = md.render('$$$\n\\sin(2\\pi)\n$$$')
-    assert.equal(res2, '<display>\\sin(2\\pi)\n</display>\n')
+    assert.strictEqual(res2, '<display>\\sin(2\\pi)\n</display>\n')
   })
 })

@@ -52,11 +52,13 @@ export class MarkdownPreviewView {
     private renderLaTeX: boolean = atomConfig().mathConfig
       .enableLatexRenderingByDefault,
     handlerConstructor: new (
+      clientStyle: util.ClientStyle,
       x: () => Promise<void>,
     ) => WebContentsHandler = WebviewHandler,
   ) {
-    this.handler = new handlerConstructor(async () => {
-      const config = atomConfig()
+    this.disposables.add(this.emitter)
+    const config = atomConfig()
+    this.handler = new handlerConstructor(config.style, async () => {
       await this.handler.init({
         userMacros: loadUserMacros(),
         mathJaxConfig: config.mathConfig,
@@ -69,6 +71,11 @@ export class MarkdownPreviewView {
       this.emitter.emit('did-change-title')
       this.emitter.emit('did-init')
     })
+    this.disposables.add(
+      atom.config.onDidChange('markdown-preview-plus.style', (val) => {
+        handlePromise(this.handler.setClientStyle(val.newValue))
+      }),
+    )
     this.element = document.createElement('div')
     this.element.tabIndex = -1
     this.element.classList.add('markdown-preview-plus')
@@ -175,6 +182,7 @@ export class MarkdownPreviewView {
 
     const { name, ext } = path.parse(filePath)
 
+    const config = atomConfig()
     if (ext === '.pdf') {
       handlePromise(
         this.getMarkdownSource().then(async (mdSource) => {
@@ -185,12 +193,13 @@ export class MarkdownPreviewView {
             this.renderLaTeX,
             filePath,
           )
-          if (atomConfig().saveConfig.openOnSave.pdf) {
+          if (config.saveConfig.openOnSave.pdf) {
             return shellOpen(pathToFileURL(filePath).toString())
           } else return
         }),
       )
     } else {
+      const style = config.style
       handlePromise(
         this.getHTMLToSave(filePath).then(async (html) => {
           const fullHtml = util.mkHtml(
@@ -198,10 +207,11 @@ export class MarkdownPreviewView {
             html,
             this.renderLaTeX,
             await this.handler.getTeXConfig(),
+            style,
           )
 
           fs.writeFileSync(filePath, fullHtml)
-          if (atomConfig().saveConfig.openOnSave.html) {
+          if (config.saveConfig.openOnSave.html) {
             return atom.workspace.open(filePath)
           } else return undefined
         }),
@@ -222,7 +232,10 @@ export class MarkdownPreviewView {
   }
 
   protected createNewFromThis(
-    handler: new (x: () => Promise<void>) => WebContentsHandler,
+    handler: new (
+      clientStyle: util.ClientStyle,
+      x: () => Promise<void>,
+    ) => WebContentsHandler,
   ) {
     const curController = this.controller
     // this will get destroyed shortly, but we create it for consistency
@@ -421,16 +434,17 @@ export class MarkdownPreviewView {
       })
 
       if (this.destroyed) return
+      const config = atomConfig()
       await this.handler.update(
         domDocument.documentElement!.outerHTML,
         this.renderLaTeX,
-        atomConfig().previewConfig.diffMethod,
+        config.previewConfig.diffMethod,
         util.buildLineMap(
           domDocument.querySelector('[data-pos]')
             ? domDocument
             : await MarkdownItWorker.getTokens(text, this.renderLaTeX),
         ),
-        atomConfig().syncConfig.syncPreviewOnEditorScroll
+        config.syncConfig.syncPreviewOnEditorScroll
           ? this.controller.getScrollSyncParams()
           : undefined,
       )
@@ -477,7 +491,7 @@ export class MarkdownPreviewView {
       }
     } else {
       const src = await this.getMarkdownSource()
-      await copyHtml(src, this.getPath(), this.renderLaTeX)
+      await copyHtml(src, this.getPath(), this.renderLaTeX, atomConfig().style)
     }
   }
 

@@ -1,6 +1,7 @@
 import { BrowserWindow, remote } from 'electron'
 import { WebContentsHandler } from './web-contents-handler'
 import { MarkdownPreviewView } from './markdown-preview-view'
+import { ClientStyle } from './util'
 
 const menuItems = [
   {
@@ -43,7 +44,7 @@ export class BrowserWindowHandler extends WebContentsHandler {
   private menu?: Electron.Menu
   private readonly window: BrowserWindow
   private readonly _element: HTMLElement
-  constructor(init: () => void | Promise<void>) {
+  constructor(clientStyle: ClientStyle, init: () => void | Promise<void>) {
     const window = new remote.BrowserWindow({
       webPreferences: {
         webSecurity: false,
@@ -59,6 +60,7 @@ export class BrowserWindowHandler extends WebContentsHandler {
       () => {
         if (this.menu) this.menu.popup({ window })
       },
+      clientStyle,
       init,
     )
     this.window = window

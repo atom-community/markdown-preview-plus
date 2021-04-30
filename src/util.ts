@@ -24,8 +24,9 @@ export async function copyHtml(
   text: string,
   filePath: string | undefined,
   renderLaTeX: boolean,
+  clientStyle: ClientStyle,
 ): Promise<void> {
-  const view = new WebviewHandler(async () => {
+  const view = new WebviewHandler(clientStyle, async () => {
     await view.init({
       userMacros: loadUserMacros(),
       mathJaxConfig: { ...atomConfig().mathConfig, latexRenderer: 'SVG' },
@@ -78,6 +79,7 @@ export function packagePath() {
 
 import { shell } from 'electron'
 import fileUriToPath from 'file-uri-to-path'
+import { ClientStyle } from './markdown-preview-view/util'
 
 export function shellOpen(url: string) {
   const exts = atomConfig().previewConfig.shellOpenFileExtensions

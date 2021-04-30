@@ -67,7 +67,12 @@ function* getActivePackageStyles(
   }
 }
 
-export function getPreviewStyles(display: boolean): string[] {
+export type ClientStyle = 'github' | 'default'
+
+export function getPreviewStyles(
+  display: boolean,
+  clientStyle: ClientStyle,
+): string[] {
   if (window['markdown-preview-plus-tests']?.getStylesOverride) {
     return window['markdown-preview-plus-tests']?.getStylesOverride(display)
   }
@@ -100,11 +105,7 @@ export function getPreviewStyles(display: boolean): string[] {
 
   styles.push(getClientStyle('generic'))
   if (display) styles.push(getClientStyle('display'))
-  if (atomConfig().useGitHubStyle) {
-    styles.push(getClientStyle('github'))
-  } else {
-    styles.push(getClientStyle('default'))
-  }
+  styles.push(getClientStyle(clientStyle))
   styles.push(...getSyntaxTheme(atomConfig().syntaxThemeName))
   styles.push(...processEditorStyles(getUserStyles()))
   return styles
@@ -122,10 +123,10 @@ function* processWorkspaceStyles(styles: Iterable<string>) {
   }
 }
 
-function getMarkdownPreviewCSS() {
+function getMarkdownPreviewCSS(clientStyle: ClientStyle) {
   const cssUrlRefExp = /url\(atom:\/\/markdown-preview-plus\/assets\/(.*)\)/
 
-  return getPreviewStyles(false)
+  return getPreviewStyles(false, clientStyle)
     .join('\n')
     .replace(cssUrlRefExp, function (
       _match,
@@ -208,6 +209,7 @@ export function mkHtml(
   html: HTMLDocument,
   renderLaTeX: boolean,
   texConfig: MathJax.TeXInputProcessor,
+  clientStyle: ClientStyle,
 ) {
   let maybeMathJaxScript: string
   if (renderLaTeX) {
@@ -221,7 +223,7 @@ export function mkHtml(
   <head>
     <meta charset="utf-8" />
     <title>${title}</title>${maybeMathJaxScript}
-    <style>${getMarkdownPreviewCSS()}</style>
+    <style>${getMarkdownPreviewCSS(clientStyle)}</style>
 ${html.head!.innerHTML}
   </head>
   <body>

@@ -64,7 +64,7 @@ describe('Parsing pipe inside inline maths delimiters `$`', function () {
 
   it('Should not delimit a column of a table', function () {
     const res1 = md.render('col a | col b\n--|--\n$P(A|B)$ | foo')
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><span class="math inline">P(A|B)</span></td>\n<td>foo</td>\n</tr>\n</tbody>\n</table>\n',
     )
@@ -74,7 +74,7 @@ describe('Parsing pipe inside inline maths delimiters `$`', function () {
     const res1 = md.render(
       'col a | col b | col c\n--|--|--\n$P(A|B)$ | foo | $P(A|B)$',
     )
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n<th>col c</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><span class="math inline">P(A|B)</span></td>\n<td>foo</td>\n<td><span class="math inline">P(A|B)</span></td>\n</tr>\n</tbody>\n</table>\n',
     )
@@ -89,7 +89,7 @@ describe('Parsing pipe inside inline maths delimiters `\\(`, `\\)`', function ()
     })
 
     const res1 = md.render('col a | col b\n--|--\n\\(P(A|B)\\) | foo')
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><span class="math inline">P(A|B)</span></td>\n<td>foo</td>\n</tr>\n</tbody>\n</table>\n',
     )
@@ -110,7 +110,7 @@ describe('Parsing pipe inside inline maths configured with multiple delimiters',
 
   it('Should not delimit a column of a table for `$`', function () {
     const res1 = md.render('col a | col b\n--|--\n$P(A|B)$ | foo')
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><span class="math inline">P(A|B)</span></td>\n<td>foo</td>\n</tr>\n</tbody>\n</table>\n',
     )
@@ -118,7 +118,7 @@ describe('Parsing pipe inside inline maths configured with multiple delimiters',
 
   it('Should not delimit a column of a table for `\\(`, `\\)`', function () {
     const res1 = md.render('col a | col b\n--|--\n\\(P(A|B)\\) | foo')
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><span class="math inline">P(A|B)</span></td>\n<td>foo</td>\n</tr>\n</tbody>\n</table>\n',
     )
@@ -126,7 +126,7 @@ describe('Parsing pipe inside inline maths configured with multiple delimiters',
 
   it('Should delimit a column of a table for `\\(`, `$`', function () {
     const res1 = md.render('col a | col b\n--|--\n\\(P(A|B)$ | foo')
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>(P(A</td>\n<td>B)$</td>\n</tr>\n</tbody>\n</table>\n',
     )
@@ -134,7 +134,7 @@ describe('Parsing pipe inside inline maths configured with multiple delimiters',
 
   it('Should delimit a column of a table for `$`, `\\)`', function () {
     const res1 = md.render('col a | col b\n--|--\n$P(A|B)\\) | foo')
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>$P(A</td>\n<td>B))</td>\n</tr>\n</tbody>\n</table>\n',
     )
@@ -149,7 +149,7 @@ describe('Parsing pipe inside unclosed maths delimiter', function () {
     })
 
     const res1 = md.render('col a | col b\n--|--\n$P(A|B) | foo')
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>$P(A</td>\n<td>B)</td>\n</tr>\n</tbody>\n</table>\n',
     )
@@ -164,7 +164,7 @@ describe('Parsing pipe inside unopened maths delimiter', function () {
     })
 
     const res1 = md.render('col a | col b\n--|--\nP(A|B)$ | foo')
-    assert.equal(
+    assert.strictEqual(
       res1,
       '<table>\n<thead>\n<tr>\n<th>col a</th>\n<th>col b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>P(A</td>\n<td>B)$</td>\n</tr>\n</tbody>\n</table>\n',
     )

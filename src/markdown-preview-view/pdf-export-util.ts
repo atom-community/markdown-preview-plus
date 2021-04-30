@@ -12,9 +12,14 @@ export async function saveAsPDF(
   renderLaTeX: boolean,
   saveFilePath: string,
 ): Promise<void> {
+  const config = atomConfig()
   return new Promise<void>((resolve) => {
-    const view = new WebviewHandler(async () => {
-      const opts = atomConfig().saveConfig.saveToPDFOptions
+    const style =
+      config.saveConfig.saveToPDFOptions.styleOverride === 'none'
+        ? config.style
+        : config.saveConfig.saveToPDFOptions.styleOverride
+    const view = new WebviewHandler(style, async () => {
+      const opts = config.saveConfig.saveToPDFOptions
       const pageSize =
         opts.pageSize === 'Custom'
           ? parsePageSize(opts.customPageSize)
@@ -33,8 +38,8 @@ export async function saveAsPDF(
       }
       const [width, height] = getPageWidth(newOpts.pageSize)
 
-      const mathConfig = atomConfig().mathConfig
-      const pdfRenderer = atomConfig().saveConfig.saveToPDFOptions.latexRenderer
+      const mathConfig = config.mathConfig
+      const pdfRenderer = config.saveConfig.saveToPDFOptions.latexRenderer
       const renderer =
         pdfRenderer === 'Same as live preview'
           ? mathConfig.latexRenderer

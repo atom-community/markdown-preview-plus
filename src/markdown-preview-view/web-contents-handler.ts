@@ -7,7 +7,7 @@ import {
   ReplyMap,
   TDiffMethod,
 } from '../../src-client/ipc'
-import { getPreviewStyles } from './util'
+import { ClientStyle, getPreviewStyles } from './util'
 import { ImageWatcher } from '../image-watch-helper'
 import * as path from 'path'
 
@@ -77,6 +77,7 @@ export abstract class WebContentsHandler {
   constructor(
     contents: Promise<WebContents>,
     showContextMenu: () => void,
+    private clientStyle: ClientStyle,
     private readonly initCont: () => void | Promise<void>,
   ) {
     this.addListeners({
@@ -145,6 +146,11 @@ export abstract class WebContentsHandler {
     this.disposables.add(
       (this.imageWatcher = new ImageWatcher(this.updateImages.bind(this))),
     )
+  }
+
+  public async setClientStyle(style: ClientStyle) {
+    this.clientStyle = style
+    return this.updateStyles()
   }
 
   public abstract get element(): HTMLElement
@@ -294,7 +300,9 @@ export abstract class WebContentsHandler {
 
   protected async updateStyles() {
     if (!this.stylesReady) return
-    return this.send<'style'>('style', { styles: getPreviewStyles(true) })
+    return this.send<'style'>('style', {
+      styles: getPreviewStyles(true, this.clientStyle),
+    })
   }
 
   protected async runRequest<T extends keyof RequestReplyMap>(

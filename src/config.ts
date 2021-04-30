@@ -67,6 +67,11 @@ export interface IConfig {
   [key: string]: TypedConfig
 }
 
+const previewStyles = [
+  { value: 'github', description: 'Light (Github.com)' },
+  { value: 'default', description: 'Match Atom' },
+]
+
 export const config: IConfig = {
   grammars: {
     title: 'Markdown Grammars',
@@ -103,10 +108,11 @@ export const config: IConfig = {
     default: false,
     order: 0.5,
   },
-  useGitHubStyle: {
-    title: 'Use GitHub.com style',
-    type: 'boolean',
-    default: false,
+  style: {
+    title: 'Overall preview style',
+    type: 'string',
+    enum: previewStyles,
+    default: 'default',
     order: 2,
   },
   syntaxThemeName: {
@@ -385,6 +391,16 @@ export const config: IConfig = {
             type: 'boolean',
             default: false,
             order: 30,
+          },
+          styleOverride: {
+            title: 'Export style override',
+            type: 'string',
+            enum: [
+              { value: 'none', description: 'Same as preview' },
+              ...previewStyles,
+            ],
+            default: 'github',
+            order: 35,
           },
           printSelectionOnly: {
             title: 'Render only selection',
@@ -787,7 +803,7 @@ declare module 'atom' {
     'markdown-preview-plus.grammars': string[]
     'markdown-preview-plus.extensions': string[]
     'markdown-preview-plus.disableToolBarIntegration': boolean
-    'markdown-preview-plus.useGitHubStyle': boolean
+    'markdown-preview-plus.style': 'github' | 'default'
     'markdown-preview-plus.syntaxThemeName': string
     'markdown-preview-plus.importPackageStyles': string[]
     'markdown-preview-plus.codeTabWidth': number
@@ -858,6 +874,10 @@ declare module 'atom' {
     'markdown-preview-plus.saveConfig.saveToPDFOptions.customPageSize': string
     'markdown-preview-plus.saveConfig.saveToPDFOptions.landscape': false | true
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printBackground': boolean
+    'markdown-preview-plus.saveConfig.saveToPDFOptions.styleOverride':
+      | 'none'
+      | 'github'
+      | 'default'
     'markdown-preview-plus.saveConfig.saveToPDFOptions.printSelectionOnly': boolean
     'markdown-preview-plus.saveConfig.saveToPDFOptions': {
       latexRenderer: 'Same as live preview' | 'HTML-CSS' | 'SVG'
@@ -866,6 +886,7 @@ declare module 'atom' {
       customPageSize: string
       landscape: false | true
       printBackground: boolean
+      styleOverride: 'none' | 'github' | 'default'
       printSelectionOnly: boolean
     }
     'markdown-preview-plus.saveConfig': {
@@ -895,6 +916,7 @@ declare module 'atom' {
       'saveToPDFOptions.customPageSize': string
       'saveToPDFOptions.landscape': false | true
       'saveToPDFOptions.printBackground': boolean
+      'saveToPDFOptions.styleOverride': 'none' | 'github' | 'default'
       'saveToPDFOptions.printSelectionOnly': boolean
       saveToPDFOptions: {
         latexRenderer: 'Same as live preview' | 'HTML-CSS' | 'SVG'
@@ -903,6 +925,7 @@ declare module 'atom' {
         customPageSize: string
         landscape: false | true
         printBackground: boolean
+        styleOverride: 'none' | 'github' | 'default'
         printSelectionOnly: boolean
       }
     }
@@ -1002,7 +1025,7 @@ declare module 'atom' {
       grammars: string[]
       extensions: string[]
       disableToolBarIntegration: boolean
-      useGitHubStyle: boolean
+      style: 'github' | 'default'
       syntaxThemeName: string
       importPackageStyles: string[]
       codeTabWidth: number
@@ -1060,6 +1083,7 @@ declare module 'atom' {
       'saveConfig.saveToPDFOptions.customPageSize': string
       'saveConfig.saveToPDFOptions.landscape': false | true
       'saveConfig.saveToPDFOptions.printBackground': boolean
+      'saveConfig.saveToPDFOptions.styleOverride': 'none' | 'github' | 'default'
       'saveConfig.saveToPDFOptions.printSelectionOnly': boolean
       'saveConfig.saveToPDFOptions': {
         latexRenderer: 'Same as live preview' | 'HTML-CSS' | 'SVG'
@@ -1068,6 +1092,7 @@ declare module 'atom' {
         customPageSize: string
         landscape: false | true
         printBackground: boolean
+        styleOverride: 'none' | 'github' | 'default'
         printSelectionOnly: boolean
       }
       saveConfig: {
@@ -1097,6 +1122,7 @@ declare module 'atom' {
         'saveToPDFOptions.customPageSize': string
         'saveToPDFOptions.landscape': false | true
         'saveToPDFOptions.printBackground': boolean
+        'saveToPDFOptions.styleOverride': 'none' | 'github' | 'default'
         'saveToPDFOptions.printSelectionOnly': boolean
         saveToPDFOptions: {
           latexRenderer: 'Same as live preview' | 'HTML-CSS' | 'SVG'
@@ -1112,6 +1138,7 @@ declare module 'atom' {
           customPageSize: string
           landscape: false | true
           printBackground: boolean
+          styleOverride: 'none' | 'github' | 'default'
           printSelectionOnly: boolean
         }
       }

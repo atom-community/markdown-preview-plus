@@ -62,6 +62,14 @@ function migrate<
 export function migrateConfig() {
   const oc = oldConfig()
   const changes: boolean[] = []
+  if (oc.useGitHubStyle !== undefined) {
+    atom.config.set(
+      'markdown-preview-plus.style',
+      oc.useGitHubStyle ? 'github' : 'default',
+    )
+    unset('useGitHubStyle')
+    changes.push(true)
+  }
   if (oc.enablePandoc !== undefined) {
     atom.config.set(
       'markdown-preview-plus.renderer',

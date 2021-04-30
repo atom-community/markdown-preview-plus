@@ -1,4 +1,5 @@
 import { WebContents, remote } from 'electron'
+import { ClientStyle } from './util'
 import { WebContentsHandler } from './web-contents-handler'
 
 export class WebviewHandler extends WebContentsHandler {
@@ -8,7 +9,7 @@ export class WebviewHandler extends WebContentsHandler {
   private _observer2?: MutationObserver
   private readonly dragStart: () => void
   private readonly dragEnd: () => void
-  constructor(init: () => void | Promise<void>) {
+  constructor(clientStyle: ClientStyle, init: () => void | Promise<void>) {
     const webview = document.createElement('webview')
     super(
       new Promise<WebContents>((resolve) => {
@@ -21,6 +22,7 @@ export class WebviewHandler extends WebContentsHandler {
       () => {
         atom.contextMenu.showForEvent({ target: this._element })
       },
+      clientStyle,
       init,
     )
     this._element = document.createElement('div')
