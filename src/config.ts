@@ -389,7 +389,7 @@ export const config: IConfig = {
             title: 'Render background',
             description: 'Whether to render CSS backgrounds in PDF',
             type: 'boolean',
-            default: false,
+            default: true,
             order: 30,
           },
           styleOverride: {
