@@ -1,3 +1,13 @@
+## 4.10.0
+
+This release adds an additional pdf export option, `markdown-preview-plus.saveConfig.saveToPDFOptions.styleOverride`, which can be one of `none`, `github` or `default`. The default value is `github`, which corresponds to black text on white background and other CSS similar to GitHub.com's readme style in the light theme.
+
+`markdown-preview-plus.saveConfig.saveToPDFOptions.printBackground` ('Render background' in settings UI) is set to `true` by default (previously `false`) mostly for consistency with the github light theme.
+
+Finally, instead of the less intuitive `useGitHubStyle` option, a replacement option `style` is introduced that makes selecting the style explicit. It can have value `github` or `default`, which have more descriptive captions in the settings UI.
+
+All this should resolve issue <https://github.com/atom-community/markdown-preview-plus/issues/512>
+
 ## 4.9.5
 
 -   Wait for animation frame on pdf render to ensure CSS is rendered
