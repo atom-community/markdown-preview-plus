@@ -17,7 +17,6 @@ let config = {
   useImsize: false,
   inlineMathSeparators: ['$', '$'],
   blockMathSeparators: ['$$', '$$'],
-  forceFullToc: false,
   tocDepth: 0,
   useAttributes: true,
   useSpans: true,
@@ -145,7 +144,6 @@ function currentConfig(rL: boolean) {
     imsize: config.useImsize,
     inlineMathSeparators: config.inlineMathSeparators,
     blockMathSeparators: config.blockMathSeparators,
-    forceFullToc: config.forceFullToc,
     tocDepth: config.tocDepth,
     attributes: config.useAttributes, // "markdown-it-attrs"
     spans: config.useSpans, // "markdown-it-bracketed-spans"
@@ -202,7 +200,6 @@ function init(initState: InitState): markdownItModule {
     markdownIt.use(require('markdown-it-anchor'))
     markdownIt.use(require('markdown-it-table-of-contents'), {
       includeLevel: Array.from({ length: initState.tocDepth }, (_, i) => i + 1),
-      forceFullToc: initState.forceFullToc,
     })
   }
 

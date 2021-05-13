@@ -114,9 +114,9 @@ describe('MarkdownPreviewView when Pandoc is enabled', function () {
             await preview.initialRenderPromise()
 
             await waitsFor(async () =>
-              (await previewFragment(preview)).querySelector(
-                'img[alt=absolute]',
-              ),
+              (
+                await previewFragment(preview)
+              ).querySelector('img[alt=absolute]'),
             )
 
             expect(

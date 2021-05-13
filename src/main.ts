@@ -1,4 +1,3 @@
-import * as url from 'url'
 import {
   SerializedMPV,
   MarkdownPreviewView,
@@ -334,9 +333,10 @@ async function makePDF(evt: CommandEvent): Promise<void> {
 }
 
 function opener(uriToOpen: string) {
+  if (!uriToOpen.startsWith('markdown-preview-plus://')) return undefined
   try {
     // tslint:disable-next-line:no-var-keyword prefer-const
-    var uri = url.parse(uriToOpen)
+    var uri = new URL(uriToOpen)
   } catch (e) {
     console.error(e, uriToOpen)
     return undefined
@@ -345,18 +345,29 @@ function opener(uriToOpen: string) {
   if (uri.protocol !== 'markdown-preview-plus:') return undefined
   if (!uri.pathname) return undefined
 
+  let typ: 'file' | 'editor'
+  let pathname: string
   try {
-    // tslint:disable-next-line:no-var-keyword prefer-const
-    var pathname = decodeURI(uri.pathname)
+    if (uri.pathname.startsWith('//file/')) {
+      typ = 'file'
+      pathname = decodeURI(uri.pathname.slice(7))
+    } else if (uri.pathname.startsWith('//editor/')) {
+      typ = 'editor'
+      pathname = decodeURI(uri.pathname.slice(9))
+    } else {
+      throw new Error(
+        `Tried to open markdown-preview-plus with uri ${uriToOpen}. This is not supported. Please report this error.`,
+      )
+    }
   } catch (e) {
     console.error(e)
     return undefined
   }
 
-  if (uri.hostname === 'file') {
-    return createFileView(pathname.slice(1))
-  } else if (uri.hostname === 'editor') {
-    const editorId = parseInt(pathname.slice(1), 10)
+  if (typ === 'file') {
+    return createFileView(pathname)
+  } else if (typ === 'editor') {
+    const editorId = parseInt(pathname, 10)
     const editor = atom.workspace
       .getTextEditors()
       .find((ed) => ed.id === editorId)
@@ -368,11 +379,10 @@ function opener(uriToOpen: string) {
       return undefined
     }
     return createEditorView(editor)
-  } else {
-    throw new Error(
-      `Tried to open markdown-preview-plus with uri ${uriToOpen}. This is not supported. Please report this error.`,
-    )
   }
+  throw new Error(
+    `Reached "impossible" state in opener while handling ${uriToOpen}. Please report this error.`,
+  )
 }
 
 function observeToolbarButton(disableToolBarIntegration: boolean) {

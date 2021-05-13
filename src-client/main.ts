@@ -29,7 +29,7 @@ window.addEventListener('unhandledrejection', (evt) => {
 })
 
 function mkResPromise<T>() {
-  let resFn: (value?: T | PromiseLike<T> | undefined) => void
+  let resFn: (value: T | PromiseLike<T>) => void
   const p = new Promise<T>((resolve) => (resFn = resolve)) as Promise<T> & {
     resolve: typeof resFn
   }
@@ -167,7 +167,7 @@ async function doUpdate({
   const parser = new DOMParser()
   const domDocument = parser.parseFromString(html, 'text/html')
   const doc = document
-  if (doc && domDocument.head!.hasChildNodes) {
+  if (doc && domDocument.head!.hasChildNodes()) {
     let container = doc.head!.querySelector('original-elements')
     if (!container) {
       container = doc.createElement('original-elements')

@@ -47,9 +47,9 @@ describe('Syncronization of source and preview', function () {
     await waitsFor.msg(
       'MathJax to finish processing',
       async () =>
-        (await previewFragment(preview)).querySelector(
-          '.MathJax_SVG_Display',
-        ) != null,
+        (
+          await previewFragment(preview)
+        ).querySelector('.MathJax_SVG_Display') != null,
     )
   })
 

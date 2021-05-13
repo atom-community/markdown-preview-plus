@@ -213,7 +213,9 @@ function runSpec(desc: string, configure: () => void) {
         it('assigns the grammar on the element', async function () {
           const rubyEditor = await waitsFor(
             async () =>
-              (await previewFragment(preview)).querySelector(
+              (
+                await previewFragment(preview)
+              ).querySelector(
                 'pre.editor-colors.lang-ruby',
               ) as TextEditorElement,
           )
@@ -266,9 +268,9 @@ var x = 0;
         // nested in a list item
         const jsEditor = await waitsFor(
           async () =>
-            (await previewFragment(pv)).querySelector(
-              'pre.editor-colors',
-            ) as TextEditorElement,
+            (
+              await previewFragment(pv)
+            ).querySelector('pre.editor-colors') as TextEditorElement,
         )
         expect(jsEditor).to.exist
         expect(jsEditor.textContent).to.equal('var x = 0;')
@@ -739,9 +741,9 @@ var x = 0;
 
           await waitsFor(
             async () =>
-              (await previewFragment(preview)).querySelectorAll(
-                'p:last-child br',
-              ).length === 0,
+              (
+                await previewFragment(preview)
+              ).querySelectorAll('p:last-child br').length === 0,
           )
 
           expect(
@@ -759,9 +761,9 @@ var x = 0;
 
           await waitsFor(
             async () =>
-              (await previewFragment(preview)).querySelectorAll(
-                'p:last-child br',
-              ).length === 1,
+              (
+                await previewFragment(preview)
+              ).querySelectorAll('p:last-child br').length === 1,
           )
 
           expect(
@@ -800,7 +802,7 @@ var x = 0;
         await preview.initialRenderPromise()
 
         let textEditor: TextEditor
-        const openedPromise = new Promise(function (resolve) {
+        const openedPromise = new Promise<void>(function (resolve) {
           const disp = atom.workspace.onDidAddTextEditor(function (event) {
             textEditor = event.textEditor
             disp.dispose()
@@ -988,9 +990,9 @@ var x = 0;
         atom.config.set('markdown-preview-plus.markdownItConfig', config as any)
         preview = await createMarkdownPreviewViewFile(filePath)
         // tslint:disable-next-line: variable-name
-        const toc_ = (await previewFragment(preview)).querySelector<
-          HTMLDivElement
-        >('div.table-of-contents')
+        const toc_ = (
+          await previewFragment(preview)
+        ).querySelector<HTMLDivElement>('div.table-of-contents')
         expect(toc_).not.to.be.null
         toc = toc_!
         headers = Array.from(
@@ -1037,36 +1039,6 @@ var x = 0;
               'Level five header',
               'Level six header',
             ])
-          })
-        })
-      })
-      describe('foceFullToc option', () => {
-        describe('when enabled', () => {
-          before(() => {
-            config.forceFullToc = true
-            config.tocDepth = 6
-          })
-          after(() => {
-            delete config.forceFullToc
-            delete config.tocDepth
-          })
-          it('is respected', async () => {
-            expect(headers).to.include('Out of order header')
-            expect(headers).to.include('File.markdown')
-          })
-        })
-        describe('when disabled', () => {
-          before(() => {
-            config.forceFullToc = false
-            config.tocDepth = 6
-          })
-          after(() => {
-            delete config.forceFullToc
-            delete config.tocDepth
-          })
-          it('out of order headers break toc', async () => {
-            expect(headers).to.include('Out of order header')
-            expect(headers).to.not.include('File.markdown')
           })
         })
       })

@@ -189,19 +189,25 @@ describe('Markdown preview plus package', function () {
             element.querySelector('pre.lang-python')!.children.length,
           ).to.equal(6)
           expect(
-            (element.querySelector(
-              'pre.lang-python span:nth-child(2)',
-            )! as HTMLElement).innerText.trim(),
+            (
+              element.querySelector(
+                'pre.lang-python span:nth-child(2)',
+              )! as HTMLElement
+            ).innerText.trim(),
           ).to.equal('')
           expect(
-            (element.querySelector(
-              'pre.lang-python span:nth-child(4)',
-            )! as HTMLElement).innerText.trim(),
+            (
+              element.querySelector(
+                'pre.lang-python span:nth-child(4)',
+              )! as HTMLElement
+            ).innerText.trim(),
           ).to.equal('')
           expect(
-            (element.querySelector(
-              'pre.lang-python span:nth-child(5)',
-            )! as HTMLElement).innerText.trim(),
+            (
+              element.querySelector(
+                'pre.lang-python span:nth-child(5)',
+              )! as HTMLElement
+            ).innerText.trim(),
           ).to.equal('')
         }))
 
@@ -485,9 +491,9 @@ world</p>
       )
 
       const notifications = Array.from(
-        document.querySelectorAll('atom-notification.warning') as NodeListOf<
-          HTMLElement
-        >,
+        document.querySelectorAll(
+          'atom-notification.warning',
+        ) as NodeListOf<HTMLElement>,
       )
       expect(notifications.length).to.equal(2)
       expect(notifications).to.satisfy((x: HTMLElement[]) =>

@@ -128,18 +128,18 @@ function getMarkdownPreviewCSS(clientStyle: ClientStyle) {
 
   return getPreviewStyles(false, clientStyle)
     .join('\n')
-    .replace(cssUrlRefExp, function (
-      _match,
-      assetsName: string,
-      _offset,
-      _string,
-    ) {
-      // base64 encode assets
-      const assetPath = path.join(packagePath(), 'assets', assetsName)
-      const originalData = fs.readFileSync(assetPath, 'binary')
-      const base64Data = Buffer.from(originalData, 'binary').toString('base64')
-      return `url('data:image/jpeg;base64,${base64Data}')`
-    })
+    .replace(
+      cssUrlRefExp,
+      function (_match, assetsName: string, _offset, _string) {
+        // base64 encode assets
+        const assetPath = path.join(packagePath(), 'assets', assetsName)
+        const originalData = fs.readFileSync(assetPath, 'binary')
+        const base64Data = Buffer.from(originalData, 'binary').toString(
+          'base64',
+        )
+        return `url('data:image/jpeg;base64,${base64Data}')`
+      },
+    )
 }
 
 export function buildLineMap(html: string | Document) {

@@ -15,7 +15,6 @@ const pandocConfig = {
   useImsize: false,
   inlineMathSeparators: ['$', '$'],
   blockMathSeparators: ['$$', '$$'],
-  forceFullToc: false,
   tocDepth: 0,
   useAttributes: true,
   useSpans: true,

@@ -12,7 +12,7 @@ import { ImageWatcher } from '../image-watch-helper'
 import * as path from 'path'
 
 export type ReplyCallbackStruct<
-  T extends keyof RequestReplyMap = keyof RequestReplyMap
+  T extends keyof RequestReplyMap = keyof RequestReplyMap,
 > = {
   [K in keyof RequestReplyMap]: {
     request: K
@@ -311,13 +311,13 @@ export abstract class WebContentsHandler {
   ) {
     const id = this.replyCallbackId++
     const result = new Promise<RequestReplyMap[T]>((resolve) => {
-      this.replyCallbacks.set(id, ({
+      this.replyCallbacks.set(id, {
         request: request,
         callback: (result: RequestReplyMap[T]) => {
           this.replyCallbacks.delete(id)
           resolve(result)
         },
-      } as unknown) as ReplyCallbackStruct<T>)
+      } as unknown as ReplyCallbackStruct<T>)
     })
     const newargs = Object.assign({ id }, args)
     await this.send<T>(request, newargs as ChannelMap[T])

@@ -48,7 +48,7 @@ function migrate<
   OK extends keyof OldConfigValues,
   NK extends keyof ConfigValues,
   OV extends Partial<OldConfigValues>[OK],
-  NV extends ConfigValues[NK]
+  NV extends ConfigValues[NK],
 >(oc: NV extends OV ? Partial<OldConfigValues> : never, neww: NK, old: OK) {
   // tslint:disable-next-line:strict-type-predicates
   if (oc[old] != null) {
@@ -62,6 +62,15 @@ function migrate<
 export function migrateConfig() {
   const oc = oldConfig()
   const changes: boolean[] = []
+  if (
+    atom.config.get('markdown-preview-plus.markdownItConfig.forceFullToc') !==
+    undefined
+  ) {
+    atom.notifications.addWarning('Markdown-preivew-plus warning', {
+      description: 'forceFullToc option is removed upstream',
+    })
+    atom.config.unset('markdown-preview-plus.markdownItConfig.forceFullToc')
+  }
   if (oc.useGitHubStyle !== undefined) {
     atom.config.set(
       'markdown-preview-plus.style',

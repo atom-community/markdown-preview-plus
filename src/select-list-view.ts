@@ -16,7 +16,7 @@ export async function selectListView(
           return li
         },
         didCancelSelection: () => {
-          resolve()
+          resolve(undefined)
         },
         didConfirmSelection: (item: string) => {
           resolve(item)

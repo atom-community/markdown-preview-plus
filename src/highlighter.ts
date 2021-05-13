@@ -1,5 +1,6 @@
 import { scopeForFenceName } from './extension-helper'
-import { TextBuffer, LanguageMode } from 'atom'
+import { TextBuffer } from 'atom'
+import type { LanguageMode } from './types/atom-extra'
 import { atomConfig } from './util'
 import { hightlightLines } from 'atom-highlight'
 
@@ -141,7 +142,7 @@ async function highlightTreeSitter(
 }
 
 async function tokenized(lm: LanguageMode) {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     if (lm.fullyTokenized || lm.tree) {
       resolve()
     } else if (lm.onDidTokenize) {

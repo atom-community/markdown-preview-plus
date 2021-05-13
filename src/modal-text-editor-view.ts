@@ -28,7 +28,7 @@ export async function modalTextEditorView(
           },
           'core:cancel': () => {
             edv.onblur = null
-            resolve()
+            resolve(undefined)
           },
         }),
       )
