@@ -1,3 +1,9 @@
+## 4.11.0
+
+-   fix: fix dev mode (Tony Brix)
+-   Remove unused test dependency
+-   Update dependencies; NB: forceFullToc option is removed upstream
+
 ## 4.10.0
 
 This release adds an additional pdf export option, `markdown-preview-plus.saveConfig.saveToPDFOptions.styleOverride`, which can be one of `none`, `github` or `default`. The default value is `github`, which corresponds to black text on white background and other CSS similar to GitHub.com's readme style in the light theme.
