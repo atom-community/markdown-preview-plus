@@ -1,3 +1,7 @@
+## 4.11.1
+
+-   Mitigate #527
+
 ## 4.11.0
 
 -   fix: fix dev mode (Tony Brix)
