@@ -113,15 +113,26 @@ async function highlightTreeSitter(
         pos.row < end.row ||
         (pos.row === end.row && pos.column <= end.column)
       ) {
-        const open = iter
-          .getOpenScopeIds()
-          .map((x) => lm.classNameForScopeId(x))
-        const close = iter
-          .getCloseScopeIds()
-          .map((x) => lm.classNameForScopeId(x))
-        res.push(...close.map((_) => `</span>`))
-        res.push(...open.map((x) => `<span class="${x}">`))
-        iter.moveToSuccessor()
+        res.push(
+          ...iter.getCloseScopeIds().map((_) => `</span>`),
+          ...iter
+            .getOpenScopeIds()
+            .map((x) => `<span class="${lm.classNameForScopeId(x)}">`),
+        )
+        try {
+          iter.moveToSuccessor()
+        } catch (e) {
+          console.error(e)
+          const err = e as Error
+          atom.notifications.addFatalError('Internal error in highlighter', {
+            dismissable: true,
+            stack: err.stack,
+            description: `${err.message}. You're currently using tree-view-compatible highlighter, you may try
+    switching to legacy highlighter instead.`,
+            detail: err.toString(),
+          })
+          break
+        }
         const nextPos = iter.getPosition()
         res.push(escapeHTML(buf.getTextInRange([pos, nextPos])))
         try {
