@@ -268,9 +268,9 @@ ipcRenderer.on<'await-fully-ready'>('await-fully-ready', (_event, { id }) => {
   }
   function loaded() {
     sendLoaded()
-    document.removeEventListener('load', loaded)
+    window.removeEventListener('load', loaded)
   }
-  document.addEventListener('load', loaded)
+  window.addEventListener('load', loaded)
 })
 
 const baseElement = document.createElement('base')
