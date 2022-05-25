@@ -1,3 +1,9 @@
+# Project status
+
+Atom is virtually dead, it's getting more broken each release, and since recently I can't publish new package versions. I have neither time nor patience to deal with that. I'm switching to VSCode and markdown-preview-enchanced.
+
+As of May, 25th 2022, this project is officially unmaintained. Create an issue and ping @lierdakil if you want to and can take over.
+
 # Markdown Preview Plus (MPP)
 
 [![CI](https://github.com/atom-community/markdown-preview-plus/workflows/CI/badge.svg?branch=master)](https://github.com/atom-community/markdown-preview-plus/actions)
