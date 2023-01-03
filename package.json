@@ -125,7 +125,7 @@
     "markdown-it-task-lists": "^2.1.1",
     "markdown-it-testgen": "^0.1.6",
     "morphdom": "^2.6.1",
-    "parcel": "^2.0.0-beta.1",
+    "parcel": "^2.8.2",
     "pirates": "^4.0.1",
     "prettier": "^2.1.2",
     "sinon": "^10.0.0",
